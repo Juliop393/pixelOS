@@ -1,0 +1,242 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  background: #1E1C1A;
+  color: #E8E6E1;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  background: #1E1C1A;
+  color: #E8E6E1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input, textarea, button, select {
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+@keyframes mesh-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(100px, 50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-50px, 100px) scale(0.9);
+  }
+}
+
+@keyframes mesh-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-80px, 80px) scale(0.95);
+  }
+  66% {
+    transform: translate(60px, -40px) scale(1.05);
+  }
+}
+
+@keyframes mesh-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(70px, -60px) scale(1.08);
+  }
+  66% {
+    transform: translate(-90px, -30px) scale(0.92);
+  }
+}
+
+@keyframes mesh-4 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-60px, 70px) scale(0.9);
+  }
+  66% {
+    transform: translate(80px, 50px) scale(1.1);
+  }
+}
+
+.animate-mesh-1 {
+  animation: mesh-1 20s ease-in-out infinite;
+}
+
+.animate-mesh-2 {
+  animation: mesh-2 25s ease-in-out infinite;
+}
+
+.animate-mesh-3 {
+  animation: mesh-3 30s ease-in-out infinite;
+}
+
+.animate-mesh-4 {
+  animation: mesh-4 22s ease-in-out infinite;
+}
+
+@keyframes rotate-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate-slow-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes float-slow-reverse {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(20px);
+  }
+}
+
+.animate-rotate-slow {
+  animation: rotate-slow 60s linear infinite;
+  transform-origin: center;
+}
+
+.animate-rotate-slow-reverse {
+  animation: rotate-slow-reverse 80s linear infinite;
+  transform-origin: center;
+}
+
+.animate-float-slow {
+  animation: float-slow 15s ease-in-out infinite;
+}
+
+.animate-float-slow-reverse {
+  animation: float-slow-reverse 18s ease-in-out infinite;
+}
+
+@keyframes mesh-hero-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(50px, 30px) scale(1.1);
+  }
+}
+
+@keyframes mesh-hero-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-40px, 40px) scale(0.95);
+  }
+}
+
+@keyframes mesh-hero-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, -50px) scale(1.05);
+  }
+}
+
+.animate-mesh-hero-1 {
+  animation: mesh-hero-1 15s ease-in-out infinite;
+}
+
+.animate-mesh-hero-2 {
+  animation: mesh-hero-2 18s ease-in-out infinite;
+}
+
+.animate-mesh-hero-3 {
+  animation: mesh-hero-3 20s ease-in-out infinite;
+}
+
+.hero-bg {
+  position: relative;
+  background: #111111;
+  overflow: hidden;
+}
+
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 80% 50% at 20% 40%, 
+      rgba(232, 114, 74, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 60%, 
+      rgba(232, 114, 74, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 50% 20%, 
+      rgba(255, 220, 180, 0.05) 0%, transparent 60%);
+  animation: meshMove 8s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 70% 50% at 70% 80%, 
+      rgba(232, 114, 74, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 10% 70%, 
+      rgba(232, 114, 74, 0.06) 0%, transparent 60%);
+  animation: meshMove2 10s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+@keyframes meshMove {
+  0%   { transform: translate(0%, 0%) scale(1); }
+  33%  { transform: translate(3%, -2%) scale(1.02); }
+  66%  { transform: translate(-2%, 3%) scale(0.98); }
+  100% { transform: translate(2%, 1%) scale(1.01); }
+}
+
+@keyframes meshMove2 {
+  0%   { transform: translate(0%, 0%) scale(1); }
+  33%  { transform: translate(-3%, 2%) scale(0.98); }
+  66%  { transform: translate(2%, -3%) scale(1.02); }
+  100% { transform: translate(-1%, 2%) scale(0.99); }
+}
