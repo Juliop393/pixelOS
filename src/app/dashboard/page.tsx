@@ -48,6 +48,26 @@ const ANGLES = [
       { label: "Formato", value: "Retargeting", color: "bg-orange-500/10 text-orange-400 border-orange-500/20" },
     ],
   },
+  {
+    id: "comparison",
+    title: "Comparación Directa",
+    description: "Muestra por qué eres la mejor opción. Ideal para mercados competitivos y clientes indecisos.",
+    icon: "⚡",
+    badges: [
+      { label: "Decisión", value: "Alta", color: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" },
+      { label: "Formato", value: "Versus", color: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20" },
+    ],
+  },
+  {
+    id: "scarcity",
+    title: "Escasez y Urgencia",
+    description: "Últimas unidades, tiempo limitado. Activa el miedo a perderse algo (FOMO) y acelera la decisión de compra.",
+    icon: "🔥",
+    badges: [
+      { label: "FOMO", value: "Máximo", color: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
+      { label: "Formato", value: "Urgencia", color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" },
+    ],
+  },
 ]
 
 const ASPECT_RATIOS = [
