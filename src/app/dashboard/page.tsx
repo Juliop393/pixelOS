@@ -161,18 +161,21 @@ export default function DashboardPage() {
   const router = useRouter()
   const [credits, setCredits] = useState(1450)
   const [producto, setProducto] = useState("")
+  const [textoAnuncio, setTextoAnuncio] = useState("")
+  const [ctaContacto, setCtaContacto] = useState("")
   const [aspectRatio, setAspectRatio] = useState("square")
   const [visualStyle, setVisualStyle] = useState("photorealistic")
   const [brandColor, setBrandColor] = useState("")
   const [selectedAngle, setSelectedAngle] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{
     imageUrl: string
     copy: string
     angle: string
   } | null>(null)
   const [selectedVariation, setSelectedVariation] = useState("both")
-  const [phase, setPhase] = useState<"select" | "loading" | "result">("select")
+  const [phase, setPhase] = useState<"select" | "loading" | "result" | "error">("select")
   const [sessionHistory, setSessionHistory] = useState<string[]>([])
 
   useEffect(() => {
@@ -190,60 +193,94 @@ export default function DashboardPage() {
   const handleSelectAngle = async (angleId: string) => {
     setSelectedAngle(angleId)
     setLoading(true)
+    setError(null)
     setPhase("loading")
 
     const payload = {
       producto,
+      textoAnuncio: textoAnuncio || null,
+      ctaContacto: ctaContacto || null,
       angle: angleId,
       formato: aspectRatio,
       estiloVisual: visualStyle,
-      brandColor,
+      brandColor: brandColor || null,
       userId: "user_beta_001",
     }
 
     console.log("Payload enviado al webhook:", payload)
 
     try {
-      const response = await fetch(
-        "http://localhost:5678/webhook-test/generar-creativo",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      )
+      const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || "http://localhost:5678/webhook/generar-creativo"
+      
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`)
+        throw new Error(`Error del servidor: ${response.status}`)
       }
 
       const data = await response.json()
 
-      setCredits((prev) => prev - 1)
-      const newResult = {
-        imageUrl: data.imageUrl || "",
-        copy: data.copy || "Tu copy persuasivo aparecerá aquí una vez que el motor de IA complete el renderizado del creativo.",
-        angle: angleId,
-      }
-      setResult(newResult)
-      setPhase("result")
-      setSessionHistory((prev) => [angleId, ...prev.slice(0, 2)])
+      if (data.success && data.imageUrl) {
+        setCredits((prev) => prev - 1)
+        const newResult = {
+          imageUrl: data.imageUrl,
+          copy: data.copy || "Tu copy persuasivo aparecerá aquí una vez que el motor de IA complete el renderizado del creativo.",
+          angle: angleId,
+        }
+        setResult(newResult)
+        setPhase("result")
+        setSessionHistory((prev) => [angleId, ...prev.slice(0, 2)])
 
-      toast.success("Creativo generado", {
-        description: "Tu anuncio está listo para publicar",
-      })
+        toast.success("Creativo generado", {
+          description: "Tu anuncio está listo para publicar",
+        })
+      } else {
+        throw new Error("Respuesta inválida del servidor")
+      }
     } catch (error) {
-      setPhase("select")
-      setSelectedAngle(null)
-      toast.error("Error al generar", {
-        description:
-          error instanceof Error ? error.message : "Intenta nuevamente",
+      console.error("Error al generar creativo:", error)
+      setError(error instanceof Error ? error.message : "Error desconocido")
+      setPhase("error")
+      
+      toast.error("Error al generar creativo", {
+        description: "Hubo un error generando tu creativo. Intenta de nuevo.",
       })
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleRetry = () => {
+    if (selectedAngle) {
+      handleSelectAngle(selectedAngle)
+    }
+  }
+
+  const handleDownload = () => {
+    if (result?.imageUrl) {
+      const link = document.createElement("a")
+      link.href = result.imageUrl
+      link.download = `creativo-${selectedAngle}-${Date.now()}.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      toast.success("Descarga iniciada", {
+        description: "Tu creativo se está descargando",
+      })
+    }
+  }
+
+  const handleFeedback = (type: "positive" | "negative") => {
+    toast.success("¡Gracias por tu feedback!", {
+      description: type === "positive" ? "Nos alegra que te haya funcionado" : "Seguiremos mejorando",
+    })
   }
 
   const handleExportToMeta = () => {
@@ -276,6 +313,35 @@ export default function DashboardPage() {
                   placeholder="Describe tu producto (Ej: Crema hidratante para piel seca, marca propia, precio S/89)"
                   className="w-full bg-[#1E1C1A] border border-[#3A3833] px-4 py-3 rounded-xl text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors mb-3"
                 />
+                
+                <div className="space-y-3 mb-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
+                      Texto del anuncio (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={textoAnuncio}
+                      onChange={(e) => setTextoAnuncio(e.target.value)}
+                      placeholder="Ej: ¡50% descuento solo hoy! Envío gratis"
+                      className="w-full bg-[#1E1C1A] border border-[#3A3833] px-3 py-2.5 rounded-lg text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
+                      CTA o contacto (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={ctaContacto}
+                      onChange={(e) => setCtaContacto(e.target.value)}
+                      placeholder="Ej: WhatsApp 999-888-777 | Compra en @tumarca"
+                      className="w-full bg-[#1E1C1A] border border-[#3A3833] px-3 py-2.5 rounded-lg text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
+                    />
+                  </div>
+                </div>
+
                 <button
                   type="button"
                   className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-medium text-[#9A9893] border border-[#3A3833] hover:border-[#D97757]/30 hover:text-[#E8E6E1] transition-all duration-200"
@@ -449,6 +515,40 @@ export default function DashboardPage() {
                 </div>
               )}
 
+              {phase === "error" && (
+                <div className="bg-[#2A2826] rounded-2xl border border-red-500/30 h-full flex items-center justify-center">
+                  <div className="text-center p-8">
+                    <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-5">
+                      <svg
+                        className="w-10 h-10 text-red-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-red-400 font-medium mb-2">
+                      Hubo un error generando tu creativo
+                    </p>
+                    <p className="text-[#9A9893]/70 text-sm mb-6">
+                      {error || "Intenta de nuevo"}
+                    </p>
+                    <button
+                      onClick={handleRetry}
+                      className="px-6 py-3 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {phase === "result" && result && (
                 <div className="space-y-4 h-full flex flex-col">
                   <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] overflow-hidden flex-shrink-0">
@@ -524,12 +624,39 @@ export default function DashboardPage() {
                       ))}
                     </div>
 
-                    <button
-                      onClick={handleExportToMeta}
-                      className="w-full py-3 px-4 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20"
-                    >
-                      Exportar a Meta Ads
-                    </button>
+                    <div className="space-y-3">
+                      <button
+                        onClick={handleDownload}
+                        className="w-full py-3 px-4 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Descargar
+                      </button>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleFeedback("positive")}
+                          className="flex-1 py-2.5 px-4 rounded-xl bg-[#1E1C1A] text-[#E8E6E1] text-sm font-medium border border-[#3A3833] hover:border-emerald-500/50 hover:text-emerald-400 transition-all duration-200"
+                        >
+                          👍 Funcionó en Meta
+                        </button>
+                        <button
+                          onClick={() => handleFeedback("negative")}
+                          className="flex-1 py-2.5 px-4 rounded-xl bg-[#1E1C1A] text-[#E8E6E1] text-sm font-medium border border-[#3A3833] hover:border-red-500/50 hover:text-red-400 transition-all duration-200"
+                        >
+                          👎 No funcionó
+                        </button>
+                      </div>
+
+                      <button
+                        onClick={handleExportToMeta}
+                        className="w-full py-3 px-4 rounded-xl bg-[#1E1C1A] text-[#E8E6E1] font-semibold text-sm border border-[#3A3833] hover:border-[#D97757]/50 active:scale-[0.98] transition-all duration-200"
+                      >
+                        Exportar a Meta Ads
+                      </button>
+                    </div>
                   </div>
 
                   {sessionHistory.length > 0 && (
