@@ -1,11 +1,19 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
 
+const PAGE_TITLES: Record<string, string> = {
+  "/dashboard": "Generador de Ángulos",
+  "/dashboard/campanas": "Identidad de Marca",
+  "/dashboard/assets": "Mis Creativos",
+  "/dashboard/configuracion": "Configuración",
+}
+
 export default function Topbar() {
   const router = useRouter()
+  const pathname = usePathname()
   const { credits } = useCredits()
 
   const handleSignOut = async () => {
@@ -14,11 +22,13 @@ export default function Topbar() {
     router.refresh()
   }
 
+  const pageTitle = PAGE_TITLES[pathname] || "Generador de Ángulos"
+
   return (
     <header className="h-16 bg-[#1E1C1A]/80 backdrop-blur-xl border-b border-[#3A3833] sticky top-0 z-40">
       <div className="h-full px-6 flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-[#E8E6E1]">Generador de Ángulos</h1>
+          <h1 className="text-lg font-bold text-[#E8E6E1]">{pageTitle}</h1>
           <p className="text-xs text-[#9A9893]">Crea creativos publicitarios con IA</p>
         </div>
 
