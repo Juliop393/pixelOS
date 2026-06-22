@@ -4,8 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
-import Sidebar from "@/components/dashboard/Sidebar"
-import Topbar from "@/components/dashboard/Topbar"
+import { useCredits } from "@/lib/credits-context"
 
 const ANGLES = [
   {
@@ -179,7 +178,7 @@ function Accordion({ title, children }: { title: string; children: React.ReactNo
 
 export default function DashboardPage() {
   const router = useRouter()
-  const [credits, setCredits] = useState(10)
+  const { credits, setCredits } = useCredits()
   const [producto, setProducto] = useState("")
   const [textoAnuncio, setTextoAnuncio] = useState("")
   const [ctaContacto, setCtaContacto] = useState("")
@@ -277,6 +276,19 @@ export default function DashboardPage() {
           return newHistory.slice(0, 20)
         })
 
+        // Guardar en localStorage para "Mis Creativos"
+        const savedCreativos = JSON.parse(localStorage.getItem("afm_creativos") || "[]")
+        const newCreativo = {
+          id: Date.now(),
+          imageUrl: data.imageUrl,
+          producto: producto,
+          angulo: selectedAngle,
+          formato: aspectRatio,
+          fecha: new Date().toISOString(),
+        }
+        savedCreativos.unshift(newCreativo)
+        localStorage.setItem("afm_creativos", JSON.stringify(savedCreativos.slice(0, 50)))
+
         toast.success("Creativo generado", {
           description: "Tu anuncio está listo para publicar",
         })
@@ -333,14 +345,7 @@ export default function DashboardPage() {
   const selectedAngleData = ANGLES.find((a) => a.id === selectedAngle)
 
   return (
-    <div className="min-h-screen bg-[#1E1C1A] text-[#E8E6E1] flex">
-      <Sidebar />
-
-      <div className="flex-1 flex flex-col min-w-0">
-        <Topbar credits={credits} />
-
-        <main className="flex-1 p-6 overflow-auto">
-          <div className="flex gap-6 h-full">
+    <div className="flex gap-6 h-full">
             {/* COLUMNA 1: Parámetros */}
             <div className="w-[320px] flex-shrink-0 space-y-6">
               <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
@@ -629,7 +634,7 @@ export default function DashboardPage() {
                         <img
                           src={result.imageUrl}
                           alt="Creativo generado"
-                          className="w-full h-full object-cover"
+                          className={`w-full h-full ${aspectRatio === "story" || aspectRatio === "4:5" ? "object-contain" : "object-cover"}`}
                         />
                       ) : (
                         <div className="flex flex-col items-center justify-center text-center p-8">
@@ -738,8 +743,6 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
-        </main>
-      </div>
     </div>
   )
 }

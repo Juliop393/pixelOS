@@ -2,13 +2,11 @@
 
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { useCredits } from "@/lib/credits-context"
 
-interface TopbarProps {
-  credits: number
-}
-
-export default function Topbar({ credits }: TopbarProps) {
+export default function Topbar() {
   const router = useRouter()
+  const { credits } = useCredits()
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
