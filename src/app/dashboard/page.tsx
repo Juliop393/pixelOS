@@ -660,25 +660,6 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-4 flex-shrink-0">
-                    <p className="text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-3">
-                      Variaciones
-                    </p>
-                    <div className="flex gap-2 mb-4">
-                      {VARIATIONS.map((variation) => (
-                        <button
-                          key={variation.id}
-                          onClick={() => setSelectedVariation(variation.id)}
-                          className={`py-2 px-4 rounded-lg text-xs font-medium transition-all duration-200 ${
-                            selectedVariation === variation.id
-                              ? "bg-[#D97757] text-white"
-                              : "bg-[#1E1C1A] text-[#9A9893] hover:text-[#E8E6E1] border border-[#3A3833]"
-                          }`}
-                        >
-                          {variation.label}
-                        </button>
-                      ))}
-                    </div>
-
                     <div className="space-y-3">
                       <button
                         onClick={handleDownload}
@@ -690,27 +671,25 @@ export default function DashboardPage() {
                         Descargar
                       </button>
 
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleFeedback("positive")}
-                          className="flex-1 py-2.5 px-4 rounded-xl bg-[#1E1C1A] text-[#E8E6E1] text-sm font-medium border border-[#3A3833] hover:border-emerald-500/50 hover:text-emerald-400 transition-all duration-200"
-                        >
-                          👍 Funcionó en Meta
-                        </button>
-                        <button
-                          onClick={() => handleFeedback("negative")}
-                          className="flex-1 py-2.5 px-4 rounded-xl bg-[#1E1C1A] text-[#E8E6E1] text-sm font-medium border border-[#3A3833] hover:border-red-500/50 hover:text-red-400 transition-all duration-200"
-                        >
-                          👎 No funcionó
-                        </button>
+                      <div className="pt-2">
+                        <p className="text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
+                          ¿Cómo quedó?
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleFeedback("positive")}
+                            className="flex-1 py-2 px-3 rounded-lg bg-[#1E1C1A] text-[#E8E6E1] text-xs font-medium border border-[#3A3833] hover:border-emerald-500/50 hover:text-emerald-400 transition-all duration-200"
+                          >
+                            ✅ Útil
+                          </button>
+                          <button
+                            onClick={() => handleFeedback("negative")}
+                            className="flex-1 py-2 px-3 rounded-lg bg-[#1E1C1A] text-[#E8E6E1] text-xs font-medium border border-[#3A3833] hover:border-red-500/50 hover:text-red-400 transition-all duration-200"
+                          >
+                            ❌ No útil
+                          </button>
+                        </div>
                       </div>
-
-                      <button
-                        onClick={handleExportToMeta}
-                        className="w-full py-3 px-4 rounded-xl bg-[#1E1C1A] text-[#E8E6E1] font-semibold text-sm border border-[#3A3833] hover:border-[#D97757]/50 active:scale-[0.98] transition-all duration-200"
-                      >
-                        Exportar a Meta Ads
-                      </button>
                     </div>
                   </div>
 
