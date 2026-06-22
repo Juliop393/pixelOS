@@ -186,6 +186,7 @@ export default function DashboardPage() {
   const [visualStyle, setVisualStyle] = useState("photorealistic")
   const [brandColor, setBrandColor] = useState("")
   const [selectedAngle, setSelectedAngle] = useState<string | null>(null)
+  const [cantidad, setCantidad] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{
@@ -193,6 +194,8 @@ export default function DashboardPage() {
     copy: string
     angle: string
   } | null>(null)
+  const [generatedImages, setGeneratedImages] = useState<Array<{ imageUrl: string; angle: string }>>([])
+  const [progress, setProgress] = useState({ completed: 0, total: 0 })
   const [selectedVariation, setSelectedVariation] = useState("both")
   const [phase, setPhase] = useState<"select" | "loading" | "result" | "error">("select")
   const [sessionHistory, setSessionHistory] = useState<Array<{ imageUrl: string; angle: string }>>([])
@@ -209,6 +212,22 @@ export default function DashboardPage() {
     checkSession()
   }, [router])
 
+  // Simular progreso durante la generación
+  useEffect(() => {
+    if (!loading || phase !== "loading") return
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev.completed >= prev.total - 1) {
+          return prev
+        }
+        return { ...prev, completed: prev.completed + 1 }
+      })
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [loading, phase])
+
   const handleSelectAngle = (angleId: string) => {
     setSelectedAngle(angleId)
   }
@@ -221,9 +240,9 @@ export default function DashboardPage() {
       return
     }
 
-    if (credits < 1) {
-      toast.error("Sin créditos disponibles", {
-        description: "No tienes créditos suficientes para generar",
+    if (credits < cantidad) {
+      toast.error("Créditos insuficientes", {
+        description: `Necesitas ${cantidad} crédito${cantidad > 1 ? "s" : ""}, tienes ${credits}`,
       })
       return
     }
@@ -231,7 +250,9 @@ export default function DashboardPage() {
     setLoading(true)
     setError(null)
     setPhase("loading")
-    setCredits((prev) => prev - 1)
+    setProgress({ completed: 0, total: cantidad })
+    setGeneratedImages([])
+    setResult(null)
 
     const payload = {
       producto,
@@ -245,64 +266,111 @@ export default function DashboardPage() {
     }
 
     console.log("Payload enviado al webhook:", payload)
+    console.log(`Generando ${cantidad} creativos en paralelo...`)
+
+    const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || "http://localhost:5678/webhook/generar-creativo"
+
+    const generateOne = async (): Promise<{ success: boolean; imageUrl?: string; copy?: string }> => {
+      try {
+        const response = await fetch(webhookUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        })
+
+        if (!response.ok) {
+          throw new Error(`Error del servidor: ${response.status}`)
+        }
+
+        const data = await response.json()
+
+        if (data.success && data.imageUrl) {
+          return { success: true, imageUrl: data.imageUrl, copy: data.copy }
+        } else {
+          throw new Error("Respuesta inválida del servidor")
+        }
+      } catch (error) {
+        console.error("Error en generación individual:", error)
+        return { success: false }
+      }
+    }
 
     try {
-      const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || "http://localhost:5678/webhook/generar-creativo"
-      
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+      const promises = Array(cantidad).fill(null).map(() => generateOne())
+      const results = await Promise.all(promises)
+
+      const successfulResults = results.filter((r) => r.success && r.imageUrl) as Array<{
+        success: boolean
+        imageUrl: string
+        copy?: string
+      }>
+
+      const successCount = successfulResults.length
+      const failCount = cantidad - successCount
+
+      if (successCount === 0) {
+        // Todas fallaron, devolver créditos
+        setCredits((prev) => prev + cantidad)
+        throw new Error("Todas las generaciones fallaron")
+      }
+
+      // Descontar solo las exitosas (si algunas fallaron, devolver esas)
+      if (failCount > 0) {
+        setCredits((prev) => prev + failCount)
+      } else {
+        setCredits((prev) => prev - cantidad)
+      }
+
+      // Procesar resultados exitosos
+      const newImages = successfulResults.map((r) => ({
+        imageUrl: r.imageUrl,
+        angle: selectedAngle,
+      }))
+
+      setGeneratedImages(newImages)
+      setResult({
+        imageUrl: newImages[0].imageUrl,
+        copy: successfulResults[0].copy || "Tu copy persuasivo aparecerá aquí una vez que el motor de IA complete el renderizado del creativo.",
+        angle: selectedAngle,
+      })
+      setPhase("result")
+
+      setSessionHistory((prev) => {
+        const newHistory = [...newImages, ...prev]
+        return newHistory.slice(0, 20)
       })
 
-      if (!response.ok) {
-        throw new Error(`Error del servidor: ${response.status}`)
-      }
+      // Guardar en localStorage para "Mis Creativos"
+      const savedCreativos = JSON.parse(localStorage.getItem("afm_creativos") || "[]")
+      const newCreativos = newImages.map((img, idx) => ({
+        id: Date.now() + idx,
+        imageUrl: img.imageUrl,
+        producto: producto,
+        angulo: selectedAngle,
+        formato: aspectRatio,
+        fecha: new Date().toISOString(),
+      }))
+      savedCreativos.unshift(...newCreativos)
+      localStorage.setItem("afm_creativos", JSON.stringify(savedCreativos.slice(0, 50)))
 
-      const data = await response.json()
-
-      if (data.success && data.imageUrl) {
-        const newResult = {
-          imageUrl: data.imageUrl,
-          copy: data.copy || "Tu copy persuasivo aparecerá aquí una vez que el motor de IA complete el renderizado del creativo.",
-          angle: selectedAngle,
-        }
-        setResult(newResult)
-        setPhase("result")
-        setSessionHistory((prev) => {
-          const newHistory = [{ imageUrl: data.imageUrl, angle: selectedAngle }, ...prev]
-          return newHistory.slice(0, 20)
-        })
-
-        // Guardar en localStorage para "Mis Creativos"
-        const savedCreativos = JSON.parse(localStorage.getItem("afm_creativos") || "[]")
-        const newCreativo = {
-          id: Date.now(),
-          imageUrl: data.imageUrl,
-          producto: producto,
-          angulo: selectedAngle,
-          formato: aspectRatio,
-          fecha: new Date().toISOString(),
-        }
-        savedCreativos.unshift(newCreativo)
-        localStorage.setItem("afm_creativos", JSON.stringify(savedCreativos.slice(0, 50)))
-
-        toast.success("Creativo generado", {
-          description: "Tu anuncio está listo para publicar",
+      if (failCount > 0) {
+        toast.warning("Generación parcial", {
+          description: `${successCount} de ${cantidad} creativos generados exitosamente`,
         })
       } else {
-        throw new Error("Respuesta inválida del servidor")
+        toast.success(`${successCount} creativo${successCount > 1 ? "s" : ""} generado${successCount > 1 ? "s" : ""}`, {
+          description: "Tus anuncios están listos para publicar",
+        })
       }
     } catch (error) {
-      console.error("Error al generar creativo:", error)
-      setCredits((prev) => prev + 1)
+      console.error("Error al generar creativos:", error)
       setError(error instanceof Error ? error.message : "Error desconocido")
       setPhase("error")
-      
-      toast.error("Error al generar creativo", {
-        description: "Hubo un error generando tu creativo. Intenta de nuevo.",
+
+      toast.error("Error al generar creativos", {
+        description: "Hubo un error generando tus creativos. Intenta de nuevo.",
       })
     } finally {
       setLoading(false)
@@ -328,6 +396,25 @@ export default function DashboardPage() {
         description: "Tu creativo se está descargando",
       })
     }
+  }
+
+  const handleDownloadAll = () => {
+    if (generatedImages.length === 0) return
+
+    generatedImages.forEach((img, idx) => {
+      setTimeout(() => {
+        const link = document.createElement("a")
+        link.href = img.imageUrl
+        link.download = `creativo-${idx + 1}-${Date.now()}.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }, idx * 300) // Delay para evitar que el navegador bloquee múltiples descargas
+    })
+
+    toast.success("Descargando creativos", {
+      description: `${generatedImages.length} imagen${generatedImages.length > 1 ? "es" : ""} se están descargando`,
+    })
   }
 
   const handleFeedback = (type: "positive" | "negative") => {
@@ -388,11 +475,37 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
+                <div className="mt-4">
+                  <label className="block text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
+                    Cantidad de creativos
+                  </label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[1, 3, 5, 10].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setCantidad(num)}
+                        disabled={loading}
+                        className={`py-2.5 px-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                          cantidad === num
+                            ? "bg-[#D97757] text-white"
+                            : "bg-[#1E1C1A] text-[#9A9893] hover:bg-[#3A3833]"
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-[#9A9893] mt-2">
+                    {cantidad} crédito{cantidad > 1 ? "s" : ""} • {cantidad === 1 ? "1 creativo" : `${cantidad} creativos`}
+                  </p>
+                </div>
+
                 <button
                   type="button"
                   onClick={handleGenerate}
-                  disabled={!producto.trim() || !selectedAngle || loading || credits === 0}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold bg-[#D97757] text-white hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#D97757] disabled:active:scale-100 mb-3"
+                  disabled={!producto.trim() || !selectedAngle || loading || credits < cantidad}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold bg-[#D97757] text-white hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#D97757] disabled:active:scale-100 mb-3 mt-4"
                 >
                   {loading ? (
                     <>
@@ -400,16 +513,16 @@ export default function DashboardPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Generando tu creativo...
+                      Generando {progress.total > 0 ? `(${progress.completed}/${progress.total})` : ""}...
                     </>
-                  ) : credits === 0 ? (
-                    "Sin créditos disponibles"
+                  ) : credits < cantidad ? (
+                    `Necesitas ${cantidad} crédito${cantidad > 1 ? "s" : ""}`
                   ) : (
                     <>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
-                      Generar Creativo
+                      Generar {cantidad > 1 ? `${cantidad} Creativos` : "Creativo"}
                     </>
                   )}
                 </button>
@@ -584,7 +697,42 @@ export default function DashboardPage() {
 
               {phase === "loading" && (
                 <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] h-full">
-                  <LoadingState />
+                  <div className="flex flex-col items-center justify-center h-full min-h-[500px]">
+                    <div className="w-full max-w-sm text-center">
+                      <div className="relative w-20 h-20 mx-auto mb-10">
+                        <div className="absolute inset-0 rounded-full border-2 border-[#D97757]/10" />
+                        <div
+                          className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#D97757] animate-spin"
+                          style={{ animationDuration: "1.5s" }}
+                        />
+                        <div className="absolute inset-3 rounded-full bg-[#D97757]/5 flex items-center justify-center">
+                          <span className="text-[#D97757] text-lg font-bold">AI</span>
+                        </div>
+                      </div>
+
+                      <p className="text-[#E8E6E1] font-medium text-lg mb-2">
+                        {progress.total > 1
+                          ? `Generando ${progress.total} creativos...`
+                          : "Generando tu creativo..."}
+                      </p>
+                      {progress.total > 1 && (
+                        <p className="text-[#9A9893] text-sm mb-6">
+                          ({progress.completed}/{progress.total} completados)
+                        </p>
+                      )}
+
+                      <div className="w-full h-1 bg-[#3A3833] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#D97757] rounded-full transition-all duration-300 ease-out"
+                          style={{
+                            width: progress.total > 0
+                              ? `${(progress.completed / progress.total) * 100}%`
+                              : "0%",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -624,6 +772,53 @@ export default function DashboardPage() {
 
               {phase === "result" && result && (
                 <div className="space-y-4 h-full flex flex-col">
+                  {generatedImages.length > 1 && (
+                    <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-4 flex-shrink-0">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-semibold text-[#9A9893] uppercase tracking-wider">
+                          {generatedImages.length} creativos generados
+                        </p>
+                        <button
+                          onClick={handleDownloadAll}
+                          className="text-xs font-medium text-[#D97757] hover:text-[#C26547] transition-colors flex items-center gap-1"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          Descargar todos
+                        </button>
+                      </div>
+                      <div className={`grid gap-2 ${
+                        generatedImages.length === 2 ? "grid-cols-2" :
+                        generatedImages.length <= 4 ? "grid-cols-2" :
+                        generatedImages.length <= 6 ? "grid-cols-3" :
+                        "grid-cols-4"
+                      }`}>
+                        {generatedImages.map((img, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setResult({
+                              imageUrl: img.imageUrl,
+                              copy: result.copy,
+                              angle: img.angle,
+                            })}
+                            className={`aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                              result.imageUrl === img.imageUrl
+                                ? "border-[#D97757] ring-2 ring-[#D97757]/30"
+                                : "border-[#3A3833] hover:border-[#D97757]/50"
+                            }`}
+                          >
+                            <img
+                              src={img.imageUrl}
+                              alt={`Creativo ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] overflow-hidden flex-shrink-0">
                     <div
                       className={`relative bg-[#1E1C1A] flex items-center justify-center overflow-hidden ${
@@ -679,15 +874,27 @@ export default function DashboardPage() {
 
                   <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-4 flex-shrink-0">
                     <div className="space-y-3">
-                      <button
-                        onClick={handleDownload}
-                        className="w-full py-3 px-4 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 flex items-center justify-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        Descargar
-                      </button>
+                      {generatedImages.length > 1 ? (
+                        <button
+                          onClick={handleDownloadAll}
+                          className="w-full py-3 px-4 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          Descargar todas ({generatedImages.length})
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleDownload}
+                          className="w-full py-3 px-4 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          Descargar
+                        </button>
+                      )}
 
                       <div className="pt-2">
                         <p className="text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
