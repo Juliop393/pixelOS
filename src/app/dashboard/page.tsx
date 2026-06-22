@@ -210,8 +210,18 @@ export default function DashboardPage() {
     checkSession()
   }, [router])
 
-  const handleSelectAngle = async (angleId: string) => {
+  const handleSelectAngle = (angleId: string) => {
     setSelectedAngle(angleId)
+  }
+
+  const handleGenerate = async () => {
+    if (!producto.trim() || !selectedAngle) {
+      toast.error("Completa los campos requeridos", {
+        description: "Ingresa tu producto y selecciona un ángulo",
+      })
+      return
+    }
+
     setLoading(true)
     setError(null)
     setPhase("loading")
@@ -220,7 +230,7 @@ export default function DashboardPage() {
       producto,
       textoAnuncio: textoAnuncio || null,
       ctaContacto: ctaContacto || null,
-      angle: angleId,
+      angulo: selectedAngle,
       formato: aspectRatio,
       estiloVisual: visualStyle,
       brandColor: brandColor || null,
@@ -251,11 +261,11 @@ export default function DashboardPage() {
         const newResult = {
           imageUrl: data.imageUrl,
           copy: data.copy || "Tu copy persuasivo aparecerá aquí una vez que el motor de IA complete el renderizado del creativo.",
-          angle: angleId,
+          angle: selectedAngle,
         }
         setResult(newResult)
         setPhase("result")
-        setSessionHistory((prev) => [angleId, ...prev.slice(0, 2)])
+        setSessionHistory((prev) => [selectedAngle, ...prev.slice(0, 2)])
 
         toast.success("Creativo generado", {
           description: "Tu anuncio está listo para publicar",
@@ -364,6 +374,30 @@ export default function DashboardPage() {
 
                 <button
                   type="button"
+                  onClick={handleGenerate}
+                  disabled={!producto.trim() || !selectedAngle || loading || credits === 0}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold bg-[#D97757] text-white hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#D97757] disabled:active:scale-100 mb-3"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Generando tu creativo...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Generar Creativo
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
                   className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-medium text-[#9A9893] border border-[#3A3833] hover:border-[#D97757]/30 hover:text-[#E8E6E1] transition-all duration-200"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -462,8 +496,9 @@ export default function DashboardPage() {
                   {ANGLES.map((angle) => (
                     <button
                       key={angle.id}
+                      type="button"
                       onClick={() => handleSelectAngle(angle.id)}
-                      disabled={loading || credits === 0}
+                      disabled={loading}
                       className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
                         selectedAngle === angle.id
                           ? "border-[#D97757] bg-[#D97757]/10"
