@@ -23,7 +23,7 @@ const navItems = [
     ),
   },
   {
-    label: "Biblioteca de Assets",
+    label: "Mis Creativos",
     href: "/dashboard/assets",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

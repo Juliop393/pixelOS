@@ -179,7 +179,7 @@ function Accordion({ title, children }: { title: string; children: React.ReactNo
 
 export default function DashboardPage() {
   const router = useRouter()
-  const [credits, setCredits] = useState(1450)
+  const [credits, setCredits] = useState(10)
   const [producto, setProducto] = useState("")
   const [textoAnuncio, setTextoAnuncio] = useState("")
   const [ctaContacto, setCtaContacto] = useState("")
@@ -196,7 +196,7 @@ export default function DashboardPage() {
   } | null>(null)
   const [selectedVariation, setSelectedVariation] = useState("both")
   const [phase, setPhase] = useState<"select" | "loading" | "result" | "error">("select")
-  const [sessionHistory, setSessionHistory] = useState<string[]>([])
+  const [sessionHistory, setSessionHistory] = useState<Array<{ imageUrl: string; angle: string }>>([])
 
   useEffect(() => {
     const checkSession = async () => {
@@ -222,9 +222,17 @@ export default function DashboardPage() {
       return
     }
 
+    if (credits < 1) {
+      toast.error("Sin créditos disponibles", {
+        description: "No tienes créditos suficientes para generar",
+      })
+      return
+    }
+
     setLoading(true)
     setError(null)
     setPhase("loading")
+    setCredits((prev) => prev - 1)
 
     const payload = {
       producto,
@@ -257,7 +265,6 @@ export default function DashboardPage() {
       const data = await response.json()
 
       if (data.success && data.imageUrl) {
-        setCredits((prev) => prev - 1)
         const newResult = {
           imageUrl: data.imageUrl,
           copy: data.copy || "Tu copy persuasivo aparecerá aquí una vez que el motor de IA complete el renderizado del creativo.",
@@ -265,7 +272,10 @@ export default function DashboardPage() {
         }
         setResult(newResult)
         setPhase("result")
-        setSessionHistory((prev) => [selectedAngle, ...prev.slice(0, 2)])
+        setSessionHistory((prev) => {
+          const newHistory = [{ imageUrl: data.imageUrl, angle: selectedAngle }, ...prev]
+          return newHistory.slice(0, 20)
+        })
 
         toast.success("Creativo generado", {
           description: "Tu anuncio está listo para publicar",
@@ -275,6 +285,7 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error("Error al generar creativo:", error)
+      setCredits((prev) => prev + 1)
       setError(error instanceof Error ? error.message : "Error desconocido")
       setPhase("error")
       
@@ -386,6 +397,8 @@ export default function DashboardPage() {
                       </svg>
                       Generando tu creativo...
                     </>
+                  ) : credits === 0 ? (
+                    "Sin créditos disponibles"
                   ) : (
                     <>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -609,7 +622,7 @@ export default function DashboardPage() {
                   <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] overflow-hidden flex-shrink-0">
                     <div
                       className={`relative bg-[#1E1C1A] flex items-center justify-center overflow-hidden ${
-                        aspectRatio === "story" ? "aspect-[9/16] max-h-[450px]" : "aspect-square max-h-[400px]"
+                        aspectRatio === "story" ? "aspect-[9/16] max-h-[500px]" : aspectRatio === "4:5" ? "aspect-[4/5] max-h-[450px]" : "aspect-square max-h-[400px]"
                       }`}
                     >
                       {result.imageUrl ? (
@@ -698,18 +711,26 @@ export default function DashboardPage() {
                       <p className="text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-3">
                         Historial de sesión
                       </p>
-                      <div className="flex gap-2">
-                        {sessionHistory.map((angleId, idx) => {
-                          const angle = ANGLES.find((a) => a.id === angleId)
-                          return (
-                            <div
-                              key={idx}
-                              className="w-14 h-14 rounded-lg bg-[#1E1C1A] border border-[#3A3833] flex items-center justify-center text-lg"
-                            >
-                              {angle?.icon}
-                            </div>
-                          )
-                        })}
+                      <div className="grid grid-cols-4 gap-2">
+                        {sessionHistory.map((item, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setResult({
+                                imageUrl: item.imageUrl,
+                                copy: "",
+                                angle: item.angle,
+                              })
+                            }}
+                            className="aspect-square rounded-lg overflow-hidden border border-[#3A3833] hover:border-[#D97757]/50 transition-all duration-200"
+                          >
+                            <img
+                              src={item.imageUrl}
+                              alt={`Creativo ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
                       </div>
                     </div>
                   )}
