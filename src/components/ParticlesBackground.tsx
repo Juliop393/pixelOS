@@ -1,7 +1,7 @@
 "use client"
 
-import { useCallback } from "react"
-import Particles from "@tsparticles/react"
+import { useEffect, useState } from "react"
+import Particles, { initParticlesEngine } from "@tsparticles/react"
 import {
   type ISourceOptions,
   MoveDirection,
@@ -67,8 +67,10 @@ const options: ISourceOptions = {
       straight: false,
       attract: {
         enable: true,
-        rotateX: 600,
-        rotateY: 1200,
+        rotate: {
+          x: 600,
+          y: 1200,
+        },
       },
     },
     number: {
@@ -85,7 +87,6 @@ const options: ISourceOptions = {
       animation: {
         enable: true,
         speed: 0.5,
-        minimumValue: 0.05,
         sync: false,
       },
     },
@@ -97,7 +98,6 @@ const options: ISourceOptions = {
       animation: {
         enable: true,
         speed: 1,
-        minimumValue: 0.5,
         sync: false,
       },
     },
@@ -106,15 +106,22 @@ const options: ISourceOptions = {
 }
 
 export default function ParticlesBackground() {
-  const init = useCallback(async (engine: unknown) => {
-    await loadSlim(engine as Parameters<typeof loadSlim>[0])
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine)
+    }).then(() => {
+      setReady(true)
+    })
   }, [])
+
+  if (!ready) return null
 
   return (
     <Particles
       id="tsparticles"
       options={options}
-      init={init}
       className="absolute inset-0 -z-10"
     />
   )
