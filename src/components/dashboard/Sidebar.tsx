@@ -3,6 +3,10 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+interface SidebarProps {
+  userEmail: string | null
+}
+
 const navItems = [
   {
     label: "Generador de Ángulos",
@@ -43,8 +47,12 @@ const navItems = [
   },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ userEmail }: SidebarProps) {
   const pathname = usePathname()
+
+  const displayName = userEmail ? userEmail.split("@")[0] : "Usuario Beta"
+  const avatarLetter = (displayName[0] ?? "U").toUpperCase()
+  const emailLabel = userEmail ?? "user@afmstudio.com"
 
   return (
     <aside className="w-64 h-screen sticky top-0 bg-[#2A2826] border-r border-[#3A3833] flex flex-col">
@@ -85,11 +93,11 @@ export default function Sidebar() {
       <div className="px-4 py-4 border-t border-[#3A3833]">
         <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-[#1E1C1A] transition-colors cursor-pointer">
           <div className="w-8 h-8 rounded-full bg-[#D97757] text-white flex items-center justify-center text-sm font-semibold">
-            U
+            {avatarLetter}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[#E8E6E1] truncate">Usuario Beta</p>
-            <p className="text-xs text-[#9A9893] truncate">user@afmstudio.com</p>
+            <p className="text-sm font-medium text-[#E8E6E1] truncate">{displayName}</p>
+            <p className="text-xs text-[#9A9893] truncate">{emailLabel}</p>
           </div>
         </div>
       </div>
