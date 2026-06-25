@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 
 interface SidebarProps {
@@ -58,12 +59,10 @@ export default function Sidebar({ userEmail }: SidebarProps) {
     <aside className="w-64 h-screen sticky top-0 bg-[#2A2826] border-r border-[#3A3833] flex flex-col">
       <div className="px-6 py-5 border-b border-[#3A3833]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-[#D97757] flex items-center justify-center">
-            <span className="text-white font-bold text-sm">AFM</span>
-          </div>
+          <Image src="/pixelOS.png" width={32} height={32} alt="PixelOS" />
           <div>
             <span className="font-semibold text-[#E8E6E1] tracking-tight block">
-              AFM Estudio
+              PixelOS
             </span>
             <span className="text-xs text-[#9A9893]">Creative AI</span>
           </div>

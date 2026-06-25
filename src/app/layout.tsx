@@ -10,7 +10,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "AFM Estudio | El motor creativo para Meta Ads",
+  title: "PixelOS - Generador de Creativos con IA",
   description: "Rompe la ceguera del scroll. Escala tu ROAS. Genera ángulos de venta, copy persuasivo y creativos de alto contraste en 10 minutos.",
 }
 

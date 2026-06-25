@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import Spotlight from "@/components/Spotlight"
 import MeshGradient from "@/components/MeshGradient"
 import GeometricBackground from "@/components/GeometricBackground"
@@ -103,11 +104,9 @@ export default function Home() {
       <header className="sticky top-0 z-50 bg-[#1E1C1A]/70 backdrop-blur-xl border-b border-[#3A3833]/50 relative">
         <nav className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#D97757] flex items-center justify-center">
-              <span className="text-white font-bold text-sm">AFM</span>
-            </div>
+            <Image src="/pixelOS.png" width={32} height={32} alt="PixelOS" />
             <span className="font-semibold text-[#E8E6E1] tracking-tight">
-              AFM Estudio
+              PixelOS
             </span>
           </div>
           <div className="flex items-center gap-6">
@@ -229,7 +228,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-28">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-[#E8E6E1] mb-3">
-              Creativos generados con AFM Estudio
+              Creativos generados con PixelOS
             </h2>
             <p className="text-lg text-[#9A9893]">
               Reales. Generados en segundos.
@@ -470,7 +469,7 @@ export default function Home() {
               <span className="text-sm text-[#9A9893]">AFM Estudio</span>
             </div>
             <span className="text-xs text-[#9A9893]/60">
-              © {new Date().getFullYear()} Todos los derechos reservados
+              © 2026 AFM Estudio · PixelOS
             </span>
           </div>
         </div>
