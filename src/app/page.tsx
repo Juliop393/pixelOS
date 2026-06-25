@@ -9,7 +9,7 @@ const bentoCards = [
     title: "4 Ángulos Visuales Estáticos",
     description: "Interrupción de Patrón, Beneficio Crudo, Falso Nativo y Oferta Directa. Cada uno optimizado para detener el scroll y generar clics.",
     icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-6 h-6" width={24} height={24} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
     ),
@@ -18,7 +18,7 @@ const bentoCards = [
     title: "Diseño de Alto Contraste",
     description: "Creativos estáticos con tipografía de impacto, composición agresiva y jerarquía visual pensada para pantallas móviles.",
     icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-6 h-6" width={24} height={24} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
       </svg>
     ),
@@ -27,7 +27,7 @@ const bentoCards = [
     title: "Creativos Estáticos en 10 Minutos",
     description: "De la idea a la imagen final lista para Meta Ads. Sin video, sin motion, sin complicaciones. Solo imágenes que convierten.",
     icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-6 h-6" width={24} height={24} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
       </svg>
     ),
@@ -104,7 +104,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 bg-[#1E1C1A]/70 backdrop-blur-xl border-b border-[#3A3833]/50 relative">
         <nav className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image src="/pixelOS.png" width={32} height={32} alt="PixelOS" />
+            <Image src="/logo_PixelOS.png" width={32} height={32} alt="PixelOS" />
             <span className="font-semibold text-[#E8E6E1] tracking-tight">
               PixelOS
             </span>
@@ -147,7 +147,7 @@ export default function Home() {
                 className="group inline-flex items-center gap-2 bg-[#D97757] text-white font-semibold text-base px-8 py-4 rounded-xl hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/30"
               >
                 <span>Generar creativos ahora</span>
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" width={20} height={20} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </Link>
@@ -180,7 +180,7 @@ export default function Home() {
                 <span className="text-3xl font-bold text-[#D97757]">1</span>
               </div>
               <div className="w-12 h-12 mx-auto mb-4 text-[#D97757]">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg width={48} height={48} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               </div>
@@ -195,7 +195,7 @@ export default function Home() {
                 <span className="text-3xl font-bold text-[#D97757]">2</span>
               </div>
               <div className="w-12 h-12 mx-auto mb-4 text-[#D97757]">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg width={48} height={48} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
@@ -210,7 +210,7 @@ export default function Home() {
                 <span className="text-3xl font-bold text-[#D97757]">3</span>
               </div>
               <div className="w-12 h-12 mx-auto mb-4 text-[#D97757]">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg width={48} height={48} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
@@ -282,7 +282,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 text-[#D97757] font-semibold text-base hover:text-[#C26547] transition-colors"
             >
               Genera el tuyo ahora
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" width={20} height={20} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </Link>
@@ -411,7 +411,7 @@ export default function Home() {
                 <ul className="space-y-3 mb-8 flex-1">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-3 text-sm text-[#9A9893]">
-                      <svg className="w-4 h-4 text-[#D97757] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-[#D97757] flex-shrink-0" width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       {feature}
@@ -451,7 +451,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 bg-[#D97757] text-white font-semibold text-base px-8 py-4 rounded-xl hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/30"
             >
               Comenzar ahora
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" width={20} height={20} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </Link>

@@ -8,7 +8,7 @@ export default function CampanasPage() {
 
       <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-12 flex flex-col items-center justify-center text-center">
         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#D97757]/20 to-[#D97757]/5 border border-[#D97757]/30 flex items-center justify-center mb-6">
-          <svg className="w-10 h-10 text-[#D97757]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-10 h-10 text-[#D97757]" width={40} height={40} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>

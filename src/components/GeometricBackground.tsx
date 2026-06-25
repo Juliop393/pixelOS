@@ -25,7 +25,7 @@ export default function GeometricBackground() {
       </div>
 
       {/* Elementos geométricos */}
-      <svg className="absolute inset-0 w-full h-full opacity-[0.12]" xmlns="http://www.w3.org/2000/svg">
+      <svg className="absolute inset-0 w-full h-full opacity-[0.12]" width="100%" height="100%" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" style={{ stopColor: '#D97757', stopOpacity: 0.3 }} />

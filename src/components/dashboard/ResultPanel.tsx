@@ -46,6 +46,9 @@ export default function ResultPanel({
             <div className="w-20 h-20 rounded-2xl bg-[#1E1C1A] border border-[#3A3833] flex items-center justify-center mx-auto mb-5">
               <svg
                 className="w-10 h-10 text-[#9A9893]/30"
+                width={40}
+                height={40}
+                aria-hidden="true"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -115,6 +118,9 @@ export default function ResultPanel({
             <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-5">
               <svg
                 className="w-10 h-10 text-red-400"
+                width={40}
+                height={40}
+                aria-hidden="true"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -155,7 +161,7 @@ export default function ResultPanel({
                   onClick={onDownloadAll}
                   className="text-xs font-medium text-[#D97757] hover:text-[#C26547] transition-colors flex items-center gap-1"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5" width={14} height={14} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   Descargar todos
@@ -205,6 +211,9 @@ export default function ResultPanel({
                   <div className="w-16 h-16 rounded-2xl bg-[#D97757]/10 border border-[#D97757]/20 flex items-center justify-center mb-4">
                     <svg
                       className="w-8 h-8 text-[#D97757]"
+                      width={32}
+                      height={32}
+                      aria-hidden="true"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -248,7 +257,7 @@ export default function ResultPanel({
                   onClick={onDownloadAll}
                   className="w-full py-3 px-4 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 flex items-center justify-center gap-2"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   Descargar todas ({generatedImages.length})
@@ -258,7 +267,7 @@ export default function ResultPanel({
                   onClick={onDownload}
                   className="w-full py-3 px-4 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 flex items-center justify-center gap-2"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   Descargar
