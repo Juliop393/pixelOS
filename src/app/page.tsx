@@ -1,6 +1,5 @@
 import Link from "next/link"
 import Image from "next/image"
-import logoPixelOS from "@/../public/logo_PixelOS.png"
 import Spotlight from "@/components/Spotlight"
 import MeshGradient from "@/components/MeshGradient"
 import GeometricBackground from "@/components/GeometricBackground"
@@ -151,7 +150,7 @@ export default function Home() {
         }}
       >
         <div className="flex items-center gap-3">
-          <Image src={logoPixelOS} width={44} height={44} alt="PixelOS" priority />
+          <Image src="/logo_PixelOS.png" width={44} height={44} alt="PixelOS" priority unoptimized />
           <span className="font-semibold text-[#E8E6E1] tracking-tight text-xl">
             PixelOS
           </span>
