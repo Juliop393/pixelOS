@@ -208,7 +208,7 @@ export default function Home() {
       </section>
 
       {/* Sección Cómo Funciona */}
-      <section className="relative border-b border-[#3A3833]/50 bg-[#1a1a1a]">
+      <section className="relative border-b border-[#3A3833]/50">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-28">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-[#E8E6E1] mb-3">
@@ -220,12 +220,6 @@ export default function Home() {
           </div>
 
           <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Línea punteada conectora (solo desktop) */}
-            <div
-              aria-hidden="true"
-              className="hidden md:block absolute top-1/2 left-[16.66%] right-[16.66%] border-t border-dashed border-[#D97757]/25"
-            />
-
             {steps.map((step, idx) => (
               <div
                 key={step.title}

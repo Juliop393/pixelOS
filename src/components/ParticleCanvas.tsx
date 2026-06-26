@@ -14,12 +14,12 @@ export default function ParticleCanvas() {
     canvas.height = window.innerHeight
 
     const mouse = { x: -1000, y: -1000 }
-    const particles = Array.from({ length: 80 }, () => ({
+    const particles = Array.from({ length: 120 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       vx: (Math.random() - 0.5) * 0.4,
       vy: (Math.random() - 0.5) * 0.4,
-      size: Math.random() * 1.5 + 0.5,
+      size: Math.random() * 2 + 0.5,
     }))
 
     const onMouse = (e: MouseEvent) => {
