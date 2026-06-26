@@ -21,6 +21,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={inter.variable}>
+      <head>
+        <link rel="icon" href="/logo_PixelOS.png" />
+      </head>
       <body className="min-h-screen antialiased">
         {children}
         <Toaster
