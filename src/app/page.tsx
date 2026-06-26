@@ -3,6 +3,7 @@ import Image from "next/image"
 import Spotlight from "@/components/Spotlight"
 import MeshGradient from "@/components/MeshGradient"
 import GeometricBackground from "@/components/GeometricBackground"
+import ParticlesBackground from "@/components/ParticlesBackground"
 
 const bentoCards = [
   {
@@ -97,6 +98,7 @@ const plans = [
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#1E1C1A] text-[#E8E6E1] relative overflow-hidden">
+      <ParticlesBackground />
       <MeshGradient />
       <GeometricBackground />
       <Spotlight />
@@ -262,12 +264,12 @@ export default function Home() {
             <div className="group relative aspect-square rounded-2xl overflow-hidden border border-[#3A3833]/50 hover:border-[#D97757]/40 transition-all duration-300">
               <img
                 src="https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_73.jpg"
-                alt="Creativo generado - Fondo Blanco (Studio)"
+                alt="Creativo generado - Demostración de Producto"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/80 to-transparent">
                 <span className="inline-block px-3 py-1 rounded-md text-xs font-semibold bg-[#D97757]/90 text-white backdrop-blur-sm">
-                  Fondo Blanco (Studio)
+                  Demostración de Producto
                 </span>
               </div>
             </div>

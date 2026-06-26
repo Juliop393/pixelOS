@@ -24,82 +24,53 @@ const options: ISourceOptions = {
     events: {
       onHover: {
         enable: true,
-        mode: "grab",
-      },
-      onClick: {
-        enable: true,
-        mode: "push",
+        mode: "repulse",
       },
     },
     modes: {
-      grab: {
-        distance: 180,
-        links: {
-          opacity: 0.6,
-        },
-      },
-      push: {
-        quantity: 2,
+      repulse: {
+        distance: 80,
+        duration: 0.4,
       },
     },
   },
   particles: {
     color: {
-      value: ["#D97757", "#9A9893", "#3A3833"],
+      value: "rgba(232, 114, 74, 0.25)",
     },
     links: {
       color: {
-        value: ["#D97757", "#3A3833"],
+        value: "rgba(232, 114, 74, 0.25)",
       },
       distance: 160,
       enable: true,
-      opacity: 0.15,
+      opacity: 0.08,
       width: 1,
     },
     move: {
       direction: MoveDirection.none,
       enable: true,
       outModes: {
-        default: OutMode.bounce,
+        default: OutMode.out,
       },
       random: true,
-      speed: 0.5,
+      speed: 0.4,
       straight: false,
-      attract: {
-        enable: true,
-        rotate: {
-          x: 600,
-          y: 1200,
-        },
-      },
     },
     number: {
       density: {
         enable: true,
       },
-      value: 100,
+      value: 70,
     },
     opacity: {
-      value: {
-        min: 0.1,
-        max: 0.3,
-      },
-      animation: {
-        enable: true,
-        speed: 0.5,
-        sync: false,
-      },
+      value: 0.25,
     },
     shape: {
       type: "circle",
     },
     size: {
-      value: { min: 1, max: 4 },
-      animation: {
-        enable: true,
-        speed: 1,
-        sync: false,
-      },
+      value: 1.5,
     },
   },
   detectRetina: true,
@@ -122,7 +93,7 @@ export default function ParticlesBackground() {
     <Particles
       id="tsparticles"
       options={options}
-      className="absolute inset-0 -z-10"
+      className="fixed inset-0 -z-10 pointer-events-auto"
     />
   )
 }
