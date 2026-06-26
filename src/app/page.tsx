@@ -101,26 +101,36 @@ export default function Home() {
       <GeometricBackground />
       <Spotlight />
 
-      <header className="sticky top-0 z-50 bg-[#1E1C1A]/70 backdrop-blur-xl border-b border-[#3A3833]/50 relative">
-        <nav className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Image src="/logo_PixelOS.png" width={32} height={32} alt="PixelOS" />
-            <span className="font-semibold text-[#E8E6E1] tracking-tight">
-              PixelOS
-            </span>
-          </div>
-          <div className="flex items-center gap-6">
-            <a href="#pricing" className="text-sm text-[#9A9893] hover:text-[#E8E6E1] transition-colors">
-              Precios
-            </a>
-            <Link
-              href="/login"
-              className="text-sm font-medium px-5 py-2.5 rounded-xl border border-[#3A3833]/50 hover:border-[#D97757]/50 hover:bg-[#2A2826]/50 transition-all duration-200 backdrop-blur-sm"
-            >
-              Ingresar
-            </Link>
-          </div>
-        </nav>
+      <header
+        className="fixed top-4 left-0 right-0 z-50 mx-auto flex items-center justify-between"
+        style={{
+          maxWidth: "900px",
+          background: "rgba(255,255,255,0.05)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: "9999px",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+          padding: "12px 24px",
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <Image src="/logo_PixelOS.png" width={44} height={44} alt="PixelOS" priority />
+          <span className="font-semibold text-[#E8E6E1] tracking-tight text-xl">
+            PixelOS
+          </span>
+        </div>
+        <div className="flex items-center gap-6">
+          <a href="#pricing" className="text-sm text-[#9A9893] hover:text-[#E8E6E1] transition-colors">
+            Precios
+          </a>
+          <Link
+            href="/login"
+            className="text-sm font-medium px-5 py-2.5 rounded-xl border border-[#3A3833]/50 hover:border-[#D97757]/50 hover:bg-[#2A2826]/50 transition-all duration-200 backdrop-blur-sm"
+          >
+            Ingresar
+          </Link>
+        </div>
       </header>
 
       <section className="hero-bg border-b border-[#3A3833]/50">
@@ -237,40 +247,40 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12">
             <div className="group relative aspect-square rounded-2xl overflow-hidden border border-[#3A3833]/50 hover:border-[#D97757]/40 transition-all duration-300">
-              <img 
-                src="https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_73.jpg" 
-                alt="Creativo generado - Demostración de Producto"
+              <img
+                src="https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_93.jpg"
+                alt="Creativo generado - Escasez y Urgencia"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/80 to-transparent">
                 <span className="inline-block px-3 py-1 rounded-md text-xs font-semibold bg-[#D97757]/90 text-white backdrop-blur-sm">
-                  Demostración de Producto
+                  Escasez y Urgencia
                 </span>
               </div>
             </div>
 
             <div className="group relative aspect-square rounded-2xl overflow-hidden border border-[#3A3833]/50 hover:border-[#D97757]/40 transition-all duration-300">
-              <img 
-                src="https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_64.png" 
-                alt="Creativo generado - Lifestyle & Contexto"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/80 to-transparent">
-                <span className="inline-block px-3 py-1 rounded-md text-xs font-semibold bg-[#D97757]/90 text-white backdrop-blur-sm">
-                  Lifestyle & Contexto
-                </span>
-              </div>
-            </div>
-
-            <div className="group relative aspect-square rounded-2xl overflow-hidden border border-[#3A3833]/50 hover:border-[#D97757]/40 transition-all duration-300">
-              <img 
-                src="https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_41.png" 
+              <img
+                src="https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_73.jpg"
                 alt="Creativo generado - Fondo Blanco (Studio)"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/80 to-transparent">
                 <span className="inline-block px-3 py-1 rounded-md text-xs font-semibold bg-[#D97757]/90 text-white backdrop-blur-sm">
                   Fondo Blanco (Studio)
+                </span>
+              </div>
+            </div>
+
+            <div className="group relative aspect-square rounded-2xl overflow-hidden border border-[#3A3833]/50 hover:border-[#D97757]/40 transition-all duration-300">
+              <img
+                src="https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_41.png"
+                alt="Creativo generado - Lifestyle & Contexto"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/80 to-transparent">
+                <span className="inline-block px-3 py-1 rounded-md text-xs font-semibold bg-[#D97757]/90 text-white backdrop-blur-sm">
+                  Lifestyle & Contexto
                 </span>
               </div>
             </div>
