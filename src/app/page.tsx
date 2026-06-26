@@ -3,7 +3,7 @@ import Image from "next/image"
 import Spotlight from "@/components/Spotlight"
 import MeshGradient from "@/components/MeshGradient"
 import GeometricBackground from "@/components/GeometricBackground"
-import SimpleParticles from "@/components/SimpleParticles"
+import GlowCursor from "@/components/GlowCursor"
 
 const bentoCards = [
   {
@@ -98,7 +98,7 @@ const plans = [
 export default function Home() {
   return (
     <main className="min-h-screen text-[#E8E6E1] relative overflow-hidden">
-      <SimpleParticles />
+      <GlowCursor />
       <MeshGradient />
       <GeometricBackground />
       <Spotlight />
