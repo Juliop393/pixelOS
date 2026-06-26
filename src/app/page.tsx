@@ -263,7 +263,7 @@ export default function Home() {
 
             <div className="group relative aspect-square rounded-2xl overflow-hidden border border-[#3A3833]/50 hover:border-[#D97757]/40 transition-all duration-300">
               <img
-                src="https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_73.jpg"
+                src="/creativo_97.jpg"
                 alt="Creativo generado - Demostración de Producto"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
@@ -276,7 +276,7 @@ export default function Home() {
 
             <div className="group relative aspect-square rounded-2xl overflow-hidden border border-[#3A3833]/50 hover:border-[#D97757]/40 transition-all duration-300">
               <img
-                src="https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_41.png"
+                src="/creativo_106.jpg"
                 alt="Creativo generado - Lifestyle & Contexto"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
