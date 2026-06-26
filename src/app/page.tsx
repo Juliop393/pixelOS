@@ -97,7 +97,7 @@ const plans = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#1E1C1A] text-[#E8E6E1] relative overflow-hidden">
+    <main className="min-h-screen text-[#E8E6E1] relative overflow-hidden">
       <ParticlesBackground />
       <MeshGradient />
       <GeometricBackground />

@@ -93,7 +93,8 @@ export default function ParticlesBackground() {
     <Particles
       id="tsparticles"
       options={options}
-      className="fixed inset-0 -z-10 pointer-events-auto"
+      className="fixed inset-0 pointer-events-auto"
+      style={{ zIndex: -1 }}
     />
   )
 }
