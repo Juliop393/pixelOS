@@ -1,51 +1,8 @@
-import { createServerClient } from "@supabase/ssr"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export async function middleware(req: NextRequest) {
-  let res = NextResponse.next()
-
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    return NextResponse.next()
-  }
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() {
-          return req.cookies.getAll()
-        },
-        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
-          cookiesToSet.forEach(({ name, value }) =>
-            req.cookies.set(name, value)
-          )
-          res = NextResponse.next()
-          cookiesToSet.forEach(({ name, value, options }) =>
-            res.cookies.set(name, value, options as Record<string, unknown>)
-          )
-        },
-      },
-    }
-  )
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (!session && req.nextUrl.pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/login", req.url))
-  }
-
-  if (
-    session &&
-    (req.nextUrl.pathname === "/login" || req.nextUrl.pathname === "/register")
-  ) {
-    return NextResponse.redirect(new URL("/dashboard", req.url))
-  }
-
-  return res
+export async function middleware(_req: NextRequest) {
+  return NextResponse.next()
 }
 
 export const config = {
