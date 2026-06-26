@@ -1,5 +1,6 @@
 import Sidebar from "@/components/dashboard/Sidebar"
 import Topbar from "@/components/dashboard/Topbar"
+import MobileBlock from "@/components/dashboard/MobileBlock"
 import { CreditsProvider } from "@/lib/credits-context"
 import { createClient } from "@/lib/supabase-server"
 
@@ -15,7 +16,8 @@ export default async function DashboardLayout({
 
   return (
     <CreditsProvider initialCredits={10}>
-      <div className="min-h-screen bg-[#1E1C1A] text-[#E8E6E1] flex">
+      {/* Desktop */}
+      <div className="hidden md:flex min-h-screen bg-[#1E1C1A] text-[#E8E6E1]">
         <Sidebar userEmail={user?.email ?? null} />
         <div className="flex-1 flex flex-col min-w-0">
           <Topbar />
@@ -24,6 +26,9 @@ export default async function DashboardLayout({
           </main>
         </div>
       </div>
+
+      {/* Móvil */}
+      <MobileBlock />
     </CreditsProvider>
   )
 }
