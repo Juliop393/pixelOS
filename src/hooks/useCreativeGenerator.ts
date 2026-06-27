@@ -13,7 +13,7 @@ export type Progress = { completed: number; total: number }
 
 export function useCreativeGenerator() {
   const router = useRouter()
-  const { credits, setCredits } = useCredits()
+  const { credits, setCredits, userId } = useCredits()
   const [producto, setProducto] = useState("")
   const [textoAnuncio, setTextoAnuncio] = useState("")
   const [ctaContacto, setCtaContacto] = useState("")
@@ -140,14 +140,24 @@ export function useCreativeGenerator() {
       const failCount = cantidad - successCount
 
       if (successCount === 0) {
-        setCredits((prev) => prev + cantidad)
+        // No se generó nada: no descontamos créditos.
         throw new Error("Todas las generaciones fallaron")
       }
 
-      if (failCount > 0) {
-        setCredits((prev) => prev + failCount)
-      } else {
-        setCredits((prev) => prev - cantidad)
+      // Descontamos 1 crédito por cada imagen generada con éxito, tanto en el
+      // estado local como en Supabase para que persista.
+      const newCredits = Math.max(0, credits - successCount)
+      setCredits(newCredits)
+
+      if (userId) {
+        const { error: creditError } = await supabase
+          .from("user_credits")
+          .update({ credits: newCredits })
+          .eq("user_id", userId)
+
+        if (creditError) {
+          console.error("Error actualizando créditos en Supabase:", creditError)
+        }
       }
 
       const newImages = successfulResults.map((r) => ({

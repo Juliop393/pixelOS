@@ -4,6 +4,7 @@ import Spotlight from "@/components/Spotlight"
 import MeshGradient from "@/components/MeshGradient"
 import GeometricBackground from "@/components/GeometricBackground"
 import ParticleCanvas from "@/components/ParticleCanvas"
+import PricingButton from "@/components/PricingButton"
 
 const bentoCards = [
   {
@@ -77,6 +78,7 @@ const steps = [
 const plans = [
   {
     name: "Starter",
+    variantId: "1842724",
     originalPrice: "$9.99",
     price: "$5.99",
     period: "/mes",
@@ -93,6 +95,7 @@ const plans = [
   },
   {
     name: "Pro",
+    variantId: "1842974",
     originalPrice: "$24.99",
     price: "$19.99",
     period: "/mes",
@@ -110,6 +113,7 @@ const plans = [
   },
   {
     name: "Business",
+    variantId: "1842976",
     originalPrice: "$59.99",
     price: "$49.99",
     period: "/mes",
@@ -441,16 +445,11 @@ export default function Home() {
                   ))}
                 </ul>
 
-                <Link
-                  href="/login"
-                  className={`block text-center text-sm font-semibold px-4 py-3.5 rounded-xl transition-all duration-200 ${
-                    plan.highlighted
-                      ? "bg-[#D97757] text-white hover:bg-[#C26547] shadow-lg shadow-[#D97757]/20"
-                      : "bg-[#1E1C1A]/60 backdrop-blur-sm text-[#E8E6E1] hover:bg-[#D97757] hover:text-white border border-[#3A3833]/50"
-                  }`}
-                >
-                  Elegir {plan.name}
-                </Link>
+                <PricingButton
+                  variantId={plan.variantId}
+                  planName={plan.name}
+                  highlighted={plan.highlighted}
+                />
               </div>
             ))}
           </div>

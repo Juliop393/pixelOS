@@ -10,7 +10,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <CreditsProvider initialCredits={10}>
+    <CreditsProvider initialCredits={0}>
       {/* Desktop */}
       <div className="hidden md:flex min-h-screen bg-[#1E1C1A] text-[#E8E6E1]">
         <AuthGuard>

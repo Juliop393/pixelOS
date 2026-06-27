@@ -32,6 +32,8 @@ export default function GenerateButton({
           </svg>
           Generando {progress.total > 0 ? `(${progress.completed}/${progress.total})` : ""}...
         </>
+      ) : credits === 0 ? (
+        "Sin créditos — Elige un plan"
       ) : credits < cantidad ? (
         `Necesitas ${cantidad} crédito${cantidad > 1 ? "s" : ""}`
       ) : (
