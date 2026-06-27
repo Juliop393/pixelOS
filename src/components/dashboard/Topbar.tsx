@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter, usePathname } from "next/navigation"
+import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
 
@@ -9,6 +10,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/campanas": "Identidad de Marca",
   "/dashboard/assets": "Mis Creativos",
   "/dashboard/configuracion": "Configuración",
+  "/dashboard/pricing": "Planes y créditos",
 }
 
 export default function Topbar() {
@@ -33,12 +35,16 @@ export default function Topbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#2A2826] border border-[#3A3833]">
+          <Link
+            href="/pricing"
+            aria-label="Ver planes y comprar créditos"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#2A2826] border border-[#3A3833] hover:border-[#D97757]/60 hover:bg-[#D97757]/10 transition-colors"
+          >
             <span className="text-sm">⚡</span>
             <span className="text-sm font-semibold text-[#E8E6E1] tabular-nums">
               {credits.toLocaleString()} Créditos
             </span>
-          </div>
+          </Link>
 
           <button
             onClick={handleSignOut}

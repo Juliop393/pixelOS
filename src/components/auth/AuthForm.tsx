@@ -10,6 +10,18 @@ interface AuthFormProps {
   mode: "login" | "register"
 }
 
+function getPasswordStrength(password: string) {
+  if (!password) return { score: 0, label: "", color: "bg-[#3A3833]" }
+
+  let score = password.length >= 8 ? 1 : 0
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1
+  if (/\d/.test(password) && /[^A-Za-z0-9]/.test(password)) score += 1
+
+  if (score >= 3) return { score, label: "Fuerte", color: "bg-emerald-400" }
+  if (score === 2) return { score, label: "Media", color: "bg-amber-400" }
+  return { score: Math.max(score, 1), label: "Débil", color: "bg-red-400" }
+}
+
 export default function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter()
   const isRegister = mode === "register"
@@ -18,23 +30,38 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
+  const [duplicateEmail, setDuplicateEmail] = useState(false)
   const [loading, setLoading] = useState(false)
+  const passwordStrength = getPasswordStrength(password)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
-    setLoading(true)
+    setDuplicateEmail(false)
+
+    if (isRegister && password.length < 8) {
+      setError("La contraseña debe tener al menos 8 caracteres")
+      return
+    }
 
     if (isRegister && password !== confirmPassword) {
       setError("Las contraseñas no coinciden")
-      setLoading(false)
       return
     }
+
+    setLoading(true)
 
     try {
       if (isRegister) {
         const { data, error } = await supabase.auth.signUp({ email, password })
         if (error) throw error
+
+        // Con la protección contra enumeración, Supabase puede devolver éxito
+        // para un email existente, pero sin identidades asociadas.
+        if (data.user?.identities?.length === 0) {
+          setDuplicateEmail(true)
+          return
+        }
 
         if (data.session) {
           router.push("/dashboard")
@@ -54,10 +81,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
         router.refresh()
       }
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message)
+      const message = err instanceof Error ? err.message : "Ocurrió un error inesperado"
+
+      if (isRegister && message.toLowerCase().includes("user already registered")) {
+        setDuplicateEmail(true)
       } else {
-        setError("Ocurrió un error inesperado")
+        setError(message)
       }
     } finally {
       setLoading(false)
@@ -121,10 +150,32 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={isRegister ? 8 : undefined}
                 className="w-full bg-[#1E1C1A] border border-[#3A3833] px-4 py-3.5 rounded-xl text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
                 placeholder="••••••••"
               />
+              {isRegister && (
+                <div className="mt-3" aria-live="polite">
+                  <div className="flex items-center gap-2 mb-2">
+                    {[1, 2, 3].map((level) => (
+                      <span
+                        key={level}
+                        className={`h-1 flex-1 rounded-full ${
+                          level <= passwordStrength.score ? passwordStrength.color : "bg-[#3A3833]"
+                        }`}
+                      />
+                    ))}
+                    {passwordStrength.label && (
+                      <span className="w-12 text-right text-xs text-[#9A9893]">
+                        {passwordStrength.label}
+                      </span>
+                    )}
+                  </div>
+                  <p className={`text-xs ${password.length >= 8 ? "text-emerald-400" : "text-[#9A9893]"}`}>
+                    {password.length >= 8 ? "✓" : "○"} Mínimo 8 caracteres
+                  </p>
+                </div>
+              )}
             </div>
 
             {isRegister && (
@@ -141,7 +192,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                   className="w-full bg-[#1E1C1A] border border-[#3A3833] px-4 py-3.5 rounded-xl text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
                   placeholder="••••••••"
                 />
@@ -151,6 +202,17 @@ export default function AuthForm({ mode }: AuthFormProps) {
             {error && (
               <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20">
                 <p className="text-red-400 text-sm">{error}</p>
+              </div>
+            )}
+
+            {duplicateEmail && (
+              <div className="px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20" role="alert">
+                <p className="text-amber-300 text-sm">
+                  Este email ya tiene una cuenta. ¿Quieres{" "}
+                  <Link href="/login" className="font-semibold underline underline-offset-2 hover:text-amber-200">
+                    iniciar sesión?
+                  </Link>
+                </p>
               </div>
             )}
 

@@ -87,6 +87,13 @@ export default function Sidebar({ userEmail }: SidebarProps) {
             </Link>
           )
         })}
+        <Link
+          href="/pricing"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-[#D97757] hover:bg-[#1E1C1A] hover:text-[#E8E6E1] transition-all duration-200"
+        >
+          <span className="w-5 text-center" aria-hidden="true">⚡</span>
+          Recargar créditos
+        </Link>
       </nav>
 
       <div className="px-4 py-4 border-t border-[#3A3833]">

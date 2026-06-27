@@ -4,7 +4,7 @@ import Spotlight from "@/components/Spotlight"
 import MeshGradient from "@/components/MeshGradient"
 import GeometricBackground from "@/components/GeometricBackground"
 import ParticleCanvas from "@/components/ParticleCanvas"
-import PricingButton from "@/components/PricingButton"
+import PricingPlans from "@/components/PricingPlans"
 
 const bentoCards = [
   {
@@ -75,63 +75,6 @@ const steps = [
   },
 ]
 
-const plans = [
-  {
-    name: "Starter",
-    variantId: "1842724",
-    originalPrice: "$9.99",
-    price: "$5.99",
-    period: "/mes",
-    credits: "40 créditos/mes",
-    description: "Ideal para negocios locales",
-    highlighted: false,
-    features: [
-      "40 créditos/mes",
-      "1 crédito = 1 creativo",
-      "3 formatos (1:1, 4:5, 9:16)",
-      "4 ángulos de venta",
-      "Soporte por email"
-    ],
-  },
-  {
-    name: "Pro",
-    variantId: "1842974",
-    originalPrice: "$24.99",
-    price: "$19.99",
-    period: "/mes",
-    credits: "150 créditos/mes",
-    description: "Ideal para agencias",
-    highlighted: true,
-    features: [
-      "150 créditos/mes",
-      "1 crédito = 1 creativo",
-      "Todos los formatos y estilos",
-      "4 ángulos de venta",
-      "Historial de campañas",
-      "Soporte prioritario"
-    ],
-  },
-  {
-    name: "Business",
-    variantId: "1842976",
-    originalPrice: "$59.99",
-    price: "$49.99",
-    period: "/mes",
-    credits: "500 créditos/mes",
-    description: "Para Media Buyers",
-    highlighted: false,
-    features: [
-      "500 créditos/mes",
-      "1 crédito = 1 creativo",
-      "Todo lo del plan Pro",
-      "White label",
-      "API access",
-      "Soporte 24/7",
-      "Múltiples usuarios"
-    ],
-  },
-]
-
 export default function Home() {
   return (
     <main className="min-h-screen text-[#E8E6E1] relative z-[1] overflow-hidden">
@@ -160,9 +103,9 @@ export default function Home() {
           </span>
         </div>
         <div className="flex items-center gap-6">
-          <a href="#pricing" className="text-sm text-[#9A9893] hover:text-[#E8E6E1] transition-colors">
+          <Link href="/pricing" className="text-sm text-[#9A9893] hover:text-[#E8E6E1] transition-colors">
             Precios
-          </a>
+          </Link>
           <Link
             href="/login"
             className="text-sm font-medium px-5 py-2.5 rounded-xl border border-[#3A3833]/50 hover:border-[#D97757]/50 hover:bg-[#2A2826]/50 transition-all duration-200 backdrop-blur-sm"
@@ -403,56 +346,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {plans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`relative rounded-2xl border p-8 flex flex-col transition-all duration-300 backdrop-blur-md ${
-                  plan.highlighted
-                    ? "border-[#D97757] bg-[#2A2826]/60 shadow-lg shadow-[#D97757]/20"
-                    : "border-[#3A3833]/50 bg-[#2A2826]/40 hover:border-[#D97757]/40"
-                }`}
-              >
-                {plan.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#D97757] text-white text-xs font-semibold px-4 py-1.5 rounded-full uppercase tracking-wider">
-                    Más popular
-                  </span>
-                )}
-
-                <div className="mb-8">
-                  <h3 className="text-lg font-bold text-[#E8E6E1] mb-2">{plan.name}</h3>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[#9A9893] text-lg line-through">{plan.originalPrice}</span>
-                    <span className="inline-block px-2 py-0.5 rounded-md text-xs font-semibold bg-[#D97757]/20 text-[#D97757] border border-[#D97757]/30">
-                      Precio MVP
-                    </span>
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold text-[#E8E6E1]">{plan.price}</span>
-                    <span className="text-[#9A9893] text-sm">{plan.period}</span>
-                  </div>
-                  <p className="text-[#D97757] text-sm font-semibold mt-3">{plan.credits}</p>
-                </div>
-
-                <ul className="space-y-3 mb-8 flex-1">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3 text-sm text-[#9A9893]">
-                      <svg className="w-4 h-4 text-[#D97757] flex-shrink-0" width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                <PricingButton
-                  variantId={plan.variantId}
-                  planName={plan.name}
-                  highlighted={plan.highlighted}
-                />
-              </div>
-            ))}
-          </div>
+          <PricingPlans />
         </div>
       </section>
 

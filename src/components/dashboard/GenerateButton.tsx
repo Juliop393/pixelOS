@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+
 interface GenerateButtonProps {
   onClick: () => void
   disabled: boolean
@@ -17,11 +19,23 @@ export default function GenerateButton({
   cantidad,
   progress,
 }: GenerateButtonProps) {
+  const router = useRouter()
+  const hasNoCredits = credits === 0
+
+  const handleClick = () => {
+    if (hasNoCredits) {
+      router.push("/pricing")
+      return
+    }
+
+    onClick()
+  }
+
   return (
     <button
       type="button"
-      onClick={onClick}
-      disabled={disabled}
+      onClick={handleClick}
+      disabled={!hasNoCredits && disabled}
       className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold bg-[#D97757] text-white hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#D97757] disabled:active:scale-100 mb-3 mt-4"
     >
       {loading ? (
