@@ -1,4 +1,79 @@
+"use client"
+
+import { FormEvent, useEffect, useState } from "react"
+import { supabase } from "@/lib/supabase"
+
 export default function ConfiguracionPage() {
+  const [agencyName, setAgencyName] = useState("")
+  const [email, setEmail] = useState("")
+  const [plan, setPlan] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser()
+
+      if (userError || !user) {
+        setMessage({ type: "error", text: "No pudimos cargar los datos de tu perfil." })
+        setLoading(false)
+        return
+      }
+
+      const metadata = user.user_metadata
+      setAgencyName(
+        typeof metadata.agency_name === "string"
+          ? metadata.agency_name
+          : typeof metadata.full_name === "string"
+            ? metadata.full_name
+            : ""
+      )
+      setEmail(user.email ?? "")
+
+      const { data, error: planError } = await supabase
+        .from("user_credits")
+        .select("plan, credits")
+        .eq("user_id", user.id)
+        .maybeSingle()
+
+      if (planError) {
+        setMessage({ type: "error", text: "No pudimos cargar los datos de tu plan." })
+      } else {
+        setPlan(data?.plan || "Gratis")
+      }
+
+      setLoading(false)
+    }
+
+    loadProfile()
+  }, [])
+
+  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setSaving(true)
+    setMessage(null)
+
+    const normalizedAgencyName = agencyName.trim()
+    const { error } = await supabase.auth.updateUser({
+      data: { agency_name: normalizedAgencyName },
+    })
+
+    if (error) {
+      setMessage({ type: "error", text: "No pudimos guardar el nombre de la agencia." })
+    } else {
+      setAgencyName(normalizedAgencyName)
+      setMessage({ type: "success", text: "Nombre de la agencia actualizado correctamente." })
+    }
+
+    setSaving(false)
+  }
+
+  const planLabel = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : "Cargando..."
+
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-10">
@@ -20,17 +95,48 @@ export default function ConfiguracionPage() {
             </div>
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between py-3 border-b border-[#3A3833]">
-              <span className="text-sm text-[#9A9893]">Nombre de la agencia</span>
-              <span className="text-sm text-[#E8E6E1]">Mi Agencia</span>
-            </div>
+            <form onSubmit={handleSave} className="py-3 border-b border-[#3A3833]">
+              <div className="flex items-center justify-between gap-4">
+                <label htmlFor="agencyName" className="text-sm text-[#9A9893] shrink-0">
+                  Nombre de la agencia
+                </label>
+                <div className="flex items-center justify-end gap-2 flex-1">
+                  <input
+                    id="agencyName"
+                    type="text"
+                    value={agencyName}
+                    onChange={(event) => setAgencyName(event.target.value)}
+                    disabled={loading || saving}
+                    placeholder={loading ? "Cargando..." : "Nombre de tu agencia"}
+                    className="w-full max-w-xs bg-[#1E1C1A] border border-[#3A3833] px-3 py-2 rounded-lg text-sm text-[#E8E6E1] text-right placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors disabled:opacity-60"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading || saving}
+                    className="px-4 py-2 rounded-lg bg-[#D97757] text-white text-sm font-semibold hover:bg-[#C26547] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {saving ? "Guardando..." : "Guardar"}
+                  </button>
+                </div>
+              </div>
+              {message && (
+                <p
+                  role="status"
+                  className={`text-xs mt-2 text-right ${
+                    message.type === "success" ? "text-emerald-400" : "text-red-400"
+                  }`}
+                >
+                  {message.text}
+                </p>
+              )}
+            </form>
             <div className="flex items-center justify-between py-3 border-b border-[#3A3833]">
               <span className="text-sm text-[#9A9893]">Email</span>
-              <span className="text-sm text-[#E8E6E1]">user@afmstudio.com</span>
+              <span className="text-sm text-[#E8E6E1]">{email || "Cargando..."}</span>
             </div>
             <div className="flex items-center justify-between py-3">
               <span className="text-sm text-[#9A9893]">Plan actual</span>
-              <span className="text-sm font-semibold text-[#D97757]">Pro</span>
+              <span className="text-sm font-semibold text-[#D97757]">{planLabel}</span>
             </div>
           </div>
         </div>
