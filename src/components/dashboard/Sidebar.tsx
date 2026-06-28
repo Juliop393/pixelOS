@@ -1,12 +1,11 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-
-interface SidebarProps {
-  userEmail: string | null
-}
+import { User } from "lucide-react"
+import { supabase } from "@/lib/supabase"
 
 const navItems = [
   {
@@ -46,14 +45,49 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    label: "Mi Perfil",
+    href: "/dashboard/perfil",
+    icon: <User className="w-5 h-5" strokeWidth={1.5} aria-hidden="true" />,
+  },
 ]
 
-export default function Sidebar({ userEmail }: SidebarProps) {
+export default function Sidebar() {
   const pathname = usePathname()
+  const [userEmail, setUserEmail] = useState("")
+  const [fullName, setFullName] = useState("")
+  const [plan, setPlan] = useState("Gratis")
 
-  const displayName = userEmail ? userEmail.split("@")[0] : "Usuario Beta"
+  useEffect(() => {
+    const loadUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) return
+
+      setUserEmail(user.email ?? "")
+      setFullName(
+        typeof user.user_metadata.full_name === "string"
+          ? user.user_metadata.full_name
+          : ""
+      )
+
+      const { data } = await supabase
+        .from("user_credits")
+        .select("plan")
+        .eq("user_id", user.id)
+        .maybeSingle()
+
+      if (data?.plan) setPlan(data.plan)
+    }
+
+    loadUser()
+  }, [])
+
+  const displayName = fullName || userEmail.split("@")[0] || "Usuario"
   const avatarLetter = (displayName[0] ?? "U").toUpperCase()
-  const emailLabel = userEmail ?? "user@afmstudio.com"
+  const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1)
 
   return (
     <aside className="w-64 h-screen sticky top-0 bg-[#2A2826] border-r border-[#3A3833] flex flex-col">
@@ -97,15 +131,16 @@ export default function Sidebar({ userEmail }: SidebarProps) {
       </nav>
 
       <div className="px-4 py-4 border-t border-[#3A3833]">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-[#1E1C1A] transition-colors cursor-pointer">
+        <Link href="/dashboard/perfil" className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-[#1E1C1A] transition-colors">
           <div className="w-8 h-8 rounded-full bg-[#D97757] text-white flex items-center justify-center text-sm font-semibold">
             {avatarLetter}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-[#E8E6E1] truncate">{displayName}</p>
-            <p className="text-xs text-[#9A9893] truncate">{emailLabel}</p>
+            <p className="text-xs text-[#9A9893] truncate">{userEmail || "Cargando..."}</p>
+            <p className="text-xs text-emerald-400 truncate mt-0.5">Plan {planLabel}</p>
           </div>
-        </div>
+        </Link>
       </div>
     </aside>
   )

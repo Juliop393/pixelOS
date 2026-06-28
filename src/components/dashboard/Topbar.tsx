@@ -10,6 +10,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/campanas": "Identidad de Marca",
   "/dashboard/assets": "Mis Creativos",
   "/dashboard/configuracion": "Configuración",
+  "/dashboard/perfil": "Mi Perfil",
   "/dashboard/pricing": "Planes y créditos",
 }
 

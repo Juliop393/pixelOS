@@ -14,7 +14,7 @@ export default function DashboardLayout({
       {/* Desktop */}
       <div className="hidden md:flex min-h-screen bg-[#1E1C1A] text-[#E8E6E1]">
         <AuthGuard>
-          <Sidebar userEmail={null} />
+          <Sidebar />
           <div className="flex-1 flex flex-col min-w-0">
             <Topbar />
             <main className="flex-1 p-6 overflow-auto">
