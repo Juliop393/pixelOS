@@ -21,6 +21,8 @@ export function useCreativeGenerator() {
   const [visualStyle, setVisualStyle] = useState("photorealistic")
   const [brandColor, setBrandColor] = useState("")
   const [selectedAngle, setSelectedAngle] = useState<string | null>(null)
+  const [imagenReferencia, setImagenReferencia] = useState<string | null>(null)
+  const [nombreImagenReferencia, setNombreImagenReferencia] = useState<string | null>(null)
   const [cantidad, setCantidad] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -92,6 +94,7 @@ export function useCreativeGenerator() {
       estiloVisual: visualStyle,
       brandColor: brandColor || null,
       userId: "user_beta_001",
+      imagenReferencia: imagenReferencia || null,
     }
 
     console.log("Payload enviado al webhook:", payload)
@@ -289,6 +292,8 @@ export function useCreativeGenerator() {
     phase, setPhase,
     sessionHistory, setSessionHistory,
     credits,
+    imagenReferencia, setImagenReferencia,
+    nombreImagenReferencia, setNombreImagenReferencia,
     handleSelectAngle,
     handleGenerate,
     handleRetry,

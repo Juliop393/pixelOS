@@ -29,6 +29,10 @@ export default function DashboardPage() {
           canGenerate={!!g.producto.trim() && !!g.selectedAngle && !g.loading && g.credits >= g.cantidad}
           credits={g.credits}
           progress={g.progress}
+          imagenReferencia={g.imagenReferencia}
+          setImagenReferencia={g.setImagenReferencia}
+          nombreImagenReferencia={g.nombreImagenReferencia}
+          setNombreImagenReferencia={g.setNombreImagenReferencia}
         />
 
         <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
