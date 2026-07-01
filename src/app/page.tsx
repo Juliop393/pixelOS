@@ -383,6 +383,17 @@ export default function Home() {
               </div>
               <span className="text-sm text-[#9A9893]">AFM Estudio</span>
             </div>
+            <nav aria-label="Enlaces legales" className="flex items-center gap-5 text-xs">
+              <Link href="/terms" className="text-[#9A9893] hover:text-[#E8E6E1] transition-colors">
+                Términos
+              </Link>
+              <Link href="/privacy" className="text-[#9A9893] hover:text-[#E8E6E1] transition-colors">
+                Privacidad
+              </Link>
+              <Link href="/refunds" className="text-[#9A9893] hover:text-[#E8E6E1] transition-colors">
+                Reembolsos
+              </Link>
+            </nav>
             <span className="text-xs text-[#9A9893]/60">
               © 2026 AFM Estudio · PixelOS
             </span>
