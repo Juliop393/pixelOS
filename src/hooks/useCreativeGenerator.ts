@@ -85,6 +85,26 @@ export function useCreativeGenerator() {
     setGeneratedImages([])
     setResult(null)
 
+    let brandIdentity = null
+    if (userId) {
+      const { data: brand } = await supabase
+        .from("brand_identity")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle()
+
+      if (brand) {
+        brandIdentity = {
+          brandName: brand.brand_name || null,
+          brandColors: [brand.primary_color, brand.secondary_color],
+          hasLogo: !!brand.logo_url,
+          logoUrl: brand.logo_url || null,
+          hasFace: !!brand.face_url,
+          faceUrl: brand.face_url || null,
+        }
+      }
+    }
+
     const payload = {
       producto,
       textoAnuncio: textoAnuncio || null,
@@ -93,8 +113,9 @@ export function useCreativeGenerator() {
       formato: aspectRatio,
       estiloVisual: visualStyle,
       brandColor: brandColor || null,
-      userId: "user_beta_001",
+      userId: userId || "user_beta_001",
       imagenReferencia: imagenReferencia || null,
+      brandIdentity,
     }
 
     console.log("Payload enviado al webhook:", payload)

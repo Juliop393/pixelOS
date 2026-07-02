@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData()
     const file = formData.get("file") as File | null
+    const bucket = (formData.get("bucket") as string) || "referencias"
 
     if (!file) {
       return NextResponse.json({ error: "No se proporcionó ningún archivo" }, { status: 400 })
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer)
 
     const { data, error } = await supabaseAdmin.storage
-      .from("referencias")
+      .from(bucket)
       .upload(fileName, buffer, {
         contentType: file.type,
         cacheControl: "3600",
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: { publicUrl } } = supabaseAdmin.storage
-      .from("referencias")
+      .from(bucket)
       .getPublicUrl(fileName)
 
     return NextResponse.json({
@@ -60,13 +61,14 @@ export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const fileName = searchParams.get("fileName")
+    const bucket = searchParams.get("bucket") || "referencias"
 
     if (!fileName) {
       return NextResponse.json({ error: "Falta el nombre del archivo" }, { status: 400 })
     }
 
     const { error } = await supabaseAdmin.storage
-      .from("referencias")
+      .from(bucket)
       .remove([fileName])
 
     if (error) {
