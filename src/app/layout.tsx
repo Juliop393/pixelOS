@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { Toaster } from "sonner"
+import { PaddleProvider } from "@/components/PaddleProvider"
 import "./globals.css"
 
 const inter = Inter({
@@ -25,7 +26,9 @@ export default function RootLayout({
         <link rel="icon" href="/logo_PixelOS.png" />
       </head>
       <body className="min-h-screen antialiased">
-        {children}
+        <PaddleProvider>
+          {children}
+        </PaddleProvider>
         <Toaster
           position="top-center"
           expand={false}
