@@ -46,7 +46,7 @@ export default function PricingPlans() {
           </ul>
 
           <PricingButton
-            variantId={plan.variantId}
+            priceId={plan.priceId}
             planName={plan.name}
             highlighted={plan.highlighted}
           />

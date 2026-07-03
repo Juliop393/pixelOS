@@ -1,7 +1,7 @@
 export const pricingPlans = [
   {
     name: "Starter",
-    variantId: "1842724",
+    priceId: process.env.NEXT_PUBLIC_PADDLE_PRICE_STARTER || "",
     originalPrice: "$9.99",
     price: "$5.99",
     period: "/mes",
@@ -17,7 +17,7 @@ export const pricingPlans = [
   },
   {
     name: "Pro",
-    variantId: "1842974",
+    priceId: process.env.NEXT_PUBLIC_PADDLE_PRICE_PRO || "",
     originalPrice: "$24.99",
     price: "$19.99",
     period: "/mes",
@@ -34,7 +34,7 @@ export const pricingPlans = [
   },
   {
     name: "Business",
-    variantId: "1842976",
+    priceId: process.env.NEXT_PUBLIC_PADDLE_PRICE_BUSINESS || "",
     originalPrice: "$59.99",
     price: "$49.99",
     period: "/mes",

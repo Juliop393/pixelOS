@@ -2,14 +2,15 @@
 
 import { useRouter } from "next/navigation"
 import { createBrowserClient } from "@supabase/ssr"
+import { getPaddle } from "@/components/PaddleProvider"
 
 interface PricingButtonProps {
-  variantId: string
+  priceId: string
   planName: string
   highlighted: boolean
 }
 
-export default function PricingButton({ planName, highlighted }: PricingButtonProps) {
+export default function PricingButton({ priceId, planName, highlighted }: PricingButtonProps) {
   const router = useRouter()
 
   const handleClick = async () => {
@@ -31,7 +32,23 @@ export default function PricingButton({ planName, highlighted }: PricingButtonPr
       return
     }
 
-    alert("Pagos próximamente")
+    const userId = session.user.id
+    const userEmail = session.user.email ?? ""
+
+    const paddle = getPaddle()
+    if (!paddle) {
+      console.error("Paddle no inicializado")
+      return
+    }
+
+    paddle.Checkout.open({
+      items: [{ priceId, quantity: 1 }],
+      customer: { email: userEmail },
+      customData: { user_id: userId },
+      settings: {
+        successUrl: "https://pixelosfm.com/dashboard",
+      },
+    })
   }
 
   return (
