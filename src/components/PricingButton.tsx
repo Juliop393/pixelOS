@@ -9,14 +9,13 @@ interface PricingButtonProps {
   highlighted: boolean
 }
 
-export default function PricingButton({ variantId, planName, highlighted }: PricingButtonProps) {
+export default function PricingButton({ planName, highlighted }: PricingButtonProps) {
   const router = useRouter()
 
   const handleClick = async () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-    // Sin config de Supabase no podemos saber si hay sesión: mandamos a registro.
     if (!supabaseUrl || !supabaseAnonKey) {
       router.push("/register")
       return
@@ -27,24 +26,12 @@ export default function PricingButton({ variantId, planName, highlighted }: Pric
       data: { session },
     } = await supabase.auth.getSession()
 
-    // Sin sesión -> registro.
     if (!session) {
       router.push("/register")
       return
     }
 
-    const storeUrl = process.env.NEXT_PUBLIC_LEMONSQUEEZY_STORE_URL
-    if (!storeUrl) {
-      console.error("Falta NEXT_PUBLIC_LEMONSQUEEZY_STORE_URL")
-      return
-    }
-
-    const userId = session.user.id
-    const checkoutUrl =
-      `${storeUrl.replace(/\/$/, "")}/checkout/buy/${variantId}` +
-      `?checkout[custom][user_id]=${encodeURIComponent(userId)}`
-
-    window.open(checkoutUrl, "_blank", "noopener,noreferrer")
+    alert("Pagos próximamente")
   }
 
   return (
