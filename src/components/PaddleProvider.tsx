@@ -21,10 +21,8 @@ export function PaddleProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    const environment = token.startsWith("test_") ? "sandbox" : "production"
-
     initializePaddle({
-      environment,
+      environment: "production",
       token,
     }).then((paddle) => {
       if (paddle) {
