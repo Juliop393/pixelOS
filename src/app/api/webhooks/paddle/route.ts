@@ -10,31 +10,74 @@ const PLAN_CREDITS: Record<string, number> = {
 
 function verifySignature(rawBody: string, signatureHeader: string | null): boolean {
   const secret = process.env.PADDLE_WEBHOOK_SECRET
-  if (!secret || !signatureHeader) return false
+  if (!secret || !signatureHeader) {
+    console.error("verifySignature: falta secret o signatureHeader", {
+      hasSecret: !!secret,
+      hasSignature: !!signatureHeader,
+    })
+    return false
+  }
 
+  // El header de Paddle tiene formato: ts=<timestamp>;h=<hmac-hex>
+  const parts = signatureHeader.split(";").reduce((acc, part) => {
+    const [key, value] = part.split("=")
+    acc[key] = value
+    return acc
+  }, {} as Record<string, string>)
+
+  const ts = parts["ts"]
+  const h1 = parts["h"]
+
+  if (!ts || !h1) {
+    console.error("verifySignature: formato de firma inválido", { signatureHeader })
+    return false
+  }
+
+  // Paddle firma: HMAC-SHA256(secret, ts + ":" + rawBody)
+  const signedPayload = `${ts}:${rawBody}`
   const expected = crypto
     .createHmac("sha256", secret)
-    .update(rawBody)
+    .update(signedPayload)
     .digest("hex")
 
-  return crypto.timingSafeEqual(
-    Buffer.from(expected, "hex"),
-    Buffer.from(signatureHeader, "hex")
-  )
+  const a = Buffer.from(expected, "hex")
+  const b = Buffer.from(h1, "hex")
+
+  if (a.length !== b.length) {
+    console.error("verifySignature: longitudes distintas", {
+      expectedLen: a.length,
+      gotLen: b.length,
+      h1,
+      expected,
+    })
+    return false
+  }
+
+  return crypto.timingSafeEqual(a, b)
 }
 
 export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text()
-    const signatureHeader = req.headers.get("paddle-signature") || req.headers.get("X-Paddle-Signature")
+
+    // Debug logs
+    console.log("Webhook Paddle recibido:", {
+      headers: Object.fromEntries(req.headers.entries()),
+      bodyPreview: rawBody.substring(0, 500),
+    })
+
+    const signatureHeader = req.headers.get("paddle-signature") || req.headers.get("Paddle-Signature")
 
     if (!verifySignature(rawBody, signatureHeader)) {
+      console.error("Firma inválida", { signatureHeader })
       return NextResponse.json({ error: "Firma inválida" }, { status: 401 })
     }
 
     const event = JSON.parse(rawBody)
     const eventType: string = event.event_type || event.type || ""
     const data = event.data || {}
+
+    console.log("Webhook evento:", eventType)
 
     const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
