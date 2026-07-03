@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
           credits,
           plan: credits >= 500 ? "business" : credits >= 150 ? "pro" : "starter",
           subscription_status: "active",
-          lemon_squeezy_subscription_id: data.id || null,
+          paddle_subscription_id: data.id || null,
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" })
 
