@@ -11,7 +11,7 @@ export default function PricingPage() {
             <Image src="/logo_PixelOS.png" width={44} height={44} alt="PixelOS" priority unoptimized />
             <span className="font-semibold text-xl tracking-tight">PixelOS</span>
           </Link>
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-[#9A9893] hover:text-[#E8E6E1] transition-colors">
+          <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9893] hover:text-[#E8E6E1] transition-colors">
             <svg className="w-4 h-4" width={16} height={16} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
