@@ -18,7 +18,7 @@ function verifySignature(rawBody: string, signatureHeader: string | null): boole
     return false
   }
 
-  // El header de Paddle tiene formato: ts=<timestamp>;h=<hmac-hex>
+  // El header de Paddle tiene formato: ts=<timestamp>;h1=<hmac-hex>
   const parts = signatureHeader.split(";").reduce((acc, part) => {
     const [key, value] = part.split("=")
     acc[key] = value
@@ -26,7 +26,7 @@ function verifySignature(rawBody: string, signatureHeader: string | null): boole
   }, {} as Record<string, string>)
 
   const ts = parts["ts"]
-  const h1 = parts["h"]
+  const h1 = parts["h1"]
 
   if (!ts || !h1) {
     console.error("verifySignature: formato de firma inválido", { signatureHeader })
