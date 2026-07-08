@@ -12,7 +12,7 @@ export default function DashboardLayout({
   return (
     <CreditsProvider initialCredits={0}>
       {/* Desktop */}
-      <div className="hidden md:flex min-h-screen bg-[#1E1C1A] text-[#E8E6E1]">
+      <div className="hidden md:flex h-screen overflow-hidden bg-[#1E1C1A] text-[#E8E6E1]">
         <AuthGuard>
           <Sidebar />
           <div className="flex-1 flex flex-col min-w-0">

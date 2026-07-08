@@ -123,7 +123,7 @@ export default function IdentidadMarcaPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto h-full overflow-y-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Identidad de Marca</h1>
         <p className="text-[#9A9893]">Personaliza tus creativos con los colores y activos de tu marca</p>

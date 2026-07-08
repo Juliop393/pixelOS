@@ -75,7 +75,7 @@ export default function ConfiguracionPage() {
   const planLabel = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : "Cargando..."
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto h-full overflow-y-auto pb-10">
       <div className="mb-10">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Configuración de la Agencia</h1>
         <p className="text-[#9A9893]">Administra tu cuenta, facturación y accesos</p>
