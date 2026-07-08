@@ -17,9 +17,9 @@ export default function DashboardPage() {
 
   return (
     <div className="flex gap-6 h-full">
-      {/* COLUMNA 1: Parámetros (scroll independiente + botón generar fijo) */}
-      <div className="w-[340px] flex-shrink-0 flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto pr-1 -mr-1 space-y-6 pb-4">
+      {/* COLUMNA 1: Parámetros (scroll independiente + botón generar sticky) */}
+      <div className="w-[340px] flex-shrink-0 h-full overflow-y-auto pr-1 -mr-1">
+        <div className="space-y-6 pb-4">
           <ProductForm
             producto={g.producto}
             setProducto={g.setProducto}
@@ -75,8 +75,8 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Botón generar fijo y prominente */}
-        <div className="flex-shrink-0 pt-4 border-t border-[#3A3833]/60">
+        {/* Botón generar sticky — siempre visible al fondo de la columna */}
+        <div className="sticky bottom-0 z-20 bg-[#1A1A1A] border-t border-[#3A3833] p-4">
           <GenerateButton
             onClick={g.handleGenerate}
             disabled={!canGenerate}
