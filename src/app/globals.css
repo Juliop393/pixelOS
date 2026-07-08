@@ -240,3 +240,27 @@ input, textarea, button, select {
   66%  { transform: translate(2%, -3%) scale(1.02); }
   100% { transform: translate(-1%, 2%) scale(0.99); }
 }
+
+/* Scrollbar personalizada — dark theme PixelOS */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4A4744 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #4A4744;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #D97757;
+}
