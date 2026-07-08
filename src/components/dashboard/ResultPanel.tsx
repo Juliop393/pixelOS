@@ -3,6 +3,12 @@
 import { ANGLES } from "@/lib/angles-data"
 import SessionHistory from "./SessionHistory"
 
+const EXAMPLE_CREATIVES = [
+  "https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_60.jpg",
+  "https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_66.jpg",
+  "https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_68.jpg",
+]
+
 interface ResultPanelProps {
   phase: "select" | "loading" | "result" | "error"
   result: { imageUrl: string; copy: string; angle: string } | null
@@ -39,15 +45,13 @@ export default function ResultPanel({
   const selectedAngleData = ANGLES.find((a) => a.id === selectedAngle)
 
   return (
-    <div className="flex-1 min-w-0">
+    <div className="min-w-0">
       {phase === "select" && (
-        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] h-full flex items-center justify-center">
-          <div className="text-center p-8">
-            <div className="w-20 h-20 rounded-2xl bg-[#1E1C1A] border border-[#3A3833] flex items-center justify-center mx-auto mb-5">
+        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-6 lg:p-8">
+          <div className="text-center max-w-md mx-auto mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-[#D97757]/10 border border-[#D97757]/20 flex items-center justify-center mx-auto mb-4">
               <svg
-                className="w-10 h-10 text-[#9A9893]/30"
-                width={40}
-                height={40}
+                className="w-8 h-8 text-[#D97757]"
                 aria-hidden="true"
                 fill="none"
                 stroke="currentColor"
@@ -61,13 +65,41 @@ export default function ResultPanel({
                 />
               </svg>
             </div>
-            <p className="text-[#9A9893] font-medium mb-1">
-              Selecciona un ángulo
-            </p>
-            <p className="text-[#9A9893]/50 text-sm">
-              El creativo aparecerá aquí
+            <h3 className="text-xl font-bold text-[#E8E6E1] mb-2">
+              Tu creativo aparecerá aquí
+            </h3>
+            <p className="text-[#9A9893] text-sm leading-relaxed">
+              Completa tu producto, elige un ángulo de venta y genera anuncios listos para publicar. Mientras tanto, mira algunos ejemplos reales:
             </p>
           </div>
+
+          <div className="mb-3 flex items-center gap-2">
+            <span className="h-px flex-1 bg-[#3A3833]" />
+            <span className="text-[11px] font-semibold text-[#9A9893] uppercase tracking-wider">
+              Ejemplos de creativos
+            </span>
+            <span className="h-px flex-1 bg-[#3A3833]" />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            {EXAMPLE_CREATIVES.map((url, idx) => (
+              <div
+                key={idx}
+                className="group relative aspect-square rounded-xl overflow-hidden border border-[#3A3833] bg-[#1E1C1A]"
+              >
+                <img
+                  src={url}
+                  alt={`Ejemplo de creativo ${idx + 1}`}
+                  loading="lazy"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-[11px] text-[#9A9893]/60 mt-3">
+            Ejemplos generados con PixelOS
+          </p>
         </div>
       )}
 
@@ -150,7 +182,7 @@ export default function ResultPanel({
       )}
 
       {phase === "result" && result && (
-        <div className="space-y-4 h-full flex flex-col">
+        <div className="space-y-4">
           {generatedImages.length > 1 && (
             <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-4 flex-shrink-0">
               <div className="flex items-center justify-between mb-3">
@@ -195,16 +227,12 @@ export default function ResultPanel({
           )}
 
           <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] overflow-hidden flex-shrink-0">
-            <div
-              className={`relative bg-[#1E1C1A] flex items-center justify-center overflow-hidden ${
-                aspectRatio === "story" ? "aspect-[9/16] max-h-[500px]" : aspectRatio === "4:5" ? "aspect-[4/5] max-h-[450px]" : "aspect-square max-h-[400px]"
-              }`}
-            >
+            <div className="relative bg-[#161412] flex items-center justify-center overflow-hidden p-4 min-h-[320px] max-h-[520px]">
               {result.imageUrl ? (
                 <img
                   src={result.imageUrl}
                   alt="Creativo generado"
-                  className={`w-full h-full ${aspectRatio === "story" || aspectRatio === "4:5" ? "object-contain" : "object-cover"}`}
+                  className="max-w-full max-h-[480px] w-auto h-auto object-contain rounded-lg"
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center text-center p-8">

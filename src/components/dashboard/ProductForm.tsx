@@ -3,22 +3,19 @@
 import { useRef, useState } from "react"
 import { toast } from "sonner"
 import QuantitySelector from "./QuantitySelector"
-import GenerateButton from "./GenerateButton"
 
 interface ProductFormProps {
   producto: string
   setProducto: (v: string) => void
-  textoAnuncio: string
-  setTextoAnuncio: (v: string) => void
+  titulo: string
+  setTitulo: (v: string) => void
+  subtitulo: string
+  setSubtitulo: (v: string) => void
   ctaContacto: string
   setCtaContacto: (v: string) => void
   cantidad: number
   setCantidad: (n: number) => void
   loading: boolean
-  onGenerate: () => void
-  canGenerate: boolean
-  credits: number
-  progress: { completed: number; total: number }
   imagenReferencia: string | null
   setImagenReferencia: (v: string | null) => void
   nombreImagenReferencia: string | null
@@ -28,17 +25,15 @@ interface ProductFormProps {
 export default function ProductForm({
   producto,
   setProducto,
-  textoAnuncio,
-  setTextoAnuncio,
+  titulo,
+  setTitulo,
+  subtitulo,
+  setSubtitulo,
   ctaContacto,
   setCtaContacto,
   cantidad,
   setCantidad,
   loading,
-  onGenerate,
-  canGenerate,
-  credits,
-  progress,
   imagenReferencia,
   setImagenReferencia,
   nombreImagenReferencia,
@@ -46,11 +41,9 @@ export default function ProductForm({
 }: ProductFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
+  const uploadFile = async (file: File) => {
     // Validar tamaño (máximo 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Archivo demasiado grande", {
@@ -104,6 +97,20 @@ export default function ProductForm({
     }
   }
 
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) uploadFile(file)
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    if (uploading) return
+    const file = e.dataTransfer.files?.[0]
+    if (file) uploadFile(file)
+  }
+
   const handleDelete = async () => {
     if (!nombreImagenReferencia) return
 
@@ -136,112 +143,174 @@ export default function ProductForm({
   }
 
   return (
-    <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
-      <h3 className="text-sm font-bold text-[#E8E6E1] mb-4 uppercase tracking-wider">
-        Tu Producto
-      </h3>
-      <input
-        type="text"
-        value={producto}
-        onChange={(e) => setProducto(e.target.value)}
-        placeholder="Describe tu producto (Ej: Crema hidratante para piel seca, marca propia, precio S/89)"
-        className="w-full bg-[#1E1C1A] border border-[#3A3833] px-4 py-3 rounded-xl text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors mb-3"
-      />
+    <div className="space-y-6">
+      {/* Producto */}
+      <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
+        <h3 className="text-sm font-bold text-[#E8E6E1] mb-4 uppercase tracking-wider">
+          Tu Producto
+        </h3>
+        <textarea
+          value={producto}
+          onChange={(e) => setProducto(e.target.value)}
+          rows={3}
+          placeholder="Describe tu producto (Ej: Crema hidratante para piel seca, marca propia, precio S/89)"
+          className="w-full resize-none bg-[#1E1C1A] border border-[#3A3833] px-4 py-3 rounded-xl text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
+        />
+      </div>
 
-      <div className="space-y-3 mb-3">
-        <div>
-          <label className="block text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
-            Texto del anuncio (opcional)
-          </label>
-          <input
-            type="text"
-            value={textoAnuncio}
-            onChange={(e) => setTextoAnuncio(e.target.value)}
-            placeholder="Ej: ¡50% descuento solo hoy! Envío gratis"
-            className="w-full bg-[#1E1C1A] border border-[#3A3833] px-3 py-2.5 rounded-lg text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
-          />
-        </div>
+      {/* Texto del anuncio con jerarquía */}
+      <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
+        <h3 className="text-sm font-bold text-[#E8E6E1] mb-1 uppercase tracking-wider">
+          Texto del anuncio
+        </h3>
+        <p className="text-xs text-[#9A9893] mb-4">
+          Dale jerarquía a tu mensaje (opcional)
+        </p>
 
-        <div>
-          <label className="block text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
-            CTA o contacto (opcional)
-          </label>
-          <input
-            type="text"
-            value={ctaContacto}
-            onChange={(e) => setCtaContacto(e.target.value)}
-            placeholder="Ej: WhatsApp 999-888-777 | Compra en @tumarca"
-            className="w-full bg-[#1E1C1A] border border-[#3A3833] px-3 py-2.5 rounded-lg text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
-          />
+        <div className="space-y-4">
+          <div>
+            <label className="block text-[11px] font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
+              Título del anuncio
+            </label>
+            <input
+              type="text"
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+              placeholder="Título principal"
+              className="w-full text-center bg-[#1E1C1A] border border-[#3A3833] px-4 py-3 rounded-xl text-lg font-bold text-[#E8E6E1] placeholder:text-[#9A9893]/40 placeholder:font-normal focus:outline-none focus:border-[#D97757]/50 transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
+              Subtítulo
+            </label>
+            <input
+              type="text"
+              value={subtitulo}
+              onChange={(e) => setSubtitulo(e.target.value)}
+              placeholder="Texto de apoyo secundario"
+              className="w-full text-center bg-[#1E1C1A] border border-[#3A3833] px-4 py-2.5 rounded-xl text-sm text-[#9A9893] placeholder:text-[#9A9893]/40 focus:outline-none focus:border-[#D97757]/50 focus:text-[#E8E6E1] transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
+              CTA (Llamado a la acción)
+            </label>
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#D97757]">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={ctaContacto}
+                onChange={(e) => setCtaContacto(e.target.value)}
+                placeholder="Ej: Compra ahora | WhatsApp 999-888-777"
+                className="w-full bg-[#1E1C1A] border border-[#D97757]/30 pl-10 pr-4 py-3 rounded-xl text-sm font-semibold text-[#E8E6E1] placeholder:text-[#9A9893]/40 placeholder:font-normal focus:outline-none focus:border-[#D97757] transition-colors"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <QuantitySelector cantidad={cantidad} setCantidad={setCantidad} loading={loading} />
+      {/* Imagen de referencia */}
+      <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
+        <h3 className="text-sm font-bold text-[#E8E6E1] mb-1 uppercase tracking-wider">
+          Imagen de referencia
+        </h3>
+        <p className="text-xs text-[#9A9893] mb-4">
+          Úsala como base visual (opcional)
+        </p>
 
-      <GenerateButton
-        onClick={onGenerate}
-        disabled={!canGenerate}
-        loading={loading}
-        credits={credits}
-        cantidad={cantidad}
-        progress={progress}
-      />
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleUpload}
+          accept="image/*"
+          className="hidden"
+        />
 
-      {/* Input de archivo oculto */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleUpload}
-        accept="image/*"
-        className="hidden"
-      />
-
-      {/* Control interactivo de la imagen de referencia */}
-      <div className="mt-4 pt-4 border-t border-[#3A3833]">
         {uploading ? (
-          <div className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-medium text-[#9A9893] border border-[#3A3833] bg-[#1E1C1A]">
-            <svg className="animate-spin h-4 w-4 text-[#D97757]" fill="none" viewBox="0 0 24 24">
+          <div className="w-full flex flex-col items-center justify-center gap-3 py-12 px-4 rounded-2xl border border-dashed border-[#3A3833] bg-[#1E1C1A]">
+            <svg className="animate-spin h-8 w-8 text-[#D97757]" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
-            Subiendo imagen...
+            <span className="text-xs font-medium text-[#9A9893]">Subiendo imagen...</span>
           </div>
         ) : imagenReferencia ? (
-          <div className="flex items-center gap-3 p-3 rounded-xl border border-[#D97757]/30 bg-[#1E1C1A]">
-            <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#2A2826] border border-[#3A3833] flex-shrink-0">
-              <img
-                src={imagenReferencia}
-                alt="Referencia"
-                className="w-full h-full object-cover"
-              />
+          <div className="relative rounded-2xl overflow-hidden border border-[#D97757]/40 bg-[#1E1C1A] group">
+            <img
+              src={imagenReferencia}
+              alt="Referencia"
+              className="w-full h-48 object-contain bg-[#161412]"
+            />
+            <div className="flex items-center justify-between gap-3 p-3 border-t border-[#3A3833]">
+              <div className="flex items-center gap-2 min-w-0">
+                <svg className="w-4 h-4 text-[#D97757] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-xs font-semibold text-[#E8E6E1] truncate">Imagen lista para usar</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#EF4444] bg-[#EF4444]/10 hover:bg-[#EF4444]/20 transition-all duration-200"
+                title="Eliminar imagen"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Eliminar
+              </button>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-semibold text-[#E8E6E1] truncate">Imagen de referencia</p>
-              <p className="text-[10px] text-[#9A9893] truncate">Lista para usar</p>
-            </div>
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="p-2 rounded-lg text-[#9A9893] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-all duration-200"
-              title="Eliminar imagen"
-            >
-              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
           </div>
         ) : (
-          <button
-            type="button"
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => fileInputRef.current?.click()}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-medium text-[#9A9893] border border-[#3A3833] hover:border-[#D97757]/30 hover:text-[#E8E6E1] transition-all duration-200"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click()
+            }}
+            onDragOver={(e) => {
+              e.preventDefault()
+              setDragActive(true)
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault()
+              setDragActive(false)
+            }}
+            onDrop={handleDrop}
+            className={`w-full flex flex-col items-center justify-center gap-3 py-12 px-4 rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200 ${
+              dragActive
+                ? "border-[#D97757] bg-[#D97757]/10"
+                : "border-[#3A3833] bg-[#1E1C1A] hover:border-[#D97757]/40 hover:bg-[#1E1C1A]/60"
+            }`}
           >
-            <svg className="w-4 h-4" width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-            </svg>
-            Subir imagen de referencia (Opcional)
-          </button>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${dragActive ? "bg-[#D97757]/20" : "bg-[#2A2826]"}`}>
+              <svg className="w-6 h-6 text-[#D97757]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-[#E8E6E1]">
+                {dragActive ? "Suelta la imagen aquí" : "Arrastra una imagen"}
+              </p>
+              <p className="text-xs text-[#9A9893] mt-0.5">
+                o haz clic para seleccionar · PNG, JPG, WEBP (máx. 5MB)
+              </p>
+            </div>
+          </div>
         )}
+      </div>
+
+      {/* Cantidad */}
+      <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] px-5 pt-1 pb-5">
+        <QuantitySelector cantidad={cantidad} setCantidad={setCantidad} loading={loading} />
       </div>
     </div>
   )

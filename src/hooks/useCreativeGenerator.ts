@@ -15,7 +15,8 @@ export function useCreativeGenerator() {
   const router = useRouter()
   const { credits, setCredits, userId } = useCredits()
   const [producto, setProducto] = useState("")
-  const [textoAnuncio, setTextoAnuncio] = useState("")
+  const [titulo, setTitulo] = useState("")
+  const [subtitulo, setSubtitulo] = useState("")
   const [ctaContacto, setCtaContacto] = useState("")
   const [aspectRatio, setAspectRatio] = useState("square")
   const [visualStyle, setVisualStyle] = useState("photorealistic")
@@ -104,6 +105,10 @@ export function useCreativeGenerator() {
         }
       }
     }
+
+    // Componemos el "texto del anuncio" a partir del título y subtítulo para
+    // mantener intacto el contrato del webhook de n8n (mismas claves de payload).
+    const textoAnuncio = [titulo.trim(), subtitulo.trim()].filter(Boolean).join(" — ")
 
     const payload = {
       producto,
@@ -242,38 +247,52 @@ export function useCreativeGenerator() {
     }
   }
 
-  const handleDownload = () => {
-    if (result?.imageUrl) {
-      const link = document.createElement("a")
-      link.href = result.imageUrl
-      link.download = `creativo-${selectedAngle}-${Date.now()}.png`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+  // Descarga directa (sin abrir nueva pestaña ni perder el progreso):
+  // descargamos la imagen como blob y forzamos el guardado con un objectURL.
+  const downloadImage = async (url: string, fileName: string) => {
+    const response = await fetch(url)
+    if (!response.ok) throw new Error(`Error al descargar: ${response.status}`)
+    const blob = await response.blob()
+    const objectUrl = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = objectUrl
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(objectUrl)
+  }
 
+  const handleDownload = async () => {
+    if (!result?.imageUrl) return
+
+    try {
+      await downloadImage(result.imageUrl, `creativo-${selectedAngle}-${Date.now()}.png`)
       toast.success("Descarga iniciada", {
         description: "Tu creativo se está descargando",
+      })
+    } catch (err) {
+      console.error("Error al descargar creativo:", err)
+      toast.error("Error al descargar", {
+        description: "No se pudo descargar la imagen. Intenta de nuevo.",
       })
     }
   }
 
-  const handleDownloadAll = () => {
+  const handleDownloadAll = async () => {
     if (generatedImages.length === 0) return
-
-    generatedImages.forEach((img, idx) => {
-      setTimeout(() => {
-        const link = document.createElement("a")
-        link.href = img.imageUrl
-        link.download = `creativo-${idx + 1}-${Date.now()}.png`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      }, idx * 300)
-    })
 
     toast.success("Descargando creativos", {
       description: `${generatedImages.length} imagen${generatedImages.length > 1 ? "es" : ""} se están descargando`,
     })
+
+    for (let idx = 0; idx < generatedImages.length; idx++) {
+      try {
+        await downloadImage(generatedImages[idx].imageUrl, `creativo-${idx + 1}-${Date.now()}.png`)
+      } catch (err) {
+        console.error("Error al descargar creativo:", err)
+      }
+    }
   }
 
   const handleFeedback = (type: "positive" | "negative") => {
@@ -298,7 +317,8 @@ export function useCreativeGenerator() {
 
   return {
     producto, setProducto,
-    textoAnuncio, setTextoAnuncio,
+    titulo, setTitulo,
+    subtitulo, setSubtitulo,
     ctaContacto, setCtaContacto,
     aspectRatio, setAspectRatio,
     visualStyle, setVisualStyle,
