@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { getPaddle } from "@/components/PaddleProvider"
 
 export default function ConfiguracionPage() {
   const [agencyName, setAgencyName] = useState("")
@@ -165,6 +166,20 @@ export default function ConfiguracionPage() {
             <div className="flex items-center justify-between py-3">
               <span className="text-sm text-[#9A9893]">Créditos restantes</span>
               <span className="text-sm font-semibold text-[#E8E6E1]">10</span>
+            </div>
+            <div className="pt-4">
+              <button
+                onClick={() => {
+                  const paddle = getPaddle()
+                  if (!paddle) return
+                  paddle.Checkout.open({
+                    settings: { displayMode: "overlay" },
+                  } as never)
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold bg-[#D97757] text-white hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20"
+              >
+                Gestionar suscripción
+              </button>
             </div>
           </div>
         </div>
