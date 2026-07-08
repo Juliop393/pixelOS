@@ -18,7 +18,7 @@ export default function DashboardPage() {
   return (
     <div className="flex gap-5 h-full">
       {/* SIDEBAR IZQUIERDA: Configuración (fija, scroll interno, botón sticky) */}
-      <aside className="w-[300px] flex-shrink-0 h-full flex flex-col rounded-2xl border border-[#3A3833] bg-[#1E1C1A] overflow-hidden">
+      <aside className="w-[360px] flex-shrink-0 h-full flex flex-col rounded-2xl border border-[#3A3833] bg-[#1E1C1A] overflow-hidden">
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <ProductForm
             producto={g.producto}
