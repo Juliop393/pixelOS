@@ -16,10 +16,10 @@ export default function DashboardPage() {
     !!g.producto.trim() && !!g.selectedAngle && !g.loading && g.credits >= g.cantidad
 
   return (
-    <div className="flex gap-6 h-full">
-      {/* COLUMNA 1: Parámetros (scroll independiente + botón generar sticky) */}
-      <div className="w-[340px] flex-shrink-0 h-full overflow-y-auto pr-1 -mr-1">
-        <div className="space-y-6 pb-4">
+    <div className="flex gap-5 h-full">
+      {/* SIDEBAR IZQUIERDA: Configuración (fija, scroll interno, botón sticky) */}
+      <aside className="w-[300px] flex-shrink-0 h-full flex flex-col rounded-2xl border border-[#3A3833] bg-[#1E1C1A] overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <ProductForm
             producto={g.producto}
             setProducto={g.setProducto}
@@ -38,15 +38,15 @@ export default function DashboardPage() {
             setNombreImagenReferencia={g.setNombreImagenReferencia}
           />
 
-          <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
-            <h3 className="text-sm font-bold text-[#E8E6E1] mb-4 uppercase tracking-wider">
+          <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] p-4">
+            <h3 className="text-xs font-bold text-[#E8E6E1] mb-3 uppercase tracking-wider">
               Formato
             </h3>
             <FormatSelector aspectRatio={g.aspectRatio} setAspectRatio={g.setAspectRatio} />
           </div>
 
-          <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
-            <h3 className="text-sm font-bold text-[#E8E6E1] mb-4 uppercase tracking-wider">
+          <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] p-4">
+            <h3 className="text-xs font-bold text-[#E8E6E1] mb-3 uppercase tracking-wider">
               Estilo Visual
             </h3>
             <StyleSelector visualStyle={g.visualStyle} setVisualStyle={g.setVisualStyle} />
@@ -54,29 +54,29 @@ export default function DashboardPage() {
 
           <Accordion title="Ajustes Avanzados">
             <label className="block text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
-              Color Principal de la Marca (Opcional)
+              Color de Marca (Opcional)
             </label>
             <input
               type="text"
               value={g.brandColor}
               onChange={(e) => g.setBrandColor(e.target.value)}
               placeholder="Ej: #D97757"
-              className="w-full bg-[#1E1C1A] border border-[#3A3833] px-3 py-2.5 rounded-lg text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
+              className="w-full bg-[#1E1C1A] border border-[#3A3833] px-3 py-2 rounded-lg text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
             />
           </Accordion>
 
           {g.phase === "result" && (
             <button
               onClick={g.handleClearResult}
-              className="w-full py-3.5 px-6 rounded-xl bg-[#1E1C1A] text-[#E8E6E1] font-semibold text-sm border border-[#3A3833] hover:border-[#D97757]/50 active:scale-[0.98] transition-all duration-200"
+              className="w-full py-3 px-4 rounded-xl bg-[#1E1C1A] text-[#E8E6E1] font-semibold text-sm border border-[#3A3833] hover:border-[#D97757]/50 active:scale-[0.98] transition-all duration-200"
             >
               Nuevo ángulo
             </button>
           )}
         </div>
 
-        {/* Botón generar sticky — siempre visible al fondo de la columna */}
-        <div className="sticky bottom-0 z-20 bg-[#1A1A1A] border-t border-[#3A3833] p-4">
+        {/* Botón GENERAR sticky — siempre visible */}
+        <div className="flex-shrink-0 border-t border-[#3A3833] bg-[#1E1C1A] p-4">
           <GenerateButton
             onClick={g.handleGenerate}
             disabled={!canGenerate}
@@ -89,19 +89,18 @@ export default function DashboardPage() {
             {g.credits} crédito{g.credits === 1 ? "" : "s"} disponible{g.credits === 1 ? "" : "s"}
           </p>
         </div>
-      </div>
+      </aside>
 
-      {/* COLUMNA 2: Ángulos de Venta (scroll independiente) */}
-      <div className="w-[400px] flex-shrink-0 h-full overflow-y-auto pr-1 -mr-1">
+      {/* ÁREA PRINCIPAL: Ángulos arriba + Resultado abajo */}
+      <div className="flex-1 min-w-0 h-full overflow-y-auto pr-1 -mr-1 space-y-5">
+        {/* Grid 2x3 de ángulos */}
         <AngleSelector
           selectedAngle={g.selectedAngle}
           onSelectAngle={g.handleSelectAngle}
           loading={g.loading}
         />
-      </div>
 
-      {/* COLUMNA 3: Lienzo / Resultados (scroll independiente) */}
-      <div className="flex-1 min-w-0 h-full overflow-y-auto pr-1 -mr-1">
+        {/* Panel de resultado */}
         <ResultPanel
           phase={g.phase}
           result={g.result}
