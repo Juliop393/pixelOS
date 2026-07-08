@@ -73,21 +73,21 @@ export default function DashboardPage() {
               Nuevo ángulo
             </button>
           )}
-        </div>
 
-        {/* Botón GENERAR sticky — siempre visible */}
-        <div className="flex-shrink-0 border-t border-[#3A3833] bg-[#1E1C1A] p-4">
-          <GenerateButton
-            onClick={g.handleGenerate}
-            disabled={!canGenerate}
-            loading={g.loading}
-            credits={g.credits}
-            cantidad={g.cantidad}
-            progress={g.progress}
-          />
-          <p className="text-center text-[11px] text-[#9A9893] mt-2">
-            {g.credits} crédito{g.credits === 1 ? "" : "s"} disponible{g.credits === 1 ? "" : "s"}
-          </p>
+          {/* Botón GENERAR sticky — visible incluso al scrollear el formulario */}
+          <div className="sticky bottom-0 -mx-4 -mb-4 mt-4 px-4 pb-4 pt-6 bg-gradient-to-t from-[#1E1C1A] via-[#1E1C1A] to-transparent z-10">
+            <GenerateButton
+              onClick={g.handleGenerate}
+              disabled={!canGenerate}
+              loading={g.loading}
+              credits={g.credits}
+              cantidad={g.cantidad}
+              progress={g.progress}
+            />
+            <p className="text-center text-[11px] text-[#9A9893] mt-2">
+              {g.credits} crédito{g.credits === 1 ? "" : "s"} disponible{g.credits === 1 ? "" : "s"}
+            </p>
+          </div>
         </div>
       </aside>
 
