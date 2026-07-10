@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
-import { getPaddle } from "@/components/PaddleProvider"
 
 export default function ConfiguracionPage() {
   const [agencyName, setAgencyName] = useState("")
@@ -155,26 +154,26 @@ export default function ConfiguracionPage() {
             </div>
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between py-3 border-b border-[#3A3833]">
-              <span className="text-sm text-[#9A9893]">Próximo cobro</span>
-              <span className="text-sm text-[#E8E6E1]">1 de julio, 2026</span>
-            </div>
-            <div className="flex items-center justify-between py-3 border-b border-[#3A3833]">
-              <span className="text-sm text-[#9A9893]">Método de pago</span>
-              <span className="text-sm text-[#E8E6E1]">•••• 4242</span>
-            </div>
-            <div className="flex items-center justify-between py-3">
-              <span className="text-sm text-[#9A9893]">Créditos restantes</span>
-              <span className="text-sm font-semibold text-[#E8E6E1]">10</span>
-            </div>
-            <div className="pt-4">
+            <div className="pt-2">
               <button
-                onClick={() => {
-                  const paddle = getPaddle()
-                  if (!paddle) return
-                  paddle.Checkout.open({
-                    settings: { displayMode: "overlay" },
-                  } as never)
+                onClick={async () => {
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) return
+                  try {
+                    const res = await fetch("/api/paddle/portal", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ userId: user.id }),
+                    })
+                    const data = await res.json()
+                    if (data.success && data.portalUrl) {
+                      window.open(data.portalUrl, "_blank", "noopener,noreferrer")
+                    } else {
+                      setMessage({ type: "error", text: data.error || "No se pudo abrir el portal" })
+                    }
+                  } catch {
+                    setMessage({ type: "error", text: "Error al conectar con el portal" })
+                  }
                 }}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold bg-[#D97757] text-white hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20"
               >
