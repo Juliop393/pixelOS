@@ -18,10 +18,10 @@ export default function DashboardPage() {
   return (
     <div className="flex gap-5 h-full">
       {/* COLUMNA 1: Configuración (scroll interno + botón sticky) */}
-      <aside className="w-[340px] flex-shrink-0 h-full overflow-y-auto rounded-2xl border border-[#3A3833] bg-[#1E1C1A]">
+      <aside className="w-[380px] flex-shrink-0 h-full overflow-y-auto rounded-2xl border border-[#3A3833] bg-[#1E1C1A]">
         <div className="space-y-4 p-4">
           <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] p-4">
-            <h3 className="text-xs font-bold text-[#E8E6E1] mb-3 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-[#D97757] mb-3 uppercase tracking-wider">
               Producto
             </h3>
             <ProductForm
