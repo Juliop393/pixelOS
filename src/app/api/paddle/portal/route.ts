@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: data?.error?.detail || "Error al crear sesión del portal" }, { status: res.status })
     }
 
-    const portalUrl = data.data?.url
+    const portalUrl = data.data?.urls?.general?.overview
 
     if (!portalUrl) {
       return NextResponse.json({ error: "No se obtuvo URL del portal" }, { status: 500 })
