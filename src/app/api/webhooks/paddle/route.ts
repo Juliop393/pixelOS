@@ -107,6 +107,7 @@ export async function POST(req: NextRequest) {
           plan: credits >= 500 ? "business" : credits >= 150 ? "pro" : "starter",
           subscription_status: "active",
           paddle_subscription_id: data.id || null,
+          paddle_customer_id: data.customer_id || null,
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" })
 
