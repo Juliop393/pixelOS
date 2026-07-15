@@ -17,26 +17,31 @@ export default function DashboardPage() {
 
   return (
     <div className="flex gap-5 h-full">
-      {/* SIDEBAR IZQUIERDA: Configuración (fija, scroll interno, botón sticky) */}
-      <aside className="w-[360px] flex-shrink-0 h-full flex flex-col rounded-2xl border border-[#3A3833] bg-[#1E1C1A] overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          <ProductForm
-            producto={g.producto}
-            setProducto={g.setProducto}
-            titulo={g.titulo}
-            setTitulo={g.setTitulo}
-            subtitulo={g.subtitulo}
-            setSubtitulo={g.setSubtitulo}
-            ctaContacto={g.ctaContacto}
-            setCtaContacto={g.setCtaContacto}
-            cantidad={g.cantidad}
-            setCantidad={g.setCantidad}
-            loading={g.loading}
-            imagenReferencia={g.imagenReferencia}
-            setImagenReferencia={g.setImagenReferencia}
-            nombreImagenReferencia={g.nombreImagenReferencia}
-            setNombreImagenReferencia={g.setNombreImagenReferencia}
-          />
+      {/* COLUMNA 1: Configuración (scroll interno + botón sticky) */}
+      <aside className="w-[340px] flex-shrink-0 h-full overflow-y-auto rounded-2xl border border-[#3A3833] bg-[#1E1C1A]">
+        <div className="space-y-4 p-4">
+          <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] p-4">
+            <h3 className="text-xs font-bold text-[#E8E6E1] mb-3 uppercase tracking-wider">
+              Producto
+            </h3>
+            <ProductForm
+              producto={g.producto}
+              setProducto={g.setProducto}
+              titulo={g.titulo}
+              setTitulo={g.setTitulo}
+              subtitulo={g.subtitulo}
+              setSubtitulo={g.setSubtitulo}
+              ctaContacto={g.ctaContacto}
+              setCtaContacto={g.setCtaContacto}
+              cantidad={g.cantidad}
+              setCantidad={g.setCantidad}
+              loading={g.loading}
+              imagenReferencia={g.imagenReferencia}
+              setImagenReferencia={g.setImagenReferencia}
+              nombreImagenReferencia={g.nombreImagenReferencia}
+              setNombreImagenReferencia={g.setNombreImagenReferencia}
+            />
+          </div>
 
           <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] p-4">
             <h3 className="text-xs font-bold text-[#E8E6E1] mb-3 uppercase tracking-wider">
@@ -74,7 +79,7 @@ export default function DashboardPage() {
             </button>
           )}
 
-          {/* Botón GENERAR sticky — visible incluso al scrollear el formulario */}
+          {/* Botón GENERAR sticky */}
           <div className="sticky bottom-0 -mx-4 -mb-4 mt-4 px-4 pb-4 pt-6 bg-gradient-to-t from-[#1E1C1A] via-[#1E1C1A] to-transparent z-10">
             <GenerateButton
               onClick={g.handleGenerate}
@@ -91,16 +96,17 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      {/* ÁREA PRINCIPAL: Ángulos arriba + Resultado abajo */}
-      <div className="flex-1 min-w-0 h-full overflow-y-auto pr-1 -mr-1 space-y-5">
-        {/* Grid 2x3 de ángulos */}
+      {/* COLUMNA 2: Ángulos de Venta (scroll interno independiente) */}
+      <div className="w-[380px] flex-shrink-0 h-full overflow-y-auto pr-1 -mr-1">
         <AngleSelector
           selectedAngle={g.selectedAngle}
           onSelectAngle={g.handleSelectAngle}
           loading={g.loading}
         />
+      </div>
 
-        {/* Panel de resultado */}
+      {/* COLUMNA 3: Panel de resultado (scroll interno independiente) */}
+      <div className="flex-1 min-w-0 h-full overflow-y-auto pr-1 -mr-1">
         <ResultPanel
           phase={g.phase}
           result={g.result}
