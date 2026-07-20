@@ -1,18 +1,27 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hc2Fjc25xaWxjcWx6eGh0b2hpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDc2NDUyNywiZXhwIjoyMDk2MzQwNTI3fQ.R61IiNjhLWPVCK_ubQbinHuKM0gKx3z3vDG7XHQWtGU"
+function getSupabaseAdmin() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-// Cliente de Supabase con service_role (corre en el servidor, se salta RLS)
-const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-})
+  if (!url || !key) {
+    return null
+  }
+
+  return createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
+}
 
 export async function POST(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin()
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: "Configuración del servidor incompleta" }, { status: 500 })
+  }
   try {
     const formData = await req.formData()
     const file = formData.get("file") as File | null
@@ -58,6 +67,10 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin()
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: "Configuración del servidor incompleta" }, { status: 500 })
+  }
   try {
     const { searchParams } = new URL(req.url)
     const fileName = searchParams.get("fileName")
