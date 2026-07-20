@@ -205,8 +205,8 @@ input, textarea, button, select {
   background: 
     radial-gradient(ellipse 80% 50% at 20% 40%, 
       rgba(232, 114, 74, 0.15) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 60%, 
-      rgba(232, 114, 74, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 90% 80%, 
+      rgba(232, 114, 74, 0.05) 0%, transparent 60%),
     radial-gradient(ellipse 50% 60% at 50% 20%, 
       rgba(255, 220, 180, 0.05) 0%, transparent 60%);
   animation: meshMove 8s ease-in-out infinite alternate;
