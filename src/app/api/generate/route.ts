@@ -53,6 +53,14 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  const internalSecret = (process.env.N8N_INTERNAL_SECRET ?? "").trim()
+  if (!internalSecret) {
+    return NextResponse.json(
+      { error: "Configuración del servidor incompleta" },
+      { status: 500, headers: { "Cache-Control": "no-store" } }
+    )
+  }
+
   // Ignorar cualquier userId enviado por el cliente; usar el de la sesión autenticada.
   const { userId: _clientUserId, ...safeBody } = body as Record<string, unknown> & { userId?: unknown }
 
@@ -61,7 +69,10 @@ export async function POST(req: NextRequest) {
   try {
     const n8nResponse = await fetch(n8nUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-PixelFM-Secret": internalSecret,
+      },
       body: JSON.stringify(payload),
     })
 
