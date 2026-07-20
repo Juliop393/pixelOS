@@ -139,7 +139,7 @@ export default function IdentidadMarcaPage() {
             type="text"
             value={brandName}
             onChange={(e) => setBrandName(e.target.value)}
-            placeholder="Ej: PixelOS"
+            placeholder="Ej: PixelFM"
             className="w-full bg-[#1E1C1A] border border-[#3A3833] px-4 py-3 rounded-xl text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
           />
         </div>

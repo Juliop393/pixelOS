@@ -93,10 +93,10 @@ export default function Sidebar() {
     <aside className="w-64 h-screen sticky top-0 bg-[#2A2826] border-r border-[#3A3833] flex flex-col">
       <div className="px-6 py-5 border-b border-[#3A3833]">
         <div className="flex items-center gap-3">
-          <Image src="/logo_PixelOS.png" width={50} height={50} alt="PixelOS" unoptimized />
+          <Image src="/logo_PixelOS.png" width={50} height={50} alt="PixelFM" unoptimized />
           <div>
             <span className="font-semibold text-[#E8E6E1] tracking-tight block">
-              PixelOS
+              PixelFM
             </span>
             <span className="text-xs text-[#9A9893]">Crea Ads</span>
           </div>

@@ -8,8 +8,8 @@ export default function PricingPage() {
       <header className="border-b border-[#3A3833]/50 bg-[#1E1C1A]/90 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <Image src="/logo_PixelOS.png" width={44} height={44} alt="PixelOS" priority unoptimized />
-            <span className="font-semibold text-xl tracking-tight">PixelOS</span>
+            <Image src="/logo_PixelOS.png" width={44} height={44} alt="PixelFM" priority unoptimized />
+            <span className="font-semibold text-xl tracking-tight">PixelFM</span>
           </Link>
           <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9893] hover:text-[#E8E6E1] transition-colors">
             <svg className="w-4 h-4" width={16} height={16} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

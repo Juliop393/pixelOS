@@ -98,7 +98,7 @@ export default function ResultPanel({
             ))}
           </div>
           <p className="text-center text-[11px] text-[#9A9893]/60 mt-3">
-            Ejemplos generados con PixelOS
+            Ejemplos generados con PixelFM
           </p>
         </div>
       )}

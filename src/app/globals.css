@@ -241,7 +241,7 @@ input, textarea, button, select {
   100% { transform: translate(-1%, 2%) scale(0.99); }
 }
 
-/* Scrollbar personalizada — dark theme PixelOS */
+/* Scrollbar personalizada — dark theme PixelFM */
 * {
   scrollbar-width: thin;
   scrollbar-color: #4A4744 transparent;

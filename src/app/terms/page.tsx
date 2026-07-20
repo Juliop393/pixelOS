@@ -2,15 +2,15 @@ import { LegalPage } from "@/components/LegalPage"
 
 export default function TermsPage() {
   return (
-    <LegalPage title="Términos de Servicio de PixelOS" updatedAt="30 de junio de 2026">
+    <LegalPage title="Términos de Servicio de PixelFM" updatedAt="30 de junio de 2026">
       <section>
         <h2>1. ACEPTACIÓN</h2>
-        <p>Al usar PixelOS aceptas estos términos. Si no estás de acuerdo, no uses el servicio.</p>
+        <p>Al usar PixelFM aceptas estos términos. Si no estás de acuerdo, no uses el servicio.</p>
       </section>
 
       <section>
         <h2>2. EL SERVICIO</h2>
-        <p>PixelOS es una plataforma SaaS que genera creativos publicitarios con inteligencia artificial. Los resultados son generados por IA y pueden variar.</p>
+        <p>PixelFM es una plataforma SaaS que genera creativos publicitarios con inteligencia artificial. Los resultados son generados por IA y pueden variar.</p>
       </section>
 
       <section>
@@ -34,7 +34,7 @@ export default function TermsPage() {
 
       <section>
         <h2>5. USO ACEPTABLE</h2>
-        <p>No puedes usar PixelOS para:</p>
+        <p>No puedes usar PixelFM para:</p>
         <ul>
           <li>Generar contenido ilegal o que infrinja derechos de terceros.</li>
           <li>Revender el servicio sin autorización.</li>
@@ -44,12 +44,12 @@ export default function TermsPage() {
 
       <section>
         <h2>6. PROPIEDAD INTELECTUAL</h2>
-        <p>Los creativos generados son tuyos. PixelOS se reserva el derecho de usar imágenes generadas de forma anónima para mejorar el servicio.</p>
+        <p>Los creativos generados son tuyos. PixelFM se reserva el derecho de usar imágenes generadas de forma anónima para mejorar el servicio.</p>
       </section>
 
       <section>
         <h2>7. LIMITACIÓN DE RESPONSABILIDAD</h2>
-        <p>PixelOS no garantiza resultados específicos de ventas o conversión con los creativos generados. La IA puede producir resultados imperfectos. No somos responsables por pérdidas derivadas del uso del servicio.</p>
+        <p>PixelFM no garantiza resultados específicos de ventas o conversión con los creativos generados. La IA puede producir resultados imperfectos. No somos responsables por pérdidas derivadas del uso del servicio.</p>
       </section>
 
       <section>

@@ -8,12 +8,12 @@ export default function MobileBlock() {
         src="/logo_PixelOS.png"
         width={64}
         height={64}
-        alt="PixelOS"
+        alt="PixelFM"
         unoptimized
       />
 
       <h1 className="mt-8 text-2xl font-bold tracking-tight">
-        PixelOS está optimizado para desktop
+        PixelFM está optimizado para desktop
       </h1>
 
       <p className="mt-4 text-[#9A9893] leading-relaxed max-w-sm">

@@ -2,10 +2,10 @@ import { LegalPage } from "@/components/LegalPage"
 
 export default function RefundsPage() {
   return (
-    <LegalPage title="Política de Reembolsos de PixelOS" updatedAt="30 de junio de 2026">
+    <LegalPage title="Política de Reembolsos de PixelFM" updatedAt="30 de junio de 2026">
       <section>
         <h2>1. POLÍTICA GENERAL</h2>
-        <p>Dado que PixelOS es un servicio digital con consumo inmediato de recursos (créditos de IA), no ofrecemos reembolsos automáticos.</p>
+        <p>Dado que PixelFM es un servicio digital con consumo inmediato de recursos (créditos de IA), no ofrecemos reembolsos automáticos.</p>
       </section>
 
       <section>

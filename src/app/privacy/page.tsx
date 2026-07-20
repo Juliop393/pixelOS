@@ -2,7 +2,7 @@ import { LegalPage } from "@/components/LegalPage"
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Política de Privacidad de PixelOS" updatedAt="30 de junio de 2026">
+    <LegalPage title="Política de Privacidad de PixelFM" updatedAt="30 de junio de 2026">
       <section>
         <h2>1. DATOS QUE RECOPILAMOS</h2>
         <ul>

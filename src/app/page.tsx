@@ -97,9 +97,9 @@ export default function Home() {
         }}
       >
         <div className="flex items-center gap-3">
-          <Image src="/logo_PixelOS.png" width={44} height={44} alt="PixelOS" priority unoptimized />
+          <Image src="/logo_PixelOS.png" width={44} height={44} alt="PixelFM" priority unoptimized />
           <span className="font-semibold text-[#E8E6E1] tracking-tight text-xl">
-            PixelOS
+            PixelFM
           </span>
         </div>
         <div className="flex items-center gap-6">
@@ -197,7 +197,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-28">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-[#E8E6E1] mb-3">
-              Creativos generados con PixelOS
+              Creativos generados con PixelFM
             </h2>
             <p className="text-lg text-[#9A9893]">
               Reales. Generados en segundos.
@@ -395,7 +395,7 @@ export default function Home() {
               </Link>
             </nav>
             <span className="text-xs text-[#9A9893]/60">
-              © 2026 AFM Estudio · PixelOS
+              © 2026 AFM Estudio · PixelFM
             </span>
           </div>
         </div>
