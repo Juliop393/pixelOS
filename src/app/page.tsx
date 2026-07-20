@@ -115,7 +115,7 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="hero-bg border-b border-[#3A3833]/50">
+      <section className="hero-bg">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-28 relative z-10">
           <div className="max-w-4xl">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#2A2826]/60 backdrop-blur-md border border-[#3A3833]/50 mb-8">
