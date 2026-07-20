@@ -217,11 +217,6 @@ input, textarea, button, select {
   content: '';
   position: absolute;
   inset: 0;
-  background: 
-    radial-gradient(ellipse 70% 50% at 70% 80%, 
-      rgba(232, 114, 74, 0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 40% at 10% 70%, 
-      rgba(232, 114, 74, 0.06) 0%, transparent 60%);
   animation: meshMove2 10s ease-in-out infinite alternate;
   z-index: 0;
 }
