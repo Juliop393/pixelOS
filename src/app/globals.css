@@ -195,7 +195,6 @@ input, textarea, button, select {
 
 .hero-bg {
   position: relative;
-  background: linear-gradient(to bottom, #111111 60%, #1E1C1A 100%);
   overflow: hidden;
 }
 
