@@ -118,22 +118,33 @@ export function useCreativeGenerator() {
       formato: aspectRatio,
       estiloVisual: visualStyle,
       brandColor: brandColor || null,
-      userId: userId || "user_beta_001",
       imagenReferencia: imagenReferencia || null,
       brandIdentity,
     }
 
-    console.log("Payload enviado al webhook:", payload)
     console.log(`Generando ${cantidad} creativos en paralelo...`)
 
-    const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || "http://localhost:5678/webhook/generar-creativo"
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    const accessToken = session?.access_token
+
+    if (!accessToken) {
+      setLoading(false)
+      setError("Sesión expirada")
+      toast.error("Sesión expirada", {
+        description: "Vuelve a iniciar sesión para continuar",
+      })
+      return
+    }
 
     const generateOne = async (): Promise<{ success: boolean; imageUrl?: string; copy?: string }> => {
       try {
-        const response = await fetch(webhookUrl, {
+        const response = await fetch("/api/generate", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify(payload),
         })
