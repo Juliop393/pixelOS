@@ -199,40 +199,11 @@ input, textarea, button, select {
 }
 
 .hero-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: 
-    radial-gradient(ellipse 80% 50% at 20% 40%, 
-      rgba(232, 114, 74, 0.15) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 90% 80%, 
-      rgba(232, 114, 74, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 60% at 50% 20%, 
-      rgba(255, 220, 180, 0.05) 0%, transparent 60%);
-  animation: meshMove 8s ease-in-out infinite alternate;
-  z-index: 0;
+  content: none;
 }
 
 .hero-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  animation: meshMove2 10s ease-in-out infinite alternate;
-  z-index: 0;
-}
-
-@keyframes meshMove {
-  0%   { transform: translate(0%, 0%) scale(1); }
-  33%  { transform: translate(3%, -2%) scale(1.02); }
-  66%  { transform: translate(-2%, 3%) scale(0.98); }
-  100% { transform: translate(2%, 1%) scale(1.01); }
-}
-
-@keyframes meshMove2 {
-  0%   { transform: translate(0%, 0%) scale(1); }
-  33%  { transform: translate(-3%, 2%) scale(0.98); }
-  66%  { transform: translate(2%, -3%) scale(1.02); }
-  100% { transform: translate(-1%, 2%) scale(0.99); }
+  content: none;
 }
 
 /* Scrollbar personalizada — dark theme PixelFM */
