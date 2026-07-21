@@ -48,6 +48,27 @@ export default function DashboardPage() {
               Formato
             </h3>
             <FormatSelector aspectRatio={g.aspectRatio} setAspectRatio={g.setAspectRatio} />
+            {g.aspectRatio === "story" && (
+              <div className="mt-3 pt-3 border-t border-[#3A3833]/50">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={g.safeZoneMeta}
+                    onChange={(e) => g.setSafeZoneMeta(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-[#3A3833] bg-[#1E1C1A] text-[#D97757] focus:ring-[#D97757]/30 focus:ring-offset-0 cursor-pointer"
+                    aria-describedby="safe-zone-desc"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-[#E8E6E1] group-hover:text-white transition-colors">
+                      Zona segura Meta
+                    </span>
+                    <p id="safe-zone-desc" className="text-xs text-[#9A9893] mt-0.5 leading-relaxed">
+                      Mantiene textos, logos, producto y CTA alejados de la interfaz de Stories y Reels.
+                    </p>
+                  </div>
+                </label>
+              </div>
+            )}
           </div>
 
           <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] p-4">

@@ -25,6 +25,7 @@ export function useCreativeGenerator() {
   const [imagenReferencia, setImagenReferencia] = useState<string | null>(null)
   const [nombreImagenReferencia, setNombreImagenReferencia] = useState<string | null>(null)
   const [cantidad, setCantidad] = useState(1)
+  const [safeZoneMeta, setSafeZoneMeta] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<Result>(null)
@@ -59,6 +60,12 @@ export function useCreativeGenerator() {
 
     return () => clearInterval(interval)
   }, [loading, phase])
+
+  useEffect(() => {
+    if (aspectRatio !== "story") {
+      setSafeZoneMeta(false)
+    }
+  }, [aspectRatio])
 
   const handleSelectAngle = (angleId: string) => {
     setSelectedAngle(angleId)
@@ -120,6 +127,7 @@ export function useCreativeGenerator() {
       brandColor: brandColor || null,
       imagenReferencia: imagenReferencia || null,
       brandIdentity,
+      safeZoneMeta,
     }
 
     console.log(`Generando ${cantidad} creativos en paralelo...`)
@@ -346,6 +354,7 @@ export function useCreativeGenerator() {
     credits,
     imagenReferencia, setImagenReferencia,
     nombreImagenReferencia, setNombreImagenReferencia,
+    safeZoneMeta, setSafeZoneMeta,
     handleSelectAngle,
     handleGenerate,
     handleRetry,
