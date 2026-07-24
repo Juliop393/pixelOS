@@ -14,6 +14,7 @@ export default function IdentidadMarcaPage() {
   const [faceUrl, setFaceUrl] = useState<string | null>(null)
   const [primaryColor, setPrimaryColor] = useState("#E8724A")
   const [secondaryColor, setSecondaryColor] = useState("#F5F0E8")
+  const [accessToken, setAccessToken] = useState<string | null>(null)
 
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingFace, setUploadingFace] = useState(false)
@@ -33,6 +34,7 @@ export default function IdentidadMarcaPage() {
 
       const uid = session.user.id
       setUserId(uid)
+      setAccessToken(session.access_token)
 
       const { data: existing } = await supabase
         .from("brand_identity")
@@ -60,11 +62,22 @@ export default function IdentidadMarcaPage() {
 
     setter(true)
     try {
+      if (!accessToken) {
+        toast.error("Sesión expirada", {
+          description: "Vuelve a iniciar sesión para continuar",
+        })
+        return
+      }
+
       const formData = new FormData()
       formData.append("file", file)
       formData.append("bucket", "brand-assets")
 
-      const res = await fetch("/api/upload", { method: "POST", body: formData })
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: formData,
+      })
       const data = await res.json()
 
       if (!data.success) {

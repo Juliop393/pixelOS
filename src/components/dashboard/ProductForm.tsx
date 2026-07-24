@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import { toast } from "sonner"
+import { supabase } from "@/lib/supabase"
 import QuantitySelector from "./QuantitySelector"
 
 interface ProductFormProps {
@@ -65,8 +66,22 @@ export default function ProductForm({
     formData.append("file", file)
 
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session?.access_token) {
+        toast.error("Sesión expirada", {
+          description: "Vuelve a iniciar sesión para continuar",
+        })
+        return
+      }
+
       const response = await fetch("/api/upload", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: formData,
       })
 
@@ -116,8 +131,22 @@ export default function ProductForm({
 
     setUploading(true)
     try {
-      const response = await fetch(`/api/upload?fileName=${nombreImagenReferencia}`, {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session?.access_token) {
+        toast.error("Sesión expirada", {
+          description: "Vuelve a iniciar sesión para continuar",
+        })
+        return
+      }
+
+      const response = await fetch(`/api/upload?fileName=${encodeURIComponent(nombreImagenReferencia)}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       })
 
       if (!response.ok) {
