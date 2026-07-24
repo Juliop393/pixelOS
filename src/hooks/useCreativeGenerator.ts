@@ -146,7 +146,7 @@ export function useCreativeGenerator() {
       return
     }
 
-    const generateOne = async (): Promise<{ success: boolean; imageUrl?: string; copy?: string }> => {
+    const generateOne = async (): Promise<{ success: boolean; imageUrl?: string; copy?: string; credits?: number }> => {
       try {
         const response = await fetch("/api/generate", {
           method: "POST",
@@ -157,6 +157,10 @@ export function useCreativeGenerator() {
           body: JSON.stringify(payload),
         })
 
+        if (response.status === 402) {
+          return { success: false, credits: 0 }
+        }
+
         if (!response.ok) {
           throw new Error(`Error del servidor: ${response.status}`)
         }
@@ -164,9 +168,10 @@ export function useCreativeGenerator() {
         const data = await response.json()
 
         if (data.success && data.imageUrl) {
-          return { success: true, imageUrl: data.imageUrl, copy: data.copy }
+          return { success: true, imageUrl: data.imageUrl, copy: data.copy, credits: data.credits }
         } else {
-          throw new Error("Respuesta inválida del servidor")
+          // n8n devolvió una respuesta sin success=true (crédito reembolsado por el servidor)
+          return { success: false, credits: data.credits }
         }
       } catch (error) {
         console.error("Error en generación individual:", error)
@@ -182,30 +187,23 @@ export function useCreativeGenerator() {
         success: boolean
         imageUrl: string
         copy?: string
+        credits?: number
       }>
 
       const successCount = successfulResults.length
       const failCount = cantidad - successCount
 
-      if (successCount === 0) {
-        // No se generó nada: no descontamos créditos.
-        throw new Error("Todas las generaciones fallaron")
+      // Sincronizar créditos desde el servidor: usar el saldo más bajo devuelto.
+      const creditsFromServer = results
+        .map((r) => r.credits)
+        .filter((c): c is number => typeof c === "number" && c >= 0)
+
+      if (creditsFromServer.length > 0) {
+        setCredits(Math.min(...creditsFromServer))
       }
 
-      // Descontamos 1 crédito por cada imagen generada con éxito, tanto en el
-      // estado local como en Supabase para que persista.
-      const newCredits = Math.max(0, credits - successCount)
-      setCredits(newCredits)
-
-      if (userId) {
-        const { error: creditError } = await supabase
-          .from("user_credits")
-          .update({ credits: newCredits })
-          .eq("user_id", userId)
-
-        if (creditError) {
-          console.error("Error actualizando créditos en Supabase:", creditError)
-        }
+      if (successCount === 0) {
+        throw new Error("Todas las generaciones fallaron")
       }
 
       const newImages = successfulResults.map((r) => ({
