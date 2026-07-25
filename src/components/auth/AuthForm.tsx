@@ -72,7 +72,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         toast.success("Cuenta creada", {
           description: "Revisa tu correo para confirmar tu cuenta antes de iniciar sesión.",
         })
-        router.push("/login")
+        router.push(`/confirm-email?email=${encodeURIComponent(email)}`)
         router.refresh()
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
