@@ -157,13 +157,15 @@ export default function ConfiguracionPage() {
             <div className="pt-2">
               <button
                 onClick={async () => {
-                  const { data: { user } } = await supabase.auth.getUser()
-                  if (!user) return
+                  const { data: { session } } = await supabase.auth.getSession()
+                  if (!session?.access_token) return
                   try {
                     const res = await fetch("/api/paddle/portal", {
                       method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ userId: user.id }),
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${session.access_token}`,
+                      },
                     })
                     const data = await res.json()
                     if (data.success && data.portalUrl) {
