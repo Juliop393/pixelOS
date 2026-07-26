@@ -12,31 +12,31 @@ export default function DashboardLayout({
     <CreditsProvider initialCredits={0}>
       {/* Desktop */}
       <div className="hidden md:flex h-screen overflow-hidden bg-[#1E1C1A] text-[#E8E6E1] flex-col relative">
-        {/* Glow terracota animado — respiración sutil detrás del dashboard */}
+        {/* Glow terracota animado — tinte sutil pero visible detrás del dashboard */}
         <div
           aria-hidden="true"
           className="absolute pointer-events-none animate-dash-glow-1"
           style={{
-            top: "-10%",
-            left: "-5%",
-            width: "55%",
-            height: "60%",
+            top: "5%",
+            left: "0%",
+            width: "50%",
+            height: "65%",
             background:
-              "radial-gradient(ellipse at center, rgba(217,119,87,0.05) 0%, transparent 70%)",
-            filter: "blur(80px)",
+              "radial-gradient(ellipse at center, rgba(217,119,87,0.14) 0%, transparent 75%)",
+            filter: "blur(60px)",
           }}
         />
         <div
           aria-hidden="true"
           className="absolute pointer-events-none animate-dash-glow-2"
           style={{
-            bottom: "-15%",
-            right: "-8%",
-            width: "50%",
-            height: "55%",
+            bottom: "0%",
+            right: "5%",
+            width: "45%",
+            height: "60%",
             background:
-              "radial-gradient(ellipse at center, rgba(217,119,87,0.035) 0%, transparent 70%)",
-            filter: "blur(90px)",
+              "radial-gradient(ellipse at center, rgba(217,119,87,0.10) 0%, transparent 75%)",
+            filter: "blur(65px)",
           }}
         />
 
