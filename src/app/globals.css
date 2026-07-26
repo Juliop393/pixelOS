@@ -206,6 +206,37 @@ input, textarea, button, select {
   content: none;
 }
 
+/* Glow terracota animado del dashboard — respiración lenta y sutil */
+@keyframes dash-glow-1 {
+  0%, 100% {
+    transform: translate(0%, 0%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(3%, 2%) scale(1.05);
+    opacity: 0.7;
+  }
+}
+
+@keyframes dash-glow-2 {
+  0%, 100% {
+    transform: translate(0%, 0%) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate(-2%, -3%) scale(1.04);
+    opacity: 1;
+  }
+}
+
+.animate-dash-glow-1 {
+  animation: dash-glow-1 28s ease-in-out infinite;
+}
+
+.animate-dash-glow-2 {
+  animation: dash-glow-2 32s ease-in-out infinite;
+}
+
 /* Scrollbar personalizada — dark theme PixelFM */
 * {
   scrollbar-width: thin;
