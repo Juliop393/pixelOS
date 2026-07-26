@@ -12,12 +12,16 @@ interface Creativo {
 }
 
 const ANGLE_NAMES: Record<string, string> = {
-  "problem-solution": "Problema y Solución",
-  "social-proof": "Prueba Social",
-  "product-demo": "Demostración",
-  "direct-offer": "Oferta Directa",
-  "comparison": "Comparación",
-  "scarcity": "Escasez",
+  "comparison": "Contraste competitivo",
+  "problem-solution": "Problema y solución",
+  "primary-benefit": "Beneficio principal",
+  "social-proof": "Prueba social",
+  "product-demo": "Demostración del producto",
+  "usage-experience": "Experiencia de uso",
+  "offer-convenience": "Oferta y conveniencia",
+  // Compatibilidad con creativos antiguos
+  "direct-offer": "Oferta directa",
+  "scarcity": "Escasez y urgencia",
 }
 
 const FORMAT_NAMES: Record<string, string> = {
