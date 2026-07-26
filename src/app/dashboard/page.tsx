@@ -29,26 +29,43 @@ export default function DashboardPage() {
   return (
     <div className="flex gap-5 h-full max-w-[1600px] mx-auto">
       {/* COLUMNA IZQUIERDA: Panel de configuración con pestañas */}
-      <aside className="w-[420px] flex-shrink-0 h-full flex flex-col rounded-3xl border border-[#3A3833] bg-[#1A1A1A]/80 backdrop-blur-md overflow-hidden">
-        {/* Pestañas */}
-        <div className="flex items-center gap-1 p-3 border-b border-[#3A3833] flex-shrink-0">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all duration-200 ${
-                activeTab === tab.id
-                  ? "bg-[#D97757] text-white"
-                  : "text-[#9CA3AF] hover:text-[#F5F0E8] hover:bg-[#3A3833]/40"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      <aside
+        className="w-[420px] flex-shrink-0 h-full flex flex-col rounded-3xl overflow-hidden"
+        style={{
+          background: "rgba(26,26,26,0.72)",
+          backdropFilter: "blur(20px) saturate(160%)",
+          WebkitBackdropFilter: "blur(20px) saturate(160%)",
+          border: "1px solid rgba(58,56,51,0.7)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+        }}
+      >
+        {/* Pestañas — control integrado de vidrio */}
+        <div className="flex-shrink-0 p-3">
+          <div
+            className="flex items-center gap-1 p-1 rounded-2xl"
+            style={{
+              background: "rgba(30,28,26,0.6)",
+              border: "1px solid rgba(58,56,51,0.5)",
+            }}
+          >
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? "bg-[#D97757] text-white shadow-sm shadow-[#D97757]/30"
+                    : "text-[#9CA3AF] hover:text-[#F5F0E8] hover:bg-[#3A3833]/30"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Contenido de la pestaña activa (scroll interno) */}
-        <div className="flex-1 overflow-y-auto min-h-0 p-4">
+        <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4">
           {activeTab === "product" && (
             <ProductForm
               producto={g.producto}
@@ -146,7 +163,15 @@ export default function DashboardPage() {
         </div>
 
         {/* Botón GENERAR siempre visible */}
-        <div className="flex-shrink-0 p-4 border-t border-[#3A3833] bg-[#1A1A1A]">
+        <div
+          className="flex-shrink-0 p-4"
+          style={{
+            background: "rgba(26,26,26,0.85)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            borderTop: "1px solid rgba(58,56,51,0.6)",
+          }}
+        >
           <GenerateButton
             onClick={g.handleGenerate}
             disabled={!canGenerate}
@@ -162,23 +187,34 @@ export default function DashboardPage() {
       </aside>
 
       {/* COLUMNA DERECHA: Preview grande */}
-      <div className="flex-1 min-w-0 h-full overflow-y-auto pr-1 -mr-1">
-        <ResultPanel
-          phase={g.phase}
-          result={g.result}
-          generatedImages={g.generatedImages}
-          progress={g.progress}
-          error={g.error}
-          aspectRatio={g.aspectRatio}
-          selectedAngle={g.selectedAngle}
-          sessionHistory={g.sessionHistory}
-          onRetry={g.handleRetry}
-          onDownload={g.handleDownload}
-          onDownloadAll={g.handleDownloadAll}
-          onFeedback={g.handleFeedback}
-          onSelectFromGenerated={g.handleSelectFromGenerated}
-          onSelectFromHistory={g.handleSelectFromHistory}
-        />
+      <div
+        className="flex-1 min-w-0 h-full overflow-y-auto rounded-3xl"
+        style={{
+          background: "rgba(26,26,26,0.5)",
+          backdropFilter: "blur(16px) saturate(140%)",
+          WebkitBackdropFilter: "blur(16px) saturate(140%)",
+          border: "1px solid rgba(58,56,51,0.6)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+        }}
+      >
+        <div className="p-5 h-full">
+          <ResultPanel
+            phase={g.phase}
+            result={g.result}
+            generatedImages={g.generatedImages}
+            progress={g.progress}
+            error={g.error}
+            aspectRatio={g.aspectRatio}
+            selectedAngle={g.selectedAngle}
+            sessionHistory={g.sessionHistory}
+            onRetry={g.handleRetry}
+            onDownload={g.handleDownload}
+            onDownloadAll={g.handleDownloadAll}
+            onFeedback={g.handleFeedback}
+            onSelectFromGenerated={g.handleSelectFromGenerated}
+            onSelectFromHistory={g.handleSelectFromHistory}
+          />
+        </div>
       </div>
     </div>
   )

@@ -45,13 +45,13 @@ export default function ResultPanel({
   const selectedAngleData = ANGLES.find((a) => a.id === selectedAngle)
 
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 h-full flex flex-col">
       {phase === "select" && (
-        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-6 lg:p-8">
-          <div className="text-center max-w-md mx-auto mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-[#D97757]/10 border border-[#D97757]/20 flex items-center justify-center mx-auto mb-4">
+        <div className="flex flex-col items-center justify-center h-full">
+          <div className="text-center max-w-sm mx-auto mb-10">
+            <div className="w-14 h-14 rounded-2xl bg-[#D97757]/8 border border-[#D97757]/15 flex items-center justify-center mx-auto mb-5">
               <svg
-                className="w-8 h-8 text-[#D97757]"
+                className="w-7 h-7 text-[#D97757]"
                 aria-hidden="true"
                 fill="none"
                 stroke="currentColor"
@@ -65,47 +65,54 @@ export default function ResultPanel({
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-[#E8E6E1] mb-2">
+            <h3 className="text-lg font-bold text-[#F5F0E8] mb-2">
               Tu creativo aparecerá aquí
             </h3>
-            <p className="text-[#9A9893] text-sm leading-relaxed">
-              Completa tu producto, elige un ángulo de venta y genera anuncios listos para publicar. Mientras tanto, mira algunos ejemplos reales:
+            <p className="text-[#9CA3AF] text-sm leading-relaxed">
+              Completa tu producto, elige un ángulo de venta y genera anuncios listos para publicar.
             </p>
           </div>
 
-          <div className="mb-3 flex items-center gap-2">
-            <span className="h-px flex-1 bg-[#3A3833]" />
-            <span className="text-[11px] font-semibold text-[#9A9893] uppercase tracking-wider">
-              Ejemplos de creativos
-            </span>
-            <span className="h-px flex-1 bg-[#3A3833]" />
-          </div>
+          <div className="w-full max-w-md mx-auto">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="h-px flex-1 bg-[#3A3833]/50" />
+              <span className="text-[10px] font-semibold text-[#9CA3AF]/70 uppercase tracking-wider">
+                Ejemplos
+              </span>
+              <span className="h-px flex-1 bg-[#3A3833]/50" />
+            </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            {EXAMPLE_CREATIVES.map((url, idx) => (
-              <div
-                key={idx}
-                className="group relative aspect-square rounded-xl overflow-hidden border border-[#3A3833] bg-[#1E1C1A]"
-              >
-                <img
-                  src={url}
-                  alt={`Ejemplo de creativo ${idx + 1}`}
-                  loading="lazy"
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-              </div>
-            ))}
+            <div className="grid grid-cols-3 gap-2.5">
+              {EXAMPLE_CREATIVES.map((url, idx) => (
+                <div
+                  key={idx}
+                  className="group relative aspect-square rounded-lg overflow-hidden border border-[#3A3833]/50 bg-[#1E1C1A]"
+                >
+                  <img
+                    src={url}
+                    alt={`Ejemplo de creativo ${idx + 1}`}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-[10px] text-[#9CA3AF]/50 mt-3">
+              Ejemplos generados con PixelFM
+            </p>
           </div>
-          <p className="text-center text-[11px] text-[#9A9893]/60 mt-3">
-            Ejemplos generados con PixelFM
-          </p>
         </div>
       )}
 
       {phase === "loading" && (
-        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] h-full">
-          <div className="flex flex-col items-center justify-center h-full min-h-[500px]">
+        <div
+          className="rounded-2xl h-full flex flex-col items-center justify-center min-h-[400px]"
+          style={{
+            background: "rgba(42,40,38,0.4)",
+            border: "1px solid rgba(58,56,51,0.5)",
+          }}
+        >
             <div className="w-full max-w-sm text-center">
               <div className="relative w-20 h-20 mx-auto mb-10">
                 <div className="absolute inset-0 rounded-full border-2 border-[#D97757]/10" />
@@ -138,14 +145,19 @@ export default function ResultPanel({
                       : "0%",
                   }}
                 />
-              </div>
+</div>
             </div>
-          </div>
         </div>
       )}
 
       {phase === "error" && (
-        <div className="bg-[#2A2826] rounded-2xl border border-red-500/30 h-full flex items-center justify-center">
+        <div
+          className="rounded-2xl h-full flex items-center justify-center"
+          style={{
+            background: "rgba(42,40,38,0.4)",
+            border: "1px solid rgba(239,68,68,0.25)",
+          }}
+        >
           <div className="text-center p-8">
             <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-5">
               <svg
@@ -184,7 +196,13 @@ export default function ResultPanel({
       {phase === "result" && result && (
         <div className="space-y-4">
           {generatedImages.length > 1 && (
-            <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-4 flex-shrink-0">
+            <div
+              className="rounded-2xl p-4 flex-shrink-0"
+              style={{
+                background: "rgba(42,40,38,0.4)",
+                border: "1px solid rgba(58,56,51,0.5)",
+              }}
+            >
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-semibold text-[#9A9893] uppercase tracking-wider">
                   {generatedImages.length} creativos generados
@@ -226,13 +244,19 @@ export default function ResultPanel({
             </div>
           )}
 
-          <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] overflow-hidden flex-shrink-0">
-            <div className="relative bg-[#161412] flex items-center justify-center overflow-hidden p-4 min-h-[320px] max-h-[520px]">
+          <div
+            className="rounded-2xl overflow-hidden flex-shrink-0"
+            style={{
+              background: "rgba(42,40,38,0.4)",
+              border: "1px solid rgba(58,56,51,0.5)",
+            }}
+          >
+            <div className="relative bg-[#161412] flex items-center justify-center overflow-hidden p-6 min-h-[320px] max-h-[560px]">
               {result.imageUrl ? (
                 <img
                   src={result.imageUrl}
                   alt="Creativo generado"
-                  className="max-w-full max-h-[480px] w-auto h-auto object-contain rounded-lg"
+                  className="max-w-full max-h-[520px] w-auto h-auto object-contain rounded-xl"
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center text-center p-8">
@@ -261,7 +285,7 @@ export default function ResultPanel({
               )}
             </div>
 
-            <div className="p-5 border-t border-[#3A3833]">
+            <div className="p-5 border-t border-[#3A3833]/60">
               <div className="flex items-start gap-3">
                 <span className="text-lg mt-0.5">
                   {selectedAngleData?.icon}
@@ -278,7 +302,13 @@ export default function ResultPanel({
             </div>
           </div>
 
-          <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-4 flex-shrink-0">
+          <div
+            className="rounded-2xl p-4 flex-shrink-0"
+            style={{
+              background: "rgba(42,40,38,0.4)",
+              border: "1px solid rgba(58,56,51,0.5)",
+            }}
+          >
             <div className="space-y-3">
               {generatedImages.length > 1 ? (
                 <button
