@@ -30,7 +30,7 @@ export default function DashboardPage() {
     <div className="flex gap-5 h-full max-w-[1600px] mx-auto">
       {/* COLUMNA IZQUIERDA: Panel de configuración con pestañas */}
       <aside
-        className="w-[420px] flex-shrink-0 h-full flex flex-col rounded-[28px] overflow-hidden"
+        className="w-[420px] flex-shrink-0 h-full flex flex-col rounded-[28px] overflow-hidden relative"
         style={{
           background:
             "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 100%), rgba(30,28,26,0.38)",
@@ -41,6 +41,15 @@ export default function DashboardPage() {
             "inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 30px rgba(0,0,0,0.22)",
         }}
       >
+        {/* Reflejo superior sutil */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-[35%] rounded-[28px] pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%)",
+          }}
+        />
         {/* Pestañas — control integrado de vidrio */}
         <div className="flex-shrink-0 p-3">
           <div
@@ -57,8 +66,8 @@ export default function DashboardPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all duration-200 ${
                   activeTab === tab.id
-                    ? "bg-[#D97757] text-white shadow-sm shadow-[#D97757]/30"
-                    : "text-[#9CA3AF] hover:text-[#F5F0E8] hover:bg-[#3A3833]/30"
+                    ? "bg-[#D97757]/15 text-[#D97757] shadow-sm shadow-[#D97757]/10 border border-[#D97757]/20"
+                    : "text-[#9CA3AF] hover:text-[#F5F0E8] hover:bg-[#3A3833]/30 border border-transparent"
                 }`}
               >
                 {tab.label}
@@ -192,18 +201,18 @@ export default function DashboardPage() {
 
       {/* COLUMNA DERECHA: Preview grande */}
       <div
-        className="flex-1 min-w-0 h-full overflow-y-auto rounded-[28px]"
+        className="flex-1 min-w-0 h-full overflow-y-auto rounded-[28px] relative"
         style={{
           background:
-            "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%), rgba(30,28,26,0.32)",
-          backdropFilter: "blur(16px) saturate(135%)",
-          WebkitBackdropFilter: "blur(16px) saturate(135%)",
-          border: "1px solid rgba(255,255,255,0.07)",
+            "linear-gradient(135deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.005) 100%), rgba(30,28,26,0.22)",
+          backdropFilter: "blur(14px) saturate(125%)",
+          WebkitBackdropFilter: "blur(14px) saturate(125%)",
+          border: "1px solid rgba(255,255,255,0.05)",
           boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 30px rgba(0,0,0,0.18)",
+            "inset 0 1px 0 rgba(255,255,255,0.04), 0 6px 24px rgba(0,0,0,0.14)",
         }}
       >
-        <div className="p-5 h-full">
+        <div className="p-5 h-full relative z-10">
           <ResultPanel
             phase={g.phase}
             result={g.result}

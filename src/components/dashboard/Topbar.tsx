@@ -84,7 +84,7 @@ export default function Topbar() {
   return (
     <header className="px-4 pt-4 z-40 flex-shrink-0">
       <div
-        className="flex items-center justify-between rounded-[28px] px-5 py-2.5 gap-4 mx-auto max-w-[1400px] relative"
+        className="flex items-center justify-between rounded-[28px] px-5 py-2.5 gap-4 mx-auto max-w-[1400px] relative overflow-hidden"
         style={{
           background:
             "linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%), rgba(30,28,26,0.42)",
@@ -95,6 +95,15 @@ export default function Topbar() {
             "inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(255,255,255,0.025), 0 12px 35px rgba(0,0,0,0.28)",
         }}
       >
+        {/* Reflejo superior tipo ::before liquid glass */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-[40%] rounded-[28px] pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%)",
+          }}
+        />
         {/* Lado izquierdo: logo + navegación */}
         <div className="flex items-center gap-6">
           <Link href="/dashboard" className="flex items-center gap-2 flex-shrink-0">
