@@ -14,7 +14,7 @@ export default function DashboardLayout({
       <div className="hidden md:flex h-screen overflow-hidden bg-[#1E1C1A] text-[#E8E6E1] flex-col">
         <AuthGuard>
           <Topbar />
-          <main className="flex-1 px-6 pb-6 pt-3 overflow-hidden min-h-0">
+          <main className="flex-1 px-6 pb-6 pt-2 overflow-hidden min-h-0">
             {children}
           </main>
         </AuthGuard>

@@ -44,15 +44,6 @@ const navItems = [
       </svg>
     ),
   },
-  {
-    label: "Perfil",
-    href: "/dashboard/perfil",
-    icon: (
-      <svg className="w-4 h-4" width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-    ),
-  },
 ]
 
 export default function Topbar() {
@@ -91,15 +82,15 @@ export default function Topbar() {
   const avatarLetter = (displayName[0] ?? "U").toUpperCase()
 
   return (
-    <header className="px-3 pt-3 z-40 flex-shrink-0">
+    <header className="px-4 pt-4 z-40 flex-shrink-0">
       <div
-        className="flex items-center justify-between rounded-2xl px-4 py-2.5 gap-4"
+        className="flex items-center justify-between rounded-3xl px-5 py-2 gap-4 mx-auto max-w-[1400px]"
         style={{
-          background: "rgba(26,26,26,0.85)",
-          backdropFilter: "blur(16px) saturate(160%)",
-          WebkitBackdropFilter: "blur(16px) saturate(160%)",
-          border: "1px solid #3A3833",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
+          background: "rgba(26,26,26,0.82)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          border: "1px solid rgba(58,56,51,0.8)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
         }}
       >
         {/* Lado izquierdo: logo + navegación */}
@@ -159,14 +150,17 @@ export default function Topbar() {
 
           <div className="w-px h-6 bg-[#3A3833]" />
 
-          <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard/perfil"
+            className="flex items-center gap-2 rounded-lg hover:bg-[#3A3833]/40 transition-colors px-1.5 py-1"
+          >
             <div className="w-7 h-7 rounded-full bg-[#D97757] text-white flex items-center justify-center text-xs font-semibold">
               {avatarLetter}
             </div>
             <span className="text-xs font-medium text-[#F5F0E8] max-w-[100px] truncate hidden xl:inline">
               {displayName}
             </span>
-          </div>
+          </Link>
 
           <button
             onClick={handleSignOut}
