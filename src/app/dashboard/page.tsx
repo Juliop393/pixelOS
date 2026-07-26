@@ -32,11 +32,13 @@ export default function DashboardPage() {
       <aside
         className="w-[420px] flex-shrink-0 h-full flex flex-col rounded-[28px] overflow-hidden"
         style={{
-          background: "rgba(255,255,255,0.03)",
-          backdropFilter: "blur(16px) saturate(160%)",
-          WebkitBackdropFilter: "blur(16px) saturate(160%)",
-          border: "1px solid rgba(255,255,255,0.06)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)",
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 100%), rgba(30,28,26,0.38)",
+          backdropFilter: "blur(16px) saturate(135%)",
+          WebkitBackdropFilter: "blur(16px) saturate(135%)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 30px rgba(0,0,0,0.22)",
         }}
       >
         {/* Pestañas — control integrado de vidrio */}
@@ -44,8 +46,9 @@ export default function DashboardPage() {
           <div
             className="flex items-center gap-1 p-1 rounded-2xl"
             style={{
-              background: "rgba(255,255,255,0.02)",
-              border: "1px solid rgba(255,255,255,0.05)",
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
             }}
           >
             {tabs.map((tab) => (
@@ -166,10 +169,11 @@ export default function DashboardPage() {
         <div
           className="flex-shrink-0 p-4"
           style={{
-            background: "rgba(255,255,255,0.03)",
+            background: "rgba(255,255,255,0.025)",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
             borderTop: "1px solid rgba(255,255,255,0.06)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
           }}
         >
           <GenerateButton
@@ -190,11 +194,13 @@ export default function DashboardPage() {
       <div
         className="flex-1 min-w-0 h-full overflow-y-auto rounded-[28px]"
         style={{
-          background: "rgba(255,255,255,0.025)",
-          backdropFilter: "blur(16px) saturate(150%)",
-          WebkitBackdropFilter: "blur(16px) saturate(150%)",
-          border: "1px solid rgba(255,255,255,0.06)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)",
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%), rgba(30,28,26,0.32)",
+          backdropFilter: "blur(16px) saturate(135%)",
+          WebkitBackdropFilter: "blur(16px) saturate(135%)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 30px rgba(0,0,0,0.18)",
         }}
       >
         <div className="p-5 h-full">

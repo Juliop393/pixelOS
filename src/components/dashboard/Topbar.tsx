@@ -86,11 +86,13 @@ export default function Topbar() {
       <div
         className="flex items-center justify-between rounded-[28px] px-5 py-2.5 gap-4 mx-auto max-w-[1400px] relative"
         style={{
-          background: "rgba(255,255,255,0.05)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%), rgba(30,28,26,0.42)",
+          backdropFilter: "blur(20px) saturate(135%)",
+          WebkitBackdropFilter: "blur(20px) saturate(135%)",
           border: "1px solid rgba(255,255,255,0.1)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(255,255,255,0.025), 0 12px 35px rgba(0,0,0,0.28)",
         }}
       >
         {/* Lado izquierdo: logo + navegación */}
