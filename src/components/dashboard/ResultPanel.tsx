@@ -47,11 +47,25 @@ export default function ResultPanel({
   return (
     <div className="min-w-0 h-full flex flex-col">
       {phase === "select" && (
-        <div className="flex flex-col items-center justify-center h-full">
-          <div className="text-center max-w-sm mx-auto mb-10">
-            <div className="w-14 h-14 rounded-2xl bg-[#D97757]/8 border border-[#D97757]/15 flex items-center justify-center mx-auto mb-5">
+        <div className="flex flex-col items-center justify-center h-full px-4">
+          {/* Tarjeta central premium */}
+          <div
+            className="text-center max-w-sm mx-auto mb-8 px-8 py-10 rounded-3xl"
+            style={{
+              background: "linear-gradient(135deg, rgba(42,40,38,0.5) 0%, rgba(30,28,26,0.35) 100%)",
+              border: "1px solid rgba(217,119,87,0.12)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.03)",
+            }}
+          >
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
+              style={{
+                background: "linear-gradient(135deg, rgba(217,119,87,0.12) 0%, rgba(217,119,87,0.04) 100%)",
+                border: "1px solid rgba(217,119,87,0.15)",
+              }}
+            >
               <svg
-                className="w-7 h-7 text-[#D97757]"
+                className="w-8 h-8 text-[#D97757]"
                 aria-hidden="true"
                 fill="none"
                 stroke="currentColor"
@@ -65,7 +79,7 @@ export default function ResultPanel({
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-[#F5F0E8] mb-2">
+            <h3 className="text-xl font-bold text-[#F5F0E8] mb-2.5">
               Tu creativo aparecerá aquí
             </h3>
             <p className="text-[#9CA3AF] text-sm leading-relaxed">
@@ -73,20 +87,22 @@ export default function ResultPanel({
             </p>
           </div>
 
-          <div className="w-full max-w-md mx-auto">
+          {/* Ejemplos como apoyo secundario */}
+          <div className="w-full max-w-sm mx-auto">
             <div className="mb-3 flex items-center gap-2">
-              <span className="h-px flex-1 bg-[#3A3833]/50" />
-              <span className="text-[10px] font-semibold text-[#9CA3AF]/70 uppercase tracking-wider">
+              <span className="h-px flex-1 bg-[#3A3833]/40" />
+              <span className="text-[10px] font-semibold text-[#9CA3AF]/60 uppercase tracking-wider">
                 Ejemplos
               </span>
-              <span className="h-px flex-1 bg-[#3A3833]/50" />
+              <span className="h-px flex-1 bg-[#3A3833]/40" />
             </div>
 
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-3 gap-2">
               {EXAMPLE_CREATIVES.map((url, idx) => (
                 <div
                   key={idx}
-                  className="group relative aspect-square rounded-lg overflow-hidden border border-[#3A3833]/50 bg-[#1E1C1A]"
+                  className="group relative aspect-square rounded-xl overflow-hidden bg-[#1E1C1A]"
+                  style={{ border: "1px solid rgba(58,56,51,0.4)" }}
                 >
                   <img
                     src={url}
@@ -98,7 +114,7 @@ export default function ResultPanel({
                 </div>
               ))}
             </div>
-            <p className="text-center text-[10px] text-[#9CA3AF]/50 mt-3">
+            <p className="text-center text-[10px] text-[#9CA3AF]/40 mt-3">
               Ejemplos generados con PixelFM
             </p>
           </div>

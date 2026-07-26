@@ -84,13 +84,13 @@ export default function Topbar() {
   return (
     <header className="px-4 pt-4 z-40 flex-shrink-0">
       <div
-        className="flex items-center justify-between rounded-3xl px-5 py-2 gap-4 mx-auto max-w-[1400px]"
+        className="flex items-center justify-between rounded-[28px] px-5 py-2.5 gap-4 mx-auto max-w-[1400px] relative"
         style={{
-          background: "rgba(26,26,26,0.82)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          border: "1px solid rgba(58,56,51,0.8)",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+          background: "linear-gradient(135deg, rgba(30,28,26,0.75) 0%, rgba(26,26,26,0.65) 100%)",
+          backdropFilter: "blur(24px) saturate(180%)",
+          WebkitBackdropFilter: "blur(24px) saturate(180%)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.04)",
         }}
       >
         {/* Lado izquierdo: logo + navegación */}
@@ -114,10 +114,10 @@ export default function Topbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
                     isActive
-                      ? "bg-[#D97757]/15 text-[#D97757]"
-                      : "text-[#9CA3AF] hover:text-[#F5F0E8] hover:bg-[#3A3833]/40"
+                      ? "bg-[#D97757] text-white shadow-sm shadow-[#D97757]/40"
+                      : "text-[#9CA3AF] hover:text-[#F5F0E8] hover:bg-[#3A3833]/30"
                   }`}
                 >
                   {item.icon}
@@ -133,7 +133,7 @@ export default function Topbar() {
           <Link
             href="/pricing"
             aria-label="Ver planes y comprar créditos"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#2A2826] border border-[#3A3833] hover:border-[#D97757]/60 hover:bg-[#D97757]/10 transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#1E1C1A]/60 border border-[#3A3833]/50 hover:border-[#D97757]/60 hover:bg-[#D97757]/8 transition-colors"
           >
             <span className="text-xs">⚡</span>
             <span className="text-xs font-semibold text-[#F5F0E8] tabular-nums">
@@ -148,11 +148,11 @@ export default function Topbar() {
             Recargar
           </Link>
 
-          <div className="w-px h-6 bg-[#3A3833]" />
+          <div className="w-px h-6 bg-[#3A3833]/50" />
 
           <Link
             href="/dashboard/perfil"
-            className="flex items-center gap-2 rounded-lg hover:bg-[#3A3833]/40 transition-colors px-1.5 py-1"
+            className="flex items-center gap-2 rounded-xl hover:bg-[#3A3833]/30 transition-colors px-1.5 py-1"
           >
             <div className="w-7 h-7 rounded-full bg-[#D97757] text-white flex items-center justify-center text-xs font-semibold">
               {avatarLetter}
@@ -164,7 +164,7 @@ export default function Topbar() {
 
           <button
             onClick={handleSignOut}
-            className="text-xs text-[#9CA3AF] hover:text-[#F5F0E8] transition-colors px-2 py-1.5 rounded-lg hover:bg-[#3A3833]/40"
+            className="text-xs text-[#9CA3AF] hover:text-[#F5F0E8] transition-colors px-2.5 py-1.5 rounded-xl hover:bg-[#3A3833]/30"
           >
             Salir
           </button>

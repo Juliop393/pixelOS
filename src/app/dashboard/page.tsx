@@ -30,13 +30,13 @@ export default function DashboardPage() {
     <div className="flex gap-5 h-full max-w-[1600px] mx-auto">
       {/* COLUMNA IZQUIERDA: Panel de configuración con pestañas */}
       <aside
-        className="w-[420px] flex-shrink-0 h-full flex flex-col rounded-3xl overflow-hidden"
+        className="w-[420px] flex-shrink-0 h-full flex flex-col rounded-[28px] overflow-hidden"
         style={{
-          background: "rgba(26,26,26,0.72)",
-          backdropFilter: "blur(20px) saturate(160%)",
-          WebkitBackdropFilter: "blur(20px) saturate(160%)",
-          border: "1px solid rgba(58,56,51,0.7)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+          background: "linear-gradient(135deg, rgba(30,28,26,0.65) 0%, rgba(26,26,26,0.55) 100%)",
+          backdropFilter: "blur(24px) saturate(160%)",
+          WebkitBackdropFilter: "blur(24px) saturate(160%)",
+          border: "1px solid rgba(255,255,255,0.05)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.03)",
         }}
       >
         {/* Pestañas — control integrado de vidrio */}
@@ -44,8 +44,8 @@ export default function DashboardPage() {
           <div
             className="flex items-center gap-1 p-1 rounded-2xl"
             style={{
-              background: "rgba(30,28,26,0.6)",
-              border: "1px solid rgba(58,56,51,0.5)",
+              background: "rgba(30,28,26,0.5)",
+              border: "1px solid rgba(255,255,255,0.04)",
             }}
           >
             {tabs.map((tab) => (
@@ -166,10 +166,10 @@ export default function DashboardPage() {
         <div
           className="flex-shrink-0 p-4"
           style={{
-            background: "rgba(26,26,26,0.85)",
+            background: "rgba(26,26,26,0.7)",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
-            borderTop: "1px solid rgba(58,56,51,0.6)",
+            borderTop: "1px solid rgba(255,255,255,0.04)",
           }}
         >
           <GenerateButton
@@ -188,13 +188,13 @@ export default function DashboardPage() {
 
       {/* COLUMNA DERECHA: Preview grande */}
       <div
-        className="flex-1 min-w-0 h-full overflow-y-auto rounded-3xl"
+        className="flex-1 min-w-0 h-full overflow-y-auto rounded-[28px]"
         style={{
-          background: "rgba(26,26,26,0.5)",
-          backdropFilter: "blur(16px) saturate(140%)",
-          WebkitBackdropFilter: "blur(16px) saturate(140%)",
-          border: "1px solid rgba(58,56,51,0.6)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+          background: "linear-gradient(135deg, rgba(30,28,26,0.5) 0%, rgba(26,26,26,0.4) 100%)",
+          backdropFilter: "blur(20px) saturate(150%)",
+          WebkitBackdropFilter: "blur(20px) saturate(150%)",
+          border: "1px solid rgba(255,255,255,0.05)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.03)",
         }}
       >
         <div className="p-5 h-full">
