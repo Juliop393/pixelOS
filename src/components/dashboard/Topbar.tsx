@@ -90,7 +90,7 @@ export default function Topbar() {
             "linear-gradient(135deg, rgba(217,119,87,0.06) 0%, rgba(217,119,87,0.015) 100%), rgba(30,28,26,0.42)",
           backdropFilter: "blur(20px) saturate(135%)",
           WebkitBackdropFilter: "blur(20px) saturate(135%)",
-          border: "1px solid rgba(217,119,87,0.12)",
+          border: "1px solid rgba(58,56,51,0.6)",
           boxShadow:
             "inset 0 1px 0 rgba(217,119,87,0.12), inset 0 -1px 0 rgba(217,119,87,0.03), 0 12px 35px rgba(0,0,0,0.28)",
         }}
