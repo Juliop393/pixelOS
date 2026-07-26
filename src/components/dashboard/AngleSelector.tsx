@@ -6,9 +6,10 @@ interface AngleSelectorProps {
   selectedAngle: string | null
   onSelectAngle: (id: string) => void
   loading: boolean
+  layout?: "list" | "grid"
 }
 
-export default function AngleSelector({ selectedAngle, onSelectAngle, loading }: AngleSelectorProps) {
+export default function AngleSelector({ selectedAngle, onSelectAngle, loading, layout = "list" }: AngleSelectorProps) {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
@@ -22,7 +23,7 @@ export default function AngleSelector({ selectedAngle, onSelectAngle, loading }:
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
+      <div className={`grid gap-3 ${layout === "grid" ? "grid-cols-2" : "grid-cols-1"}`}>
         {ANGLES.map((angle) => {
           const isSelected = selectedAngle === angle.id
           return (

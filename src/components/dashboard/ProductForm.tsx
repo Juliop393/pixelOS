@@ -21,6 +21,7 @@ interface ProductFormProps {
   setImagenReferencia: (v: string | null) => void
   nombreImagenReferencia: string | null
   setNombreImagenReferencia: (v: string | null) => void
+  showQuantity?: boolean
 }
 
 export default function ProductForm({
@@ -39,6 +40,7 @@ export default function ProductForm({
   setImagenReferencia,
   nombreImagenReferencia,
   setNombreImagenReferencia,
+  showQuantity = true,
 }: ProductFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
@@ -338,9 +340,11 @@ export default function ProductForm({
       </div>
 
       {/* Cantidad */}
-      <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] px-5 pt-1 pb-5">
-        <QuantitySelector cantidad={cantidad} setCantidad={setCantidad} loading={loading} />
-      </div>
+      {showQuantity && (
+        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] px-5 pt-1 pb-5">
+          <QuantitySelector cantidad={cantidad} setCantidad={setCantidad} loading={loading} />
+        </div>
+      )}
     </div>
   )
 }
