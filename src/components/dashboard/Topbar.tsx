@@ -87,21 +87,21 @@ export default function Topbar() {
         className="flex items-center justify-between rounded-[28px] px-6 py-3.5 gap-5 mx-auto max-w-[1200px] relative overflow-hidden"
         style={{
           background:
-            "linear-gradient(135deg, rgba(217,119,87,0.06) 0%, rgba(217,119,87,0.015) 100%), rgba(30,28,26,0.42)",
+            "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%), rgba(26,26,26,0.36)",
           backdropFilter: "blur(20px) saturate(135%)",
           WebkitBackdropFilter: "blur(20px) saturate(135%)",
           border: "1px solid rgba(58,56,51,0.6)",
           boxShadow:
-            "inset 0 1px 0 rgba(217,119,87,0.12), inset 0 -1px 0 rgba(217,119,87,0.03), 0 12px 35px rgba(0,0,0,0.28)",
+            "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(255,255,255,0.02), 0 12px 35px rgba(0,0,0,0.28)",
         }}
       >
-        {/* Reflejo superior cálido tipo ::before liquid glass */}
+        {/* Reflejo superior tipo ::before liquid glass */}
         <div
           aria-hidden="true"
           className="absolute inset-x-0 top-0 h-[40%] rounded-[28px] pointer-events-none"
           style={{
             background:
-              "linear-gradient(180deg, rgba(217,119,87,0.07) 0%, transparent 100%)",
+              "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%)",
           }}
         />
         {/* Lado izquierdo: logo + navegación */}
