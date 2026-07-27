@@ -13,20 +13,21 @@ export default function DashboardLayout({
     <CreditsProvider initialCredits={0}>
       {/* Desktop */}
       <div className="hidden md:flex h-screen overflow-hidden bg-[#1E1C1A] text-[#E8E6E1] flex-col relative">
-        {/* Glow terracota extendido — mayor presencia, distribución amplia */}
+        {/* Glow principal — claro cálido/champagne para luminosidad premium */}
         <div
           aria-hidden="true"
           className="absolute pointer-events-none animate-dash-glow-1"
           style={{
             top: "0%",
-            left: "-5%",
+            left: "0%",
             width: "65%",
             height: "80%",
             background:
-              "radial-gradient(ellipse at 40% 40%, rgba(217,119,87,0.16) 0%, transparent 72%)",
-            filter: "blur(55px)",
+              "radial-gradient(ellipse at 40% 40%, rgba(245,240,232,0.07) 0%, transparent 72%)",
+            filter: "blur(60px)",
           }}
         />
+        {/* Glow secundario — neutro/humo cálido para profundidad sin tinte */}
         <div
           aria-hidden="true"
           className="absolute pointer-events-none animate-dash-glow-2"
@@ -36,21 +37,21 @@ export default function DashboardLayout({
             width: "60%",
             height: "75%",
             background:
-              "radial-gradient(ellipse at 60% 60%, rgba(217,119,87,0.12) 0%, transparent 72%)",
+              "radial-gradient(ellipse at 60% 60%, rgba(120,116,112,0.06) 0%, transparent 72%)",
             filter: "blur(65px)",
           }}
         />
-        {/* Tercer glow central muy sutil para envolver todo el ancho */}
+        {/* Glow de acento — terracota sutil para identidad de marca */}
         <div
           aria-hidden="true"
           className="absolute pointer-events-none animate-dash-glow-1"
           style={{
             top: "30%",
-            left: "30%",
-            width: "45%",
-            height: "50%",
+            left: "35%",
+            width: "40%",
+            height: "45%",
             background:
-              "radial-gradient(ellipse at center, rgba(217,119,87,0.06) 0%, transparent 70%)",
+              "radial-gradient(ellipse at center, rgba(217,119,87,0.05) 0%, transparent 70%)",
             filter: "blur(70px)",
             animationDelay: "8s",
           }}
