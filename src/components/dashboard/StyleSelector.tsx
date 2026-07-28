@@ -3,27 +3,51 @@
 const VISUAL_STYLES = [
   {
     id: "white-bg",
-    label: "Fondo Blanco (Studio)",
+    label: "Fondo de estudio",
     icon: "📷",
-    tooltip: "Producto sobre fondo blanco limpio. Ideal para e-commerce y catálogos.",
+    tooltip: "Producto sobre fondo limpio. Ideal para e-commerce y catálogos.",
   },
   {
     id: "lifestyle",
-    label: "Lifestyle & Contexto",
+    label: "Lifestyle y contexto",
     icon: "🌿",
     tooltip: "Producto en un ambiente real. Transmite aspiración y estilo de vida.",
   },
   {
-    id: "ugc",
-    label: "UGC Style",
-    icon: "📱",
-    tooltip: "Estilo orgánico y auténtico. Simula contenido de usuario real, genera confianza y alto CTR.",
+    id: "product-action",
+    label: "Producto en acción",
+    icon: "🎬",
+    tooltip: "Mostrar el producto funcionando o siendo utilizado claramente.",
   },
   {
-    id: "before-after",
-    label: "Antes / Después",
-    icon: "🔄",
-    tooltip: "Composición dividida que muestra la transformación. Ideal para productos con resultado visible.",
+    id: "b2b",
+    label: "Comercial B2B",
+    icon: "🏢",
+    tooltip: "Contexto profesional, industrial, empresarial, mayorista o corporativo.",
+  },
+  {
+    id: "premium-editorial",
+    label: "Premium editorial",
+    icon: "✨",
+    tooltip: "Estética sofisticada, aspiracional, iluminación cuidada y composición elegante.",
+  },
+  {
+    id: "benefits-infographic",
+    label: "Infografía de beneficios",
+    icon: "📊",
+    tooltip: "Producto acompañado de beneficios, características o datos visuales organizados.",
+  },
+  {
+    id: "direct-offer",
+    label: "Oferta y venta directa",
+    icon: "🏷️",
+    tooltip: "Diseño comercial con precio, promoción, stock, entrega, venta por mayor o CTA destacado.",
+  },
+  {
+    id: "minimal-tech",
+    label: "Minimalista tecnológico",
+    icon: "💻",
+    tooltip: "Diseño moderno, limpio y preciso para SaaS, gadgets y productos digitales.",
   },
 ]
 

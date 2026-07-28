@@ -70,4 +70,13 @@ export const ANGLES: Angle[] = [
       { label: "Enfoque", value: "Venta / Conveniencia", color: "bg-orange-500/10 text-orange-400 border-orange-500/20" },
     ],
   },
+  {
+    id: "unique-mechanism",
+    title: "Mecanismo único",
+    description: "Explica la característica, proceso o tecnología que hace que el producto funcione de forma diferente.",
+    icon: "🔧",
+    badges: [
+      { label: "Enfoque", value: "Por qué funciona", color: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
+    ],
+  },
 ]

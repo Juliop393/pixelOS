@@ -19,7 +19,7 @@ export function useCreativeGenerator() {
   const [subtitulo, setSubtitulo] = useState("")
   const [ctaContacto, setCtaContacto] = useState("")
   const [aspectRatio, setAspectRatio] = useState("square")
-  const [visualStyle, setVisualStyle] = useState("photorealistic")
+  const [visualStyle, setVisualStyle] = useState("white-bg")
   const [brandColor, setBrandColor] = useState("")
   const [selectedAngle, setSelectedAngle] = useState<string | null>(null)
   const [imagenReferencia, setImagenReferencia] = useState<string | null>(null)

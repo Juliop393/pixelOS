@@ -19,6 +19,7 @@ const ANGLE_NAMES: Record<string, string> = {
   "product-demo": "Demostración del producto",
   "usage-experience": "Experiencia de uso",
   "offer-convenience": "Oferta y conveniencia",
+  "unique-mechanism": "Mecanismo único",
   // Compatibilidad con creativos antiguos
   "direct-offer": "Oferta directa",
   "scarcity": "Escasez y urgencia",
