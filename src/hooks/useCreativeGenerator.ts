@@ -312,12 +312,6 @@ export function useCreativeGenerator() {
     }
   }
 
-  const handleFeedback = (type: "positive" | "negative") => {
-    toast.success("¡Gracias por tu feedback!", {
-      description: type === "positive" ? "Nos alegra que te haya funcionado" : "Seguiremos mejorando",
-    })
-  }
-
   const handleClearResult = () => {
     setResult(null)
     setSelectedAngle(null)
@@ -358,7 +352,6 @@ export function useCreativeGenerator() {
     handleRetry,
     handleDownload,
     handleDownloadAll,
-    handleFeedback,
     handleClearResult,
     handleSelectFromGenerated,
     handleSelectFromHistory,

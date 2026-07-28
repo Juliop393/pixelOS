@@ -21,7 +21,6 @@ interface ResultPanelProps {
   onRetry: () => void
   onDownload: () => void
   onDownloadAll: () => void
-  onFeedback: (type: "positive" | "negative") => void
   onSelectFromGenerated: (img: { imageUrl: string; angle: string }, copy: string) => void
   onSelectFromHistory: (item: { imageUrl: string; angle: string }) => void
 }
@@ -38,7 +37,6 @@ export default function ResultPanel({
   onRetry,
   onDownload,
   onDownloadAll,
-  onFeedback,
   onSelectFromGenerated,
   onSelectFromHistory,
 }: ResultPanelProps) {
@@ -267,13 +265,28 @@ export default function ResultPanel({
               border: "1px solid rgba(58,56,51,0.5)",
             }}
           >
-            <div className="relative bg-[#161412] flex items-center justify-center overflow-hidden p-6 min-h-[320px] max-h-[560px]">
+            <div className="relative bg-[#161412] flex items-center justify-center overflow-hidden min-h-[320px] max-h-[560px]">
               {result.imageUrl ? (
-                <img
-                  src={result.imageUrl}
-                  alt="Creativo generado"
-                  className="max-w-full max-h-[520px] w-auto h-auto object-contain rounded-xl"
-                />
+                <>
+                  {/* Fondo blurred de la misma imagen */}
+                  <img
+                    src={result.imageUrl}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{
+                      filter: "blur(40px) brightness(0.25) saturate(0.5)",
+                      transform: "scale(1.15)",
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-[#161412]/60" />
+                  {/* Imagen principal nítida */}
+                  <img
+                    src={result.imageUrl}
+                    alt="Creativo generado"
+                    className="relative z-10 max-w-[85%] max-h-[480px] w-auto h-auto object-contain rounded-xl shadow-xl shadow-black/40"
+                  />
+                </>
               ) : (
                 <div className="flex flex-col items-center justify-center text-center p-8">
                   <div className="w-16 h-16 rounded-2xl bg-[#D97757]/10 border border-[#D97757]/20 flex items-center justify-center mb-4">
@@ -326,7 +339,7 @@ export default function ResultPanel({
             }}
           >
             <div className="space-y-3">
-              {generatedImages.length > 1 ? (
+                          {generatedImages.length > 1 ? (
                 <button
                   onClick={onDownloadAll}
                   className="w-full py-3 px-4 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 flex items-center justify-center gap-2"
@@ -347,26 +360,6 @@ export default function ResultPanel({
                   Descargar
                 </button>
               )}
-
-              <div className="pt-2">
-                <p className="text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
-                  ¿Cómo quedó?
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => onFeedback("positive")}
-                    className="flex-1 py-2 px-3 rounded-lg bg-[#1E1C1A] text-[#E8E6E1] text-xs font-medium border border-[#3A3833] hover:border-emerald-500/50 hover:text-emerald-400 transition-all duration-200"
-                  >
-                    ✅ Útil
-                  </button>
-                  <button
-                    onClick={() => onFeedback("negative")}
-                    className="flex-1 py-2 px-3 rounded-lg bg-[#1E1C1A] text-[#E8E6E1] text-xs font-medium border border-[#3A3833] hover:border-red-500/50 hover:text-red-400 transition-all duration-200"
-                  >
-                    ❌ No útil
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
 

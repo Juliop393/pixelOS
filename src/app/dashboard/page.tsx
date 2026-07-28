@@ -225,7 +225,6 @@ export default function DashboardPage() {
             onRetry={g.handleRetry}
             onDownload={g.handleDownload}
             onDownloadAll={g.handleDownloadAll}
-            onFeedback={g.handleFeedback}
             onSelectFromGenerated={g.handleSelectFromGenerated}
             onSelectFromHistory={g.handleSelectFromHistory}
           />
