@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
         ],
         response_format: { type: "json_object" },
         max_completion_tokens: 1200,
-        temperature: 0.3,
+        temperature: 0.6,
         thinking: { type: "disabled" },
       }),
       signal: controller.signal,
