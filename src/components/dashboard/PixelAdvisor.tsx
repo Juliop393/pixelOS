@@ -52,7 +52,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
 
       if (!res.ok) {
         const msg = data.providerStatus
-          ? `${data.error} (${data.providerStatus}${data.providerCode ? `: ${data.providerCode}` : ""})`
+          ? `Error IA (${data.providerStatus}${data.providerCode ? ` — ${data.providerCode}` : ""})${data.providerMessage ? `: ${data.providerMessage}` : ""}`
           : data.error || "Error al consultar Pixel IA"
         setError(msg)
         return
