@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useCreativeGenerator } from "@/hooks/useCreativeGenerator"
+import { supabase } from "@/lib/supabase"
 import AngleSelector from "@/components/dashboard/AngleSelector"
 import FormatSelector from "@/components/dashboard/FormatSelector"
 import StyleSelector from "@/components/dashboard/StyleSelector"
@@ -17,6 +18,25 @@ type Tab = "product" | "angle" | "design"
 export default function DashboardPage() {
   const g = useCreativeGenerator()
   const [activeTab, setActiveTab] = useState<Tab>("product")
+  const [advisorToken, setAdvisorToken] = useState<string | undefined>()
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAdvisorToken(session?.access_token)
+    })
+  }, [])
+
+  const handleApplyRecommendation = (rec: {
+    angleId: string
+    styleId: string
+    format: string
+    safeZoneMeta: boolean
+  }) => {
+    g.handleSelectAngle(rec.angleId)
+    g.setAspectRatio(rec.format)
+    g.setVisualStyle(rec.styleId)
+    g.setSafeZoneMeta(rec.safeZoneMeta)
+  }
 
   const canGenerate =
     !!g.producto.trim() && !!g.selectedAngle && !g.loading && g.credits >= g.cantidad
@@ -29,7 +49,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex gap-5 h-full max-w-[1600px] mx-auto relative">
-      <PixelAdvisor />
+      <PixelAdvisor onApplyRecommendation={handleApplyRecommendation} accessToken={advisorToken} />
       {/* COLUMNA IZQUIERDA: Panel de configuración con pestañas */}
       <aside
         className="w-[420px] flex-shrink-0 h-full flex flex-col rounded-[28px] overflow-hidden relative"
