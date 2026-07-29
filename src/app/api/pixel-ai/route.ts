@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
   const timeout = setTimeout(() => controller.abort(), 25000)
 
   try {
-    const kimiRes = await fetch("https://api.moonshot.cn/v1/chat/completions", {
+    const kimiRes = await fetch("https://api.moonshot.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
