@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Sparkles } from "lucide-react"
 
 type DemoStep = "initial" | "results"
 
@@ -40,41 +41,28 @@ export default function PixelAdvisor() {
 
   return (
     <>
-      {/* Burbuja flotante */}
+      {/* Burbuja flotante — glass oscuro con acento terracota y pulso sutil */}
       <button
         onClick={() => setIsOpen(true)}
-        title="Abrir Pixel Advisor"
-        className={`fixed bottom-6 right-6 z-40 w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 ${
+        title="Abrir Pixel IA"
+        className={`fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 animate-pulse ${
           isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
         style={{
           background:
-            "linear-gradient(135deg, rgba(217,119,87,0.9) 0%, rgba(217,119,87,0.75) 100%)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          border: "1px solid rgba(217,119,87,0.3)",
-          boxShadow: "0 8px 24px rgba(217,119,87,0.2)",
+            "linear-gradient(135deg, rgba(30,28,26,0.85) 0%, rgba(26,26,26,0.78) 100%)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid rgba(217,119,87,0.25)",
+          boxShadow: "0 4px 20px rgba(217,119,87,0.15), inset 0 1px 0 rgba(255,255,255,0.05)",
+          animationDuration: "3s",
         }}
       >
-        <svg
-          className="w-6 h-6 text-white"
-          width={24}
-          height={24}
-          aria-hidden="true"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-          />
-        </svg>
+        <Sparkles className="w-5 h-5 text-[#D97757]" strokeWidth={1.5} />
+        <span className="text-sm font-semibold text-[#F5F0E8]">Pixel IA</span>
       </button>
 
-      {/* Ventana flotante — sin overlay agresivo */}
+      {/* Ventana flotante */}
       <div
         className={`fixed bottom-6 right-6 z-50 w-[400px] h-[600px] max-h-[calc(100vh-48px)] flex flex-col rounded-[28px] overflow-hidden transition-all duration-300 ${
           isOpen ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none"
@@ -113,27 +101,12 @@ export default function PixelAdvisor() {
                 border: "1px solid rgba(217,119,87,0.2)",
               }}
             >
-              <svg
-                className="w-4 h-4 text-[#D97757]"
-                width={16}
-                height={16}
-                aria-hidden="true"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                />
-              </svg>
+              <Sparkles className="w-4 h-4 text-[#D97757]" strokeWidth={1.5} />
             </div>
             <div>
-              <span className="text-sm font-bold text-[#F5F0E8]">Pixel Advisor</span>
+              <span className="text-sm font-bold text-[#F5F0E8]">Pixel IA</span>
               <span className="text-[10px] text-[#9CA3AF] ml-2 hidden sm:inline">
-                Asistente de estrategia
+                Estrategia creativa para tus anuncios.
               </span>
             </div>
           </div>
@@ -171,22 +144,7 @@ export default function PixelAdvisor() {
                 border: "1px solid rgba(217,119,87,0.15)",
               }}
             >
-              <svg
-                className="w-3.5 h-3.5 text-[#D97757]"
-                width={14}
-                height={14}
-                aria-hidden="true"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                />
-              </svg>
+              <Sparkles className="w-3.5 h-3.5 text-[#D97757]" strokeWidth={1.5} />
             </div>
             <div
               className="rounded-2xl rounded-tl-md px-3.5 py-2.5 max-w-[85%]"
@@ -229,15 +187,7 @@ export default function PixelAdvisor() {
                     border: "1px solid rgba(217,119,87,0.15)",
                   }}
                 >
-                  <svg
-                    className="w-3.5 h-3.5 text-[#D97757]"
-                    width={14} height={14} aria-hidden="true" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                    />
-                  </svg>
+                  <Sparkles className="w-3.5 h-3.5 text-[#D97757]" strokeWidth={1.5} />
                 </div>
                 <div className="max-w-[90%] space-y-2.5">
                   <p className="text-xs text-[#9CA3AF] ml-1 mb-1">
