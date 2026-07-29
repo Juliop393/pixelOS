@@ -10,6 +10,7 @@ import QuantitySelector from "@/components/dashboard/QuantitySelector"
 import ResultPanel from "@/components/dashboard/ResultPanel"
 import GenerateButton from "@/components/dashboard/GenerateButton"
 import Accordion from "@/components/ui/Accordion"
+import PixelAdvisor from "@/components/dashboard/PixelAdvisor"
 
 type Tab = "product" | "angle" | "design"
 
@@ -27,7 +28,8 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="flex gap-5 h-full max-w-[1600px] mx-auto">
+    <div className="flex gap-5 h-full max-w-[1600px] mx-auto relative">
+      <PixelAdvisor />
       {/* COLUMNA IZQUIERDA: Panel de configuración con pestañas */}
       <aside
         className="w-[420px] flex-shrink-0 h-full flex flex-col rounded-[28px] overflow-hidden relative"
