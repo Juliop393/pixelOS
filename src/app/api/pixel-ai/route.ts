@@ -149,7 +149,23 @@ export async function POST(req: NextRequest) {
     clearTimeout(timeout)
 
     if (!kimiRes.ok) {
-      return NextResponse.json({ error: "Error al consultar el servicio de IA" }, { status: 502, headers: { "Cache-Control": "no-store" } })
+      let providerCode: string | null = null
+      let providerMessage: string | null = null
+      try {
+        const errBody = await kimiRes.json()
+        providerCode = errBody?.error?.code ?? null
+        providerMessage = errBody?.error?.message ?? null
+      } catch { /* ignore parse errors */ }
+
+      return NextResponse.json(
+        {
+          error: "Error al consultar el servicio de IA",
+          providerStatus: kimiRes.status,
+          providerCode,
+          providerMessage,
+        },
+        { status: 502, headers: { "Cache-Control": "no-store" } }
+      )
     }
 
     const kimiData = await kimiRes.json()
