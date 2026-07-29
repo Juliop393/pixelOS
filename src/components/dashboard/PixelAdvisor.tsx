@@ -21,15 +21,14 @@ interface PixelAdvisorProps {
 export default function PixelAdvisor({ onApplyRecommendation, accessToken }: PixelAdvisorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
+  const [sentMessage, setSentMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [summary, setSummary] = useState("")
   const [appliedIndex, setAppliedIndex] = useState<number | null>(null)
 
-  const handleRecommend = async () => {
-    if (!input.trim() || isLoading) return
-
+  const handleApiCall = async (description: string) => {
     if (!accessToken) {
       setError("Sesión expirada. Vuelve a iniciar sesión.")
       return
@@ -46,7 +45,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ description: input.trim() }),
+        body: JSON.stringify({ description }),
       })
 
       const data = await res.json()
@@ -65,6 +64,21 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
     }
   }
 
+  const handleRecommend = async () => {
+    if (!input.trim() || isLoading) return
+
+    const message = input.trim()
+    setSentMessage(message)
+    setInput("")
+    await handleApiCall(message)
+  }
+
+  const handleRetry = () => {
+    if (!sentMessage) return
+    setError(null)
+    handleApiCall(sentMessage)
+  }
+
   const handleClose = () => {
     setIsOpen(false)
     setError(null)
@@ -72,6 +86,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
 
   const handleNewQuery = () => {
     setInput("")
+    setSentMessage(null)
     setRecommendations([])
     setSummary("")
     setError(null)
@@ -202,7 +217,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
           </div>
 
           {/* Burbuja del usuario */}
-          {input.trim() && (
+          {sentMessage && (
             <div className="flex items-start gap-2 justify-end">
               <div
                 className="rounded-2xl rounded-tr-md px-3.5 py-2.5 max-w-[85%]"
@@ -211,7 +226,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
                   border: "1px solid rgba(217,119,87,0.15)",
                 }}
               >
-                <p className="text-sm text-[#F5F0E8] leading-relaxed">{input}</p>
+                <p className="text-sm text-[#F5F0E8] leading-relaxed">{sentMessage}</p>
               </div>
             </div>
           )}
@@ -261,7 +276,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
                   <p className="text-sm text-[#F5F0E8]">{error}</p>
                 </div>
                 <button
-                  onClick={handleRecommend}
+                  onClick={handleRetry}
                   className="text-xs font-medium text-[#D97757] hover:text-[#E18A6E] transition-colors ml-1"
                 >
                   Reintentar
