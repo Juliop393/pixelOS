@@ -35,62 +35,96 @@ const STYLE_NAMES: Record<string, string> = {
   "minimal-tech": "Minimalista tecnológico",
 }
 
-const SYSTEM_PROMPT = `Eres Pixel IA, un asesor de estrategia publicitaria para Meta Ads.
+const CHAT_SYSTEM_PROMPT = `Eres Pixel IA, un asesor amable de estrategia publicitaria para Meta Ads.
 
-Tu función es recomendar 3 ángulos de venta diferentes para un producto o servicio descrito por el usuario.
+Tu trabajo es conversar con el usuario para entender su negocio antes de recomendar ángulos.
 
-Considera:
-- Si es B2B o B2C
-- El cliente objetivo
-- El problema principal que resuelve
-- El contexto de uso
-- La modalidad comercial (venta directa, por mayor, suscripción, etc.)
-- El objetivo de conversión
-- Las políticas de Meta Ads (no hacer afirmaciones falsas ni engañosas)
+Información mínima que necesitas:
+- Qué producto o servicio vende
+- A quién se lo vende (público objetivo)
+- Qué quiere conseguir con el anuncio (objetivo / forma de venta)
+
+Información opcional pero útil:
+- Principal beneficio
+- Problema que resuelve
+- B2B o B2C
+- Canal de conversión
+- Mercado o ubicación
+
+Comportamiento:
+- Si el usuario solo saluda, responde naturalmente y pide información.
+- Si la información es parcial, pregunta solo por lo que falta. Sé breve.
+- Si ya tienes lo necesario, da un resumen claro de lo que entendiste y PREGUNTA si está correcto.
+- NO generes recomendaciones de ángulos en esta fase.
+- Responde en español, con frases cortas y amables.
+- Máximo 3 oraciones por respuesta.
+
+Responde ÚNICAMENTE con este JSON:
+{
+  "message": "tu respuesta conversacional aquí",
+  "hasEnoughInfo": true o false,
+  "summary": "resumen de lo entendido (solo si hasEnoughInfo es true)"
+}`
+
+const RECOMMEND_SYSTEM_PROMPT = `Eres Pixel IA, un asesor de estrategia publicitaria para Meta Ads.
+
+El usuario ya confirmó este resumen de su negocio. Ahora recomienda 3 ángulos de venta.
+
+Considera: B2B/B2C, cliente objetivo, problema, contexto, modalidad comercial, objetivo de conversión, políticas Meta Ads.
 
 Ángulos disponibles:
-1. comparison — Contraste competitivo: Compara alternativa genérica vs producto, sin mencionar marcas.
-2. problem-solution — Problema y solución: Problema real del cliente y cómo el producto lo resuelve.
-3. primary-benefit — Beneficio principal: Resultado práctico más importante del producto.
-4. social-proof — Prueba social: Testimonios, reseñas o datos reales. No inventar datos.
-5. product-demo — Demostración del producto: Producto funcionando en contexto real.
-6. usage-experience — Experiencia de uso: Producto integrado en rutina del usuario.
-7. offer-convenience — Oferta y conveniencia: Precio, stock, entrega, ahorro.
-8. unique-mechanism — Mecanismo único: Tecnología o proceso que lo hace diferente.
+1. comparison — Contraste competitivo
+2. problem-solution — Problema y solución
+3. primary-benefit — Beneficio principal
+4. social-proof — Prueba social
+5. product-demo — Demostración del producto
+6. usage-experience — Experiencia de uso
+7. offer-convenience — Oferta y conveniencia
+8. unique-mechanism — Mecanismo único
 
-Estilos visuales disponibles:
-1. white-bg — Fondo de estudio
-2. lifestyle — Lifestyle y contexto
-3. product-action — Producto en acción
-4. b2b — Comercial B2B
-5. premium-editorial — Premium editorial
-6. benefits-infographic — Infografía de beneficios
-7. direct-offer — Oferta y venta directa
-8. minimal-tech — Minimalista tecnológico
-
+Estilos: white-bg, lifestyle, product-action, b2b, premium-editorial, benefits-infographic, direct-offer, minimal-tech
 Formatos: square (1:1), story (9:16), 4:5 (4:5)
-
 safeZoneMeta: solo true si formato es "story".
 
 Reglas:
-- Exactamente 3 recomendaciones distintas (no repetir ángulos).
-- Solo usar IDs de las listas anteriores.
-- Razones breves, contextualizadas al producto descrito.
-- No inventar cifras, certificaciones ni clientes.
-- Si falta contexto, hacer la mejor recomendación posible sin inventar.
-- Recomendar formatos variados entre las 3 opciones.
+- 3 recomendaciones distintas.
+- Solo IDs de las listas.
+- Razones breves (máx 2 frases).
+- Formatos variados.
+- No inventar datos.
 
-Responde ÚNICAMENTE con un objeto JSON válido.`
+Responde ÚNICAMENTE con JSON.`
+
+async function callKimi(messages: { role: string; content: string }[], useJson: boolean, apiKey: string, controller: AbortController) {
+  const body: Record<string, unknown> = {
+    model: "kimi-k2.6",
+    messages,
+    max_completion_tokens: 1200,
+    temperature: 0.6,
+    thinking: { type: "disabled" },
+  }
+
+  if (useJson) {
+    body.response_format = { type: "json_object" }
+  }
+
+  return fetch("https://api.moonshot.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+    signal: controller.signal,
+  })
+}
 
 export async function POST(req: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.json(
-      { error: "Configuración del servidor incompleta" },
-      { status: 500, headers: { "Cache-Control": "no-store" } }
-    )
+    return NextResponse.json({ error: "Configuración del servidor incompleta" }, { status: 500, headers: { "Cache-Control": "no-store" } })
   }
 
   const authHeader = req.headers.get("authorization")
@@ -104,18 +138,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Sesión inválida" }, { status: 401, headers: { "Cache-Control": "no-store" } })
   }
 
-  let body: { description?: string }
+  let body: Record<string, unknown>
   try { body = await req.json() } catch {
     return NextResponse.json({ error: "Cuerpo de solicitud inválido" }, { status: 400, headers: { "Cache-Control": "no-store" } })
   }
 
-  const description = (body.description ?? "").trim()
-  if (!description) {
-    return NextResponse.json({ error: "Describe tu producto para recibir recomendaciones" }, { status: 400, headers: { "Cache-Control": "no-store" } })
-  }
-  if (description.length > 800) {
-    return NextResponse.json({ error: "La descripción es demasiado larga" }, { status: 400, headers: { "Cache-Control": "no-store" } })
-  }
+  const action = body.action === "recommend" ? "recommend" : "chat"
 
   const apiKey = process.env.KIMI_API_KEY
   if (!apiKey) {
@@ -126,26 +154,34 @@ export async function POST(req: NextRequest) {
   const timeout = setTimeout(() => controller.abort(), 25000)
 
   try {
-    const kimiRes = await fetch("https://api.moonshot.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "kimi-k2.6",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: description },
-        ],
-        response_format: { type: "json_object" },
-        max_completion_tokens: 1200,
-        temperature: 0.6,
-        thinking: { type: "disabled" },
-      }),
-      signal: controller.signal,
-    })
+    let messages: { role: string; content: string }[]
+    let useJson: boolean
 
+    if (action === "recommend") {
+      const summary = typeof body.summary === "string" ? body.summary : ""
+      if (!summary) {
+        clearTimeout(timeout)
+        return NextResponse.json({ error: "Falta el resumen del negocio" }, { status: 400, headers: { "Cache-Control": "no-store" } })
+      }
+      messages = [
+        { role: "system", content: RECOMMEND_SYSTEM_PROMPT },
+        { role: "user", content: `Basado en este resumen confirmado, recomienda 3 ángulos:\n\n${summary}` },
+      ]
+      useJson = true
+    } else {
+      const chatMessages = Array.isArray(body.messages) ? body.messages as Array<{ role: string; content: string }> : []
+      if (chatMessages.length === 0) {
+        clearTimeout(timeout)
+        return NextResponse.json({ error: "La conversación está vacía" }, { status: 400, headers: { "Cache-Control": "no-store" } })
+      }
+      messages = [
+        { role: "system", content: CHAT_SYSTEM_PROMPT },
+        ...chatMessages.slice(-10),
+      ]
+      useJson = true
+    }
+
+    const kimiRes = await callKimi(messages, useJson, apiKey, controller)
     clearTimeout(timeout)
 
     if (!kimiRes.ok) {
@@ -155,15 +191,10 @@ export async function POST(req: NextRequest) {
         const errBody = await kimiRes.json()
         providerCode = errBody?.error?.code ?? null
         providerMessage = errBody?.error?.message ?? null
-      } catch { /* ignore parse errors */ }
+      } catch { /* ignore */ }
 
       return NextResponse.json(
-        {
-          error: "Error al consultar el servicio de IA",
-          providerStatus: kimiRes.status,
-          providerCode,
-          providerMessage,
-        },
+        { error: "Error al consultar el servicio de IA", providerStatus: kimiRes.status, providerCode, providerMessage },
         { status: 502, headers: { "Cache-Control": "no-store" } }
       )
     }
@@ -175,15 +206,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Respuesta inválida del servicio de IA" }, { status: 502, headers: { "Cache-Control": "no-store" } })
     }
 
-    // Parse y validar la respuesta
-    let parsed: unknown
+    if (action === "chat") {
+      let parsed: Record<string, unknown> = { message: rawContent, hasEnoughInfo: false }
+      try {
+        const p = JSON.parse(rawContent)
+        if (typeof p.message === "string") parsed = p
+      } catch { /* usar texto crudo como message */ }
+
+      const hasEnoughInfo = parsed.hasEnoughInfo === true
+      const summary = hasEnoughInfo && typeof parsed.summary === "string" ? parsed.summary : undefined
+
+      return NextResponse.json(
+        { message: typeof parsed.message === "string" ? parsed.message : rawContent, hasEnoughInfo, summary: summary ?? null },
+        { headers: { "Cache-Control": "no-store" } }
+      )
+    }
+
+    // action === "recommend"
+    let parsed: Record<string, unknown>
     try { parsed = JSON.parse(rawContent) } catch {
       return NextResponse.json({ error: "El servicio de IA devolvió un formato inesperado" }, { status: 502, headers: { "Cache-Control": "no-store" } })
     }
 
-    const data = parsed as Record<string, unknown>
-    const recommendations = Array.isArray(data.recommendations) ? data.recommendations : []
-
+    const recommendations = Array.isArray(parsed.recommendations) ? parsed.recommendations : []
     if (recommendations.length < 3) {
       return NextResponse.json({ error: "El servicio de IA no generó suficientes recomendaciones" }, { status: 502, headers: { "Cache-Control": "no-store" } })
     }
@@ -207,7 +252,7 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(
-      { summary: typeof data.summary === "string" ? data.summary : "Análisis del producto", recommendations: validated },
+      { summary: typeof parsed.summary === "string" ? parsed.summary : "", recommendations: validated },
       { headers: { "Cache-Control": "no-store" } }
     )
   } catch (err) {
