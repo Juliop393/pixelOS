@@ -393,6 +393,12 @@ export default function Home() {
               <Link href="/refunds" className="text-[#9A9893] hover:text-[#E8E6E1] transition-colors">
                 Reembolsos
               </Link>
+              <a
+                href="mailto:soporte@pixelosfm.com?subject=Soporte%20PixelFM&body=Hola%20equipo%20de%20PixelFM%2C%0A%0ANecesito%20ayuda%20con%3A%0A"
+                className="text-[#9A9893] hover:text-[#E8E6E1] transition-colors"
+              >
+                Soporte
+              </a>
             </nav>
             <span className="text-xs text-[#9A9893]/60">
               © 2026 AFM Estudio · PixelFM
