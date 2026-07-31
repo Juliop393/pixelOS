@@ -119,25 +119,30 @@ export default function DashboardPage() {
         {/* Contenido de la pestaña activa (scroll interno) */}
         <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4">
           {activeTab === "product" && (
-            <ProductForm
-              producto={g.producto}
-              setProducto={g.setProducto}
-              titulo={g.titulo}
-              setTitulo={g.setTitulo}
-              subtitulo={g.subtitulo}
-              setSubtitulo={g.setSubtitulo}
-              ctaContacto={g.ctaContacto}
-              setCtaContacto={g.setCtaContacto}
-              cantidad={g.cantidad}
-              setCantidad={g.setCantidad}
-              loading={g.loading}
-              imagenReferencia={g.imagenReferencia}
-              setImagenReferencia={g.setImagenReferencia}
-              nombreImagenReferencia={g.nombreImagenReferencia}
-              setNombreImagenReferencia={g.setNombreImagenReferencia}
-              showQuantity={false}
-              highlightProduct={highlightProduct}
-            />
+            <>
+              <ProductForm
+                producto={g.producto}
+                setProducto={g.setProducto}
+                titulo={g.titulo}
+                setTitulo={g.setTitulo}
+                subtitulo={g.subtitulo}
+                setSubtitulo={g.setSubtitulo}
+                ctaContacto={g.ctaContacto}
+                setCtaContacto={g.setCtaContacto}
+                cantidad={g.cantidad}
+                setCantidad={g.setCantidad}
+                loading={g.loading}
+                imagenReferencia={g.imagenReferencia}
+                setImagenReferencia={g.setImagenReferencia}
+                nombreImagenReferencia={g.nombreImagenReferencia}
+                setNombreImagenReferencia={g.setNombreImagenReferencia}
+                showQuantity={false}
+                highlightProduct={highlightProduct}
+              />
+              <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] px-4 pt-1 pb-4 mt-4">
+                <QuantitySelector cantidad={g.cantidad} setCantidad={g.setCantidad} loading={g.loading} />
+              </div>
+            </>
           )}
 
           {activeTab === "angle" && (
@@ -184,10 +189,6 @@ export default function DashboardPage() {
                   Estilo Visual
                 </h3>
                 <StyleSelector visualStyle={g.visualStyle} setVisualStyle={g.setVisualStyle} />
-              </div>
-
-              <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] px-4 pt-1 pb-4">
-                <QuantitySelector cantidad={g.cantidad} setCantidad={g.setCantidad} loading={g.loading} />
               </div>
 
               <Accordion title="Ajustes Avanzados">
