@@ -11,6 +11,7 @@ type Recommendation = {
   styleName: string
   format: string
   safeZoneMeta: boolean
+  productDescription?: string
 }
 
 type ConvState = "collecting" | "confirming" | "recommending" | "completed"
@@ -42,6 +43,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
   const [summary, setSummary] = useState("")
   const [confirmationMessage, setConfirmationMessage] = useState("")
   const [appliedIndex, setAppliedIndex] = useState<number | null>(null)
+  const [appliedDetails, setAppliedDetails] = useState<Recommendation | null>(null)
 
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -72,6 +74,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
     setConfirmationMessage("")
     setError(null)
     setAppliedIndex(null)
+    setAppliedDetails(null)
   }
 
   const sendChatMessage = async (userMessage: string, context?: Record<string, unknown>) => {
@@ -172,7 +175,11 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
       }
 
       setSummary(data.summary || "")
-      setRecommendations(data.recommendations || [])
+      const recs = (data.recommendations || []) as Recommendation[]
+      if (data.productDescription) {
+        for (const rec of recs) { rec.productDescription = data.productDescription as string }
+      }
+      setRecommendations(recs)
       setConvState("completed")
     } catch {
       setError("Error al conectar con Pixel IA")
@@ -194,6 +201,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
   const handleApply = (rec: Recommendation, idx: number) => {
     onApplyRecommendation?.(rec)
     setAppliedIndex(idx)
+    setAppliedDetails(rec)
   }
 
   return (
@@ -422,6 +430,21 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
                     </button>
                   </div>
                 ))}
+
+                {appliedDetails && (
+                  <div className="rounded-xl p-3 mt-2" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)" }}>
+                    <p className="text-xs font-semibold text-emerald-400 mb-2">✓ Recomendación aplicada al generador</p>
+                    <div className="text-xs text-[#F5F0E8] space-y-0.5">
+                      {appliedDetails.productDescription && (
+                        <p><span className="text-[#9CA3AF]">Producto:</span> {appliedDetails.productDescription}</p>
+                      )}
+                      <p><span className="text-[#9CA3AF]">Ángulo:</span> {appliedDetails.angleName}</p>
+                      <p><span className="text-[#9CA3AF]">Estilo:</span> {appliedDetails.styleName}</p>
+                      <p><span className="text-[#9CA3AF]">Formato:</span> {formatLabels[appliedDetails.format] ?? appliedDetails.format}</p>
+                      <p><span className="text-[#9CA3AF]">Zona Segura Meta:</span> {appliedDetails.safeZoneMeta ? "Activada" : "Desactivada"}</p>
+                    </div>
+                  </div>
+                )}
 
                 <button onClick={handleReset} className="text-xs font-medium text-[#9CA3AF] hover:text-[#F5F0E8] transition-colors flex items-center gap-1 ml-1">
                   <svg className="w-3 h-3" width={12} height={12} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">

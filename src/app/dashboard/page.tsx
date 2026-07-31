@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const g = useCreativeGenerator()
   const [activeTab, setActiveTab] = useState<Tab>("product")
   const [advisorToken, setAdvisorToken] = useState<string | undefined>()
+  const [highlightProduct, setHighlightProduct] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -26,16 +27,33 @@ export default function DashboardPage() {
     })
   }, [])
 
+  useEffect(() => {
+    if (highlightProduct) {
+      const timer = setTimeout(() => setHighlightProduct(false), 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [highlightProduct])
+
   const handleApplyRecommendation = (rec: {
     angleId: string
     styleId: string
     format: string
     safeZoneMeta: boolean
+    productDescription?: string
   }) => {
     g.handleSelectAngle(rec.angleId)
     g.setAspectRatio(rec.format)
     g.setVisualStyle(rec.styleId)
     g.setSafeZoneMeta(rec.safeZoneMeta)
+
+    if (rec.productDescription) {
+      const current = g.producto.trim()
+      if (!current || current.length < 30) {
+        g.setProducto(rec.productDescription)
+        setActiveTab("product")
+        setHighlightProduct(true)
+      }
+    }
   }
 
   const canGenerate =
@@ -118,6 +136,7 @@ export default function DashboardPage() {
               nombreImagenReferencia={g.nombreImagenReferencia}
               setNombreImagenReferencia={g.setNombreImagenReferencia}
               showQuantity={false}
+              highlightProduct={highlightProduct}
             />
           )}
 

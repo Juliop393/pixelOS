@@ -22,6 +22,7 @@ interface ProductFormProps {
   nombreImagenReferencia: string | null
   setNombreImagenReferencia: (v: string | null) => void
   showQuantity?: boolean
+  highlightProduct?: boolean
 }
 
 export default function ProductForm({
@@ -41,6 +42,7 @@ export default function ProductForm({
   nombreImagenReferencia,
   setNombreImagenReferencia,
   showQuantity = true,
+  highlightProduct = false,
 }: ProductFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
@@ -184,8 +186,12 @@ export default function ProductForm({
           value={producto}
           onChange={(e) => setProducto(e.target.value)}
           rows={3}
-          placeholder="Describe tu producto (Ej: Crema hidratante para piel seca, marca propia, precio S/89)"
-          className="w-full resize-none bg-[#1E1C1A] border border-[#3A3833] px-4 py-3 rounded-xl text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
+          placeholder="Describe qué vendes y para quién."
+          className={`w-full resize-none bg-[#1E1C1A] border px-4 py-3 rounded-xl text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none transition-all duration-700 ${
+            highlightProduct
+              ? "border-[#D97757] shadow-[0_0_12px_rgba(217,119,87,0.25)]"
+              : "border-[#3A3833] focus:border-[#D97757]/50"
+          }`}
         />
       </div>
 
@@ -195,7 +201,7 @@ export default function ProductForm({
           Texto del anuncio
         </h3>
         <p className="text-xs text-[#9A9893] mb-4">
-          Dale jerarquía a tu mensaje (opcional)
+          Opcional
         </p>
 
         <div className="space-y-4">
@@ -220,7 +226,7 @@ export default function ProductForm({
               type="text"
               value={subtitulo}
               onChange={(e) => setSubtitulo(e.target.value)}
-              placeholder="Texto de apoyo secundario"
+              placeholder="Mensaje de apoyo"
               className="w-full text-center bg-[#1E1C1A] border border-[#3A3833] px-4 py-2.5 rounded-xl text-sm text-[#9A9893] placeholder:text-[#9A9893]/40 focus:outline-none focus:border-[#D97757]/50 focus:text-[#E8E6E1] transition-colors"
             />
           </div>
@@ -239,7 +245,7 @@ export default function ProductForm({
                 type="text"
                 value={ctaContacto}
                 onChange={(e) => setCtaContacto(e.target.value)}
-                placeholder="Ej: Compra ahora | WhatsApp 999-888-777"
+                placeholder="Ej. Comprar ahora o WhatsApp"
                 className="w-full bg-[#1E1C1A] border border-[#D97757]/30 pl-10 pr-4 py-3 rounded-xl text-sm font-semibold text-[#E8E6E1] placeholder:text-[#9A9893]/40 placeholder:font-normal focus:outline-none focus:border-[#D97757] transition-colors"
               />
             </div>

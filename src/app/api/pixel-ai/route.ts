@@ -100,6 +100,7 @@ safeZoneMeta: solo true si formato es story.
 Responde ÚNICAMENTE con JSON:
 {
   "summary": "Análisis breve",
+  "productDescription": "Descripción clara del producto, público y modalidad. Máx 180 caracteres.",
   "recommendations": [
     {
       "angleId": "problem-solution",
@@ -112,6 +113,8 @@ Responde ÚNICAMENTE con JSON:
     }
   ]
 }
+
+productDescription debe ser claro, específico, incluir qué se vende y para quién, máximo 180 caracteres, sin inventar precios ni cifras.
 
 3 recomendaciones distintas, sin inventar datos.`
 
@@ -308,6 +311,7 @@ export async function POST(req: NextRequest) {
     {
       type: "recommendations",
       summary: typeof parsed.summary === "string" ? parsed.summary : "",
+      productDescription: typeof parsed.productDescription === "string" ? parsed.productDescription.slice(0, 180) : "",
       recommendations: validated,
     },
     { headers: { "Cache-Control": "no-store" } }
