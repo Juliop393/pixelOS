@@ -253,6 +253,13 @@ export default function ProductForm({
         </div>
       </div>
 
+      {/* Cantidad */}
+      {showQuantity && (
+        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] px-5 pt-1 pb-5">
+          <QuantitySelector cantidad={cantidad} setCantidad={setCantidad} loading={loading} />
+        </div>
+      )}
+
       {/* Imagen de referencia */}
       <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
         <h3 className="text-sm font-bold text-[#E8E6E1] mb-1 uppercase tracking-wider">
@@ -344,13 +351,6 @@ export default function ProductForm({
           </div>
         )}
       </div>
-
-      {/* Cantidad */}
-      {showQuantity && (
-        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] px-5 pt-1 pb-5">
-          <QuantitySelector cantidad={cantidad} setCantidad={setCantidad} loading={loading} />
-        </div>
-      )}
     </div>
   )
 }
