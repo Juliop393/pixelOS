@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { Search, Copy, Check } from "lucide-react"
 
@@ -23,6 +24,22 @@ export default function AdminUsersPage() {
   const [error, setError] = useState<string | null>(null)
   const [userData, setUserData] = useState<UserData | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session?.access_token) { setIsAdmin(false); return }
+      try {
+        const res = await fetch("/api/admin/check", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        const data = await res.json()
+        setIsAdmin(data.isAdmin === true)
+      } catch {
+        setIsAdmin(false)
+      }
+    })
+  }, [])
 
   const copyToClipboard = (text: string | null, field: string) => {
     if (!text) return
@@ -79,6 +96,33 @@ export default function AdminUsersPage() {
         <p className="text-[#9A9893]">Busca por correo para revisar una cuenta</p>
       </div>
 
+      {isAdmin === null && (
+        <div className="flex justify-center py-16">
+          <div className="w-6 h-6 rounded-full border-2 border-[#D97757]/30 border-t-[#D97757] animate-spin" />
+        </div>
+      )}
+
+      {isAdmin === false && (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#D97757]/10 border border-[#D97757]/20 flex items-center justify-center mx-auto mb-5">
+            <svg className="w-8 h-8 text-[#D97757]" width={32} height={32} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m0 0v2m0-2h2m-2 0H10m9.364-8.364l-2.12 2.12m0 0a9 9 0 11-12.728 0m12.728 0l-1.415 1.415M3.222 3.222l17.556 17.556" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-[#F5F0E8] mb-2">Acceso restringido</h2>
+          <p className="text-[#9CA3AF] text-sm mb-8 max-w-sm">
+            Esta sección está disponible solo para administradores de PixelFM.
+          </p>
+          <Link
+            href="/dashboard"
+            className="px-6 py-3 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20"
+          >
+            Volver al dashboard
+          </Link>
+        </div>
+      )}
+
+      {isAdmin === true && (
       <div className="space-y-6">
         <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-6">
           <div className="flex gap-3">
@@ -153,6 +197,7 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   )
 }
