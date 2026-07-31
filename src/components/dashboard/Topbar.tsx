@@ -159,13 +159,6 @@ export default function Topbar() {
             Recargar
           </Link>
 
-          <a
-            href="mailto:soporte@pixelosfm.com?subject=Soporte%20PixelFM&body=Hola%20equipo%20de%20PixelFM%2C%0A%0ANecesito%20ayuda%20con%3A%0A"
-            className="text-sm font-medium text-[#9CA3AF] hover:text-[#F5F0E8] transition-colors hidden xl:inline"
-          >
-            Soporte
-          </a>
-
           <div className="w-px h-7 bg-[#3A3833]/50" />
 
           <Link

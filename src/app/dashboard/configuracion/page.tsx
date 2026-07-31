@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { Mail } from "lucide-react"
 
 export default function ConfiguracionPage() {
   const [agencyName, setAgencyName] = useState("")
@@ -182,6 +183,36 @@ export default function ConfiguracionPage() {
                 Gestionar suscripción
               </button>
             </div>
+          </div>
+        </div>
+
+        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-6">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-[#1E1C1A] border border-[#3A3833] flex items-center justify-center text-[#D97757]">
+              <Mail className="w-5 h-5" strokeWidth={1.5} />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">Soporte</h2>
+              <p className="text-sm text-[#9A9893]">¿Necesitas ayuda con PixelFM? Escríbenos y te responderemos por correo.</p>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between py-3 border-t border-[#3A3833]">
+              <span className="text-sm text-[#9A9893]">Correo</span>
+              <span className="text-sm text-[#E8E6E1]">soporte@pixelosfm.com</span>
+            </div>
+            <div className="pt-2">
+              <a
+                href="mailto:soporte@pixelosfm.com?subject=Soporte%20PixelFM&body=Hola%20equipo%20de%20PixelFM%2C%0A%0ANecesito%20ayuda%20con%3A%0A"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold bg-[#D97757] text-white hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20"
+              >
+                <Mail className="w-4 h-4" strokeWidth={1.5} />
+                Contactar soporte
+              </a>
+            </div>
+            <p className="text-xs text-[#9A9893]/70 text-center">
+              También puedes escribirnos directamente a soporte@pixelosfm.com
+            </p>
           </div>
         </div>
 
