@@ -15,27 +15,10 @@ function Logo() {
   )
 }
 
-function AdCreative({ compact = false }: { compact?: boolean }) {
+function AdCreative() {
   return (
-    <div className={`adCreative ${compact ? "compact" : ""}`}>
-      <div className="adTopline">NUEVA FÓRMULA · 2026</div>
-      <div className="adCopy">
-        <span>Menos rutina.</span>
-        <strong>Más calma.</strong>
-      </div>
-      <div className="productScene">
-        <div className="halo" />
-        <div className="bottle">
-          <i />
-          <span>noa</span>
-        </div>
-        <div className="stone one" />
-        <div className="stone two" />
-      </div>
-      <div className="adFooter">
-        <span>Rutinas simples.<br />Resultados reales.</span>
-        <b>DESCUBRIR <Arrow /></b>
-      </div>
+    <div className="adCreative realCreative">
+      <img src="/creative-solea-1x1.png" alt="Creativo publicitario cuadrado de Solea" />
     </div>
   )
 }
@@ -243,9 +226,9 @@ export default function Home() {
       <section className="examples section container" id="ejemplos">
         <div className="sectionIntro centered"><span className="kicker">CREATIVOS QUE SE ADAPTAN</span><h2>Una campaña. Todos los formatos.</h2><p>Genera piezas coherentes para feed, Stories y Reels.</p></div>
         <div className="creativeGallery">
-          <article className="creativeCard square"><div className="formatTag">1:1</div><div className="abstractAd peach"><span>SOLEA</span><h3>Tu piel.<br />Sin filtros.</h3><div className="jar">S</div><small>NUEVO SPF 50</small></div><footer><span>Feed</span><span>1080 × 1080</span></footer></article>
-          <article className="creativeCard portrait"><div className="formatTag">4:5</div><div className="abstractAd coffee"><span>ORIGEN</span><h3>Mejores<br />mañanas.</h3><div className="coffeeBag">origen<small>COLOMBIA</small></div><small>CAFÉ DE ESPECIALIDAD</small></div><footer><span>Feed vertical</span><span>1080 × 1350</span></footer></article>
-          <article className="creativeCard story"><div className="formatTag">9:16</div><div className="abstractAd fitness"><span>FORMA</span><h3>20 minutos.<br />Todo tu cuerpo.</h3><div className="fitnessOrb">↗</div><small>EMPIEZA HOY</small></div><footer><span>Stories & Reels</span><span>1080 × 1920</span></footer></article>
+          <article className="creativeCard square"><div className="formatTag">1:1</div><div className="abstractAd realCreative"><img src="/creative-origen-1x1.png" alt="Creativo cuadrado de café Origen" /></div><footer><span>Feed</span><span>1080 × 1080</span></footer></article>
+          <article className="creativeCard portrait"><div className="formatTag">4:5</div><div className="abstractAd realCreative"><img src="/creative-forma-4x5.png" alt="Creativo vertical de fitness Forma" /></div><footer><span>Feed vertical</span><span>1080 × 1350</span></footer></article>
+          <article className="creativeCard story"><div className="formatTag">9:16</div><div className="abstractAd realCreative"><img src="/creative-spilltech-9x16.png" alt="Creativo vertical B2B de SpillTech" /></div><footer><span>Stories & Reels</span><span>1080 × 1920</span></footer></article>
         </div>
       </section>
 
@@ -253,7 +236,7 @@ export default function Home() {
         <div className="safeVisual">
           <div className="phone">
             <div className="phoneTop"><span>9:41</span><i /></div>
-            <div className="storyAd"><span>NOA</span><h3>Menos ruido.<br />Más foco.</h3><div className="storyBottle"><i /></div><button>DESCUBRIR</button><div className="safeGuides"><span>Zona segura</span></div></div>
+            <div className="storyAd realStoryCreative"><img src="/creative-solea-safe-9x16.png" alt="Creativo vertical de Solea para Stories y Reels" /><div className="safeGuides"><span>Zona segura</span></div></div>
           </div>
           <div className="safeBadge glass"><Check /><span><b>Zona Segura activa</b><small>Todo dentro del área visible</small></span></div>
         </div>
