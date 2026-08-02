@@ -297,3 +297,9 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 .section-visible{animation:sectionReveal .8s ease-out both}
 .section-hidden{opacity:0;transform:translateY(24px)}
 @media(prefers-reduced-motion:reduce){.appFrame,body:before,.section-visible{animation:none}.section-hidden{opacity:1;transform:none}}
+
+/* === FONDO ANIMADO DEL HERO === */
+.hero{position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:-20%;background:radial-gradient(ellipse 40% 50% at 30% 30%,rgba(215,107,69,.12),transparent 55%),radial-gradient(ellipse 35% 45% at 75% 65%,rgba(215,107,69,.08),transparent 50%),radial-gradient(ellipse 50% 60% at 50% 80%,rgba(255,255,255,.02),transparent 60%);background-size:160% 160%;opacity:.85;z-index:0;pointer-events:none;animation:heroBgShift 18s ease-in-out infinite}
+@keyframes heroBgShift{0%,100%{background-position:0% 0%,0% 0%,0% 0%;opacity:.85}25%{background-position:2% 1%,-1% 2%,1% -1%}50%{background-position:0% 2%,2% 0%,-1% 1%;opacity:.7}75%{background-position:-2% -1%,1% -2%,2% 2%}}
+@media(prefers-reduced-motion:reduce){.hero:before{animation:none}}
