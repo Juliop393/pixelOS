@@ -303,3 +303,13 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 .hero:before{content:"";position:absolute;inset:-20%;background:radial-gradient(ellipse 40% 50% at 30% 30%,rgba(215,107,69,.10),transparent 55%),radial-gradient(ellipse 35% 45% at 75% 65%,rgba(215,107,69,.06),transparent 50%),radial-gradient(ellipse 50% 60% at 50% 80%,rgba(255,255,255,.02),transparent 60%);background-size:180% 180%;opacity:.88;z-index:0;pointer-events:none;animation:heroBgShift 16s ease-in-out infinite}
 @keyframes heroBgShift{0%,100%{background-position:0% 0%,0% 0%,0% 0%;transform:translate3d(-3%,-2%,0) scale(1.05);opacity:.95}25%{background-position:4% 2%,-3% 3%,2% -3%;transform:translate3d(1%,1%,0) scale(1.08)}50%{background-position:0% 4%,4% 0%,-2% 3%;transform:translate3d(3%,-1%,0) scale(1.06);opacity:.78}75%{background-position:-3% -2%,2% -3%,4% 2%;transform:translate3d(-1%,2%,0) scale(1.1)}}
 @media(prefers-reduced-motion:reduce){.hero:before{animation:none}}
+
+/* === HERO TICKER (restaurado del ZIP original) === */
+.heroTicker{height:44px;max-width:520px;margin-top:20px;overflow:hidden;border:1px solid rgba(215,107,69,.16);border-radius:13px;background:rgba(19,16,14,.55);box-shadow:inset 0 1px rgba(255,255,255,.035);backdrop-filter:blur(12px);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.tickerTrack{width:max-content;height:100%;display:flex;animation:tickerFlow 32s linear infinite;will-change:transform}
+.tickerGroup{display:flex;align-items:center;height:100%;flex-shrink:0}
+.tickerGroup>span{display:flex;align-items:center;gap:20px;padding-left:20px;color:#958a7f;font:500 11px/1 var(--font-geist-mono);letter-spacing:.035em;white-space:nowrap}
+.tickerGroup>span>i{width:3px;height:3px;border-radius:50%;background:rgba(215,107,69,.55)}
+@keyframes tickerFlow{to{transform:translate3d(-50%,0,0)}}
+@media(max-width:760px){.heroTicker{max-width:100%;margin-top:18px}.tickerTrack{animation-duration:36s}}
+@media(prefers-reduced-motion:reduce){.tickerTrack{animation:none!important;transform:none!important}.heroTicker{overflow-x:hidden}}
