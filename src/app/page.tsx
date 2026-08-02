@@ -141,8 +141,8 @@ export default function Home() {
     const onPointerMove = (event: PointerEvent) => {
       if (!preview || prefersReduced || event.pointerType === "touch") return
       const bounds = preview.getBoundingClientRect()
-      const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 12
-      const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 12
+      const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 8
+      const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 8
       setParallax(x, y)
     }
     const resetParallax = () => setParallax(0, 0)
