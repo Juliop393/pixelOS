@@ -300,6 +300,6 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 
 /* === FONDO ANIMADO DEL HERO === */
 .hero{position:relative;overflow:hidden}
-.hero:before{content:"";position:absolute;inset:-20%;background:radial-gradient(ellipse 40% 50% at 30% 30%,rgba(215,107,69,.07),transparent 55%),radial-gradient(ellipse 35% 45% at 75% 65%,rgba(215,107,69,.04),transparent 50%),radial-gradient(ellipse 50% 60% at 50% 80%,rgba(255,255,255,.015),transparent 60%);background-size:160% 160%;opacity:.65;z-index:0;pointer-events:none;animation:heroBgShift 18s ease-in-out infinite}
-@keyframes heroBgShift{0%,100%{background-position:0% 0%,0% 0%,0% 0%;opacity:.85}25%{background-position:2% 1%,-1% 2%,1% -1%}50%{background-position:0% 2%,2% 0%,-1% 1%;opacity:.7}75%{background-position:-2% -1%,1% -2%,2% 2%}}
+.hero:before{content:"";position:absolute;inset:-20%;background:radial-gradient(ellipse 40% 50% at 30% 30%,rgba(215,107,69,.10),transparent 55%),radial-gradient(ellipse 35% 45% at 75% 65%,rgba(215,107,69,.06),transparent 50%),radial-gradient(ellipse 50% 60% at 50% 80%,rgba(255,255,255,.02),transparent 60%);background-size:180% 180%;opacity:.88;z-index:0;pointer-events:none;animation:heroBgShift 16s ease-in-out infinite}
+@keyframes heroBgShift{0%,100%{background-position:0% 0%,0% 0%,0% 0%;transform:translate3d(-3%,-2%,0) scale(1.05);opacity:.95}25%{background-position:4% 2%,-3% 3%,2% -3%;transform:translate3d(1%,1%,0) scale(1.08)}50%{background-position:0% 4%,4% 0%,-2% 3%;transform:translate3d(3%,-1%,0) scale(1.06);opacity:.78}75%{background-position:-3% -2%,2% -3%,4% 2%;transform:translate3d(-1%,2%,0) scale(1.1)}}
 @media(prefers-reduced-motion:reduce){.hero:before{animation:none}}
