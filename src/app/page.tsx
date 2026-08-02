@@ -92,33 +92,69 @@ const plans = [
   { name: "Business", price: "$49.99", text: "Para equipos y más volumen.", features: ["500 creativos al mes", "Hasta 3 miembros", "Uso comercial", "Soporte prioritario"], cta: "Elegir Business" },
 ]
 
+const tickerItems = ["Meta Ads Ready", "Pixel IA", "Ángulos estratégicos", "Zona Segura Meta", "Creativos listos para publicar", "1:1 · 4:5 · 9:16", "Estrategia + IA"]
+
 export default function Home() {
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    if (prefersReduced) return
 
+    // Section reveal
     const sections = document.querySelectorAll(".section")
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("section-visible")
-            entry.target.classList.remove("section-hidden")
-            observer.unobserve(entry.target)
-          }
-        })
-      },
-      { threshold: 0.08 }
-    )
+    let observer: IntersectionObserver | undefined
+    if (prefersReduced) {
+      sections.forEach((el) => {
+        el.classList.remove("section-hidden")
+        el.classList.add("section-visible")
+      })
+    } else {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("section-visible")
+              entry.target.classList.remove("section-hidden")
+              observer?.unobserve(entry.target)
+            }
+          })
+        },
+        { threshold: 0.08 }
+      )
 
-    sections.forEach((el) => {
-      if (!el.classList.contains("hero")) {
-        el.classList.add("section-hidden")
-      }
-      observer.observe(el)
-    })
+      sections.forEach((el) => {
+        if (!el.classList.contains("hero")) {
+          el.classList.add("section-hidden")
+        }
+        observer?.observe(el)
+      })
+    }
 
-    return () => observer.disconnect()
+    // Parallax en el AppPreview
+    const preview = document.querySelector<HTMLElement>(".previewWrap")
+    let frame = 0
+    const setParallax = (x: number, y: number) => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        preview?.style.setProperty("--parallax-x", `${x}px`)
+        preview?.style.setProperty("--parallax-y", `${y}px`)
+      })
+    }
+    const onPointerMove = (event: PointerEvent) => {
+      if (!preview || prefersReduced || event.pointerType === "touch") return
+      const bounds = preview.getBoundingClientRect()
+      const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 12
+      const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 12
+      setParallax(x, y)
+    }
+    const resetParallax = () => setParallax(0, 0)
+    preview?.addEventListener("pointermove", onPointerMove)
+    preview?.addEventListener("pointerleave", resetParallax)
+
+    return () => {
+      observer?.disconnect()
+      cancelAnimationFrame(frame)
+      preview?.removeEventListener("pointermove", onPointerMove)
+      preview?.removeEventListener("pointerleave", resetParallax)
+    }
   }, [])
 
   return (
@@ -145,6 +181,11 @@ export default function Home() {
           <p>PixelFM combina estrategia publicitaria e inteligencia artificial para ayudarte a elegir el enfoque correcto y generar creativos listos para publicar.</p>
           <div className="heroActions"><Link className="button" href="/register">Crear mi primer anuncio <Arrow /></Link><a className="textButton" href="#como-funciona"><span className="play">▶</span> Ver cómo funciona</a></div>
           <small className="creditNote"><Check /> 5 créditos gratis <i /> Sin tarjeta</small>
+          <div className="heroTicker" aria-label="Capacidades de PixelFM">
+            <div className="tickerTrack">
+              {[0, 1].map((group) => <div className="tickerGroup" aria-hidden={group === 1} key={group}>{tickerItems.map((item) => <span key={`${group}-${item}`}>{item}<i /></span>)}</div>)}
+            </div>
+          </div>
         </div>
         <AppPreview />
       </section>
