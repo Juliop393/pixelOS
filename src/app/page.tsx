@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect } from "react"
 import Link from "next/link"
 
 const Arrow = () => <span aria-hidden="true">↗</span>
@@ -90,6 +93,34 @@ const plans = [
 ]
 
 export default function Home() {
+  useEffect(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    if (prefersReduced) return
+
+    const sections = document.querySelectorAll(".section")
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("section-visible")
+            entry.target.classList.remove("section-hidden")
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.08 }
+    )
+
+    sections.forEach((el) => {
+      if (!el.classList.contains("hero")) {
+        el.classList.add("section-hidden")
+      }
+      observer.observe(el)
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <main id="top">
       <header className="navShell">

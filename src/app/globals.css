@@ -287,3 +287,13 @@ img.logoMark{width:25px;height:25px;display:block;object-fit:contain}
 .miniLogo{display:flex;align-items:center}.miniLogo img{width:11px;height:11px;object-fit:contain;margin-right:5px}
 .nav .logo{gap:12px;font-size:21px}.nav img.logoMark{width:40px;height:40px}
 
+
+/* === ANIMACIONES LANDING === */
+@keyframes mockupFloat{0%,100%{transform:rotateY(-2deg) rotateX(1deg) translateY(0)}50%{transform:rotateY(-1.5deg) rotateX(0.5deg) translateY(-8px)}}
+.appFrame{animation:mockupFloat 6s ease-in-out infinite}
+@keyframes bgDrift{0%,100%{transform:translate(0,0)}50%{transform:translate(2px,1px)}}
+body:before{animation:bgDrift 20s ease-in-out infinite}
+@keyframes sectionReveal{0%{opacity:0;transform:translateY(24px)}100%{opacity:1;transform:translateY(0)}}
+.section-visible{animation:sectionReveal .8s ease-out both}
+.section-hidden{opacity:0;transform:translateY(24px)}
+@media(prefers-reduced-motion:reduce){.appFrame,body:before,.section-visible{animation:none}.section-hidden{opacity:1;transform:none}}
