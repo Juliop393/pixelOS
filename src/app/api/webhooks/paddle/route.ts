@@ -148,8 +148,8 @@ export async function POST(req: NextRequest) {
   const userId = typeof customData.user_id === "string" ? customData.user_id : undefined
   if (userId) {
     // Use the `last_paddle_occurred_at` from user_credits to detect stale events
-    // Skip this check for canceled events (we want them to always update status)
-    const isSubEvent = eventType === "subscription.activated" || eventType === "subscription.created" || eventType === "subscription.updated"
+    // Check every subscription event for out-of-order delivery.
+    const isSubEvent = eventType === "subscription.activated" || eventType === "subscription.created" || eventType === "subscription.updated" || eventType === "subscription.canceled"
     if (isSubEvent) {
       const { data: current } = await admin
         .from("user_credits")
