@@ -44,10 +44,9 @@ export const pricingPlans = [
       "500 créditos/mes",
       "1 crédito = 1 creativo",
       "Todo lo del plan Pro",
-      "White label",
-      "API access",
-      "Soporte 24/7",
-      "Múltiples usuarios",
+      "Mayor volumen de generación",
+      "Uso comercial",
+      "Soporte prioritario",
     ],
   },
 ]
