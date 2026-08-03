@@ -70,9 +70,9 @@ const angles = ["Problema y solución", "Beneficio principal", "Comparación", "
 const styles = ["Comercial B2B", "Premium editorial", "Producto en acción", "Lifestyle", "Oferta directa", "Minimalista tecnológico"]
 
 const plans = [
-  { name: "Starter", price: "$5.99", text: "Para probar ideas y lanzar rápido.", features: ["30 creativos al mes", "Todos los formatos", "Pixel IA incluido"], cta: "Empezar con Starter" },
-  { name: "Pro", price: "$19.99", text: "Para marcas que crean cada semana.", features: ["150 creativos al mes", "Zona Segura Meta", "Historial de proyectos", "Prioridad de generación"], cta: "Elegir Pro", featured: true },
-  { name: "Business", price: "$49.99", text: "Para equipos y más volumen.", features: ["500 creativos al mes", "Hasta 3 miembros", "Uso comercial", "Soporte prioritario"], cta: "Elegir Business" },
+  { name: "Starter", oldPrice: "$9.99", price: "$5.99", text: "Para probar ideas y lanzar rápido.", features: ["40 créditos al mes", "1 crédito = 1 creativo", "Formatos 1:1, 4:5 y 9:16", "Ángulos y estilos publicitarios", "Pixel IA incluido"], cta: "Empezar con Starter" },
+  { name: "Pro", oldPrice: "$24.99", price: "$19.99", text: "Para marcas que crean cada semana.", features: ["150 créditos al mes", "Todo lo de Starter", "Zona Segura Meta", "Historial de proyectos", "Soporte prioritario"], cta: "Elegir Pro", featured: true },
+  { name: "Business", oldPrice: "$59.99", price: "$49.99", text: "Para marcas que necesitan más volumen.", features: ["500 créditos al mes", "Todo lo de Pro", "Mayor volumen de generación", "Uso comercial", "Soporte prioritario"], cta: "Elegir Business" },
 ]
 
 const tickerItems = ["Meta Ads Ready", "Pixel IA", "Ángulos estratégicos", "Zona Segura Meta", "Creativos listos para publicar", "1:1 · 4:5 · 9:16", "Estrategia + IA"]
@@ -159,9 +159,9 @@ export default function Home() {
 
       <section className="hero section container" id="producto">
         <div className="heroCopy">
-          <div className="pill"><span>✦</span> Creativos estratégicos para Meta Ads</div>
+          <div className="pill"><span>✦</span> Estrategia y creativos para Meta Ads</div>
           <h1>Convierte tu producto en anuncios que se sienten <em>pensados,</em> no improvisados.</h1>
-          <p>PixelFM combina estrategia publicitaria e inteligencia artificial para ayudarte a elegir el enfoque correcto y generar creativos listos para publicar.</p>
+          <p>Pixel IA analiza tu producto, recomienda el ángulo y genera creativos listos para Feed, Stories y Reels.</p>
           <div className="heroActions"><Link className="button" href="/register">Crear mi primer anuncio <Arrow /></Link><a className="textButton" href="#como-funciona"><span className="play">▶</span> Ver cómo funciona</a></div>
           <small className="creditNote"><Check /> 5 créditos gratis <i /> Sin tarjeta</small>
           <div className="heroTicker" aria-label="Capacidades de PixelFM">
@@ -245,7 +245,7 @@ export default function Home() {
 
       <section className="pricing section container" id="precios">
         <div className="sectionIntro centered"><span className="kicker">PRECIOS SIMPLES</span><h2>Empieza pequeño. Crece cuando quieras.</h2><p>Todos los planes incluyen acceso a Pixel IA y formatos para Meta Ads.</p></div>
-        <div className="pricingGrid">{plans.map(plan => <article className={`priceCard ${plan.featured ? "featured" : ""}`} key={plan.name}>{plan.featured && <span className="popular">MÁS ELEGIDO</span>}<div><h3>{plan.name}</h3><p>{plan.text}</p></div><div className="price"><strong>{plan.price}</strong><span>USD<br />/ mes</span></div><div className="priceDivider" /><ul>{plan.features.map(x => <li key={x}><Check /> {x}</li>)}</ul><Link className={plan.featured ? "button" : "outlineButton"} href="/pricing">{plan.cta} <span>→</span></Link></article>)}</div>
+        <div className="pricingGrid">{plans.map(plan => <article className={`priceCard ${plan.featured ? "featured" : ""}`} key={plan.name}>{plan.featured && <span className="popular">Más popular</span>}<div><h3>{plan.name}</h3><p>{plan.text}</p></div><div className="price"><span className="priceOld">{plan.oldPrice}</span><strong>{plan.price}</strong><span>USD<br />/ mes</span></div><div className="priceDivider" /><ul>{plan.features.map(x => <li key={x}><Check /> {x}</li>)}</ul><Link className={plan.featured ? "button" : "outlineButton"} href="/pricing">{plan.cta} <span>→</span></Link></article>)}</div>
         <p className="pricingNote"><Check /> Cancela cuando quieras <i /> Los créditos se renuevan cada mes</p>
       </section>
 
