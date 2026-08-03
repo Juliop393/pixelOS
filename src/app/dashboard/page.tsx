@@ -66,11 +66,11 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="flex gap-5 h-full max-w-[1600px] mx-auto relative">
+    <div className="flex gap-4 2xl:gap-5 h-full max-w-[1600px] mx-auto relative">
       <PixelAdvisor onApplyRecommendation={handleApplyRecommendation} accessToken={advisorToken} />
       {/* COLUMNA IZQUIERDA: Panel de configuración con pestañas */}
       <aside
-        className="w-[420px] flex-shrink-0 h-full flex flex-col rounded-[28px] overflow-hidden relative"
+        className="w-[360px] 2xl:w-[420px] flex-shrink-0 h-full flex flex-col rounded-[28px] overflow-hidden relative"
         style={{
           background:
             "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 100%), rgba(30,28,26,0.38)",
