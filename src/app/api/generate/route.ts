@@ -190,6 +190,44 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: cleanPayload.error }, { status: 400, headers: headersNoStore })
   }
 
+  // ---- Atomic rate limit (reuses existing RPC) ----
+  const GEN_SHORT_LIMIT = 4
+  const GEN_SHORT_SECONDS = 120
+  const GEN_DAILY_LIMIT = 60
+
+  try {
+    const adminClient = createAdminClient()
+    const { data: rateStatus, error: rateError } = await adminClient.rpc("check_and_record_api_rate_limit", {
+      p_user_id: user.id,
+      p_endpoint: "generate",
+      p_short_limit: GEN_SHORT_LIMIT,
+      p_short_window_seconds: GEN_SHORT_SECONDS,
+      p_daily_limit: GEN_DAILY_LIMIT,
+    })
+
+    if (rateError) throw rateError
+
+    if (rateStatus === "short_limit") {
+      return NextResponse.json(
+        { error: "Estás generando demasiado rápido. Espera un momento e inténtalo nuevamente." },
+        { status: 429, headers: { ...headersNoStore, "Retry-After": String(GEN_SHORT_SECONDS) } }
+      )
+    }
+
+    if (rateStatus === "daily_limit") {
+      return NextResponse.json(
+        { error: "Alcanzaste el límite diario de generación. Podrás volver a generar más adelante." },
+        { status: 429, headers: headersNoStore }
+      )
+    }
+
+    // rateStatus === "allowed" → continue
+
+  } catch (e) {
+    console.error("Rate limit RPC failed for generate:", e)
+    return NextResponse.json({ error: "Error interno al verificar límites" }, { status: 500, headers: headersNoStore })
+  }
+
   // ---- n8n config check ----
   const n8nUrl = process.env.N8N_WEBHOOK_URL
   const internalSecret = (process.env.N8N_INTERNAL_SECRET ?? "").trim()
