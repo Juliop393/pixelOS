@@ -8,143 +8,242 @@ const PLAN_CREDITS: Record<string, number> = {
   [process.env.NEXT_PUBLIC_PADDLE_PRICE_BUSINESS || ""]: 500,
 }
 
-function verifySignature(rawBody: string, signatureHeader: string | null): boolean {
-  const secret = process.env.PADDLE_WEBHOOK_SECRET
-  if (!secret || !signatureHeader) {
-    console.error("verifySignature: falta secret o signatureHeader", {
-      hasSecret: !!secret,
-      hasSignature: !!signatureHeader,
-    })
-    return false
-  }
+const SIGNATURE_TOLERANCE_MS = 5 * 60 * 1000 // 5 minutes
 
-  // El header de Paddle tiene formato: ts=<timestamp>;h1=<hmac-hex>
+function parseSignature(signatureHeader: string | null): { ts: number; h1: string } | null {
+  if (!signatureHeader) return null
+
   const parts = signatureHeader.split(";").reduce((acc, part) => {
-    const [key, value] = part.split("=")
-    acc[key] = value
+    const eq = part.indexOf("=")
+    if (eq > 0) acc[part.slice(0, eq)] = part.slice(eq + 1)
     return acc
   }, {} as Record<string, string>)
 
-  const ts = parts["ts"]
+  const tsRaw = parts["ts"]
   const h1 = parts["h1"]
 
-  if (!ts || !h1) {
-    console.error("verifySignature: formato de firma inválido", { signatureHeader })
-    return false
-  }
+  if (!tsRaw || !h1) return null
 
-  // Paddle firma: HMAC-SHA256(secret, ts + ":" + rawBody)
-  const signedPayload = `${ts}:${rawBody}`
+  const ts = Number(tsRaw)
+  if (isNaN(ts) || ts <= 0) return null
+
+  return { ts, h1 }
+}
+
+function verifyHmac(rawBody: string, ts: number, h1: string): boolean {
+  const secret = process.env.PADDLE_WEBHOOK_SECRET
+  if (!secret) return false
+
   const expected = crypto
     .createHmac("sha256", secret)
-    .update(signedPayload)
+    .update(`${ts}:${rawBody}`)
     .digest("hex")
 
   const a = Buffer.from(expected, "hex")
   const b = Buffer.from(h1, "hex")
 
-  if (a.length !== b.length) {
-    console.error("verifySignature: longitudes distintas", {
-      expectedLen: a.length,
-      gotLen: b.length,
-      h1,
-      expected,
-    })
-    return false
-  }
-
+  if (a.length !== b.length) return false
   return crypto.timingSafeEqual(a, b)
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const rawBody = await req.text()
+function getAdminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  )
+}
 
-    // Debug logs
-    console.log("Webhook Paddle recibido:", {
-      headers: Object.fromEntries(req.headers.entries()),
-      bodyPreview: rawBody.substring(0, 500),
+export async function POST(req: NextRequest) {
+  // ---- Parse body ----
+  let rawBody: string
+  try {
+    rawBody = await req.text()
+  } catch {
+    return NextResponse.json({ error: "Cuerpo no legible" }, { status: 400 })
+  }
+
+  // ---- Verify signature with time tolerance ----
+  const signatureHeader = req.headers.get("paddle-signature") || req.headers.get("Paddle-Signature")
+  if (!signatureHeader) {
+    return NextResponse.json({ error: "Firma ausente" }, { status: 400 })
+  }
+
+  const parsed = parseSignature(signatureHeader)
+  if (!parsed) {
+    return NextResponse.json({ error: "Firma inválida" }, { status: 401 })
+  }
+
+  if (!verifyHmac(rawBody, parsed.ts, parsed.h1)) {
+    return NextResponse.json({ error: "Firma no coincide" }, { status: 401 })
+  }
+
+  // Time tolerance
+  const signatureAge = Math.abs(Date.now() - parsed.ts * 1000)
+  if (signatureAge > SIGNATURE_TOLERANCE_MS) {
+    return NextResponse.json({ error: "Timestamp fuera de tolerancia" }, { status: 400 })
+  }
+
+  // ---- Parse event ----
+  let event: Record<string, unknown>
+  try {
+    event = JSON.parse(rawBody)
+  } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 })
+  }
+
+  const eventId = typeof event.event_id === "string" ? event.event_id : ""
+  const eventType = typeof event.event_type === "string" ? event.event_type : (typeof event.type === "string" ? event.type : "")
+  const data = (typeof event.data === "object" && event.data !== null ? event.data : {}) as Record<string, unknown>
+
+  if (!eventId || !eventType) {
+    return NextResponse.json({ error: "event_id/event_type requeridos" }, { status: 400 })
+  }
+
+  const occurredAt = typeof data.occurred_at === "string" ? new Date(data.occurred_at) : new Date()
+  if (isNaN(occurredAt.getTime())) {
+    return NextResponse.json({ error: "occurred_at inválido" }, { status: 400 })
+  }
+
+  // ---- Idempotency: atomic insert of event_id as "processing" ----
+  const admin = getAdminClient()
+
+  const { error: insertErr } = await admin
+    .from("paddle_webhook_events")
+    .insert({
+      event_id: eventId,
+      event_type: eventType,
+      occurred_at: occurredAt.toISOString(),
+      status: "processing",
     })
 
-    const signatureHeader = req.headers.get("paddle-signature") || req.headers.get("Paddle-Signature")
+  if (insertErr) {
+    // Duplicate key → event already seen
+    const { data: existing } = await admin
+      .from("paddle_webhook_events")
+      .select("status")
+      .eq("event_id", eventId)
+      .maybeSingle()
 
-    if (!verifySignature(rawBody, signatureHeader)) {
-      console.error("Firma inválida", { signatureHeader })
-      return NextResponse.json({ error: "Firma inválida" }, { status: 401 })
+    const status = (existing as { status?: string } | null)?.status
+
+    if (status === "processed" || status === "ignored") {
+      return NextResponse.json({ success: true, deduplicated: true })
     }
 
-    const event = JSON.parse(rawBody)
-    const eventType: string = event.event_type || event.type || ""
-    const data = event.data || {}
+    if (status === "processing") {
+      // Another request is already handling this event — skip safely
+      return NextResponse.json({ success: true, concurrent: true })
+    }
 
-    console.log("Webhook evento:", eventType)
+    // "failed" status → allow retry
+  }
 
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false } }
-    )
+  // ---- Guardar `last_paddle_occurred_at` en el usuario ANTES de procesar eventos de subscripción para manejar fuera-de-orden. No es crítico para el funcionamiento pero es necesario para la consistencia.
 
+  // This is a simplified check: we only handle subscription events. 
+  // If the event's occurred_at is older than what we already have, skip it.
+  const eventData = data as Record<string, unknown>
+  const customData = (eventData.custom_data ?? {}) as Record<string, unknown>
+  const userId = typeof customData.user_id === "string" ? customData.user_id : undefined
+  if (userId) {
+    // Use the `last_paddle_occurred_at` from user_credits to detect stale events
+    // Skip this check for canceled events (we want them to always update status)
+    const isSubEvent = eventType === "subscription.activated" || eventType === "subscription.created" || eventType === "subscription.updated"
+    if (isSubEvent) {
+      const { data: current } = await admin
+        .from("user_credits")
+        .select("last_paddle_occurred_at")
+        .eq("user_id", userId)
+        .maybeSingle()
+
+      const lastTs = (current as { last_paddle_occurred_at?: string } | null)?.last_paddle_occurred_at
+      if (lastTs) {
+        const lastDate = new Date(lastTs)
+        if (occurredAt <= lastDate) {
+          // Mark as ignored (stale)
+          await admin
+            .from("paddle_webhook_events")
+            .update({ status: "ignored", processed_at: new Date().toISOString() })
+            .eq("event_id", eventId)
+
+          return NextResponse.json({ success: true, stale: true })
+        }
+      }
+    }
+  }
+
+  // ---- Process the event ----
+  try {
     if (eventType === "subscription.activated" || eventType === "subscription.created") {
-      const userId = data.custom_data?.user_id
-
       if (!userId) {
         return NextResponse.json({ error: "Sin user_id" }, { status: 400 })
       }
 
-      const priceId = data.items?.[0]?.price?.id || data.items?.[0]?.price_id || ""
+      const items = (eventData.items as Array<Record<string, unknown>> | undefined) ?? []
+      const firstPrice = items.length > 0 ? (items[0]?.price as Record<string, unknown> | undefined) : undefined
+      const priceId = firstPrice && typeof firstPrice.id === "string" ? firstPrice.id : (items.length > 0 && typeof items[0]?.price_id === "string" ? items[0].price_id : "")
       const credits = PLAN_CREDITS[priceId]
 
       if (!credits) {
-        return NextResponse.json({ error: "price_id no reconocido", priceId }, { status: 400 })
+        return NextResponse.json({ error: "price_id no reconocido" }, { status: 400 })
       }
 
-      const { error } = await supabaseAdmin
+      const { error } = await admin
         .from("user_credits")
         .upsert({
           user_id: userId,
           credits,
           plan: credits >= 500 ? "business" : credits >= 150 ? "pro" : "starter",
           subscription_status: "active",
-          paddle_subscription_id: data.id || null,
-          paddle_customer_id: data.customer_id || null,
+          paddle_subscription_id: typeof eventData.id === "string" ? eventData.id : null,
+          paddle_customer_id: typeof eventData.customer_id === "string" ? eventData.customer_id : null,
+          last_paddle_occurred_at: occurredAt.toISOString(),
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" })
 
-      if (error) {
-        console.error("Error upsert user_credits:", error)
-        return NextResponse.json({ error: error.message }, { status: 500 })
-      }
-
-      return NextResponse.json({ success: true, credits })
-    }
-
-    if (eventType === "subscription.canceled") {
-      const userId = data.custom_data?.user_id
-
+      if (error) throw error
+    } else if (eventType === "subscription.canceled") {
       if (!userId) {
         return NextResponse.json({ error: "Sin user_id" }, { status: 400 })
       }
 
-      const { error } = await supabaseAdmin
+      const { error } = await admin
         .from("user_credits")
         .update({
           subscription_status: "cancelled",
+          last_paddle_occurred_at: occurredAt.toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq("user_id", userId)
 
-      if (error) {
-        console.error("Error update user_credits:", error)
-        return NextResponse.json({ error: error.message }, { status: 500 })
-      }
+      if (error) throw error
+    } else {
+      // Unknown event — mark as ignored
+      await admin
+        .from("paddle_webhook_events")
+        .update({ status: "ignored", processed_at: new Date().toISOString() })
+        .eq("event_id", eventId)
 
-      return NextResponse.json({ success: true })
+      return NextResponse.json({ success: true, ignored: eventType })
     }
 
-    return NextResponse.json({ success: true, ignored: eventType })
+    // Mark as processed
+    await admin
+      .from("paddle_webhook_events")
+      .update({ status: "processed", processed_at: new Date().toISOString() })
+      .eq("event_id", eventId)
+
+    return NextResponse.json({ success: true })
   } catch (err) {
-    console.error("Error webhook Paddle:", err)
+    const msg = err instanceof Error ? err.message : "Error desconocido"
+
+    // Mark as failed so Paddle can retry
+    await admin
+      .from("paddle_webhook_events")
+      .update({ status: "failed", error_message: msg })
+      .eq("event_id", eventId)
+
     return NextResponse.json({ error: "Error interno" }, { status: 500 })
   }
 }
