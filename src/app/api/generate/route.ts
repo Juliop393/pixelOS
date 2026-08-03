@@ -18,7 +18,7 @@ const MAX_PRODUCT_CHARS = 3000
 const MAX_TITLE_CHARS = 180
 const MAX_SUBTITLE_CHARS = 300
 
-const N8N_TIMEOUT_MS = 45_000
+const N8N_TIMEOUT_MS = 90_000
 
 const headersNoStore = { "Cache-Control": "no-store" }
 
@@ -87,9 +87,33 @@ function buildCleanPayload(body: Record<string, unknown>, userId: string): Recor
   const imagenReferencia = typeof body.imagenReferencia === "string" ? body.imagenReferencia : null
   if (!isValidReferenceUrl(imagenReferencia)) return { error: "URL de referencia no permitida" }
 
-  const brandIdentity = (typeof body.brandIdentity === "object" && body.brandIdentity !== null)
-    ? (body.brandIdentity as Record<string, unknown>)
-    : null
+  const brandIdentity = (() => {
+    const raw = body.brandIdentity
+    if (raw === null || raw === undefined) return null
+    if (typeof raw !== "object" || Array.isArray(raw)) return { error: "brandIdentity inválido" } as const
+
+    const bi = raw as Record<string, unknown>
+
+    const brandName = typeof bi.brandName === "string" ? bi.brandName.trim().slice(0, 100) : null
+
+    const brandColors = Array.isArray(bi.brandColors) && bi.brandColors.length === 2 &&
+      typeof bi.brandColors[0] === "string" && typeof bi.brandColors[1] === "string"
+      ? (bi.brandColors as string[]).map((c: string) => c.trim().slice(0, 20))
+      : null
+
+    const hasLogo = typeof bi.hasLogo === "boolean" ? bi.hasLogo : false
+    const hasFace = typeof bi.hasFace === "boolean" ? bi.hasFace : false
+
+    const logoUrl = typeof bi.logoUrl === "string" ? bi.logoUrl.trim() : null
+    const faceUrl = typeof bi.faceUrl === "string" ? bi.faceUrl.trim() : null
+
+    if (logoUrl && !isValidReferenceUrl(logoUrl)) return { error: "URL del logo no permitida" } as const
+    if (faceUrl && !isValidReferenceUrl(faceUrl)) return { error: "URL de la foto no permitida" } as const
+
+    return { brandName, brandColors, hasLogo, logoUrl, hasFace, faceUrl }
+  })()
+
+  if (brandIdentity && "error" in brandIdentity) return brandIdentity
 
   return {
     producto,
