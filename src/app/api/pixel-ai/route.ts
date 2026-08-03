@@ -35,10 +35,9 @@ const STYLE_NAMES: Record<string, string> = {
   "minimal-tech": "Minimalista tecnológico",
 }
 
-const RATE_LIMIT_WINDOW_SHORT = 5 * 60 * 1000   // 5 minutes
-const RATE_LIMIT_MAX_SHORT = 8
-const RATE_LIMIT_WINDOW_DAY = 24 * 60 * 60 * 1000
-const RATE_LIMIT_MAX_DAY = 40
+const RATE_LIMIT_SHORT_MAX = 8
+const RATE_LIMIT_SHORT_SECONDS = 300  // 5 minutes
+const RATE_LIMIT_DAILY_MAX = 40
 const MAX_MESSAGES = 10
 const MAX_CHARS_PER_MESSAGE = 2000
 const MAX_COMBINED_CHARS = 6000
@@ -134,56 +133,39 @@ function getAdminClient() {
   )
 }
 
-async function checkRateLimit(userId: string): Promise<{ allowed: boolean; retryAfter?: number; reason?: string }> {
+type RateLimitResult = { allowed: false; reason: string; retryAfter?: number } | { allowed: true }
+
+async function checkAndRecordRateLimit(userId: string): Promise<RateLimitResult> {
   const admin = getAdminClient()
-  const now = new Date()
-  const shortAgo = new Date(now.getTime() - RATE_LIMIT_WINDOW_SHORT).toISOString()
-  const dayAgo = new Date(now.getTime() - RATE_LIMIT_WINDOW_DAY).toISOString()
+  const { data: status, error } = await admin.rpc("check_and_record_api_rate_limit", {
+    p_user_id: userId,
+    p_endpoint: "pixel-ai",
+    p_short_limit: RATE_LIMIT_SHORT_MAX,
+    p_short_window_seconds: RATE_LIMIT_SHORT_SECONDS,
+    p_daily_limit: RATE_LIMIT_DAILY_MAX,
+  })
 
-  const { count: shortCount, error: shortErr } = await admin
-    .from("api_rate_limits")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .eq("endpoint", "pixel-ai")
-    .gte("created_at", shortAgo)
+  if (error) throw error
 
-  if (shortErr) throw shortErr
-
-  if ((shortCount ?? 0) >= RATE_LIMIT_MAX_SHORT) {
-    return {
-      allowed: false,
-      retryAfter: RATE_LIMIT_WINDOW_SHORT / 1000,
-      reason: "Has enviado demasiados mensajes seguidos. Espera unos minutos e inténtalo nuevamente.",
-    }
+  if (status === "short_limit") {
+    return { allowed: false, retryAfter: RATE_LIMIT_SHORT_SECONDS, reason: "Has enviado demasiados mensajes seguidos. Espera unos minutos e inténtalo nuevamente." }
   }
 
-  const { count: dayCount, error: dayErr } = await admin
-    .from("api_rate_limits")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .eq("endpoint", "pixel-ai")
-    .gte("created_at", dayAgo)
-
-  if (dayErr) throw dayErr
-
-  if ((dayCount ?? 0) >= RATE_LIMIT_MAX_DAY) {
-    return {
-      allowed: false,
-      reason: "Alcanzaste el límite diario de Pixel IA. Podrás volver a usarlo más adelante.",
-    }
+  if (status === "daily_limit") {
+    return { allowed: false, reason: "Alcanzaste el límite diario de Pixel IA. Podrás volver a usarlo más adelante." }
   }
 
   return { allowed: true }
 }
 
-async function recordRequest(userId: string) {
-  const admin = getAdminClient()
-  await admin.from("api_rate_limits").insert({ user_id: userId, endpoint: "pixel-ai" })
-
-  // Periodic cleanup (~10% chance): delete records older than 48 hours
-  if (Math.random() < 0.1) {
+async function cleanupOldRecords() {
+  try {
+    if (Math.random() >= 0.1) return
+    const admin = getAdminClient()
     const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
     await admin.from("api_rate_limits").delete().lt("created_at", cutoff).eq("endpoint", "pixel-ai")
+  } catch (e) {
+    console.error("Rate limit cleanup failed:", e)
   }
 }
 
@@ -316,9 +298,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: validation.error }, { status: validation.status, headers: cacheHeaders })
   }
 
-  // ---- Rate limit check ----
+  // ---- Atomic rate limit check + record (RPC) ----
   try {
-    const limitResult = await checkRateLimit(user.id)
+    const limitResult = await checkAndRecordRateLimit(user.id)
     if (!limitResult.allowed) {
       const headers: Record<string, string> = { ...cacheHeaders }
       if (limitResult.retryAfter) {
@@ -327,12 +309,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: limitResult.reason }, { status: 429, headers })
     }
   } catch (e) {
-    console.error("Rate limit check failed:", e)
+    console.error("Rate limit RPC failed:", e)
     return NextResponse.json({ error: "Error interno al verificar límites" }, { status: 500, headers: cacheHeaders })
   }
 
-  // ---- Record the request ----
-  recordRequest(user.id).catch((e) => console.error("Rate limit record failed:", e))
+  // Probabilistic cleanup (non-blocking)
+  cleanupOldRecords()
 
   // ---- Chat action ----
   if (validation.action === "chat") {
