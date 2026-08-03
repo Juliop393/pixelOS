@@ -16,14 +16,14 @@ export default function PricingPage() {
         </nav>
       </header>
 
-      <section className="section container">
+      <section className="container" style={{ marginTop: "80px", paddingBottom: "120px" }}>
         <div className="sectionIntro centered">
           <span className="kicker">PRECIOS</span>
           <h2>Planes simples</h2>
           <p>Precios de lanzamiento. Sin contratos. Cancela cuando quieras.</p>
         </div>
         <PricingPlans />
-        <p className="pricingNote">✓ Cancela cuando quieras · Los créditos se renuevan cada mes</p>
+        <p className="pricingNote" style={{ marginTop: "32px" }}>✓ Cancela cuando quieras · Los créditos se renuevan cada mes</p>
       </section>
     </main>
   )
