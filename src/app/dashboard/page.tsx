@@ -248,7 +248,7 @@ export default function DashboardPage() {
             "inset 0 1px 0 rgba(255,255,255,0.04), 0 6px 24px rgba(0,0,0,0.14)",
         }}
       >
-        <div className="p-5 h-full relative z-10">
+        <div className="p-3 h-full relative z-10">
           <ResultPanel
             phase={g.phase}
             result={g.result}
