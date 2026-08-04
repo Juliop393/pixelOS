@@ -12,6 +12,11 @@ import ResultPanel from "@/components/dashboard/ResultPanel"
 import GenerateButton from "@/components/dashboard/GenerateButton"
 import Accordion from "@/components/ui/Accordion"
 import PixelAdvisor from "@/components/dashboard/PixelAdvisor"
+import cvs from "@/components/dashboard/GeneratorWorkspace.module.css"
+
+const FORMAT_LABELS: Record<string, string> = {
+  square: "1:1", story: "9:16", "4:5": "4:5",
+}
 
 type Tab = "product" | "angle" | "design"
 
@@ -20,6 +25,8 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>("product")
   const [advisorToken, setAdvisorToken] = useState<string | undefined>()
   const [highlightProduct, setHighlightProduct] = useState(false)
+  const [showGuides, setShowGuides] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -237,34 +244,53 @@ export default function DashboardPage() {
 
       {/* COLUMNA DERECHA: Preview grande */}
       <div
-        className="flex-1 min-w-0 h-full overflow-y-auto rounded-[28px] relative"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.005) 100%), rgba(30,28,26,0.22)",
-          backdropFilter: "blur(14px) saturate(125%)",
-          WebkitBackdropFilter: "blur(14px) saturate(125%)",
-          border: "1px solid rgba(255,255,255,0.05)",
-          boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.04), 0 6px 24px rgba(0,0,0,0.14)",
+        className={`${cvs.canvasPanel} flex-1 min-w-0 h-full ${isFullscreen ? cvs.canvasFullscreen : ""}`}
+        style={isFullscreen ? {} : {
+          background: "rgba(20,18,16,.9)",
+          border: "1px solid rgba(243,234,223,.09)",
+          borderRadius: "24px",
+          boxShadow: "0 30px 80px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.025)",
         }}
       >
-        <div className="p-3 h-full relative z-10">
-          <ResultPanel
-            phase={g.phase}
-            result={g.result}
-            generatedImages={g.generatedImages}
-            progress={g.progress}
-            error={g.error}
-            aspectRatio={g.aspectRatio}
-            selectedAngle={g.selectedAngle}
-            sessionHistory={g.sessionHistory}
-            onRetry={g.handleRetry}
-            onDownload={g.handleDownload}
-            onDownloadAll={g.handleDownloadAll}
-            onSelectFromGenerated={g.handleSelectFromGenerated}
-            onSelectFromHistory={g.handleSelectFromHistory}
-          />
+        <div className={cvs.canvasHeader}>
+          <div>
+            <span className={cvs.liveDot} />
+            <div><b>Vista previa</b><small>Tu creativo se actualizará aquí</small></div>
+          </div>
+          <div className={cvs.canvasTools}>
+            <span>{FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio}</span>
+            <button
+              className={showGuides ? cvs.toolActive : ""}
+              onClick={() => setShowGuides(!showGuides)}
+              aria-label={showGuides ? "Ocultar guías" : "Mostrar guías"}
+              title={showGuides ? "Ocultar guías" : "Mostrar guías"}
+              aria-pressed={showGuides}
+            >⌗</button>
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              aria-label={isFullscreen ? "Salir de pantalla completa" : "Expandir vista"}
+              title={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+              aria-pressed={isFullscreen}
+            >⛶</button>
+          </div>
         </div>
+
+        <ResultPanel
+          phase={g.phase}
+          result={g.result}
+          generatedImages={g.generatedImages}
+          progress={g.progress}
+          error={g.error}
+          aspectRatio={g.aspectRatio}
+          selectedAngle={g.selectedAngle}
+          sessionHistory={g.sessionHistory}
+          showGuides={showGuides}
+          onRetry={g.handleRetry}
+          onDownload={g.handleDownload}
+          onDownloadAll={g.handleDownloadAll}
+          onSelectFromGenerated={g.handleSelectFromGenerated}
+          onSelectFromHistory={g.handleSelectFromHistory}
+        />
       </div>
     </div>
   )

@@ -1,15 +1,10 @@
 "use client"
 
-import { ANGLES } from "@/lib/angles-data"
-import { Sparkles, Download, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react"
+import { useState } from "react"
+import { Sparkles, Download } from "lucide-react"
+import styles from "./GeneratorWorkspace.module.css"
 
-const EXAMPLE_CREATIVES = [
-  "https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_60.jpg",
-  "https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_66.jpg",
-  "https://masacsnqilcqlzxhtohi.supabase.co/storage/v1/object/public/creativos/creativo_68.jpg",
-]
-
-interface ResultPanelProps {
+type ResultPanelProps = {
   phase: "select" | "loading" | "result" | "error"
   result: { imageUrl: string; copy: string; angle: string } | null
   generatedImages: Array<{ imageUrl: string; angle: string }>
@@ -18,6 +13,7 @@ interface ResultPanelProps {
   aspectRatio: string
   selectedAngle: string | null
   sessionHistory: Array<{ imageUrl: string; angle: string }>
+  showGuides: boolean
   onRetry: () => void
   onDownload: () => void
   onDownloadAll: () => void
@@ -25,266 +21,167 @@ interface ResultPanelProps {
   onSelectFromHistory: (item: { imageUrl: string; angle: string }) => void
 }
 
+const FORMAT_LABELS: Record<string, string> = {
+  square: "1:1", story: "9:16", "4:5": "4:5",
+}
+
 export default function ResultPanel({
-  phase,
-  result,
-  generatedImages,
-  progress,
-  error,
-  aspectRatio,
-  selectedAngle,
-  sessionHistory,
-  onRetry,
-  onDownload,
-  onDownloadAll,
-  onSelectFromGenerated,
-  onSelectFromHistory,
+  phase, result, generatedImages, progress, error, aspectRatio, selectedAngle,
+  sessionHistory, showGuides, onRetry, onDownload, onDownloadAll,
+  onSelectFromGenerated, onSelectFromHistory,
 }: ResultPanelProps) {
-  const selectedAngleData = ANGLES.find((a) => a.id === selectedAngle)
-  const allThumbs = [...generatedImages, ...sessionHistory]
+  const [activeIndex, setActiveIndex] = useState(0)
+  const hasResults = generatedImages.length > 0
+  const activeImg = generatedImages[activeIndex]
+  const formatLabel = FORMAT_LABELS[aspectRatio] ?? aspectRatio
+
+  const selectPrev = () => setActiveIndex((i) => Math.max(0, i - 1))
+  const selectNext = () => setActiveIndex((i) => Math.min(generatedImages.length - 1, i + 1))
 
   return (
-    <div className="min-w-0 h-full flex flex-col gap-3">
-      {/* === MAIN STAGE === */}
-      <div
-        className="flex-1 rounded-[24px] overflow-hidden relative min-h-0"
-        style={{
-          background: "linear-gradient(160deg, rgba(22,20,18,0.6) 0%, rgba(14,13,13,0.5) 100%)",
-          border: "1px solid rgba(255,255,255,0.05)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
-      >
-        {/* Reflejo superior */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-[25%] pointer-events-none"
-          style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%)" }}
-        />
-
-        {/* --- EMPTY STATE --- */}
+    <div className={styles.canvasStage}>
+      {/* === PREVIEW AREA === */}
+      <div className={styles.previewArea}>
+        {/* --- EMPTY --- */}
         {phase === "select" && (
-          <div className="h-full flex flex-col items-center justify-center px-6 py-8 relative z-10">
-            <div
-              className="text-center max-w-sm mb-6 px-8 py-8 rounded-3xl"
-              style={{
-                background: "linear-gradient(135deg, rgba(42,40,38,0.45) 0%, rgba(30,28,26,0.3) 100%)",
-                border: "1px solid rgba(217,119,87,0.1)",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.03)",
-              }}
-            >
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                style={{
-                  background: "linear-gradient(135deg, rgba(217,119,87,0.12) 0%, rgba(217,119,87,0.04) 100%)",
-                  border: "1px solid rgba(217,119,87,0.12)",
-                }}
-              >
-                <Sparkles className="w-6 h-6 text-[#D97757]" strokeWidth={1.5} />
-              </div>
-              <h3 className="text-lg font-bold text-[#F5F0E8] mb-2">
-                Tu creativo aparecerá aquí
-              </h3>
-              <p className="text-[#9CA3AF] text-sm leading-relaxed">
-                Completa tu producto, elige un ángulo de venta y genera anuncios listos para publicar.
-              </p>
+          <div className={styles.previewEmpty}>
+            <div className={styles.formatHints} aria-hidden="true"><i /><i /><i /></div>
+            {showGuides && (
+              <div className={styles.guideOverlay} aria-hidden="true"><i /><b /></div>
+            )}
+            <div className={styles.previewIcon} aria-hidden="true">
+              <span><Sparkles className="w-6 h-6 text-[#e58a68]" strokeWidth={1.5} /></span>
             </div>
-
-            <div className="w-full max-w-sm">
-              <div className="mb-3 flex items-center gap-2">
-                <span className="h-px flex-1 bg-[#3A3833]/30" />
-                <span className="text-[10px] font-semibold text-[#9CA3AF]/50 uppercase tracking-wider">
-                  Inspiración
-                </span>
-                <span className="h-px flex-1 bg-[#3A3833]/30" />
-              </div>
-              <div className="flex gap-2.5 overflow-x-auto pb-1 dashboard-scroll">
-                {EXAMPLE_CREATIVES.map((url, idx) => (
-                  <div
-                    key={idx}
-                    className="group relative w-28 h-28 flex-shrink-0 rounded-xl overflow-hidden"
-                    style={{ border: "1px solid rgba(58,56,51,0.35)" }}
-                  >
-                    <img
-                      src={url}
-                      alt={`Ejemplo ${idx + 1}`}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                  </div>
-                ))}
-              </div>
+            <span className={styles.previewKicker}>LISTO PARA CREAR</span>
+            <h2>Tu producto está a una estrategia<br />de convertirse en anuncio.</h2>
+            <p>Completa la información y Pixel IA preparará el enfoque antes de generar.</p>
+            <div className={styles.progressSteps}>
+              <span className={styles.done}><i>1</i> Producto</span>
+              <b />
+              <span><i>2</i> Estrategia</span>
+              <b />
+              <span><i>3</i> Creativo</span>
             </div>
           </div>
         )}
 
-        {/* --- LOADING STATE --- */}
+        {/* --- LOADING --- */}
         {phase === "loading" && (
-          <div className="h-full flex flex-col items-center justify-center relative z-10">
-            <div className="w-full max-w-sm text-center">
-              <div
-                className="w-20 h-20 mx-auto mb-8 rounded-2xl flex items-center justify-center relative"
-                style={{
-                  background: "linear-gradient(135deg, rgba(217,119,87,0.12) 0%, rgba(217,119,87,0.04) 100%)",
-                  border: "1px solid rgba(217,119,87,0.15)",
-                }}
-              >
-                <Sparkles className="w-9 h-9 text-[#D97757] animate-pulse" strokeWidth={1.5} />
-                <div
-                  className="absolute -inset-1 rounded-2xl opacity-60"
-                  style={{
-                    background: "conic-gradient(from 0deg, transparent, rgba(217,119,87,0.15), transparent)",
-                    animation: "spin 2s linear infinite",
-                  }}
-                />
-              </div>
-
-              <p className="text-[#F5F0E8] font-semibold text-base mb-1.5">
-                {progress.total > 1
-                  ? `Generando ${progress.total} creativos`
-                  : "Pixel IA está trabajando"}
-              </p>
-              <p className="text-[#9CA3AF] text-xs mb-6">
-                {progress.total > 1
-                  ? `${progress.completed} de ${progress.total} completados`
-                  : "Creando tu anuncio..."}
-              </p>
-
-              <div className="w-full h-[3px] bg-[#3A3833]/50 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-[#D97757] rounded-full transition-all duration-500 ease-out"
-                  style={{
-                    width: progress.total > 0
-                      ? `${(progress.completed / progress.total) * 100}%`
-                      : "0%",
-                    boxShadow: "0 0 8px rgba(217,119,87,0.4)",
-                  }}
-                />
-              </div>
+          <div className={styles.generatingState} role="status" aria-live="polite">
+            <div className={styles.generatingMark}>
+              <img src="/pixelfm-logo.png" alt="" /><i />
+            </div>
+            <span className={styles.previewKicker}>PIXELFM ESTÁ CREANDO</span>
+            <h2>Construyendo una dirección<br />visual para tu producto.</h2>
+            <p>Pixel IA está convirtiendo tu estrategia en un creativo listo para Meta Ads.</p>
+            <div className={styles.loadingTrack}><i /></div>
+            <div className={styles.loadingStages}>
+              <span className={styles.stageComplete}><i>✓</i> Analizando el producto</span>
+              <span className={styles.stageActive}><i /> Construyendo la dirección visual</span>
+              <span><i /> Generando el creativo</span>
             </div>
           </div>
         )}
 
-        {/* --- ERROR STATE --- */}
+        {/* --- ERROR --- */}
         {phase === "error" && (
-          <div className="h-full flex items-center justify-center relative z-10">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-2xl bg-red-500/8 border border-red-500/15 flex items-center justify-center mx-auto mb-5">
-                <svg className="w-8 h-8 text-red-400" width={32} height={32} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <p className="text-[#F5F0E8] font-medium mb-1.5">Hubo un error generando tu creativo</p>
-              <p className="text-[#9CA3AF]/60 text-xs mb-6 max-w-xs mx-auto">{error || "Intenta de nuevo"}</p>
-              <button
-                onClick={onRetry}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20"
-              >
-                <RefreshCw className="w-4 h-4" strokeWidth={1.5} />
-                Reintentar
-              </button>
+          <div className={styles.previewEmpty}>
+            <div className={styles.previewIcon} aria-hidden="true">
+              <span style={{ color: "#ef4444" }}>!</span>
             </div>
+            <span className={styles.previewKicker}>ERROR</span>
+            <h2>No se pudo generar<br />el creativo.</h2>
+            <p>{error || "Intenta de nuevo"}</p>
+            <button onClick={onRetry} className="mt-6 px-5 py-2.5 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200">
+              Reintentar
+            </button>
           </div>
         )}
 
-        {/* --- RESULT STATE --- */}
-        {phase === "result" && result && (
-          <div className="h-full flex flex-col relative z-10">
-            {/* Preview principal */}
-            <div className="flex-1 flex items-center justify-center overflow-hidden p-6 min-h-0">
-              {result.imageUrl ? (
-                <>
-                  <img
-                    src={result.imageUrl}
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    style={{ filter: "blur(45px) brightness(0.2) saturate(0.4)", transform: "scale(1.2)" }}
-                  />
-                  <div className="absolute inset-0 bg-[#0c0b0a]/65" />
-                  <img
-                    src={result.imageUrl}
-                    alt="Creativo generado"
-                    className="relative z-10 max-w-[88%] max-h-full w-auto h-auto object-contain rounded-xl"
-                    style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06)" }}
-                  />
-                </>
-              ) : (
-                <div className="text-center">
-                  <p className="text-[#9CA3AF] text-sm">Vista previa del creativo</p>
-                </div>
+        {/* --- RESULT --- */}
+        {phase === "result" && hasResults && activeImg && (
+          <div className={styles.resultState}>
+            <div className={styles.resultMeta}>
+              <span><i /> Resultado {activeIndex + 1} de {generatedImages.length}</span>
+              <div>
+                <button onClick={selectPrev} disabled={activeIndex === 0} aria-label="Creativo anterior">←</button>
+                <button onClick={selectNext} disabled={activeIndex === generatedImages.length - 1} aria-label="Creativo siguiente">→</button>
+              </div>
+            </div>
+            <div className={styles.resultFrame} data-format={formatLabel}>
+              <img src={activeImg.imageUrl} alt={`Creativo generado ${activeIndex + 1}`} />
+              {showGuides && (
+                <div className={`${styles.guideOverlay} ${formatLabel === "9:16" ? styles.metaSafeGuide : ""}`} data-testid="preview-guides" aria-hidden="true"><i /><b /></div>
               )}
             </div>
-
-            {/* Angle + Copy footer */}
-            {selectedAngleData && (
-              <div className="px-5 py-3.5 flex items-start gap-2.5" style={{ borderTop: "1px solid rgba(58,56,51,0.4)" }}>
-                <span className="text-base mt-0.5">{selectedAngleData.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-[#F5F0E8] mb-0.5">{selectedAngleData.title}</p>
-                  <p className="text-xs text-[#9CA3AF] leading-relaxed line-clamp-2">{result.copy}</p>
-                </div>
+            <div className={styles.resultActions}>
+              <span><b>{formatLabel}</b> · Creativo listo</span>
+              <div>
+                <a href={activeImg.imageUrl} target="_blank" rel="noreferrer">Ampliar</a>
+                <button onClick={generatedImages.length > 1 ? onDownloadAll : onDownload}>
+                  Descargar <span>↓</span>
+                </button>
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>
 
-      {/* === BOTTOM STRIP: Thumbs + Download === */}
-      {phase === "result" && (
-        <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Thumbnails strip */}
-          {allThumbs.length > 1 && (
-            <div
-              className="flex-1 rounded-2xl p-2.5 overflow-hidden"
-              style={{
-                background: "rgba(42,40,38,0.35)",
-                border: "1px solid rgba(58,56,51,0.4)",
-              }}
-            >
-              <div className="flex gap-2 overflow-x-auto dashboard-scroll">
-                {allThumbs.map((img, idx) => {
-                  const isActive = result?.imageUrl === img.imageUrl
-                  const fromHistory = idx >= generatedImages.length
-                  return (
+      {/* === DOCK: CONTEXT RAIL + PIXEL IA === */}
+      {phase !== "loading" && (
+        <div className={styles.workspaceDock}>
+          <div className={styles.contextRail}>
+            {hasResults && phase === "result" ? (
+              <>
+                <div className={styles.railLabel}>
+                  <span>Resultados</span>
+                  <small>{generatedImages.length} {generatedImages.length === 1 ? "creativo" : "creativos"} en esta sesión</small>
+                </div>
+                <div className={styles.thumbnailRail}>
+                  {generatedImages.map((img, idx) => (
                     <button
-                      key={`${img.imageUrl}-${idx}`}
-                      onClick={() => fromHistory ? onSelectFromHistory(img) : onSelectFromGenerated(img, result?.copy || "")}
-                      className={`relative w-14 h-14 flex-shrink-0 rounded-lg overflow-hidden border transition-all duration-200 ${
-                        isActive
-                          ? "border-[#D97757] ring-1 ring-[#D97757]/30"
-                          : "border-[#3A3833] hover:border-[#D97757]/40"
-                      }`}
+                      key={idx}
+                      className={idx === activeIndex ? styles.thumbnailActive : ""}
+                      onClick={() => setActiveIndex(idx)}
+                      aria-label={`Seleccionar creativo ${idx + 1}`}
                     >
-                      <img src={img.imageUrl} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                      <img src={img.imageUrl} alt="" /><span>{idx + 1}</span>
                     </button>
-                  )
-                })}
-              </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={styles.railLabel}>
+                  <span>Resumen del creativo</span>
+                  <small>Configuración actual antes de generar</small>
+                </div>
+                <div className={styles.summaryGrid}>
+                  <span><small>Ángulo</small><b>{selectedAngle || "Sin seleccionar"}</b></span>
+                  <span><small>Formato</small><b>{formatLabel}</b></span>
+                  <span><small>Cantidad</small><b>{generatedImages.length || "—"}</b></span>
+                  <span><small>Zona Segura</small><b>{showGuides ? "Activada" : "Desactivada"}</b></span>
+                  <span className={styles.summaryStatus}>
+                    <small>Estado</small>
+                    <b><i />{phase === "result" ? "Creativo generado" : "Listo para generar"}</b>
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+
+          <aside className={styles.aiCard}>
+            <div className={styles.aiHead}>
+              <span><Sparkles className="w-4 h-4" strokeWidth={1.5} /></span>
+              <div><b>Pixel IA</b><small>Asistente estratégico</small></div>
+              <i />
             </div>
-          )}
-
-          {/* Download button */}
-          <button
-            onClick={generatedImages.length > 1 ? onDownloadAll : onDownload}
-            className="flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 flex-shrink-0"
-            style={{ boxShadow: "0 4px 16px rgba(217,119,87,0.2)" }}
-          >
-            <Download className="w-4 h-4" strokeWidth={1.5} />
-            {generatedImages.length > 1 ? `Descargar (${generatedImages.length})` : "Descargar"}
-          </button>
+            <p>Analiza tu producto y recomienda el ángulo antes de generar.</p>
+            <button onClick={() => document.querySelector<HTMLButtonElement>("[title='Abrir Pixel IA']")?.click()}>
+              Iniciar con Pixel IA <span>→</span>
+            </button>
+          </aside>
         </div>
-      )}
-
-      {/* === EMPTY STATE STRIP: Inspiration === */}
-      {phase === "select" && (
-        <div
-          className="flex-1 flex flex-col justify-end rounded-[24px] overflow-hidden relative min-h-0 hidden"
-          style={{
-            background: "linear-gradient(160deg, rgba(22,20,18,0.6) 0%, rgba(14,13,13,0.5) 100%)",
-            border: "1px solid rgba(255,255,255,0.05)",
-          }}
-        />
       )}
     </div>
   )
