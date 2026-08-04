@@ -311,5 +311,4 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 .dashboard-scroll::-webkit-scrollbar-thumb{background:rgba(58,56,51,0.5);border-radius:4px}
 .dashboard-scroll::-webkit-scrollbar-thumb:hover{background:rgba(217,119,87,0.3)}
 
-/* Hide floating Pixel IA bubble on generator (keeps DOM for aiCard click) */
-#generator-root [title="Abrir Pixel IA"]{opacity:0!important;pointer-events:none!important;z-index:-1!important}
+/* (bubble hiding handled by PixelAdvisorAsHidden wrapper) */
