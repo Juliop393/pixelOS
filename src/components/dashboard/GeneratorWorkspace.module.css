@@ -195,3 +195,45 @@
 .resultFrame[data-format="4:5"]{aspect-ratio:auto;max-width:min(65%,480px)}
 .resultFrame[data-format="9:16"]{aspect-ratio:auto;max-width:min(45%,360px);max-height:95%}
 @media(max-width:680px){.resultFrame{max-width:100%}.resultFrame[data-format="1:1"],.resultFrame[data-format="4:5"],.resultFrame[data-format="9:16"]{max-width:100%}}
+
+/* === ALIGNMENT & FINAL LEGIBILITY === */
+.canvasHeader{height:68px}
+.canvasTools{gap:8px}
+.canvasTools .formatBtn{height:34px;font-size:12px;padding:0 14px}
+.canvasTools button{width:34px;height:34px;font-size:14px}
+.resultMeta button{width:34px;height:34px;font-size:14px}
+.resultActions a,.resultActions button{font-size:12px;height:36px}
+.railLabel>small{font-size:11px}
+.summaryGrid small{font-size:10px}
+.summaryGrid b{font-size:12px}
+.aiHead b{font-size:13px}
+.aiHead small{font-size:11px}
+.aiCard p{font-size:12px}
+.aiCard button{font-size:12px}
+.stepTabs button{font-size:13px;height:44px}
+.stepTabs button span{font-size:11px}
+.formCard label{font-size:12px}
+.formCard textarea,.formCard input{font-size:13px}
+.helper{font-size:11px}
+.segmented button{font-size:12px;height:38px}
+.generateDock>div{font-size:11px}
+.canvasHeader small{font-size:12px}
+.previewKicker{font-size:11px}
+.loadingStages{font-size:12px}
+.resultMeta>span{font-size:12px}
+.resultActions>span{font-size:12px}
+.toggleRow>span{font-size:12px}
+.toggleRow>span small{font-size:10px}
+.summaryStatus>b{font-size:12px}
+.railLabel>span{font-size:13px}
+.progressSteps{font-size:13px}
+.generatingState>p{font-size:13px}
+.thumbnailRail button>span{font-size:10px}
+.panelIntro p{font-size:13px}
+.formHeading p{font-size:12px}
+.generateButton{font-size:13px}
+.metaSafeGuide>b{font-size:10px}
+/* Background ambient from ZIP */
+#generator-root::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(circle at 50% -20%,rgba(126,62,39,.12),transparent 43%),radial-gradient(circle at 85% 85%,rgba(126,62,39,.06),transparent 50%)}
+@media(max-width:1250px){.workspaceDock{grid-template-columns:minmax(0,1fr) 250px}}
+@media(max-width:680px){.resultMeta button{width:34px;height:34px}.resultActions a,.resultActions button{font-size:12px}}

@@ -73,8 +73,8 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="flex gap-4 h-full max-w-[1600px] mx-auto relative">
-      <PixelAdvisor onApplyRecommendation={handleApplyRecommendation} accessToken={advisorToken} hideBubble />
+    <div id="generator-root" className="flex gap-4 h-full max-w-[1600px] mx-auto relative">
+      <PixelAdvisor onApplyRecommendation={handleApplyRecommendation} accessToken={advisorToken} />
 
       {/* ===== LEFT PANEL ===== */}
       <aside className={`${s.builderPanel} w-[410px] flex-shrink-0 h-full`}>
