@@ -24,6 +24,7 @@ type Message = {
 interface PixelAdvisorProps {
   onApplyRecommendation?: (rec: Recommendation) => void
   accessToken?: string
+  hideBubble?: boolean
 }
 
 const INITIAL_MESSAGE: Message = {
@@ -31,7 +32,7 @@ const INITIAL_MESSAGE: Message = {
   content: "Cuéntame qué vendes, a quién se lo vendes y qué quieres conseguir con el anuncio.",
 }
 
-export default function PixelAdvisor({ onApplyRecommendation, accessToken }: PixelAdvisorProps) {
+export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideBubble }: PixelAdvisorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
   const [convState, setConvState] = useState<ConvState>("collecting")
@@ -205,6 +206,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
   return (
     <>
       {/* Burbuja flotante */}
+      {!hideBubble && (
       <button
         onClick={() => setIsOpen(true)}
         title="Abrir Pixel IA"
@@ -223,6 +225,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken }: Pix
         <Sparkles className="w-5 h-5 text-[#D97757]" strokeWidth={1.5} />
         <span className="text-sm font-semibold text-[#F5F0E8]">Pixel IA</span>
       </button>
+      )}
 
       {/* Ventana flotante */}
       <div

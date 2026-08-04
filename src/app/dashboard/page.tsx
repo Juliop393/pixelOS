@@ -9,10 +9,8 @@ import StyleSelector from "@/components/dashboard/StyleSelector"
 import ProductForm from "@/components/dashboard/ProductForm"
 import QuantitySelector from "@/components/dashboard/QuantitySelector"
 import ResultPanel from "@/components/dashboard/ResultPanel"
-import GenerateButton from "@/components/dashboard/GenerateButton"
-import Accordion from "@/components/ui/Accordion"
 import PixelAdvisor from "@/components/dashboard/PixelAdvisor"
-import cvs from "@/components/dashboard/GeneratorWorkspace.module.css"
+import s from "@/components/dashboard/GeneratorWorkspace.module.css"
 
 const FORMAT_LABELS: Record<string, string> = {
   square: "1:1", story: "9:16", "4:5": "4:5",
@@ -42,17 +40,12 @@ export default function DashboardPage() {
   }, [highlightProduct])
 
   const handleApplyRecommendation = (rec: {
-    angleId: string
-    styleId: string
-    format: string
-    safeZoneMeta: boolean
-    productDescription?: string
+    angleId: string; styleId: string; format: string; safeZoneMeta: boolean; productDescription?: string
   }) => {
     g.handleSelectAngle(rec.angleId)
     g.setAspectRatio(rec.format)
     g.setVisualStyle(rec.styleId)
     g.setSafeZoneMeta(rec.safeZoneMeta)
-
     if (rec.productDescription) {
       const current = g.producto.trim()
       if (!current || current.length < 30) {
@@ -63,8 +56,7 @@ export default function DashboardPage() {
     }
   }
 
-  const canGenerate =
-    !!g.producto.trim() && !!g.selectedAngle && !g.loading && g.credits >= g.cantidad
+  const canGenerate = !!g.producto.trim() && !!g.selectedAngle && !g.loading && g.credits >= g.cantidad
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "product", label: "Producto" },
@@ -72,60 +64,38 @@ export default function DashboardPage() {
     { id: "design", label: "Diseño" },
   ]
 
+  const angleName = g.selectedAngle
+    ? tabs.find(() => true)?.label ?? "—"
+    : "Sin seleccionar"
+
   return (
-    <div className="flex gap-4 2xl:gap-5 h-full max-w-[1600px] mx-auto relative">
-      <PixelAdvisor onApplyRecommendation={handleApplyRecommendation} accessToken={advisorToken} />
-      {/* COLUMNA IZQUIERDA: Panel de configuración con pestañas */}
-      <aside
-        className="w-[360px] 2xl:w-[420px] flex-shrink-0 h-full flex flex-col rounded-[28px] overflow-hidden relative"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 100%), rgba(30,28,26,0.38)",
-          backdropFilter: "blur(16px) saturate(135%)",
-          WebkitBackdropFilter: "blur(16px) saturate(135%)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 30px rgba(0,0,0,0.22)",
-        }}
-      >
-        {/* Reflejo superior sutil */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-[35%] rounded-[28px] pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%)",
-          }}
-        />
-        {/* Pestañas — control integrado de vidrio */}
-        <div className="flex-shrink-0 p-3">
-          <div
-            className="flex items-center gap-1 p-1 rounded-2xl"
-            style={{
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.06)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
-            }}
-          >
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? "bg-[#D97757]/15 text-[#D97757] shadow-sm shadow-[#D97757]/10 border border-[#D97757]/20"
-                    : "text-[#9CA3AF] hover:text-[#F5F0E8] hover:bg-[#3A3833]/30 border border-transparent"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+    <div className="flex gap-4 h-full max-w-[1600px] mx-auto relative">
+      <PixelAdvisor onApplyRecommendation={handleApplyRecommendation} accessToken={advisorToken} hideBubble />
+
+      {/* ===== LEFT PANEL (ZIP design) ===== */}
+      <aside className={`${s.builderPanel} w-[410px] flex-shrink-0 h-full`}>
+        <div className={s.panelIntro}>
+          <span className={s.eyebrow}>NUEVO CREATIVO</span>
+          <h1>Construye tu anuncio</h1>
+          <p>Define el producto y deja que Pixel IA ordene el resto.</p>
         </div>
 
-        {/* Contenido de la pestaña activa (scroll interno) */}
-        <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4">
-          {activeTab === "product" && (
+        <div className={s.stepTabs} role="tablist" aria-label="Pasos del generador">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              className={activeTab === tab.id ? s.stepActive : ""}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <span>0{tabs.indexOf(tab) + 1}</span>{tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className={s.formScroll}>
+{activeTab === "product" && (
             <ProductForm
               producto={g.producto}
               setProducto={g.setProducto}
@@ -142,125 +112,68 @@ export default function DashboardPage() {
               setImagenReferencia={g.setImagenReferencia}
               nombreImagenReferencia={g.nombreImagenReferencia}
               setNombreImagenReferencia={g.setNombreImagenReferencia}
+              showQuantity={false}
               highlightProduct={highlightProduct}
             />
           )}
 
           {activeTab === "angle" && (
-            <AngleSelector
-              selectedAngle={g.selectedAngle}
-              onSelectAngle={g.handleSelectAngle}
-              loading={g.loading}
-              layout="grid"
-            />
+            <section className={s.formCard}>
+              <div className={s.formHeading}>
+                <span>02</span>
+                <div><h2>Estrategia</h2><p>Elige el enfoque persuasivo de tu anuncio.</p></div>
+              </div>
+              <AngleSelector
+                selectedAngle={g.selectedAngle}
+                onSelectAngle={g.handleSelectAngle}
+                loading={g.loading}
+                layout="grid"
+              />
+            </section>
           )}
 
           {activeTab === "design" && (
-            <div className="space-y-4">
-              <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] p-4">
-                <h3 className="text-xs font-bold text-[#F5F0E8] mb-3 uppercase tracking-wider">
-                  Formato
-                </h3>
-                <FormatSelector aspectRatio={g.aspectRatio} setAspectRatio={g.setAspectRatio} />
-                {g.aspectRatio === "story" && (
-                  <div className="mt-3 pt-3 border-t border-[#3A3833]/50">
-                    <label className="flex items-start gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        checked={g.safeZoneMeta}
-                        onChange={(e) => g.setSafeZoneMeta(e.target.checked)}
-                        className="mt-0.5 w-4 h-4 rounded border-[#3A3833] bg-[#1E1C1A] text-[#D97757] focus:ring-[#D97757]/30 focus:ring-offset-0 cursor-pointer"
-                        aria-describedby="safe-zone-desc"
-                      />
-                      <div>
-                        <span className="text-sm font-medium text-[#F5F0E8] group-hover:text-white transition-colors">
-                          Zona segura Meta
-                        </span>
-                        <p id="safe-zone-desc" className="text-xs text-[#9CA3AF] mt-0.5 leading-relaxed">
-                          Mantiene textos, logos, producto y CTA alejados de la interfaz de Stories y Reels.
-                        </p>
-                      </div>
-                    </label>
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] p-4">
-                <h3 className="text-xs font-bold text-[#F5F0E8] mb-3 uppercase tracking-wider">
-                  Estilo Visual
-                </h3>
+            <>
+              <section className={s.formCard}>
+                <div className={s.formHeading}>
+                  <span>03</span>
+                  <div><h2>Estilo visual</h2><p>Define la estética que acompañará tu mensaje.</p></div>
+                </div>
                 <StyleSelector visualStyle={g.visualStyle} setVisualStyle={g.setVisualStyle} />
-              </div>
-
-              <Accordion title="Ajustes Avanzados">
-                <label className="block text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider mb-2">
-                  Color de Marca (Opcional)
-                </label>
-                <input
-                  type="text"
-                  value={g.brandColor}
-                  onChange={(e) => g.setBrandColor(e.target.value)}
-                  placeholder="Ej: #D97757"
-                  className="w-full bg-[#1E1C1A] border border-[#3A3833] px-3 py-2 rounded-lg text-sm text-[#F5F0E8] placeholder:text-[#9CA3AF]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
-                />
-              </Accordion>
-
-              {g.phase === "result" && (
-                <button
-                  onClick={g.handleClearResult}
-                  className="w-full py-3 px-4 rounded-xl bg-[#1E1C1A] text-[#F5F0E8] font-semibold text-sm border border-[#3A3833] hover:border-[#D97757]/50 active:scale-[0.98] transition-all duration-200"
-                >
-                  Nuevo ángulo
-                </button>
-              )}
-            </div>
+              </section>
+            </>
           )}
         </div>
 
-        {/* Botón GENERAR siempre visible */}
-        <div
-          className="flex-shrink-0 p-4"
-          style={{
-            background: "rgba(255,255,255,0.025)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            borderTop: "1px solid rgba(255,255,255,0.06)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
-          }}
-        >
-          <GenerateButton
+        <div className={s.generateDock}>
+          <button
+            className={s.generateButton}
             onClick={g.handleGenerate}
             disabled={!canGenerate}
-            loading={g.loading}
-            credits={g.credits}
-            cantidad={g.cantidad}
-            progress={g.progress}
-          />
-          <p className="text-center text-[11px] text-[#9CA3AF] mt-2">
-            {g.credits} crédito{g.credits === 1 ? "" : "s"} disponible{g.credits === 1 ? "" : "s"}
-          </p>
+          >
+            <span>✦</span> Generar {g.cantidad > 1 ? `${g.cantidad} creativos` : "creativo"}<b>→</b>
+          </button>
+          <div>
+            <span>Coste estimado: {g.cantidad} {g.cantidad === 1 ? "crédito" : "créditos"}</span>
+            <span>{g.credits} disponible{g.credits === 1 ? "" : "s"}</span>
+          </div>
         </div>
       </aside>
 
-      {/* COLUMNA DERECHA: Preview grande */}
-      <div
-        className={`${cvs.canvasPanel} flex-1 min-w-0 h-full ${isFullscreen ? cvs.canvasFullscreen : ""}`}
-        style={isFullscreen ? {} : {
-          background: "rgba(20,18,16,.9)",
-          border: "1px solid rgba(243,234,223,.09)",
-          borderRadius: "24px",
-          boxShadow: "0 30px 80px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.025)",
-        }}
+      {/* ===== RIGHT PANEL (ZIP design) ===== */}
+      <section
+        className={`${s.canvasPanel} flex-1 min-w-0 h-full ${isFullscreen ? s.canvasFullscreen : ""}`}
+        data-testid="canvas-panel"
       >
-        <div className={cvs.canvasHeader}>
+        <div className={s.canvasHeader}>
           <div>
-            <span className={cvs.liveDot} />
+            <span className={s.liveDot} />
             <div><b>Vista previa</b><small>Tu creativo se actualizará aquí</small></div>
           </div>
-          <div className={cvs.canvasTools}>
+          <div className={s.canvasTools}>
             <span>{FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio}</span>
             <button
-              className={showGuides ? cvs.toolActive : ""}
+              className={showGuides ? s.toolActive : ""}
               onClick={() => setShowGuides(!showGuides)}
               aria-label={showGuides ? "Ocultar guías" : "Mostrar guías"}
               title={showGuides ? "Ocultar guías" : "Mostrar guías"}
@@ -291,7 +204,7 @@ export default function DashboardPage() {
           onSelectFromGenerated={g.handleSelectFromGenerated}
           onSelectFromHistory={g.handleSelectFromHistory}
         />
-      </div>
+      </section>
     </div>
   )
 }

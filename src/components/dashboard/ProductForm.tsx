@@ -23,6 +23,7 @@ interface ProductFormProps {
   setNombreImagenReferencia: (v: string | null) => void
   showQuantity?: boolean
   highlightProduct?: boolean
+  compact?: boolean
 }
 
 export default function ProductForm({
@@ -43,6 +44,7 @@ export default function ProductForm({
   setNombreImagenReferencia,
   showQuantity = true,
   highlightProduct = false,
+  compact = false,
 }: ProductFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)

@@ -104,3 +104,44 @@
 @media(max-width:980px){.workspace{grid-template-columns:1fr}.canvasPanel{min-height:720px}.previewArea{min-height:500px}.workspaceDock{grid-template-columns:minmax(0,1fr) 280px}}
 @media(max-width:680px){.previewArea{min-height:500px;padding:22px 14px 16px}.previewEmpty,.generatingState{width:100%;min-height:390px;padding:34px 20px}.previewEmpty h2,.generatingState h2{font-size:22px}.formatHints{right:17px;top:17px}.workspaceDock{grid-template-columns:1fr;padding:0 12px 12px}.contextRail{display:block;padding:14px;min-height:138px}.railLabel{width:auto;margin-bottom:14px}.aiCard{display:flex}.resultFrame{max-height:380px}.thumbnailRail button{width:68px;height:82px;flex-basis:68px}}
 .canvasFullscreen{position:fixed!important;inset:18px!important;width:auto!important;height:auto!important;z-index:50!important;border-radius:22px!important;background:#100f0e!important;box-shadow:0 40px 100px rgba(0,0,0,.72)!important}
+
+/* === LEFT PANEL (ZIP design) === */
+.builderPanel{display:flex;flex-direction:column;min-height:0;overflow:hidden;border:1px solid rgba(243,234,223,.09);background:rgba(20,18,16,.9);border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.025)}
+.panelIntro{padding:24px 24px 19px}
+.panelIntro .eyebrow{font-family:monospace;font-size:9px;letter-spacing:.16em;color:#d76b45}
+.panelIntro h1{font-size:25px;line-height:1.1;letter-spacing:-.045em;margin:8px 0 7px;font-weight:560}
+.panelIntro p{font-size:12px;line-height:1.5;color:#9a9086;margin:0}
+.stepTabs{margin:0 18px 14px;padding:4px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:#100f0e;border:1px solid rgba(243,234,223,.09);border-radius:14px}
+.stepTabs button{height:40px;border:0;border-radius:10px;background:transparent;color:#746d66;font-size:10px;display:flex;justify-content:center;align-items:center;gap:7px;cursor:pointer;transition:.35s ease}
+.stepTabs button span{font-family:monospace;font-size:8px;color:#57514b}
+.stepActive{color:#f4c1ad!important;background:rgba(215,107,69,.13)!important;box-shadow:inset 0 0 0 1px rgba(215,107,69,.24)!important}
+.stepActive span{color:#d76b45!important}
+.formScroll{min-height:0;overflow-y:auto;padding:0 18px 20px;scrollbar-width:thin;scrollbar-color:#4a4038 transparent}
+.formCard{padding:19px;border:1px solid rgba(243,234,223,.09);background:rgba(255,255,255,.018);border-radius:16px;margin-bottom:12px}
+.formHeading{display:flex;gap:12px;align-items:flex-start;margin-bottom:18px}
+.formHeading>span{width:27px;height:27px;flex:0 0 27px;border:1px solid rgba(215,107,69,.22);border-radius:8px;background:rgba(215,107,69,.07);color:#d76b45;font:8px monospace;display:grid;place-items:center}
+.formHeading h2{font-size:13px;line-height:1.25;font-weight:580;margin:0}
+.formHeading p{font-size:10px;line-height:1.45;color:#8c847c;margin:4px 0 0}
+.formCard label{font-size:9px;color:#7e766d;display:block;margin:14px 0 6px}
+.formCard textarea,.formCard input{width:100%;border:1px solid rgba(243,234,223,.09);border-radius:10px;background:#13110f;color:#d1c7bd;padding:10px 12px;font-size:11px;resize:vertical;outline:none;transition:border-color .3s ease}
+.formCard textarea:focus,.formCard input:focus{border-color:rgba(215,107,69,.25)}
+.formCard input{height:38px}
+.helper{margin-top:16px;padding:11px 14px;border:1px solid rgba(215,107,69,.12);border-radius:11px;background:rgba(215,107,69,.04);color:#c1b3a8;display:flex;align-items:center;gap:9px;font-size:9px;line-height:1.5}
+.helper>span{color:#d76b45}
+.segmented{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:14px}
+.segmented button{height:34px;border:1px solid rgba(243,234,223,.09);border-radius:9px;background:#13110f;color:#857c74;font-size:10px;cursor:pointer;transition:.3s ease}
+.segmented .segSelected{border-color:rgba(215,107,69,.35);color:#efb19a;background:rgba(215,107,69,.08)}
+.toggleRow{width:100%;display:flex;align-items:center;justify-content:space-between;background:transparent;border:0;color:#a0958c;padding:4px 0;cursor:pointer;text-align:left}
+.toggleRow>span{display:flex;flex-direction:column;gap:3px;font-size:10px}
+.toggleRow>span b{color:#ccc0b4}
+.toggleRow>span small{font-size:8px;color:#7b726a}
+.toggleRow>i{width:30px;height:16px;border-radius:20px;background:#312c27;position:relative;transition:.35s ease}
+.toggleRow>i>em{position:absolute;width:12px;height:12px;border-radius:50%;background:#66605a;top:2px;left:2px;transition:transform .3s ease}
+.toggleOn{background:rgba(215,107,69,.38)!important}
+.toggleOn em{transform:translateX(14px);background:#d76b45!important}
+.generateDock{flex-shrink:0;padding:14px 18px 16px;border-top:1px solid rgba(243,234,223,.09);background:rgba(16,14,13,.95);z-index:3}
+.generateButton{width:100%;height:48px;border:0;border-radius:13px;background:linear-gradient(135deg,#e38a67,#cb5b38);color:white;font-size:12px;font-weight:620;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;box-shadow:0 12px 30px rgba(215,107,69,.18);transition:transform .3s ease,box-shadow .3s ease}
+.generateButton:hover{transform:translateY(-1px);box-shadow:0 16px 36px rgba(215,107,69,.24)}
+.generateButton:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.generateButton>span{color:#fff5ec}
+.generateDock>div{display:flex;justify-content:space-between;font-size:9px;color:#6e665f;margin-top:9px}
