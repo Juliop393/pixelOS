@@ -145,3 +145,6 @@
 .generateButton:disabled{opacity:.45;cursor:not-allowed;transform:none}
 .generateButton>span{color:#fff5ec}
 .generateDock>div{display:flex;justify-content:space-between;font-size:9px;color:#6e665f;margin-top:9px}
+
+.canvasTools .formatBtn{height:31px;padding:0 11px;border:1px solid rgba(243,234,223,.09);border-radius:9px;display:grid;place-items:center;color:#9b9187;font:9px monospace;background:#12100f;cursor:pointer;transition:border-color .3s ease,color .3s ease}
+.canvasTools .formatBtn:hover{color:#c9bdb2;border-color:rgba(215,107,69,.25)}

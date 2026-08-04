@@ -14,6 +14,9 @@ type ResultPanelProps = {
   selectedAngle: string | null
   sessionHistory: Array<{ imageUrl: string; angle: string }>
   showGuides: boolean
+  credits?: number
+  cantidad?: number
+  safeZoneMeta?: boolean
   onRetry: () => void
   onDownload: () => void
   onDownloadAll: () => void
@@ -27,7 +30,8 @@ const FORMAT_LABELS: Record<string, string> = {
 
 export default function ResultPanel({
   phase, result, generatedImages, progress, error, aspectRatio, selectedAngle,
-  sessionHistory, showGuides, onRetry, onDownload, onDownloadAll,
+  sessionHistory, showGuides, credits = 0, cantidad = 1, safeZoneMeta = false,
+  onRetry, onDownload, onDownloadAll,
   onSelectFromGenerated, onSelectFromHistory,
 }: ResultPanelProps) {
   const [activeIndex, setActiveIndex] = useState(0)
@@ -159,8 +163,8 @@ export default function ResultPanel({
                 <div className={styles.summaryGrid}>
                   <span><small>Ángulo</small><b>{selectedAngle || "Sin seleccionar"}</b></span>
                   <span><small>Formato</small><b>{formatLabel}</b></span>
-                  <span><small>Cantidad</small><b>{generatedImages.length || "—"}</b></span>
-                  <span><small>Zona Segura</small><b>{showGuides ? "Activada" : "Desactivada"}</b></span>
+                  <span><small>Cantidad</small><b>{cantidad} {cantidad === 1 ? "creativo" : "creativos"}</b></span>
+                  <span><small>Zona Segura</small><b>{safeZoneMeta ? "Activada" : "Desactivada"}</b></span>
                   <span className={styles.summaryStatus}>
                     <small>Estado</small>
                     <b><i />{phase === "result" ? "Creativo generado" : "Listo para generar"}</b>
