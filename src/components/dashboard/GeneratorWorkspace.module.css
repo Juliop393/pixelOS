@@ -148,3 +148,50 @@
 
 .canvasTools .formatBtn{height:31px;padding:0 11px;border:1px solid rgba(243,234,223,.09);border-radius:9px;display:grid;place-items:center;color:#9b9187;font:9px monospace;background:#12100f;cursor:pointer;transition:border-color .3s ease,color .3s ease}
 .canvasTools .formatBtn:hover{color:#c9bdb2;border-color:rgba(215,107,69,.25)}
+
+/* === LEGIBILITY & PREVIEW FIX === */
+.canvasHeader b{font-size:14px}
+.canvasHeader small{font-size:12px;line-height:1.5}
+.canvasTools .formatBtn{font-size:11px;height:34px;padding:0 14px}
+.canvasTools button{width:34px;height:34px}
+.previewKicker{font-size:11px}
+.loadingStages{font-size:12px;gap:24px}
+.loadingStages span>i{width:10px;height:10px}
+.stageComplete i{width:18px;height:18px}
+.resultMeta>span{font-size:12px}
+.resultMeta button{width:34px;height:34px}
+.resultActions>span{font-size:11px}
+.resultActions a,.resultActions button{font-size:11px;height:34px;padding:0 14px}
+.railLabel>span{font-size:13px}
+.railLabel>small{font-size:11px;line-height:1.55}
+.summaryGrid small{font-size:10px}
+.summaryGrid b{font-size:11px}
+.summaryStatus>b{font-size:11px}
+.aiHead b{font-size:13px}
+.aiHead small{font-size:11px}
+.aiCard p{font-size:12px;line-height:1.6}
+.aiCard button{font-size:12px}
+.thumbnailRail button>span{font-size:9px}
+.metaSafeGuide>b{font-size:10px}
+.panelIntro .eyebrow{font-size:11px}
+.panelIntro p{font-size:13px;line-height:1.55}
+.stepTabs button{font-size:12px;height:44px}
+.stepTabs button span{font-size:10px}
+.formHeading p{font-size:11px;line-height:1.5}
+.formCard label{font-size:11px}
+.formCard textarea,.formCard input{font-size:12px}
+.helper{font-size:10px}
+.segmented button{font-size:11px;height:36px}
+.toggleRow>span{font-size:11px}
+.toggleRow>span small{font-size:10px}
+.generateDock>div{font-size:10px}
+.progressSteps{font-size:12px}
+.progressSteps span i{width:24px;height:24px;font-size:9px}
+.generatingState>p{font-size:12px}
+/* PREVIEW FIX — imagen completa sin recorte */
+.resultState{height:auto;overflow:visible}
+.resultFrame{flex:1;min-height:0;max-width:min(88%,620px);max-height:100%;width:auto;padding:12px;margin:0 auto}
+.resultFrame[data-format="1:1"]{aspect-ratio:auto;max-width:min(60%,520px)}
+.resultFrame[data-format="4:5"]{aspect-ratio:auto;max-width:min(65%,480px)}
+.resultFrame[data-format="9:16"]{aspect-ratio:auto;max-width:min(45%,360px);max-height:95%}
+@media(max-width:680px){.resultFrame{max-width:100%}.resultFrame[data-format="1:1"],.resultFrame[data-format="4:5"],.resultFrame[data-format="9:16"]{max-width:100%}}
