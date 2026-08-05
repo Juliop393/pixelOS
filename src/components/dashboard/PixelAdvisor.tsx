@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Sparkles } from "lucide-react"
+import styles from "./GeneratorWorkspace.module.css"
 
 type Recommendation = {
   angleId: string
@@ -25,6 +26,9 @@ interface PixelAdvisorProps {
   onApplyRecommendation?: (rec: Recommendation) => void
   accessToken?: string
   hideBubble?: boolean
+  inline?: boolean
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 const INITIAL_MESSAGE: Message = {
@@ -32,8 +36,13 @@ const INITIAL_MESSAGE: Message = {
   content: "Cuéntame qué vendes, a quién se lo vendes y qué quieres conseguir con el anuncio.",
 }
 
-export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideBubble }: PixelAdvisorProps) {
-  const [isOpen, setIsOpen] = useState(false)
+export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideBubble, inline = false, open, onOpenChange }: PixelAdvisorProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const isOpen = open ?? uncontrolledOpen
+  const setIsOpen = (next: boolean) => {
+    if (open === undefined) setUncontrolledOpen(next)
+    onOpenChange?.(next)
+  }
   const [input, setInput] = useState("")
   const [convState, setConvState] = useState<ConvState>("collecting")
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE])
@@ -227,11 +236,11 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
       </button>
       )}
 
-      {/* Ventana flotante */}
-      <div
-        className={`fixed bottom-6 right-6 z-50 w-[400px] h-[600px] max-h-[calc(100vh-48px)] flex flex-col rounded-[28px] overflow-hidden transition-all duration-300 ${
-          isOpen ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none"
-        }`}
+      {/* Panel de conversación: inline en el generador, flotante en usos legacy */}
+      {isOpen && <div
+        id="pixel-ai-panel"
+        aria-label="Panel de Pixel IA"
+        className={inline ? styles.aiPanel : "fixed bottom-6 right-6 z-50 w-[400px] h-[600px] max-h-[calc(100vh-48px)] flex flex-col rounded-[28px] overflow-hidden transition-all duration-300"}
         style={{
           background: "linear-gradient(135deg, rgba(30,28,26,0.92) 0%, rgba(26,26,26,0.88) 100%)",
           backdropFilter: "blur(28px) saturate(150%)",
@@ -491,7 +500,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
             </div>
           </div>
         )}
-      </div>
+      </div>}
     </>
   )
 }

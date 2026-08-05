@@ -1,8 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { Sparkles } from "lucide-react"
 import { useCreativeGenerator } from "@/hooks/useCreativeGenerator"
 import { supabase } from "@/lib/supabase"
+import { ANGLES } from "@/lib/angles-data"
 import AngleSelector from "@/components/dashboard/AngleSelector"
 import FormatSelector from "@/components/dashboard/FormatSelector"
 import StyleSelector from "@/components/dashboard/StyleSelector"
@@ -17,9 +19,11 @@ const FORMAT_LABELS: Record<string, string> = {
   square: "1:1", story: "9:16", "4:5": "4:5",
 }
 
-const FORMAT_CYCLE: Record<string, string> = {
-  square: "4:5", "4:5": "story", story: "square",
-}
+const FORMAT_OPTIONS = [
+  { id: "square", label: "1:1", description: "Feed" },
+  { id: "4:5", label: "4:5", description: "Feed vertical" },
+  { id: "story", label: "9:16", description: "Stories y Reels" },
+]
 
 type Tab = "product" | "angle" | "design"
 
@@ -30,6 +34,8 @@ export default function DashboardPage() {
   const [highlightProduct, setHighlightProduct] = useState(false)
   const [showGuides, setShowGuides] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [formatOpen, setFormatOpen] = useState(false)
+  const [advisorOpen, setAdvisorOpen] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -64,7 +70,27 @@ export default function DashboardPage() {
   const canGenerate =
     !!g.producto.trim() && !!g.selectedAngle && !g.loading && g.credits >= g.cantidad
 
-  const cycleFormat = () => g.setAspectRatio(FORMAT_CYCLE[g.aspectRatio] ?? "square")
+  const selectedAngleLabel = useMemo(
+    () => ANGLES.find((angle) => angle.id === g.selectedAngle)?.title ?? "Sin seleccionar",
+    [g.selectedAngle],
+  )
+
+  const selectFormat = (format: string) => {
+    g.setAspectRatio(format)
+    setFormatOpen(false)
+  }
+
+  const summaryStatus = g.loading
+    ? "Generando"
+    : g.phase === "error"
+      ? "Requiere atención"
+      : g.phase === "result"
+        ? "Creativo generado"
+        : !g.producto.trim()
+          ? "Completa el producto"
+          : !g.selectedAngle
+            ? "Selecciona un ángulo"
+            : "Listo para generar"
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "product", label: "Producto" },
@@ -73,11 +99,12 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div id="generator-root" className="flex gap-4 h-full max-w-[1600px] mx-auto relative">
-      <PixelAdvisor onApplyRecommendation={handleApplyRecommendation} accessToken={advisorToken} />
+    <div id="generator-root" className={s.generatorPage}>
+      <div className={s.ambient} aria-hidden="true"><i /><i /></div>
 
+      <section className={s.workspace}>
       {/* ===== LEFT PANEL ===== */}
-      <aside className={`${s.builderPanel} w-[410px] flex-shrink-0 h-full`}>
+      <aside className={s.builderPanel}>
         <div className={s.panelIntro}>
           <span className={s.eyebrow}>NUEVO CREATIVO</span>
           <h1>Construye tu anuncio</h1>
@@ -116,6 +143,7 @@ export default function DashboardPage() {
               setImagenReferencia={g.setImagenReferencia}
               nombreImagenReferencia={g.nombreImagenReferencia}
               setNombreImagenReferencia={g.setNombreImagenReferencia}
+              showQuantity={false}
               highlightProduct={highlightProduct}
             />
           )}
@@ -209,19 +237,28 @@ export default function DashboardPage() {
       </aside>
 
       {/* ===== RIGHT PANEL ===== */}
-      <section
-        className={`${s.canvasPanel} flex-1 min-w-0 h-full ${isFullscreen ? s.canvasFullscreen : ""}`}
-        data-testid="canvas-panel"
-      >
+      <div className={s.previewColumn}>
+      <section className={`${s.canvasPanel} ${isFullscreen ? s.canvasFullscreen : ""}`} data-testid="canvas-panel" data-format={FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio}>
         <div className={s.canvasHeader}>
           <div>
             <span className={s.liveDot} />
             <div><b>Vista previa</b><small>Tu creativo se actualizará aquí</small></div>
           </div>
           <div className={s.canvasTools}>
-            <button className={s.formatBtn} onClick={cycleFormat} title="Cambiar formato" aria-label={`Formato actual: ${FORMAT_LABELS[g.aspectRatio]}`}>
-              {FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio}
-            </button>
+            <div className={s.formatMenu}>
+              <button className={s.formatBtn} onClick={() => setFormatOpen(!formatOpen)} aria-expanded={formatOpen} aria-haspopup="menu">
+                {FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio} <span>⌄</span>
+              </button>
+              {formatOpen && (
+                <div role="menu">
+                  {FORMAT_OPTIONS.map((option) => (
+                    <button key={option.id} role="menuitem" className={g.aspectRatio === option.id ? s.activeFormat : ""} onClick={() => selectFormat(option.id)}>
+                      <span>{option.label}</span><small>{option.description}</small><b>{g.aspectRatio === option.id ? "✓" : ""}</b>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               className={showGuides ? s.toolActive : ""}
               onClick={() => setShowGuides(!showGuides)}
@@ -255,6 +292,39 @@ export default function DashboardPage() {
           onSelectFromGenerated={g.handleSelectFromGenerated}
           onSelectFromHistory={g.handleSelectFromHistory}
         />
+      </section>
+
+      <section className={s.contextRail} aria-label="Resumen del creativo">
+        <div className={s.railLabel}><span>Resumen del creativo</span><small>Configuración actual de la generación</small></div>
+        <div className={s.summaryGrid}>
+          <span><small>Ángulo</small><b>{selectedAngleLabel}</b></span>
+          <span><small>Formato</small><b>{FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio}</b></span>
+          <span><small>Cantidad</small><b>{g.cantidad} {g.cantidad === 1 ? "creativo" : "creativos"}</b></span>
+          <span><small>Zona Segura</small><b>{g.safeZoneMeta ? "Activada" : "Desactivada"}</b></span>
+          <span className={s.summaryStatus}><small>Estado</small><b><i />{summaryStatus}</b></span>
+        </div>
+      </section>
+      </div>
+
+      <aside className={`${s.aiCard} ${s.builderAiCard} ${advisorOpen ? s.aiCardActive : ""}`}>
+        <div className={s.aiHead}>
+          <span><Sparkles className="w-4 h-4" strokeWidth={1.5} /></span>
+          <div><b>Pixel IA</b><small>Asistente estratégico</small></div><i />
+        </div>
+        <p>Piensa la estrategia antes de generar y recomienda el mejor ángulo.</p>
+        <button onClick={() => setAdvisorOpen(true)} aria-expanded={advisorOpen} aria-controls="pixel-ai-panel">
+          {advisorOpen ? "Pixel IA abierta" : "Iniciar con Pixel IA"} <span>→</span>
+        </button>
+      </aside>
+
+      <PixelAdvisor
+        onApplyRecommendation={handleApplyRecommendation}
+        accessToken={advisorToken}
+        hideBubble
+        inline
+        open={advisorOpen}
+        onOpenChange={setAdvisorOpen}
+      />
       </section>
     </div>
   )

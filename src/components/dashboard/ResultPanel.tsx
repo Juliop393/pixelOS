@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Sparkles, Download } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Sparkles } from "lucide-react"
 import styles from "./GeneratorWorkspace.module.css"
 
 type ResultPanelProps = {
@@ -29,18 +29,28 @@ const FORMAT_LABELS: Record<string, string> = {
 }
 
 export default function ResultPanel({
-  phase, result, generatedImages, progress, error, aspectRatio, selectedAngle,
-  sessionHistory, showGuides, credits = 0, cantidad = 1, safeZoneMeta = false,
+  phase, result, generatedImages, error, aspectRatio, showGuides,
   onRetry, onDownload, onDownloadAll,
-  onSelectFromGenerated, onSelectFromHistory,
+  onSelectFromGenerated,
 }: ResultPanelProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const hasResults = generatedImages.length > 0
   const activeImg = generatedImages[activeIndex]
   const formatLabel = FORMAT_LABELS[aspectRatio] ?? aspectRatio
 
-  const selectPrev = () => setActiveIndex((i) => Math.max(0, i - 1))
-  const selectNext = () => setActiveIndex((i) => Math.min(generatedImages.length - 1, i + 1))
+  useEffect(() => {
+    setActiveIndex((index) => Math.min(index, Math.max(0, generatedImages.length - 1)))
+  }, [generatedImages.length])
+
+  const selectAt = (index: number) => {
+    const image = generatedImages[index]
+    if (!image) return
+    setActiveIndex(index)
+    onSelectFromGenerated(image, result?.copy ?? "")
+  }
+
+  const selectPrev = () => selectAt(Math.max(0, activeIndex - 1))
+  const selectNext = () => selectAt(Math.min(generatedImages.length - 1, activeIndex + 1))
 
   return (
     <div className={styles.canvasStage}>
@@ -107,85 +117,44 @@ export default function ResultPanel({
           <div className={styles.resultState}>
             <div className={styles.resultMeta}>
               <span><i /> Resultado {activeIndex + 1} de {generatedImages.length}</span>
-              <div>
+              {generatedImages.length > 1 && <div>
                 <button onClick={selectPrev} disabled={activeIndex === 0} aria-label="Creativo anterior">←</button>
                 <button onClick={selectNext} disabled={activeIndex === generatedImages.length - 1} aria-label="Creativo siguiente">→</button>
-              </div>
+              </div>}
             </div>
-            <div className={styles.resultFrame} data-format={formatLabel}>
-              <img src={activeImg.imageUrl} alt={`Creativo generado ${activeIndex + 1}`} />
-              {showGuides && (
-                <div className={`${styles.guideOverlay} ${formatLabel === "9:16" ? styles.metaSafeGuide : ""}`} data-testid="preview-guides" aria-hidden="true"><i /><b /></div>
-              )}
+            <div className={styles.resultViewport}>
+              <div className={styles.resultFrame} data-format={formatLabel}>
+                <img src={activeImg.imageUrl} alt={`Creativo generado ${activeIndex + 1}`} />
+                {showGuides && (
+                  <div className={`${styles.guideOverlay} ${formatLabel === "9:16" ? styles.metaSafeGuide : ""}`} data-testid="preview-guides" aria-hidden="true"><i /><b /></div>
+                )}
+              </div>
             </div>
             <div className={styles.resultActions}>
               <span><b>{formatLabel}</b> · Creativo listo</span>
               <div>
                 <a href={activeImg.imageUrl} target="_blank" rel="noreferrer">Ampliar</a>
-                <button onClick={generatedImages.length > 1 ? onDownloadAll : onDownload}>
+                <button onClick={onDownload}>
                   Descargar <span>↓</span>
                 </button>
+                {generatedImages.length > 1 && <button onClick={onDownloadAll}>Descargar todos <span>↓</span></button>}
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* === DOCK: CONTEXT RAIL + PIXEL IA === */}
-      {phase !== "loading" && (
-        <div className={styles.workspaceDock}>
-          <div className={styles.contextRail}>
-            {hasResults && phase === "result" ? (
-              <>
-                <div className={styles.railLabel}>
-                  <span>Resultados</span>
-                  <small>{generatedImages.length} {generatedImages.length === 1 ? "creativo" : "creativos"} en esta sesión</small>
-                </div>
-                <div className={styles.thumbnailRail}>
-                  {generatedImages.map((img, idx) => (
-                    <button
-                      key={idx}
-                      className={idx === activeIndex ? styles.thumbnailActive : ""}
-                      onClick={() => setActiveIndex(idx)}
-                      aria-label={`Seleccionar creativo ${idx + 1}`}
-                    >
-                      <img src={img.imageUrl} alt="" /><span>{idx + 1}</span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className={styles.railLabel}>
-                  <span>Resumen del creativo</span>
-                  <small>Configuración actual antes de generar</small>
-                </div>
-                <div className={styles.summaryGrid}>
-                  <span><small>Ángulo</small><b>{selectedAngle || "Sin seleccionar"}</b></span>
-                  <span><small>Formato</small><b>{formatLabel}</b></span>
-                  <span><small>Cantidad</small><b>{cantidad} {cantidad === 1 ? "creativo" : "creativos"}</b></span>
-                  <span><small>Zona Segura</small><b>{safeZoneMeta ? "Activada" : "Desactivada"}</b></span>
-                  <span className={styles.summaryStatus}>
-                    <small>Estado</small>
-                    <b><i />{phase === "result" ? "Creativo generado" : "Listo para generar"}</b>
-                  </span>
-                </div>
-              </>
-            )}
+      {hasResults && phase === "result" && (
+        <section className={styles.resultsStrip} aria-label="Resultados generados">
+          <div className={styles.railLabel}><span>Resultados</span><small>{generatedImages.length} {generatedImages.length === 1 ? "creativo" : "creativos"} en esta sesión</small></div>
+          <div className={styles.thumbnailRail}>
+            {generatedImages.map((img, idx) => (
+              <button key={idx} className={idx === activeIndex ? styles.thumbnailActive : ""} onClick={() => selectAt(idx)} aria-label={`Seleccionar creativo ${idx + 1}`}>
+                <img src={img.imageUrl} alt="" /><span>{idx + 1}</span>
+              </button>
+            ))}
           </div>
-
-          <aside className={styles.aiCard}>
-            <div className={styles.aiHead}>
-              <span><Sparkles className="w-4 h-4" strokeWidth={1.5} /></span>
-              <div><b>Pixel IA</b><small>Asistente estratégico</small></div>
-              <i />
-            </div>
-            <p>Analiza tu producto y recomienda el ángulo antes de generar.</p>
-            <button onClick={() => document.querySelector<HTMLButtonElement>("[title='Abrir Pixel IA']")?.click()}>
-              Iniciar con Pixel IA <span>→</span>
-            </button>
-          </aside>
-        </div>
+        </section>
       )}
     </div>
   )
