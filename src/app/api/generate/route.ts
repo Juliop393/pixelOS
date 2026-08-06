@@ -191,9 +191,9 @@ export async function POST(req: NextRequest) {
   }
 
   // ---- Atomic rate limit (reuses existing RPC) ----
-  const GEN_SHORT_LIMIT = 4
-  const GEN_SHORT_SECONDS = 120
-  const GEN_DAILY_LIMIT = 60
+  const GEN_SHORT_LIMIT = 10
+  const GEN_SHORT_SECONDS = 60
+  const GEN_DAILY_LIMIT = 100
 
   try {
     const adminClient = createAdminClient()
