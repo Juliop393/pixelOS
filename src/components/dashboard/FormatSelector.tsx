@@ -1,5 +1,7 @@
 "use client"
 
+import styles from "./GeneratorWorkspace.module.css"
+
 const ASPECT_RATIOS = [
   { id: "square", label: "1:1", description: "Cuadrado" },
   { id: "story", label: "9:16", description: "Vertical" },
@@ -13,19 +15,18 @@ interface FormatSelectorProps {
 
 export default function FormatSelector({ aspectRatio, setAspectRatio }: FormatSelectorProps) {
   return (
-    <div className="space-y-2">
+    <div className={styles.formatChoices}>
       {ASPECT_RATIOS.map((ratio) => (
         <button
           key={ratio.id}
+          type="button"
           onClick={() => setAspectRatio(ratio.id)}
-          className={`w-full flex items-center justify-between py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
-            aspectRatio === ratio.id
-              ? "bg-[#D97757] text-white"
-              : "bg-[#1E1C1A] text-[#9A9893] hover:bg-[#3A3833]"
-          }`}
+          className={aspectRatio === ratio.id ? styles.selected : ""}
+          aria-pressed={aspectRatio === ratio.id}
         >
-          <span className="font-bold">{ratio.label}</span>
-          <span className="text-xs opacity-60">{ratio.description}</span>
+          <i data-ratio={ratio.label} aria-hidden="true" />
+          <b>{ratio.label}</b>
+          <small>{ratio.description}</small>
         </button>
       ))}
     </div>

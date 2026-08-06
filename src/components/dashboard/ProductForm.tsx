@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 import QuantitySelector from "./QuantitySelector"
+import styles from "./GeneratorWorkspace.module.css"
 
 interface ProductFormProps {
   producto: string
@@ -178,37 +179,33 @@ export default function ProductForm({
   }
 
   return (
-    <div className="space-y-6">
+    <div className={styles.tabContent}>
       {/* Producto */}
-      <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
-        <h3 className="text-sm font-bold text-[#E8E6E1] mb-4 uppercase tracking-wider">
-          Tu Producto
-        </h3>
+      <section className={`${styles.formCard} ${styles.productFormCard}`}>
+        <div className={styles.formHeading}>
+          <span>01</span>
+          <div><h2>Tu producto</h2><p>La base para construir una estrategia relevante.</p></div>
+        </div>
         <textarea
           value={producto}
           onChange={(e) => setProducto(e.target.value)}
           rows={3}
           placeholder="Describe qué vendes y para quién."
-          className={`w-full resize-none bg-[#1E1C1A] border px-4 py-3 rounded-xl text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none transition-all duration-700 ${
-            highlightProduct
-              ? "border-[#D97757] shadow-[0_0_12px_rgba(217,119,87,0.25)]"
-              : "border-[#3A3833] focus:border-[#D97757]/50"
-          }`}
+          className={`${styles.panelTextarea} ${highlightProduct ? styles.fieldHighlight : ""}`}
         />
-      </div>
+        <div className={styles.helper}><span>✦</span> Pixel IA usará esta descripción para recomendar el mejor ángulo.</div>
+      </section>
 
       {/* Texto del anuncio con jerarquía */}
-      <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
-        <h3 className="text-sm font-bold text-[#E8E6E1] mb-1 uppercase tracking-wider">
-          Texto del anuncio
-        </h3>
-        <p className="text-xs text-[#9A9893] mb-4">
-          Opcional
-        </p>
+      <section className={`${styles.formCard} ${styles.productFormCard}`}>
+        <div className={styles.formHeading}>
+          <span>02</span>
+          <div><h2>Texto del anuncio</h2><p>Opcional · Pixel IA puede proponerlo.</p></div>
+        </div>
 
-        <div className="space-y-4">
+        <div className={styles.formFields}>
           <div>
-            <label className="block text-[11px] font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
+            <label>
               Título del anuncio
             </label>
             <input
@@ -216,12 +213,12 @@ export default function ProductForm({
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Título principal"
-              className="w-full text-center bg-[#1E1C1A] border border-[#3A3833] px-4 py-3 rounded-xl text-lg font-bold text-[#E8E6E1] placeholder:text-[#9A9893]/40 placeholder:font-normal focus:outline-none focus:border-[#D97757]/50 transition-colors"
+              className={styles.panelInput}
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
+            <label>
               Subtítulo
             </label>
             <input
@@ -229,16 +226,16 @@ export default function ProductForm({
               value={subtitulo}
               onChange={(e) => setSubtitulo(e.target.value)}
               placeholder="Mensaje de apoyo"
-              className="w-full text-center bg-[#1E1C1A] border border-[#3A3833] px-4 py-2.5 rounded-xl text-sm text-[#9A9893] placeholder:text-[#9A9893]/40 focus:outline-none focus:border-[#D97757]/50 focus:text-[#E8E6E1] transition-colors"
+              className={styles.panelInput}
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
+            <label>
               CTA (Llamado a la acción)
             </label>
-            <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#D97757]">
+            <div className={styles.ctaField}>
+              <span aria-hidden="true">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
@@ -248,63 +245,61 @@ export default function ProductForm({
                 value={ctaContacto}
                 onChange={(e) => setCtaContacto(e.target.value)}
                 placeholder="Ej. Comprar ahora o WhatsApp"
-                className="w-full bg-[#1E1C1A] border border-[#D97757]/30 pl-10 pr-4 py-3 rounded-xl text-sm font-semibold text-[#E8E6E1] placeholder:text-[#9A9893]/40 placeholder:font-normal focus:outline-none focus:border-[#D97757] transition-colors"
+                className={`${styles.panelInput} ${styles.ctaInput}`}
               />
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Cantidad */}
       {showQuantity && (
-        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] px-5 pt-1 pb-5">
+        <section className={`${styles.formCard} ${styles.quantityCard}`}>
           <QuantitySelector cantidad={cantidad} setCantidad={setCantidad} loading={loading} />
-        </div>
+        </section>
       )}
 
       {/* Imagen de referencia */}
-      <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-5">
-        <h3 className="text-sm font-bold text-[#E8E6E1] mb-1 uppercase tracking-wider">
-          Imagen de referencia
-        </h3>
-        <p className="text-xs text-[#9A9893] mb-4">
-          Úsala como base visual (opcional)
-        </p>
+      <section className={`${styles.formCard} ${styles.productFormCard}`}>
+        <div className={styles.formHeading}>
+          <span>04</span>
+          <div><h2>Imagen de referencia</h2><p>Opcional · Ayuda a respetar producto y marca.</p></div>
+        </div>
 
         <input
           type="file"
           ref={fileInputRef}
           onChange={handleUpload}
           accept="image/*"
-          className="hidden"
+          className={styles.hiddenFileInput}
         />
 
         {uploading ? (
-          <div className="w-full flex flex-col items-center justify-center gap-3 py-12 px-4 rounded-2xl border border-dashed border-[#3A3833] bg-[#1E1C1A]">
+          <div className={styles.uploadState}>
             <svg className="animate-spin h-8 w-8 text-[#D97757]" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
-            <span className="text-xs font-medium text-[#9A9893]">Subiendo imagen...</span>
+            <span>Subiendo imagen...</span>
           </div>
         ) : imagenReferencia ? (
-          <div className="relative rounded-2xl overflow-hidden border border-[#D97757]/40 bg-[#1E1C1A] group">
+          <div className={styles.referencePreview}>
             <img
               src={imagenReferencia}
               alt="Referencia"
-              className="w-full h-48 object-contain bg-[#161412]"
+              className={styles.referenceImage}
             />
-            <div className="flex items-center justify-between gap-3 p-3 border-t border-[#3A3833]">
-              <div className="flex items-center gap-2 min-w-0">
+            <div className={styles.referenceMeta}>
+              <div>
                 <svg className="w-4 h-4 text-[#D97757] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="text-xs font-semibold text-[#E8E6E1] truncate">Imagen lista para usar</span>
+                <span>Imagen lista para usar</span>
               </div>
               <button
                 type="button"
                 onClick={handleDelete}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#EF4444] bg-[#EF4444]/10 hover:bg-[#EF4444]/20 transition-all duration-200"
+                className={styles.deleteReference}
                 title="Eliminar imagen"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,28 +326,24 @@ export default function ProductForm({
               setDragActive(false)
             }}
             onDrop={handleDrop}
-            className={`w-full flex flex-col items-center justify-center gap-3 py-12 px-4 rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200 ${
-              dragActive
-                ? "border-[#D97757] bg-[#D97757]/10"
-                : "border-[#3A3833] bg-[#1E1C1A] hover:border-[#D97757]/40 hover:bg-[#1E1C1A]/60"
-            }`}
+            className={`${styles.uploadDrop} ${dragActive ? styles.uploadDropActive : ""}`}
           >
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${dragActive ? "bg-[#D97757]/20" : "bg-[#2A2826]"}`}>
+            <div className={styles.uploadIcon}>
               <svg className="w-6 h-6 text-[#D97757]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
             </div>
-            <div className="text-center">
-              <p className="text-sm font-semibold text-[#E8E6E1]">
+            <div>
+              <p>
                 {dragActive ? "Suelta la imagen aquí" : "Arrastra una imagen"}
               </p>
-              <p className="text-xs text-[#9A9893] mt-0.5">
+              <small>
                 o haz clic para seleccionar · PNG, JPG, WEBP (máx. 5MB)
-              </p>
+              </small>
             </div>
           </div>
         )}
-      </div>
+      </section>
     </div>
   )
 }
