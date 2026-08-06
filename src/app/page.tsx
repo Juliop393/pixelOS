@@ -141,7 +141,7 @@ export default function Home() {
   }, [])
 
   return (
-    <main id="top">
+    <main id="top" className="landingPage">
       <header className="navShell">
         <nav className="nav glass" aria-label="Navegación principal">
           <Logo />

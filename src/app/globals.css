@@ -304,6 +304,59 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 @keyframes heroBgShift{0%,100%{background-position:0% 0%,0% 0%,0% 0%;transform:translate3d(-3%,-2%,0) scale(1.05);opacity:.95}25%{background-position:4% 2%,-3% 3%,2% -3%;transform:translate3d(1%,1%,0) scale(1.08)}50%{background-position:0% 4%,4% 0%,-2% 3%;transform:translate3d(3%,-1%,0) scale(1.06);opacity:.78}75%{background-position:-3% -2%,2% -3%,4% 2%;transform:translate3d(-1%,2%,0) scale(1.1)}}
 @media(prefers-reduced-motion:reduce){.hero:before{animation:none}}
 
+/* === LANDING VISUAL REPAIR (scoped) === */
+@keyframes landingTickerFlow{to{transform:translate3d(-50%,0,0)}}
+.landingPage .heroTicker{height:44px;max-width:520px;margin-top:20px;overflow:hidden;border:1px solid rgba(215,107,69,.18);border-radius:12px;background:rgba(20,18,16,.64);box-shadow:inset 0 1px rgba(255,255,255,.035);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.landingPage .tickerTrack{width:max-content;height:100%;display:flex;animation:landingTickerFlow 32s linear infinite;will-change:transform}
+.landingPage .tickerGroup{height:100%;display:flex;align-items:center;flex-shrink:0}
+.landingPage .tickerGroup>span{height:100%;display:flex;align-items:center;gap:19px;padding-left:19px;color:#a79c91;font:500 12px/1 monospace;letter-spacing:.025em;white-space:nowrap}
+.landingPage .tickerGroup>span>i{width:3px;height:3px;flex:0 0 3px;border-radius:50%;background:rgba(215,107,69,.72)}
+
+.landingPage .previewWrap{padding-bottom:112px;transform:translate3d(var(--parallax-x,0),var(--parallax-y,0),0);transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+.landingPage .previewWrap:before{right:0}
+.landingPage .aiFloat{width:min(300px,calc(100% - 36px));right:18px;bottom:0;z-index:6;padding:18px;border-color:rgba(215,107,69,.21);box-shadow:0 22px 55px rgba(0,0,0,.45),inset 0 1px rgba(255,255,255,.055)}
+.landingPage .aiFloatHead b{font-size:13px}.landingPage .aiFloatHead small{font-size:12px;line-height:1.35;color:#9d9389}.landingPage .aiFloat p{font-size:13px;line-height:1.55;color:#b4aaa0;margin:13px 0}.landingPage .aiFloat button{font-size:12px}
+.landingPage .appBody{grid-template-columns:98px 186px minmax(0,1fr)}.landingPage .sideRail{padding-inline:8px}.landingPage .appBar,.landingPage .miniLogo{font-size:12px}.landingPage .appActions span{font-size:12px}.landingPage .railStep{font-size:12px}.landingPage .railStep b{width:22px;height:22px;font-size:12px}.landingPage .controlPanel label{font-size:12px;color:#aaa198}.landingPage .selectBox,.landingPage .styleChoice,.landingPage .formatPicker button{font-size:12px}.landingPage .safeToggle b{font-size:12px}.landingPage .safeToggle small{font-size:12px;color:#9d948b}.landingPage .canvasTop{font-size:12px;color:#a69c93}.landingPage .generateButton{height:39px;font-size:14px}
+.landingPage .adCreative.realCreative{padding:0;background:#171410}
+.landingPage .adCreative.realCreative img{display:block;width:100%;height:100%;object-fit:cover}
+
+.landingPage .sectionIntro p,.landingPage .aiCopy>p,.landingPage .safeCopy>p{font-size:16px;line-height:1.65;color:#b8aea3}
+.landingPage .pill{font-size:12px}.landingPage .eyebrow,.landingPage .kicker{font-size:12px}.landingPage .creditNote{font-size:13px;color:#a3998f}.landingPage .textButton{font-size:14px}.landingPage .button.small{font-size:14px}
+.landingPage .benefitGrid b{font-size:15px}.landingPage .benefitGrid p{font-size:14px;line-height:1.55;color:#a69c92}.landingPage .benefitGrid small{font-size:12px;color:#817970}
+
+.landingPage .aiSection{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(48px,7vw,84px);padding-inline:clamp(24px,5vw,60px)}
+.landingPage .miniFeature{padding:18px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.018);margin-top:32px}.landingPage .miniFeature b{font-size:14px}.landingPage .miniFeature small{font-size:13px;line-height:1.5;color:#9c9389}
+.landingPage .chatPanel{min-height:500px;background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));box-shadow:0 28px 70px rgba(0,0,0,.25)}
+.landingPage .chatHeader{height:72px;padding-inline:24px}.landingPage .chatHeader b{font-size:14px}.landingPage .chatHeader small{font-size:12px;color:#9d948a}
+.landingPage .chatBody{padding:26px;gap:16px;font-size:14px;line-height:1.55}.landingPage .botMessage,.landingPage .userMessage{padding:14px 16px}.landingPage .recommendation{max-width:96%;padding:18px}.landingPage .recommendation b{font-size:14px}.landingPage .recommendation small{font-size:12px;color:#968d84}.landingPage .recommendation li{padding-left:28px;margin:11px 0}.landingPage .recommendation li:before{width:19px;height:19px;font-size:10px}.landingPage .chatInput{height:54px;margin:0 22px 22px;padding-left:16px;font-size:13px}
+
+.landingPage .stepLine article>span{font-size:12px}.landingPage .stepLine h3{font-size:20px}.landingPage .stepLine p{font-size:15px;line-height:1.6;color:#a69d93}.landingPage .libraryHead b{font-size:15px}.landingPage .libraryHead small{font-size:12px;color:#938a81}.landingPage .chipCloud span{font-size:13px;color:#aaa198}
+
+.landingPage .creativeGallery{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr) minmax(0,.82fr);align-items:end;gap:24px;max-width:1080px;margin:44px auto 0;overflow:visible}
+.landingPage .creativeCard{width:100%;min-width:0;padding:10px;background:linear-gradient(145deg,#191613,#12110f);box-shadow:0 22px 55px rgba(0,0,0,.24);transform:translateY(var(--card-offset,0))}
+.landingPage .creativeCard.square{width:100%;--card-offset:8px}.landingPage .creativeCard.portrait{width:100%;--card-offset:-16px}.landingPage .creativeCard.story{width:100%;--card-offset:12px}
+.landingPage .creativeCard:hover{transform:translateY(calc(var(--card-offset,0px) - 5px));border-color:rgba(215,107,69,.23)}
+.landingPage .creativeCard .abstractAd.realCreative{padding:0;background:#0f0e0d}
+.landingPage .creativeCard .abstractAd.realCreative img{display:block;width:100%;height:100%;object-fit:cover}
+.landingPage .formatTag{font-size:12px;right:16px;top:16px;padding:7px 9px}.landingPage .creativeCard footer{height:39px;padding:12px 6px 0;font-size:12px}
+
+.landingPage .safeSection{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(48px,7vw,88px);padding-inline:clamp(24px,5vw,70px)}
+.landingPage .safeVisual{height:auto;min-height:650px;border:1px solid var(--line);border-radius:28px;background:radial-gradient(circle at 50% 48%,rgba(173,91,57,.18),rgba(20,17,14,.7) 53%,rgba(13,12,11,.9) 75%);overflow:visible;isolation:isolate}
+.landingPage .phone{width:min(270px,70%);height:auto;aspect-ratio:9/16;padding:8px;position:relative;z-index:2}
+.landingPage .storyAd.realStoryCreative{height:calc(100% - 25px);padding:0}
+.landingPage .storyAd.realStoryCreative img{display:block;width:100%;height:100%;object-fit:cover}
+.landingPage .safeGuides{z-index:2;border-color:rgba(255,248,236,.88)}.landingPage .safeGuides span{top:-22px;padding:4px 7px;border-radius:5px;background:rgba(12,11,10,.72);font-size:12px;color:#fff8ed}.landingPage .phoneTop{font-size:12px}
+.landingPage .safeBadge{right:24px;bottom:42px;z-index:3;padding:14px 16px;box-shadow:0 18px 45px rgba(0,0,0,.4)}.landingPage .safeBadge b{font-size:13px}.landingPage .safeBadge small{font-size:12px;color:#a69d94}.landingPage .safeCopy ul{font-size:14px;line-height:1.5;color:#bcb2a8}
+
+.landingPage .priceCard{min-height:500px}.landingPage .popular{font-size:12px}.landingPage .priceCard>div:first-of-type p{font-size:14px;color:#958c83}.landingPage .price span{font-size:12px}.landingPage .priceCard ul{font-size:15px;line-height:1.45;color:#b9afa5}.landingPage .outlineButton{font-size:14px}.landingPage .pricingNote{font-size:13px;color:#958c83}
+.landingPage .ctaBox p{font-size:15px}.landingPage .ctaBox small{font-size:12px}.landingPage .footerMain>div:first-child p{font-size:14px;color:#938a81}.landingPage .footerLinks b{font-size:13px}.landingPage .footerLinks a{font-size:14px;color:#938a81}.landingPage .footerBottom{font-size:12px;color:#79726b}
+
+@media(max-width:1050px){.landingPage .aiSection,.landingPage .safeSection{padding-inline:0}.landingPage .previewWrap{padding-bottom:120px}}
+@media(max-width:900px){.landingPage .aiSection,.landingPage .safeSection{grid-template-columns:1fr}.landingPage .benefitGrid{grid-template-columns:1fr 1fr}.landingPage .libraryPanel{grid-template-columns:1fr;padding:30px 26px}.landingPage .libraryDivider{height:1px}.landingPage .creativeGallery{grid-template-columns:1fr;max-width:440px;gap:28px}.landingPage .creativeCard.square,.landingPage .creativeCard.portrait,.landingPage .creativeCard.story{--card-offset:0}.landingPage .safeCopy{order:0}.landingPage .safeVisual{order:1;min-height:680px;width:min(100%,600px);margin-inline:auto}.landingPage .pricingGrid{grid-template-columns:1fr;max-width:580px;margin-inline:auto}.landingPage .priceCard{width:100%}}
+@media(max-width:760px){.landingPage .heroTicker{max-width:100%;margin-top:22px}.landingPage .tickerTrack{animation-duration:36s}.landingPage .previewWrap{padding-bottom:126px}.landingPage .aiFloat{width:min(280px,calc(100% - 24px));right:12px;bottom:0}.landingPage .appBody{grid-template-columns:52px 165px minmax(0,1fr)}.landingPage .heroCopy>p{font-size:15px}.landingPage .benefitGrid p,.landingPage .stepLine p,.landingPage .priceCard>div:first-of-type p,.landingPage .priceCard ul{font-size:14px}.landingPage .chatBody{font-size:13px}.landingPage .creativeGallery{overflow:visible;padding:0;scroll-snap-type:none}.landingPage .creativeCard.square,.landingPage .creativeCard.portrait,.landingPage .creativeCard.story{width:100%;min-width:0;max-width:440px}.landingPage .safeVisual{min-height:650px}.landingPage .priceCard{min-height:470px}}
+@media(max-width:480px){.landingPage .previewWrap{padding-bottom:136px}.landingPage .aiFloat{width:calc(100% - 16px);right:8px;bottom:0}.landingPage .appBody{grid-template-columns:43% 57%}.landingPage .direction{margin-top:88px}.landingPage .safeVisual{min-height:620px;place-items:start center;padding-top:20px}.landingPage .phone{width:min(250px,78%)}.landingPage .safeBadge{right:50%;bottom:14px;transform:translateX(50%);white-space:nowrap}.landingPage .chatBody{padding:18px}.landingPage .botMessage,.landingPage .userMessage{max-width:88%}.landingPage .footerLinks{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.landingPage .tickerTrack{animation:none;transform:none}.landingPage .tickerGroup[aria-hidden="true"]{display:none}.landingPage .previewWrap{transform:none!important;transition:none}.landingPage .creativeCard,.landingPage .creativeCard:hover{transform:none}}
+
 
 /* === DASHBOARD SCROLLBAR === */
 .dashboard-scroll::-webkit-scrollbar{height:4px;width:4px}
