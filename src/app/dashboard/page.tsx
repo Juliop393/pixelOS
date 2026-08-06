@@ -9,7 +9,6 @@ import AngleSelector from "@/components/dashboard/AngleSelector"
 import FormatSelector from "@/components/dashboard/FormatSelector"
 import StyleSelector from "@/components/dashboard/StyleSelector"
 import ProductForm from "@/components/dashboard/ProductForm"
-import QuantitySelector from "@/components/dashboard/QuantitySelector"
 import ResultPanel from "@/components/dashboard/ResultPanel"
 import Accordion from "@/components/ui/Accordion"
 import PixelAdvisor from "@/components/dashboard/PixelAdvisor"
@@ -143,7 +142,7 @@ export default function DashboardPage() {
               setImagenReferencia={g.setImagenReferencia}
               nombreImagenReferencia={g.nombreImagenReferencia}
               setNombreImagenReferencia={g.setNombreImagenReferencia}
-              showQuantity={false}
+              showQuantity
               highlightProduct={highlightProduct}
             />
           )}
@@ -182,14 +181,6 @@ export default function DashboardPage() {
               <section className={s.formCard}>
                 <div className={s.formHeading}>
                   <span>04</span>
-                  <div><h2>Cantidad</h2><p>¿Cuántas versiones necesitas?</p></div>
-                </div>
-                <QuantitySelector cantidad={g.cantidad} setCantidad={g.setCantidad} loading={g.loading} />
-              </section>
-
-              <section className={s.formCard}>
-                <div className={s.formHeading}>
-                  <span>05</span>
                   <div><h2>Estilo visual</h2><p>Define la estética que acompañará tu mensaje.</p></div>
                 </div>
                 <StyleSelector visualStyle={g.visualStyle} setVisualStyle={g.setVisualStyle} />
@@ -197,7 +188,7 @@ export default function DashboardPage() {
 
               <section className={s.formCard}>
                 <div className={s.formHeading}>
-                  <span>06</span>
+                  <span>05</span>
                   <div><h2>Ajustes</h2><p>Configuración adicional.</p></div>
                 </div>
                 <Accordion title="Color de marca">

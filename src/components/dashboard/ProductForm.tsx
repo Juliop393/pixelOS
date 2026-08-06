@@ -255,6 +255,10 @@ export default function ProductForm({
       {/* Cantidad */}
       {showQuantity && (
         <section className={`${styles.formCard} ${styles.quantityCard}`}>
+          <div className={styles.formHeading}>
+            <span>03</span>
+            <div><h2>Cantidad</h2><p>¿Cuántas versiones necesitas?</p></div>
+          </div>
           <QuantitySelector cantidad={cantidad} setCantidad={setCantidad} loading={loading} />
         </section>
       )}
