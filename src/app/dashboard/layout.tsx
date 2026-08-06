@@ -1,8 +1,10 @@
 import Topbar from "@/components/dashboard/Topbar"
+import DashboardNavigation from "@/components/dashboard/DashboardNavigation"
 import MobileBlock from "@/components/dashboard/MobileBlock"
 import DashboardParticles from "@/components/dashboard/DashboardParticles"
 import { AuthGuard } from "@/components/dashboard/AuthGuard"
 import { CreditsProvider } from "@/lib/credits-context"
+import styles from "@/components/dashboard/DashboardShell.module.css"
 
 export default function DashboardLayout({
   children,
@@ -12,7 +14,7 @@ export default function DashboardLayout({
   return (
     <CreditsProvider initialCredits={0}>
       {/* Desktop */}
-      <div className="hidden md:flex h-screen overflow-hidden bg-[#1E1C1A] text-[#E8E6E1] flex-col relative">
+      <div className={styles.desktopRoot}>
         {/* Glow principal — claro cálido/champagne para luminosidad premium */}
         <div
           aria-hidden="true"
@@ -61,10 +63,13 @@ export default function DashboardLayout({
         <DashboardParticles />
 
         <AuthGuard>
-          <Topbar />
-          <main className="flex-1 px-6 pb-6 pt-2 overflow-hidden min-h-0 relative z-10">
-            {children}
-          </main>
+          <div className={styles.shell}>
+            <DashboardNavigation />
+            <div className={styles.shellBody}>
+              <Topbar />
+              <main className={styles.content}>{children}</main>
+            </div>
+          </div>
         </AuthGuard>
       </div>
 
