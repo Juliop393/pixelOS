@@ -332,9 +332,10 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 
 .landingPage .stepLine article>span{font-size:12px}.landingPage .stepLine h3{font-size:20px}.landingPage .stepLine p{font-size:15px;line-height:1.6;color:#a69d93}.landingPage .libraryHead b{font-size:15px}.landingPage .libraryHead small{font-size:12px;color:#938a81}.landingPage .chipCloud span{font-size:13px;color:#aaa198}
 
-.landingPage .creativeGallery{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.81fr) minmax(0,.58fr);align-items:end;gap:24px;max-width:1080px;margin:48px auto 0;overflow:visible}
+.landingPage .creativeGallery{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.05fr) minmax(0,.62fr);align-items:end;gap:26px;max-width:1080px;margin:48px auto 0;overflow:visible}
 .landingPage .creativeCard{width:100%;min-width:0;padding:10px;background:linear-gradient(145deg,#191613,#12110f);box-shadow:0 22px 55px rgba(0,0,0,.24);transform:translateY(0)}
 .landingPage .creativeCard.square,.landingPage .creativeCard.portrait,.landingPage .creativeCard.story{width:100%;--card-offset:0}
+.landingPage .creativeCard.portrait{border-color:rgba(215,107,69,.19);box-shadow:0 28px 68px rgba(0,0,0,.34),0 0 0 1px rgba(215,107,69,.025)}
 .landingPage .creativeCard:hover{transform:translateY(-5px);border-color:rgba(215,107,69,.23)}
 .landingPage .creativeCard .abstractAd.realCreative{padding:0;background:#0f0e0d}
 .landingPage .creativeCard .abstractAd.realCreative img{display:block;width:100%;height:100%;object-fit:cover}
@@ -360,16 +361,18 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 /* === LANDING NAV + GOOGLE ENTRY POLISH === */
 .landingPage .navShell{height:104px;padding-top:16px;position:sticky;top:0;z-index:100;background:linear-gradient(180deg,rgba(12,11,10,.78),rgba(12,11,10,.28) 70%,transparent);pointer-events:none}
 .landingPage section[id]{scroll-margin-top:120px}
-.landingPage .nav{height:72px;padding:0 16px 0 24px;border-radius:20px;isolation:isolate;overflow:clip;pointer-events:auto;background:linear-gradient(135deg,rgba(38,34,30,.82),rgba(20,18,16,.72));border-color:rgba(243,234,220,.14);box-shadow:0 18px 50px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.075);-webkit-backdrop-filter:blur(24px) saturate(135%);backdrop-filter:blur(24px) saturate(135%)}
-.landingPage .nav:before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,rgba(255,255,255,.055),transparent 34%,transparent 70%,rgba(215,107,69,.04));pointer-events:none}
+.landingPage .nav{height:72px;padding:0 16px 0 24px;border-radius:24px;isolation:isolate;overflow:clip;pointer-events:auto;background:linear-gradient(135deg,rgba(51,45,40,.58),rgba(22,19,17,.44));border-color:rgba(243,234,220,.16);box-shadow:0 22px 58px rgba(0,0,0,.34),0 7px 24px rgba(40,24,17,.18),inset 0 1px rgba(255,255,255,.09);-webkit-backdrop-filter:blur(28px) saturate(142%);backdrop-filter:blur(28px) saturate(142%)}
+.landingPage .nav:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.075),transparent 24%),linear-gradient(105deg,rgba(215,107,69,.035),transparent 34%,transparent 72%,rgba(243,234,220,.025));pointer-events:none}
 .landingPage .nav>*{position:relative;z-index:1}
-.landingPage .navLinks{gap:3px;padding:4px;border:1px solid rgba(243,234,220,.055);border-radius:12px;background:rgba(8,7,6,.18)}
-.landingPage .navLinks a{padding:8px 11px;border-radius:9px;color:#bdb3a8;font-weight:520;letter-spacing:.005em;transition:color .25s,background .25s}
-.landingPage .navLinks a:hover{color:#fff8ed;background:rgba(255,255,255,.055)}
+.landingPage .navLinks{gap:5px;padding:0;border:0;border-radius:0;background:transparent}
+.landingPage .navLinks a{position:relative;padding:10px 11px;border-radius:9px;color:#c2b8ad;font-weight:520;letter-spacing:.005em;transition:color .28s,background .28s,transform .28s}
+.landingPage .navLinks a:after{content:"";position:absolute;left:12px;right:12px;bottom:5px;height:1px;border-radius:99px;background:linear-gradient(90deg,transparent,rgba(215,107,69,.9),transparent);opacity:0;transform:scaleX(.4);transition:opacity .28s,transform .28s}
+.landingPage .navLinks a:hover{color:#fff8ed;background:rgba(255,255,255,.045);transform:translateY(-1px)}
+.landingPage .navLinks a:hover:after{opacity:1;transform:scaleX(1)}
 .landingPage .navCtas{gap:9px}
-.landingPage .login{height:42px;padding:0 14px;display:inline-flex;align-items:center;border:1px solid rgba(243,234,220,.1);border-radius:10px;background:rgba(255,255,255,.025);color:#ddd3c7;font-weight:560}
-.landingPage .login:hover{border-color:rgba(243,234,220,.2);background:rgba(255,255,255,.055)}
-.landingPage .button.small{height:42px;padding:0 17px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:linear-gradient(145deg,#df7651,#c95d3a);box-shadow:0 10px 25px rgba(215,107,69,.22),inset 0 1px rgba(255,255,255,.18)}
+.landingPage .login{height:42px;padding:0 14px;display:inline-flex;align-items:center;border:1px solid rgba(243,234,220,.11);border-radius:11px;background:rgba(255,255,255,.032);color:#e0d6ca;font-weight:560;box-shadow:inset 0 1px rgba(255,255,255,.035)}
+.landingPage .login:hover{border-color:rgba(243,234,220,.22);background:rgba(255,255,255,.065);transform:translateY(-1px)}
+.landingPage .button.small{height:42px;padding:0 17px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:linear-gradient(145deg,#df7651,#c95d3a);box-shadow:0 11px 27px rgba(215,107,69,.23),inset 0 1px rgba(255,255,255,.2)}
 .landingPage .heroQuickStart{display:flex;align-items:center;gap:18px;margin-top:17px}
 .landingPage .googleLandingButton{height:44px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:10px;border:1px solid rgba(243,234,220,.14);border-radius:11px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.028));color:#e8ded2;font-size:13px;font-weight:590;cursor:pointer;box-shadow:inset 0 1px rgba(255,255,255,.055);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:transform .25s,border-color .25s,background .25s}
 .landingPage .googleLandingButton:hover{transform:translateY(-2px);border-color:rgba(243,234,220,.24);background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.045))}
