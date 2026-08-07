@@ -332,10 +332,10 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 
 .landingPage .stepLine article>span{font-size:12px}.landingPage .stepLine h3{font-size:20px}.landingPage .stepLine p{font-size:15px;line-height:1.6;color:#a69d93}.landingPage .libraryHead b{font-size:15px}.landingPage .libraryHead small{font-size:12px;color:#938a81}.landingPage .chipCloud span{font-size:13px;color:#aaa198}
 
-.landingPage .creativeGallery{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr) minmax(0,.82fr);align-items:end;gap:24px;max-width:1080px;margin:44px auto 0;overflow:visible}
-.landingPage .creativeCard{width:100%;min-width:0;padding:10px;background:linear-gradient(145deg,#191613,#12110f);box-shadow:0 22px 55px rgba(0,0,0,.24);transform:translateY(var(--card-offset,0))}
-.landingPage .creativeCard.square{width:100%;--card-offset:8px}.landingPage .creativeCard.portrait{width:100%;--card-offset:-16px}.landingPage .creativeCard.story{width:100%;--card-offset:12px}
-.landingPage .creativeCard:hover{transform:translateY(calc(var(--card-offset,0px) - 5px));border-color:rgba(215,107,69,.23)}
+.landingPage .creativeGallery{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.81fr) minmax(0,.58fr);align-items:end;gap:24px;max-width:1080px;margin:48px auto 0;overflow:visible}
+.landingPage .creativeCard{width:100%;min-width:0;padding:10px;background:linear-gradient(145deg,#191613,#12110f);box-shadow:0 22px 55px rgba(0,0,0,.24);transform:translateY(0)}
+.landingPage .creativeCard.square,.landingPage .creativeCard.portrait,.landingPage .creativeCard.story{width:100%;--card-offset:0}
+.landingPage .creativeCard:hover{transform:translateY(-5px);border-color:rgba(215,107,69,.23)}
 .landingPage .creativeCard .abstractAd.realCreative{padding:0;background:#0f0e0d}
 .landingPage .creativeCard .abstractAd.realCreative img{display:block;width:100%;height:100%;object-fit:cover}
 .landingPage .formatTag{font-size:12px;right:16px;top:16px;padding:7px 9px}.landingPage .creativeCard footer{height:39px;padding:12px 6px 0;font-size:12px}
@@ -356,6 +356,31 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 @media(max-width:760px){.landingPage .heroTicker{max-width:100%;margin-top:22px}.landingPage .tickerTrack{animation-duration:36s}.landingPage .previewWrap{padding-bottom:126px}.landingPage .aiFloat{width:min(280px,calc(100% - 24px));right:12px;bottom:0}.landingPage .appBody{grid-template-columns:52px 165px minmax(0,1fr)}.landingPage .heroCopy>p{font-size:15px}.landingPage .benefitGrid p,.landingPage .stepLine p,.landingPage .priceCard>div:first-of-type p,.landingPage .priceCard ul{font-size:14px}.landingPage .chatBody{font-size:13px}.landingPage .creativeGallery{overflow:visible;padding:0;scroll-snap-type:none}.landingPage .creativeCard.square,.landingPage .creativeCard.portrait,.landingPage .creativeCard.story{width:100%;min-width:0;max-width:440px}.landingPage .safeVisual{min-height:650px}.landingPage .priceCard{min-height:470px}}
 @media(max-width:480px){.landingPage .previewWrap{padding-bottom:136px}.landingPage .aiFloat{width:calc(100% - 16px);right:8px;bottom:0}.landingPage .appBody{grid-template-columns:43% 57%}.landingPage .direction{margin-top:88px}.landingPage .safeVisual{min-height:620px;place-items:start center;padding-top:20px}.landingPage .phone{width:min(250px,78%)}.landingPage .safeBadge{right:50%;bottom:14px;transform:translateX(50%);white-space:nowrap}.landingPage .chatBody{padding:18px}.landingPage .botMessage,.landingPage .userMessage{max-width:88%}.landingPage .footerLinks{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){.landingPage .tickerTrack{animation:none;transform:none}.landingPage .tickerGroup[aria-hidden="true"]{display:none}.landingPage .previewWrap{transform:none!important;transition:none}.landingPage .creativeCard,.landingPage .creativeCard:hover{transform:none}}
+
+/* === LANDING NAV + GOOGLE ENTRY POLISH === */
+.landingPage .navShell{height:104px;padding-top:16px;position:sticky;top:0;z-index:100;background:linear-gradient(180deg,rgba(12,11,10,.78),rgba(12,11,10,.28) 70%,transparent);pointer-events:none}
+.landingPage section[id]{scroll-margin-top:120px}
+.landingPage .nav{height:72px;padding:0 16px 0 24px;border-radius:20px;isolation:isolate;overflow:clip;pointer-events:auto;background:linear-gradient(135deg,rgba(38,34,30,.82),rgba(20,18,16,.72));border-color:rgba(243,234,220,.14);box-shadow:0 18px 50px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.075);-webkit-backdrop-filter:blur(24px) saturate(135%);backdrop-filter:blur(24px) saturate(135%)}
+.landingPage .nav:before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,rgba(255,255,255,.055),transparent 34%,transparent 70%,rgba(215,107,69,.04));pointer-events:none}
+.landingPage .nav>*{position:relative;z-index:1}
+.landingPage .navLinks{gap:3px;padding:4px;border:1px solid rgba(243,234,220,.055);border-radius:12px;background:rgba(8,7,6,.18)}
+.landingPage .navLinks a{padding:8px 11px;border-radius:9px;color:#bdb3a8;font-weight:520;letter-spacing:.005em;transition:color .25s,background .25s}
+.landingPage .navLinks a:hover{color:#fff8ed;background:rgba(255,255,255,.055)}
+.landingPage .navCtas{gap:9px}
+.landingPage .login{height:42px;padding:0 14px;display:inline-flex;align-items:center;border:1px solid rgba(243,234,220,.1);border-radius:10px;background:rgba(255,255,255,.025);color:#ddd3c7;font-weight:560}
+.landingPage .login:hover{border-color:rgba(243,234,220,.2);background:rgba(255,255,255,.055)}
+.landingPage .button.small{height:42px;padding:0 17px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:linear-gradient(145deg,#df7651,#c95d3a);box-shadow:0 10px 25px rgba(215,107,69,.22),inset 0 1px rgba(255,255,255,.18)}
+.landingPage .heroQuickStart{display:flex;align-items:center;gap:18px;margin-top:17px}
+.landingPage .googleLandingButton{height:44px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:10px;border:1px solid rgba(243,234,220,.14);border-radius:11px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.028));color:#e8ded2;font-size:13px;font-weight:590;cursor:pointer;box-shadow:inset 0 1px rgba(255,255,255,.055);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:transform .25s,border-color .25s,background .25s}
+.landingPage .googleLandingButton:hover{transform:translateY(-2px);border-color:rgba(243,234,220,.24);background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.045))}
+.landingPage .googleLandingButton:disabled{opacity:.62;cursor:wait;transform:none}
+.landingPage .heroQuickStart .creditNote{margin:0}
+.landingPage .heroOauthError{max-width:390px;margin:10px 0 0;color:#e89a82;font-size:12px;line-height:1.45}
+
+@media(max-width:1050px){.landingPage .navLinks a{padding-inline:8px}.landingPage .navCtas{gap:7px}.landingPage .login{padding-inline:11px}}
+@media(max-width:900px){.landingPage .creativeGallery{grid-template-columns:1fr;max-width:520px;align-items:start;gap:28px}.landingPage .creativeCard.square{max-width:440px}.landingPage .creativeCard.portrait{max-width:356px}.landingPage .creativeCard.story{max-width:260px}.landingPage .creativeCard.square,.landingPage .creativeCard.portrait,.landingPage .creativeCard.story{justify-self:center}}
+@media(max-width:760px){.landingPage .navShell{height:96px;padding-top:12px}.landingPage .nav{padding-inline:18px}.landingPage .heroQuickStart{align-items:flex-start;flex-direction:column;gap:12px}.landingPage .googleLandingButton{width:min(100%,320px)}.landingPage .mobileMenu>div{top:64px;background:rgba(24,21,18,.96);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}}
+@media(max-width:480px){.landingPage .googleLandingButton{width:100%}}
 
 
 /* === DASHBOARD SCROLLBAR === */

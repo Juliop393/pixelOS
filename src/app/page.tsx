@@ -1,10 +1,18 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 
 const Arrow = () => <span aria-hidden="true">↗</span>
 const Check = () => <span className="check" aria-hidden="true">✓</span>
+const GoogleMark = () => (
+  <svg width={18} height={18} viewBox="0 0 18 18" aria-hidden="true">
+    <path fill="#4285F4" d="M17.64 9.205c0-.638-.057-1.252-.164-1.841H9v3.482h4.844a4.14 4.14 0 01-1.797 2.716v2.258h2.909c1.702-1.567 2.684-3.875 2.684-6.615z" />
+    <path fill="#34A853" d="M9 18c2.43 0 4.468-.806 5.956-2.18l-2.909-2.258c-.806.54-1.836.859-3.047.859-2.344 0-4.328-1.585-5.037-3.714H.956v2.332A9 9 0 009 18z" />
+    <path fill="#FBBC05" d="M3.963 10.707A5.41 5.41 0 013.681 9c0-.592.102-1.168.282-1.707V4.961H.956A9 9 0 000 9c0 1.452.347 2.827.956 4.039l3.007-2.332z" />
+    <path fill="#EA4335" d="M9 3.579c1.321 0 2.507.454 3.441 1.346l2.581-2.581C13.464.891 11.426 0 9 0A9 9 0 00.956 4.961l3.007 2.332C4.672 5.164 6.656 3.579 9 3.579z" />
+  </svg>
+)
 
 function Logo() {
   return (
@@ -78,6 +86,29 @@ const plans = [
 const tickerItems = ["Meta Ads Ready", "Pixel IA", "Ángulos estratégicos", "Zona Segura Meta", "Creativos listos para publicar", "1:1 · 4:5 · 9:16", "Estrategia + IA"]
 
 export default function Home() {
+  const [googleLoading, setGoogleLoading] = useState(false)
+  const [googleError, setGoogleError] = useState("")
+
+  const handleGoogleAuth = async () => {
+    setGoogleError("")
+    setGoogleLoading(true)
+
+    try {
+      const { supabase } = await import("@/lib/supabase")
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+
+      if (error) throw error
+    } catch {
+      setGoogleError("No pudimos conectar con Google. Inténtalo nuevamente.")
+      setGoogleLoading(false)
+    }
+  }
+
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
@@ -163,7 +194,14 @@ export default function Home() {
           <h1>Convierte tu producto en anuncios que se sienten <em>pensados,</em> no improvisados.</h1>
           <p>Pixel IA analiza tu producto, recomienda el ángulo y genera creativos listos para Feed, Stories y Reels.</p>
           <div className="heroActions"><Link className="button" href="/register">Crear mi primer anuncio <Arrow /></Link><a className="textButton" href="#como-funciona"><span className="play">▶</span> Ver cómo funciona</a></div>
-          <small className="creditNote"><Check /> 5 créditos gratis <i /> Sin tarjeta</small>
+          <div className="heroQuickStart">
+            <button className="googleLandingButton" type="button" onClick={handleGoogleAuth} disabled={googleLoading}>
+              <GoogleMark />
+              <span>{googleLoading ? "Conectando..." : "Continuar con Google"}</span>
+            </button>
+            <small className="creditNote"><Check /> 5 créditos gratis <i /> Sin tarjeta</small>
+          </div>
+          {googleError && <p className="heroOauthError" role="alert">{googleError}</p>}
           <div className="heroTicker" aria-label="Capacidades de PixelFM">
             <div className="tickerTrack">
               {[0, 1].map((group) => <div className="tickerGroup" aria-hidden={group === 1} key={group}>{tickerItems.map((item) => <span key={`${group}-${item}`}>{item}<i /></span>)}</div>)}
