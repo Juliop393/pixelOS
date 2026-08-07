@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -32,7 +32,36 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [error, setError] = useState("")
   const [duplicateEmail, setDuplicateEmail] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [oauthLoading, setOauthLoading] = useState(false)
   const passwordStrength = getPasswordStrength(password)
+
+  useEffect(() => {
+    const oauthError = new URLSearchParams(window.location.search).get("oauth_error")
+
+    if (oauthError === "callback") {
+      setError("No pudimos iniciar sesión con Google. Inténtalo nuevamente.")
+    }
+  }, [])
+
+  const handleGoogleAuth = async () => {
+    setError("")
+    setDuplicateEmail(false)
+    setOauthLoading(true)
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+
+      if (error) throw error
+    } catch {
+      setError("No pudimos iniciar sesión con Google. Inténtalo nuevamente.")
+      setOauthLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -116,6 +145,27 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 ? "Regístrate para comenzar a crear anuncios"
                 : "Ingresa tus credenciales para continuar"}
             </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleAuth}
+            disabled={oauthLoading || loading}
+            className="w-full flex items-center justify-center gap-3 bg-[#E8E6E1] text-[#1E1C1A] font-semibold px-6 py-4 rounded-xl hover:bg-white active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg className="w-5 h-5" width={20} height={20} viewBox="0 0 18 18" aria-hidden="true">
+              <path fill="#4285F4" d="M17.64 9.205c0-.638-.057-1.252-.164-1.841H9v3.482h4.844a4.14 4.14 0 01-1.797 2.716v2.258h2.909c1.702-1.567 2.684-3.875 2.684-6.615z" />
+              <path fill="#34A853" d="M9 18c2.43 0 4.468-.806 5.956-2.18l-2.909-2.258c-.806.54-1.836.859-3.047.859-2.344 0-4.328-1.585-5.037-3.714H.956v2.332A9 9 0 009 18z" />
+              <path fill="#FBBC05" d="M3.963 10.707A5.41 5.41 0 013.681 9c0-.592.102-1.168.282-1.707V4.961H.956A9 9 0 000 9c0 1.452.347 2.827.956 4.039l3.007-2.332z" />
+              <path fill="#EA4335" d="M9 3.579c1.321 0 2.507.454 3.441 1.346l2.581-2.581C13.464.891 11.426 0 9 0A9 9 0 00.956 4.961l3.007 2.332C4.672 5.164 6.656 3.579 9 3.579z" />
+            </svg>
+            {oauthLoading ? "Conectando con Google..." : "Continuar con Google"}
+          </button>
+
+          <div className="flex items-center gap-4 my-6" aria-hidden="true">
+            <span className="h-px flex-1 bg-[#3A3833]" />
+            <span className="text-xs text-[#9A9893] whitespace-nowrap">o continúa con correo</span>
+            <span className="h-px flex-1 bg-[#3A3833]" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -218,7 +268,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || oauthLoading}
               className="w-full bg-[#D97757] text-white font-semibold px-6 py-4 rounded-xl hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
