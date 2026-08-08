@@ -332,9 +332,9 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 
 .landingPage .stepLine article>span{font-size:12px}.landingPage .stepLine h3{font-size:20px}.landingPage .stepLine p{font-size:15px;line-height:1.6;color:#a69d93}.landingPage .libraryHead b{font-size:15px}.landingPage .libraryHead small{font-size:12px;color:#938a81}.landingPage .chipCloud span{font-size:13px;color:#aaa198}
 
-.landingPage .creativeGallery{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.05fr) minmax(0,.62fr);align-items:end;gap:26px;max-width:1080px;margin:48px auto 0;overflow:visible}
+.landingPage .creativeGallery{display:flex;justify-content:center;align-items:end;gap:24px;max-width:1200px;margin:48px auto 0;overflow:visible}
 .landingPage .creativeCard{width:100%;min-width:0;padding:10px;align-self:end;margin-bottom:0;background:linear-gradient(145deg,#191613,#12110f);box-shadow:0 22px 55px rgba(0,0,0,.24);transform:translateY(0)}
-.landingPage .creativeCard.square,.landingPage .creativeCard.portrait,.landingPage .creativeCard.story{width:100%;--card-offset:0}
+.landingPage .creativeCard.square{width:30%}.landingPage .creativeCard.portrait{width:31%}.landingPage .creativeCard.story{width:25%}.landingPage .creativeCard.square,.landingPage .creativeCard.portrait,.landingPage .creativeCard.story{--card-offset:0}
 .landingPage .creativeCard.portrait{border-color:rgba(215,107,69,.19);box-shadow:0 28px 68px rgba(0,0,0,.34),0 0 0 1px rgba(215,107,69,.025)}
 .landingPage .creativeCard:hover{transform:translateY(-5px);border-color:rgba(215,107,69,.23)}
 .landingPage .creativeCard .abstractAd.realCreative{padding:0;background:#0f0e0d}
@@ -362,7 +362,7 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 .landingPage .navShell{height:104px;padding-top:16px;position:sticky;top:0;z-index:100;background:linear-gradient(180deg,rgba(12,11,10,.78),rgba(12,11,10,.28) 70%,transparent);pointer-events:none}
 .landingPage section[id]{scroll-margin-top:120px}
 .landingPage .nav{height:72px;width:min(1120px,calc(100% - 128px));padding:0 16px 0 24px;border-radius:30px;isolation:isolate;overflow:clip;pointer-events:auto;background:linear-gradient(135deg,rgba(51,45,40,.58),rgba(22,19,17,.44));border-color:rgba(243,234,220,.16);box-shadow:0 22px 58px rgba(0,0,0,.34),0 7px 24px rgba(40,24,17,.18),inset 0 1px rgba(255,255,255,.09);-webkit-backdrop-filter:blur(28px) saturate(142%);backdrop-filter:blur(28px) saturate(142%)}
-.landingPage .nav:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.075),transparent 24%),linear-gradient(105deg,rgba(215,107,69,.035),transparent 34%,transparent 72%,rgba(243,234,220,.025));pointer-events:none}
+.landingPage .nav:before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.075),transparent 24%),linear-gradient(105deg,rgba(215,107,69,.035),transparent 34%,transparent 72%,rgba(243,234,220,.025));pointer-events:none}
 .landingPage .nav>*{position:relative;z-index:1}
 .landingPage .navLinks{gap:5px;padding:0;border:0;border-radius:0;background:transparent}
 .landingPage .navLinks a{position:relative;padding:10px 11px;border-radius:9px;color:#c2b8ad;font-weight:520;letter-spacing:.005em;transition:color .28s,background .28s,transform .28s}
@@ -381,8 +381,8 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
 .landingPage .heroOauthError{max-width:390px;margin:10px 0 0;color:#e89a82;font-size:12px;line-height:1.45}
 
 @media(max-width:1050px){.landingPage .nav{width:calc(100% - 64px)}.landingPage .navLinks a{padding-inline:8px}.landingPage .navCtas{gap:7px}.landingPage .login{padding-inline:11px}}
-@media(max-width:900px){.landingPage .creativeGallery{grid-template-columns:1fr;max-width:520px;align-items:start;gap:28px}.landingPage .creativeCard.square{max-width:440px}.landingPage .creativeCard.portrait{max-width:356px}.landingPage .creativeCard.story{max-width:260px}.landingPage .creativeCard.square,.landingPage .creativeCard.portrait,.landingPage .creativeCard.story{justify-self:center}}
-@media(max-width:760px){.landingPage .navShell{height:96px;padding-top:12px}.landingPage .nav{width:calc(100% - 40px);padding-inline:18px;border-radius:24px}.landingPage .heroQuickStart{align-items:flex-start;flex-direction:column;gap:12px}.landingPage .googleLandingButton{width:min(100%,320px)}.landingPage .mobileMenu>div{top:64px;background:rgba(24,21,18,.96);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}}
+@media(max-width:900px){.landingPage .creativeGallery{display:grid;grid-template-columns:1fr;max-width:520px;align-items:start;gap:28px}.landingPage .creativeCard.square{max-width:440px}.landingPage .creativeCard.portrait{max-width:356px}.landingPage .creativeCard.story{max-width:260px}.landingPage .creativeCard.square,.landingPage .creativeCard.portrait,.landingPage .creativeCard.story{width:100%;justify-self:center}}
+@media(max-width:760px){.landingPage .navShell{height:96px;padding-top:12px}.landingPage .nav{width:calc(100% - 40px);padding-inline:18px;border-radius:24px;overflow:visible}.landingPage .heroQuickStart{align-items:flex-start;flex-direction:column;gap:12px}.landingPage .googleLandingButton{width:min(100%,320px)}.landingPage .mobileMenu[open]{z-index:5}.landingPage .mobileMenu>div{position:fixed;left:0;right:0;top:80px;width:auto;background:rgba(24,21,18,.96);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}}
 @media(max-width:480px){.landingPage .googleLandingButton{width:100%}}
 
 
