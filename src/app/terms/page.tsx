@@ -59,7 +59,7 @@ export default function TermsPage() {
 
       <section>
         <h2>9. CONTACTO</h2>
-        <p>Para consultas: <a href="mailto:soporte@pixelosfm.com" className="text-[#D97757] hover:text-[#E18A6E] transition-colors">soporte@pixelosfm.com</a></p>
+        <p>Para consultas: <a href="mailto:team@pixelfm.com" className="text-[#D97757] hover:text-[#E18A6E] transition-colors">team@pixelfm.com</a></p>
       </section>
     </LegalPage>
   )

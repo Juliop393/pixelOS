@@ -199,11 +199,11 @@ export default function ConfiguracionPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between py-3 border-t border-[#3A3833]">
               <span className="text-sm text-[#9A9893]">Correo</span>
-              <span className="text-sm text-[#E8E6E1]">soporte@pixelosfm.com</span>
+              <span className="text-sm text-[#E8E6E1]">team@pixelfm.com</span>
             </div>
             <div className="pt-2">
               <a
-                href="mailto:soporte@pixelosfm.com?subject=Soporte%20PixelFM&body=Hola%20equipo%20de%20PixelFM%2C%0A%0ANecesito%20ayuda%20con%3A%0A"
+                href="mailto:team@pixelfm.com?subject=Soporte%20PixelFM&body=Hola%20equipo%20de%20PixelFM%2C%0A%0ANecesito%20ayuda%20con%3A%0A"
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold bg-[#D97757] text-white hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20"
               >
                 <Mail className="w-4 h-4" strokeWidth={1.5} />
@@ -211,7 +211,7 @@ export default function ConfiguracionPage() {
               </a>
             </div>
             <p className="text-xs text-[#9A9893]/70 text-center">
-              También puedes escribirnos directamente a soporte@pixelosfm.com
+              También puedes escribirnos directamente a team@pixelfm.com
             </p>
           </div>
         </div>

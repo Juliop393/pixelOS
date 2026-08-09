@@ -20,7 +20,7 @@ export default function RefundsPage() {
 
       <section>
         <h2>3. CÓMO SOLICITAR UN REEMBOLSO</h2>
-        <p>Escribe a <a href="mailto:soporte@pixelosfm.com" className="text-[#D97757] hover:text-[#E18A6E] transition-colors">soporte@pixelosfm.com</a> con:</p>
+        <p>Escribe a <a href="mailto:team@pixelfm.com" className="text-[#D97757] hover:text-[#E18A6E] transition-colors">team@pixelfm.com</a> con:</p>
         <ul>
           <li>Tu email de cuenta.</li>
           <li>Fecha del cobro.</li>

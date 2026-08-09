@@ -40,7 +40,7 @@ export default function PrivacyPage() {
 
       <section>
         <h2>5. TUS DERECHOS</h2>
-        <p>Puedes solicitar la eliminación de tu cuenta y datos en cualquier momento escribiendo a <a href="mailto:soporte@pixelosfm.com" className="text-[#D97757] hover:text-[#E18A6E] transition-colors">soporte@pixelosfm.com</a>.</p>
+        <p>Puedes solicitar la eliminación de tu cuenta y datos en cualquier momento escribiendo a <a href="mailto:team@pixelfm.com" className="text-[#D97757] hover:text-[#E18A6E] transition-colors">team@pixelfm.com</a>.</p>
       </section>
 
       <section>
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
 
       <section>
         <h2>7. CONTACTO</h2>
-        <p><a href="mailto:soporte@pixelosfm.com" className="text-[#D97757] hover:text-[#E18A6E] transition-colors">soporte@pixelosfm.com</a></p>
+        <p><a href="mailto:team@pixelfm.com" className="text-[#D97757] hover:text-[#E18A6E] transition-colors">team@pixelfm.com</a></p>
       </section>
     </LegalPage>
   )

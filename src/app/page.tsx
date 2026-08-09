@@ -294,7 +294,7 @@ export default function Home() {
       </section>
 
       <footer className="footer container">
-        <div className="footerMain"><div><Logo /><p>Estrategia e IA para crear anuncios<br />que se sienten pensados.</p></div><div className="footerLinks"><div><b>Producto</b><a href="#producto">Características</a><a href="#como-funciona">Cómo funciona</a><a href="#ejemplos">Ejemplos</a><a href="#precios">Precios</a></div><div><b>Legal</b><Link href="/terms">Términos</Link><Link href="/privacy">Privacidad</Link><a href="mailto:soporte@pixelosfm.com?subject=Soporte%20PixelFM&body=Hola%20equipo%20de%20PixelFM%2C%0A%0ANecesito%20ayuda%20con%3A%0A">Soporte</a></div></div></div>
+        <div className="footerMain"><div><Logo /><p>Estrategia e IA para crear anuncios<br />que se sienten pensados.</p></div><div className="footerLinks"><div><b>Producto</b><a href="#producto">Características</a><a href="#como-funciona">Cómo funciona</a><a href="#ejemplos">Ejemplos</a><a href="#precios">Precios</a></div><div><b>Legal</b><Link href="/terms">Términos</Link><Link href="/privacy">Privacidad</Link><a href="mailto:team@pixelfm.com?subject=Soporte%20PixelFM&body=Hola%20equipo%20de%20PixelFM%2C%0A%0ANecesito%20ayuda%20con%3A%0A">Soporte</a></div></div></div>
         <div className="footerBottom"><span>© 2026 AFM Estudio · PixelFM</span><span><i /> Todos los sistemas operativos</span></div>
       </footer>
     </main>
