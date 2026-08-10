@@ -46,7 +46,7 @@ export default function PricingButton({ priceId, planName, highlighted }: Pricin
       customer: { email: userEmail },
       customData: { user_id: userId },
       settings: {
-        successUrl: "https://pixelosfm.com/dashboard",
+        successUrl: "https://pixelfm.com/dashboard",
       },
     })
   }
