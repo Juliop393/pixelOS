@@ -8,11 +8,12 @@ import { useCredits } from "@/lib/credits-context"
 import styles from "./DashboardShell.module.css"
 
 const sectionDetails = [
+  { path: "/dashboard/videos", title: "Videos", description: "Constructor de anuncios en movimiento" },
   { path: "/dashboard/campanas", title: "Identidad", description: "Marca y recursos visuales" },
   { path: "/dashboard/assets", title: "Mis Creativos", description: "Biblioteca de resultados" },
   { path: "/dashboard/configuracion", title: "Configuración", description: "Preferencias de la cuenta" },
   { path: "/dashboard/perfil", title: "Perfil", description: "Información de tu cuenta" },
-  { path: "/dashboard", title: "Generador", description: "Workspace creativo" },
+  { path: "/dashboard", title: "Imágenes", description: "Generador de creativos" },
 ]
 
 export default function Topbar() {
