@@ -13,7 +13,7 @@ export default function VideoPreview({ previewUrl, activeChunk, activeIndex, tot
     </header>
     <div className={s.previewStage}>
       <div className={s.phoneFrame}>
-        {previewUrl ? <img src={previewUrl} alt="Preview del fragmento activo" /> : <div className={s.previewEmpty}><Film /><span>9:16</span><h2>Tu secuencia comienza aquí</h2><p>Selecciona una imagen para visualizar el fragmento activo.</p></div>}
+        {previewUrl ? <img src={previewUrl} alt="Preview del fragmento activo" /> : <div className={s.previewEmpty}><Film /><span>STORIES / REELS · 9:16</span><p>Selecciona una imagen para preparar este fragmento.</p></div>}
         <div className={s.previewOverlay}><span>FRAGMENTO {activeIndex + 1}</span><b>{activeChunk.purpose}</b><small>6 segundos · {styleLabel}</small></div>
       </div>
       <aside className={s.directionCard}>

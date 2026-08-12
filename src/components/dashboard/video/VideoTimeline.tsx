@@ -21,8 +21,8 @@ export default function VideoTimeline({ chunks, activeId, hookLabel, onSelect, o
         </div>
         {index < chunks.length - 1 && <span className={s.connector}>→</span>}
       </div>)}
-      {chunks.length < 4 && <button className={s.addChunk} onClick={onAdd}><Plus /><b>Añadir fragmento</b><small>+ 6 segundos</small></button>}
+      {chunks.length < 5 && <button className={s.addChunk} onClick={onAdd}><Plus /><b>Añadir fragmento</b><small>+ 6 segundos</small></button>}
     </div>
-    <footer><span>{chunks.length} {chunks.length === 1 ? "fragmento" : "fragmentos"}</span><i /><b>{chunks.length * 6} segundos totales</b><small>Máximo inicial: 4 fragmentos</small></footer>
+    <footer><span>{chunks.length} {chunks.length === 1 ? "fragmento" : "fragmentos"}</span><i /><b>{chunks.length * 6} segundos totales</b><small>Máximo: 5 fragmentos · 30s</small></footer>
   </section>
 }

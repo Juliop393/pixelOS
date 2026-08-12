@@ -34,4 +34,4 @@ export const VIDEO_STYLES: VideoOption[] = [
   { id: "b2b", label: "B2B / Professional", description: "Sobrio y orientado a negocio.", icon: "▦" },
 ]
 
-export const CHUNK_PURPOSES = ["Hook / apertura", "Producto / demostración", "Beneficio", "CTA"]
+export const CHUNK_PURPOSES = ["Gancho / apertura", "Producto / demostración", "Beneficio", "Prueba / refuerzo", "CTA"]
