@@ -7,8 +7,8 @@ export default function VideoSourcePicker({ source, previewUrl, fileName, onSour
 }) {
   return <>
     <div className={s.sourceTabs}>
-      <button className={source === "library" ? s.sourceActive : ""} onClick={() => onSourceChange("library")}><ImageIcon />Mis creativos</button>
-      <button className={source === "upload" ? s.sourceActive : ""} onClick={() => onSourceChange("upload")}><Upload />Subir imagen</button>
+      <button className={source === "library" ? s.sourceActive : ""} onClick={() => onSourceChange("library")}><i className={s.sourceIcon}><ImageIcon /></i><span><b>Mis creativos</b><small>Biblioteca PixelFM</small></span></button>
+      <button className={source === "upload" ? s.sourceActive : ""} onClick={() => onSourceChange("upload")}><i className={s.sourceIcon}><Upload /></i><span><b>Subir imagen</b><small>Desde tu equipo</small></span></button>
     </div>
     {source === "library" ? (
       <div className={s.libraryEmpty}><ImageIcon /><b>Elige desde Mis creativos</b><small>La biblioteca se conectará en la integración.</small><span>Vista previa local</span></div>

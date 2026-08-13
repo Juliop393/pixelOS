@@ -2,25 +2,25 @@ export type VideoOption = { id: string; label: string; description: string; icon
 export type VideoChunk = { id: number; purpose: string; duration: 6 }
 
 export const VIDEO_ANGLES: VideoOption[] = [
-  { id: "problem", label: "Problema → Solución", description: "Presenta la tensión y resuélvela.", icon: "↗" },
-  { id: "benefit", label: "Beneficio principal", description: "Enfoca el resultado más valioso.", icon: "✦" },
-  { id: "demo", label: "Demostración de producto", description: "Muestra el producto en acción.", icon: "▶" },
-  { id: "social", label: "Prueba social", description: "Convierte confianza en decisión.", icon: "◎" },
-  { id: "comparison", label: "Comparación", description: "Contrasta dos alternativas.", icon: "⇄" },
-  { id: "experience", label: "Experiencia de uso", description: "Haz tangible cómo se siente.", icon: "◇" },
-  { id: "offer", label: "Oferta / conveniencia", description: "Lleva la propuesta al frente.", icon: "%" },
-  { id: "mechanism", label: "Mecanismo único", description: "Explica qué lo hace diferente.", icon: "⌁" },
+  { id: "problem", label: "Problema → Solución", description: "Presenta la tensión y resuélvela.", icon: "↗", swatch: "linear-gradient(145deg,#d77a59,#642f25)" },
+  { id: "benefit", label: "Beneficio principal", description: "Enfoca el resultado más valioso.", icon: "✦", swatch: "linear-gradient(145deg,#d8b06d,#63502d)" },
+  { id: "demo", label: "Demostración de producto", description: "Muestra el producto en acción.", icon: "▶", swatch: "linear-gradient(145deg,#82966d,#32402f)" },
+  { id: "social", label: "Prueba social", description: "Convierte confianza en decisión.", icon: "◎", swatch: "linear-gradient(145deg,#9e82a7,#44334a)" },
+  { id: "comparison", label: "Comparación", description: "Contrasta dos alternativas.", icon: "⇄", swatch: "linear-gradient(145deg,#7393a8,#253b49)" },
+  { id: "experience", label: "Experiencia de uso", description: "Haz tangible cómo se siente.", icon: "◇", swatch: "linear-gradient(145deg,#c79d84,#654334)" },
+  { id: "offer", label: "Oferta / conveniencia", description: "Lleva la propuesta al frente.", icon: "%", swatch: "linear-gradient(145deg,#e88158,#792f22)" },
+  { id: "mechanism", label: "Mecanismo único", description: "Explica qué lo hace diferente.", icon: "⌁", swatch: "linear-gradient(145deg,#748b91,#293a3e)" },
 ]
 
 export const VIDEO_HOOKS: VideoOption[] = [
-  { id: "result", label: "Resultado primero", description: "Abre con la transformación.", icon: "01" },
-  { id: "question", label: "Pregunta directa", description: "Activa una necesidad concreta.", icon: "?" },
-  { id: "problem", label: "Problema reconocible", description: "Conecta desde una fricción real.", icon: "!" },
-  { id: "interrupt", label: "Pattern interrupt", description: "Rompe el ritmo del feed.", icon: "×" },
-  { id: "curiosity", label: "Curiosidad", description: "Abre una idea que pide respuesta.", icon: "…" },
-  { id: "instant", label: "Demostración inmediata", description: "Actúa desde el primer segundo.", icon: "▶" },
-  { id: "before", label: "Antes / después", description: "Contrasta dos estados visuales.", icon: "⇥" },
-  { id: "offer", label: "Oferta directa", description: "Presenta valor y acción sin rodeos.", icon: "%" },
+  { id: "result", label: "Resultado primero", description: "Abre con la transformación.", icon: "01", swatch: "linear-gradient(145deg,#e18b68,#713c2e)" },
+  { id: "question", label: "Pregunta directa", description: "Activa una necesidad concreta.", icon: "?", swatch: "linear-gradient(145deg,#d7ae70,#594724)" },
+  { id: "problem", label: "Problema reconocible", description: "Conecta desde una fricción real.", icon: "!", swatch: "linear-gradient(145deg,#bf6e62,#592c29)" },
+  { id: "interrupt", label: "Pattern interrupt", description: "Rompe el ritmo del feed.", icon: "×", swatch: "linear-gradient(145deg,#8d7ca5,#3d344c)" },
+  { id: "curiosity", label: "Curiosidad", description: "Abre una idea que pide respuesta.", icon: "…", swatch: "linear-gradient(145deg,#718ba5,#283b4e)" },
+  { id: "instant", label: "Demostración inmediata", description: "Actúa desde el primer segundo.", icon: "▶", swatch: "linear-gradient(145deg,#7f9b77,#31452e)" },
+  { id: "before", label: "Antes / después", description: "Contrasta dos estados visuales.", icon: "⇥", swatch: "linear-gradient(145deg,#c39b80,#684737)" },
+  { id: "offer", label: "Oferta directa", description: "Presenta valor y acción sin rodeos.", icon: "%", swatch: "linear-gradient(145deg,#ed8058,#772d20)" },
 ]
 
 export const VIDEO_STYLES: VideoOption[] = [
