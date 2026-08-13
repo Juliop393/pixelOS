@@ -67,7 +67,7 @@
 
 /* Final viewport fit and shared option language. */
 .page{height:100%;min-height:0;padding:0;overflow:hidden}
-.workspace{width:min(calc(100% - 8px),1340px);height:100%;min-height:0;margin:0 auto;grid-template-columns:480px minmax(0,1fr);gap:14px;align-items:stretch}
+.workspace{width:min(100%,1600px);height:100%;min-height:0;margin:0 auto;grid-template-columns:480px minmax(0,1fr);gap:14px;align-items:stretch}
 .configPanel,.stagePanel{height:100%;min-height:0}
 .configPanel{position:relative;top:auto;overflow:hidden}
 .stagePanel{overflow:hidden}
