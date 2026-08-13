@@ -6,41 +6,51 @@
 
 /* Video editor ergonomic refinement: compact controls, generous preview and natural page scroll. */
 .page{height:100%;min-height:0;padding:2px 0 26px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
-.workspace{width:min(calc(100% - 8px),1380px);height:auto;min-height:calc(100dvh - 124px);margin:0 auto;grid-template-columns:430px minmax(0,1fr);gap:16px;align-items:start}
-.configPanel{height:calc(100dvh - 124px);min-height:620px;position:sticky;top:0}
-.stagePanel{height:auto;min-height:calc(100dvh - 124px);overflow:visible}
-.intro{padding:22px 24px 18px}
+.workspace{width:min(calc(100% - 8px),1340px);height:auto;min-height:calc(100dvh - 112px);margin:0 auto;grid-template-columns:460px minmax(0,1fr);gap:16px;align-items:start}
+.configPanel{height:calc(100dvh - 112px);min-height:650px;max-height:820px;position:sticky;top:0}
+.stagePanel{height:auto;min-height:calc(100dvh - 112px);overflow:visible}
+.intro{padding:25px 26px 20px}
+.intro h1{margin-top:10px;font-size:30px}
 .intro p,.cardTitle p{font-size:13px;line-height:1.5}
-.stepTabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:0 14px 4px;padding:5px;border:1px solid rgba(255,255,255,.08);border-radius:15px;background:rgba(255,255,255,.025)}
-.stepTabs button{min-width:0;height:48px;padding:0 6px;border:1px solid transparent;border-radius:11px;background:transparent;color:#8f8a86;font-family:inherit;font-size:10px;font-weight:700;line-height:1.15;cursor:pointer;transition:color .25s ease,background .25s ease,border-color .25s ease}
-.stepTabs button span{display:block;margin-bottom:4px;color:#706965;font-family:inherit;font-size:8px;font-weight:700;line-height:1;letter-spacing:.08em}
+.stepTabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 16px 5px;padding:5px;border:1px solid rgba(255,255,255,.08);border-radius:15px;background:rgba(255,255,255,.025)}
+.stepTabs button{min-width:0;height:58px;padding:0 8px;border:1px solid transparent;border-radius:11px;background:transparent;color:#8f8a86;font-family:inherit;font-size:11px;font-weight:700;line-height:1.18;cursor:pointer;transition:color .25s ease,background .25s ease,border-color .25s ease}
+.stepTabs button span{display:block;margin-bottom:5px;color:#706965;font-family:inherit;font-size:9px;font-weight:700;line-height:1;letter-spacing:.08em}
 .stepTabs button:hover{color:#d8d1ca;background:rgba(255,255,255,.035)}
 .stepTabs .stepActive{color:#fff7ef;border-color:rgba(225,112,76,.42);background:linear-gradient(145deg,rgba(225,112,76,.19),rgba(225,112,76,.08));box-shadow:inset 0 1px rgba(255,255,255,.08)}
 .stepTabs .stepActive span{color:#e88060}
-.configScroll{display:block;padding:12px 14px 18px;overflow-y:auto}
-.configScroll>.card{min-height:100%;padding:18px}
-.cardTitle{margin-bottom:16px}
-.cardTitle h2{font-size:14px}
-.sourceTabs button,.optionGrid>button{font-size:12px}
-.libraryEmpty small,.uploadBox small,.optionGrid small{font-size:10px;line-height:1.45}
+.configScroll{display:flex;flex-direction:column;padding:13px 16px 18px;overflow-y:auto}
+.configScroll>.card{min-height:0;padding:20px}
+.cardTitle{margin-bottom:18px;gap:12px}
+.cardTitle>i{width:32px;height:32px;flex-basis:32px;font-size:11px}
+.cardTitle h2{font-size:15px}
+.sourceTabs button{height:44px;font-size:12px}
+.sourceTabs svg{width:16px}
+.libraryEmpty,.uploadBox{min-height:142px}
+.libraryEmpty b,.uploadBox b{font-size:13px}
+.libraryEmpty small,.uploadBox small,.optionGrid small{font-size:10.5px;line-height:1.45}
+.optionGrid{gap:9px}
+.optionGrid>button{min-height:76px;padding:11px;gap:10px}
+.optionGrid>button>i{width:40px;height:44px;flex-basis:40px;font-size:13px}
 .optionGrid b{font-size:12px;line-height:1.3}
-.previewStage{flex:0 0 auto;min-height:430px;padding:18px 24px;grid-template-columns:minmax(230px,300px) minmax(220px,280px);gap:20px}
-.phoneFrame{height:min(48dvh,430px);min-height:350px}
+.optionGrid em{font-size:11px}
+.previewStage{flex:0 0 auto;min-height:450px;padding:18px 22px;grid-template-columns:minmax(250px,300px) minmax(220px,260px);gap:16px}
+.phoneFrame{height:min(50dvh,450px);min-height:370px}
 .previewEmpty{padding:22px}
 .previewEmpty svg{width:28px;height:28px}
 .previewEmpty span{margin-top:12px;font-size:10px;letter-spacing:.12em}
 .previewEmpty p{max-width:190px;margin-top:8px;font-size:12px;line-height:1.5}
 .previewOverlay span,.previewOverlay small{font-size:9px}
 .previewOverlay b{font-size:13px}
+.directionCard{padding:20px}
 .directionCard p{font-size:12px;line-height:1.55}
 .directionCard button{font-size:11px}
-.timeline{flex:0 0 auto;min-height:220px;padding:16px 20px 14px}
+.timeline{flex:0 0 auto;min-height:210px;padding:15px 20px 13px}
 .timelineHeader span,.timelineHeader p,.timeline footer{font-size:10px}
 .chunkCard small{font-size:9px}.chunkCard b{font-size:12px}
 
-@media(max-width:1320px){.workspace{grid-template-columns:400px minmax(0,1fr)}.previewStage{grid-template-columns:minmax(220px,280px) minmax(190px,240px)}}
-@media(max-width:1120px){.workspace{grid-template-columns:380px minmax(0,1fr)}.directionCard{display:none}.previewStage{grid-template-columns:minmax(220px,290px)}}
+@media(max-width:1320px){.workspace{grid-template-columns:420px minmax(0,1fr)}.previewStage{grid-template-columns:minmax(230px,280px) minmax(190px,230px);gap:14px}.optionGrid>button{min-height:72px;padding:10px}.optionGrid>button>i{width:37px;height:42px;flex-basis:37px}}
+@media(max-width:1120px){.workspace{grid-template-columns:390px minmax(0,1fr)}.directionCard{display:none}.previewStage{grid-template-columns:minmax(230px,300px)}}
 @media(max-width:920px){.page{padding-bottom:20px}.workspace{width:min(calc(100% - 4px),760px);min-height:0;display:flex;flex-direction:column}.configPanel{position:relative;top:auto;width:100%;height:720px;min-height:620px}.stagePanel{width:100%;min-height:780px;overflow:hidden}.previewStage{min-height:520px;grid-template-columns:minmax(230px,340px)}.phoneFrame{height:min(62dvh,500px);min-height:400px}.optionGrid{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.workspace{width:100%}.stepTabs{margin-inline:10px}.stepTabs button{font-size:9px}.configScroll{padding-inline:10px}.previewStage{padding-inline:14px}.phoneFrame{min-height:360px}.timeline{padding-inline:14px}}
-@media(max-height:760px) and (min-width:921px){.workspace{min-height:620px}.configPanel{height:620px;min-height:620px}.stagePanel{min-height:680px}.previewStage{min-height:390px;padding-block:14px}.phoneFrame{height:350px;min-height:340px}.timeline{min-height:210px;padding-block:14px}}
+@media(max-height:800px) and (min-width:921px){.workspace{min-height:640px}.configPanel{height:calc(100dvh - 108px);min-height:640px}.stagePanel{min-height:690px}.intro{padding-block:20px 16px}.intro h1{font-size:28px}.stepTabs button{height:52px}.configScroll{padding-top:10px}.configScroll>.card{padding:16px}.cardTitle{margin-bottom:14px}.optionGrid{gap:7px}.optionGrid>button{min-height:66px;padding:8px}.optionGrid>button>i{width:34px;height:38px;flex-basis:34px}.previewStage{min-height:400px;padding-block:14px}.phoneFrame{height:360px;min-height:350px}.timeline{min-height:205px;padding-block:13px}}
 @media(prefers-reduced-motion:reduce){.stepTabs button{transition:none}}
