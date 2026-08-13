@@ -33,6 +33,15 @@
 .optionGrid>button>i{width:42px;height:48px;flex-basis:42px;font-size:14px}
 .optionGrid b{font-size:13px;line-height:1.3}
 .optionGrid em{font-size:11px}
+.optionGrid>button.styleOption{min-height:86px;border-color:rgba(255,242,232,.1);background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(7,6,5,.3));transition:transform .25s ease,border-color .25s ease,background-color .25s ease,box-shadow .25s ease}
+.optionGrid>button.styleOption:hover{transform:translateY(-1px);border-color:rgba(215,107,69,.3);background:rgba(255,255,255,.035);box-shadow:0 10px 24px rgba(0,0,0,.16)}
+.optionGrid>button>i.optionSwatch{height:54px;color:#fff;font-family:inherit;font-size:17px;text-shadow:0 2px 8px rgba(0,0,0,.42);box-shadow:inset 0 1px rgba(255,255,255,.28),0 7px 16px rgba(0,0,0,.25);overflow:hidden;position:relative}
+.optionGrid>button>i.optionSwatch:after{content:"";position:absolute;inset:0;background:linear-gradient(145deg,rgba(255,255,255,.2),transparent 48%);pointer-events:none}
+.optionGrid>button.styleOption>span{gap:5px}
+.optionGrid>button.styleOption b{color:#e2d8cf;font-size:13px;font-weight:620}
+.optionGrid>button.styleOption small{color:#948981;font-size:11px;line-height:1.38}
+.optionGrid>button.styleOption.optionActive{border-color:rgba(232,128,91,.7);background:linear-gradient(145deg,rgba(215,107,69,.16),rgba(215,107,69,.06));box-shadow:0 12px 26px rgba(116,43,24,.2),inset 0 0 0 1px rgba(239,148,114,.08)}
+.optionGrid>button.styleOption.optionActive b{color:#fff3ea}
 .previewStage{flex:0 0 auto;min-height:450px;padding:18px 22px;grid-template-columns:minmax(250px,300px) minmax(220px,260px);gap:16px}
 .phoneFrame{height:min(50dvh,450px);min-height:370px}
 .previewEmpty{padding:22px}

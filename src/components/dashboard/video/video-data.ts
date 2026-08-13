@@ -1,4 +1,4 @@
-export type VideoOption = { id: string; label: string; description: string; icon: string }
+export type VideoOption = { id: string; label: string; description: string; icon: string; swatch?: string }
 export type VideoChunk = { id: number; purpose: string; duration: 6 }
 
 export const VIDEO_ANGLES: VideoOption[] = [
@@ -24,14 +24,14 @@ export const VIDEO_HOOKS: VideoOption[] = [
 ]
 
 export const VIDEO_STYLES: VideoOption[] = [
-  { id: "ugc", label: "UGC", description: "Natural, directo y humano.", icon: "◉" },
-  { id: "cinematic", label: "Product Cinematic", description: "Luz y movimiento premium.", icon: "◈" },
-  { id: "lifestyle", label: "Lifestyle", description: "Producto dentro de una escena real.", icon: "☼" },
-  { id: "demo", label: "Product Demo", description: "Claridad funcional paso a paso.", icon: "▶" },
-  { id: "editorial", label: "Editorial Premium", description: "Ritmo calmado y composición cuidada.", icon: "◆" },
-  { id: "commercial", label: "Dynamic Commercial", description: "Energía y foco en conversión.", icon: "ϟ" },
-  { id: "minimal", label: "Minimal Product", description: "Producto, espacio y mensaje esencial.", icon: "□" },
-  { id: "b2b", label: "B2B / Professional", description: "Sobrio y orientado a negocio.", icon: "▦" },
+  { id: "ugc", label: "UGC", description: "Natural, directo y humano.", icon: "📱", swatch: "linear-gradient(145deg,#d9a58f,#75483d)" },
+  { id: "cinematic", label: "Product Cinematic", description: "Luz y movimiento premium.", icon: "🎞️", swatch: "linear-gradient(145deg,#d2a16f,#3b261d)" },
+  { id: "lifestyle", label: "Lifestyle", description: "Producto dentro de una escena real.", icon: "🌿", swatch: "linear-gradient(145deg,#a9b582,#34432f)" },
+  { id: "demo", label: "Product Demo", description: "Claridad funcional paso a paso.", icon: "🎬", swatch: "linear-gradient(145deg,#7594a5,#243842)" },
+  { id: "editorial", label: "Editorial Premium", description: "Ritmo calmado y composición cuidada.", icon: "✨", swatch: "linear-gradient(145deg,#f0d8c9,#985c43)" },
+  { id: "commercial", label: "Dynamic Commercial", description: "Energía y foco en conversión.", icon: "⚡", swatch: "linear-gradient(145deg,#ef835e,#792e24)" },
+  { id: "minimal", label: "Minimal Product", description: "Producto, espacio y mensaje esencial.", icon: "◻", swatch: "linear-gradient(145deg,#e8e5df,#6d7475)" },
+  { id: "b2b", label: "B2B / Professional", description: "Sobrio y orientado a negocio.", icon: "🏢", swatch: "linear-gradient(145deg,#57778c,#172d3b)" },
 ]
 
 export const CHUNK_PURPOSES = ["Gancho / apertura", "Producto / demostración", "Beneficio", "Prueba / refuerzo", "CTA"]
