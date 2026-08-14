@@ -1,40 +1,27 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import { Sparkles } from "lucide-react"
+import { useEffect, useState } from "react"
 import { useCreativeGenerator } from "@/hooks/useCreativeGenerator"
+import { useVideoGenerator } from "@/hooks/useVideoGenerator"
 import { supabase } from "@/lib/supabase"
-import { ANGLES } from "@/lib/angles-data"
 import AngleSelector from "@/components/dashboard/AngleSelector"
 import FormatSelector from "@/components/dashboard/FormatSelector"
 import StyleSelector from "@/components/dashboard/StyleSelector"
 import ProductForm from "@/components/dashboard/ProductForm"
+import QuantitySelector from "@/components/dashboard/QuantitySelector"
 import ResultPanel from "@/components/dashboard/ResultPanel"
+import GenerateButton from "@/components/dashboard/GenerateButton"
 import Accordion from "@/components/ui/Accordion"
 import PixelAdvisor from "@/components/dashboard/PixelAdvisor"
-import s from "@/components/dashboard/GeneratorWorkspace.module.css"
-
-const FORMAT_LABELS: Record<string, string> = {
-  square: "1:1", story: "9:16", "4:5": "4:5",
-}
-
-const FORMAT_OPTIONS = [
-  { id: "square", label: "1:1", description: "Feed" },
-  { id: "4:5", label: "4:5", description: "Feed vertical" },
-  { id: "story", label: "9:16", description: "Stories y Reels" },
-]
 
 type Tab = "product" | "angle" | "design"
 
 export default function DashboardPage() {
   const g = useCreativeGenerator()
+  const v = useVideoGenerator()
   const [activeTab, setActiveTab] = useState<Tab>("product")
   const [advisorToken, setAdvisorToken] = useState<string | undefined>()
   const [highlightProduct, setHighlightProduct] = useState(false)
-  const [showGuides, setShowGuides] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [formatOpen, setFormatOpen] = useState(false)
-  const [advisorOpen, setAdvisorOpen] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -50,12 +37,17 @@ export default function DashboardPage() {
   }, [highlightProduct])
 
   const handleApplyRecommendation = (rec: {
-    angleId: string; styleId: string; format: string; safeZoneMeta: boolean; productDescription?: string
+    angleId: string
+    styleId: string
+    format: string
+    safeZoneMeta: boolean
+    productDescription?: string
   }) => {
     g.handleSelectAngle(rec.angleId)
     g.setAspectRatio(rec.format)
     g.setVisualStyle(rec.styleId)
     g.setSafeZoneMeta(rec.safeZoneMeta)
+
     if (rec.productDescription) {
       const current = g.producto.trim()
       if (!current || current.length < 30) {
@@ -66,30 +58,14 @@ export default function DashboardPage() {
     }
   }
 
-  const canGenerate =
-    !!g.producto.trim() && !!g.selectedAngle && !g.loading && g.credits >= g.cantidad
-
-  const selectedAngleLabel = useMemo(
-    () => ANGLES.find((angle) => angle.id === g.selectedAngle)?.title ?? "Sin seleccionar",
-    [g.selectedAngle],
-  )
-
-  const selectFormat = (format: string) => {
-    g.setAspectRatio(format)
-    setFormatOpen(false)
+  const handleGenerateVideo = () => {
+    if (!g.result?.imageUrl) return
+    const hookText = [g.titulo.trim(), g.subtitulo.trim()].filter(Boolean).join(" — ")
+    v.generateVideo(g.result.imageUrl, g.selectedAngle ?? "", hookText, g.visualStyle)
   }
 
-  const summaryStatus = g.loading
-    ? "Generando"
-    : g.phase === "error"
-      ? "Requiere atención"
-      : g.phase === "result"
-        ? "Creativo generado"
-        : !g.producto.trim()
-          ? "Completa el producto"
-          : !g.selectedAngle
-            ? "Selecciona un ángulo"
-            : "Listo para generar"
+  const canGenerate =
+    !!g.producto.trim() && !!g.selectedAngle && !g.loading && g.credits >= g.cantidad
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "product", label: "Producto" },
@@ -98,33 +74,58 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div id="generator-root" className={s.generatorPage}>
-      <div className={s.ambient} aria-hidden="true"><i /><i /></div>
-
-      <section className={s.workspace}>
-      {/* ===== LEFT PANEL ===== */}
-      <aside className={s.builderPanel}>
-        <div className={s.panelIntro}>
-          <span className={s.eyebrow}>NUEVO CREATIVO</span>
-          <h1>Construye tu anuncio</h1>
-          <p>Define el producto y deja que Pixel IA ordene el resto.</p>
+    <div className="flex gap-4 2xl:gap-5 h-full max-w-[1600px] mx-auto relative">
+      <PixelAdvisor onApplyRecommendation={handleApplyRecommendation} accessToken={advisorToken} />
+      {/* COLUMNA IZQUIERDA: Panel de configuración con pestañas */}
+      <aside
+        className="w-[360px] 2xl:w-[420px] flex-shrink-0 h-full flex flex-col rounded-[28px] overflow-hidden relative"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 100%), rgba(30,28,26,0.38)",
+          backdropFilter: "blur(16px) saturate(135%)",
+          WebkitBackdropFilter: "blur(16px) saturate(135%)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 30px rgba(0,0,0,0.22)",
+        }}
+      >
+        {/* Reflejo superior sutil */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-[35%] rounded-[28px] pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%)",
+          }}
+        />
+        {/* Pestañas — control integrado de vidrio */}
+        <div className="flex-shrink-0 p-3">
+          <div
+            className="flex items-center gap-1 p-1 rounded-2xl"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+            }}
+          >
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? "bg-[#D97757]/15 text-[#D97757] shadow-sm shadow-[#D97757]/10 border border-[#D97757]/20"
+                    : "text-[#9CA3AF] hover:text-[#F5F0E8] hover:bg-[#3A3833]/30 border border-transparent"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className={s.stepTabs} role="tablist" aria-label="Pasos del generador">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              className={activeTab === tab.id ? s.stepActive : ""}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <span>0{tabs.indexOf(tab) + 1}</span>{tab.label}
-            </button>
-          ))}
-        </div>
-
-        <div className={s.formScroll}>
+        {/* Contenido de la pestaña activa (scroll interno) */}
+        <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4">
           {activeTab === "product" && (
             <ProductForm
               producto={g.producto}
@@ -142,181 +143,142 @@ export default function DashboardPage() {
               setImagenReferencia={g.setImagenReferencia}
               nombreImagenReferencia={g.nombreImagenReferencia}
               setNombreImagenReferencia={g.setNombreImagenReferencia}
-              showQuantity
               highlightProduct={highlightProduct}
             />
           )}
 
           {activeTab === "angle" && (
-            <section className={s.formCard}>
-              <div className={s.formHeading}>
-                <span>02</span>
-                <div><h2>Estrategia</h2><p>Elige el enfoque persuasivo de tu anuncio.</p></div>
-              </div>
-              <AngleSelector
-                selectedAngle={g.selectedAngle}
-                onSelectAngle={g.handleSelectAngle}
-                loading={g.loading}
-                layout="grid"
-              />
-            </section>
+            <AngleSelector
+              selectedAngle={g.selectedAngle}
+              onSelectAngle={g.handleSelectAngle}
+              loading={g.loading}
+              layout="grid"
+            />
           )}
 
           {activeTab === "design" && (
-            <div className="flex flex-col gap-3">
-              <section className={s.formCard}>
-                <div className={s.formHeading}>
-                  <span>03</span>
-                  <div><h2>Formato</h2><p>Elige la proporción de tu anuncio.</p></div>
-                </div>
+            <div className="space-y-4">
+              <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] p-4">
+                <h3 className="text-xs font-bold text-[#F5F0E8] mb-3 uppercase tracking-wider">
+                  Formato
+                </h3>
                 <FormatSelector aspectRatio={g.aspectRatio} setAspectRatio={g.setAspectRatio} />
                 {g.aspectRatio === "story" && (
-                  <button className={s.toggleRow} onClick={() => g.setSafeZoneMeta(!g.safeZoneMeta)} aria-pressed={g.safeZoneMeta} style={{ marginTop: 14 }}>
-                    <span><b>Zona Segura Meta</b><small>Protege textos y CTA en Stories y Reels.</small></span>
-                    <i className={g.safeZoneMeta ? s.toggleOn : ""}><em /></i>
-                  </button>
+                  <div className="mt-3 pt-3 border-t border-[#3A3833]/50">
+                    <label className="flex items-start gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={g.safeZoneMeta}
+                        onChange={(e) => g.setSafeZoneMeta(e.target.checked)}
+                        className="mt-0.5 w-4 h-4 rounded border-[#3A3833] bg-[#1E1C1A] text-[#D97757] focus:ring-[#D97757]/30 focus:ring-offset-0 cursor-pointer"
+                        aria-describedby="safe-zone-desc"
+                      />
+                      <div>
+                        <span className="text-sm font-medium text-[#F5F0E8] group-hover:text-white transition-colors">
+                          Zona segura Meta
+                        </span>
+                        <p id="safe-zone-desc" className="text-xs text-[#9CA3AF] mt-0.5 leading-relaxed">
+                          Mantiene textos, logos, producto y CTA alejados de la interfaz de Stories y Reels.
+                        </p>
+                      </div>
+                    </label>
+                  </div>
                 )}
-              </section>
+              </div>
 
-              <section className={s.formCard}>
-                <div className={s.formHeading}>
-                  <span>04</span>
-                  <div><h2>Estilo visual</h2><p>Define la estética que acompañará tu mensaje.</p></div>
-                </div>
+              <div className="bg-[#2A2826] rounded-xl border border-[#3A3833] p-4">
+                <h3 className="text-xs font-bold text-[#F5F0E8] mb-3 uppercase tracking-wider">
+                  Estilo Visual
+                </h3>
                 <StyleSelector visualStyle={g.visualStyle} setVisualStyle={g.setVisualStyle} />
-              </section>
+              </div>
 
-              <section className={s.formCard}>
-                <div className={s.formHeading}>
-                  <span>05</span>
-                  <div><h2>Ajustes</h2><p>Configuración adicional.</p></div>
-                </div>
-                <Accordion title="Color de marca">
-                  <label className="block text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider mb-2">
-                    Color de Marca (Opcional)
-                  </label>
-                  <input
-                    type="text"
-                    value={g.brandColor}
-                    onChange={(e) => g.setBrandColor(e.target.value)}
-                    placeholder="Ej: #D97757"
-                    className="w-full bg-[#1E1C1A] border border-[#3A3833] px-3 py-2 rounded-lg text-sm text-[#F5F0E8] placeholder:text-[#9CA3AF]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
-                  />
-                </Accordion>
-              </section>
+              <Accordion title="Ajustes Avanzados">
+                <label className="block text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider mb-2">
+                  Color de Marca (Opcional)
+                </label>
+                <input
+                  type="text"
+                  value={g.brandColor}
+                  onChange={(e) => g.setBrandColor(e.target.value)}
+                  placeholder="Ej: #D97757"
+                  className="w-full bg-[#1E1C1A] border border-[#3A3833] px-3 py-2 rounded-lg text-sm text-[#F5F0E8] placeholder:text-[#9CA3AF]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
+                />
+              </Accordion>
+
+              {g.phase === "result" && (
+                <button
+                  onClick={g.handleClearResult}
+                  className="w-full py-3 px-4 rounded-xl bg-[#1E1C1A] text-[#F5F0E8] font-semibold text-sm border border-[#3A3833] hover:border-[#D97757]/50 active:scale-[0.98] transition-all duration-200"
+                >
+                  Nuevo ángulo
+                </button>
+              )}
             </div>
           )}
         </div>
 
-        <div className={s.generateDock}>
-          <button
-            className={s.generateButton}
+        {/* Botón GENERAR siempre visible */}
+        <div
+          className="flex-shrink-0 p-4"
+          style={{
+            background: "rgba(255,255,255,0.025)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+          }}
+        >
+          <GenerateButton
             onClick={g.handleGenerate}
             disabled={!canGenerate}
-          >
-            <span>✦</span>
-            {g.loading
-              ? `Generando (${g.progress.completed}/${g.progress.total})...`
-              : `Generar ${g.cantidad > 1 ? `${g.cantidad} creativos` : "creativo"}`}
-            <b>→</b>
-          </button>
-          <div>
-            <span>{g.cantidad} {g.cantidad === 1 ? "crédito" : "créditos"} · {g.cantidad} {g.cantidad === 1 ? "creativo" : "creativos"}</span>
-            <span>{g.credits} disponible{g.credits === 1 ? "" : "s"}</span>
-          </div>
+            loading={g.loading}
+            credits={g.credits}
+            cantidad={g.cantidad}
+            progress={g.progress}
+          />
+          <p className="text-center text-[11px] text-[#9CA3AF] mt-2">
+            {g.credits} crédito{g.credits === 1 ? "" : "s"} disponible{g.credits === 1 ? "" : "s"}
+          </p>
         </div>
       </aside>
 
-      {/* ===== RIGHT PANEL ===== */}
-      <div className={s.previewColumn}>
-      <section className={`${s.canvasPanel} ${isFullscreen ? s.canvasFullscreen : ""}`} data-testid="canvas-panel" data-format={FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio}>
-        <div className={s.canvasHeader}>
-          <div>
-            <span className={s.liveDot} />
-            <div><b>Vista previa</b><small>Tu creativo se actualizará aquí</small></div>
-          </div>
-          <div className={s.canvasTools}>
-            <div className={s.formatMenu}>
-              <button className={s.formatBtn} onClick={() => setFormatOpen(!formatOpen)} aria-expanded={formatOpen} aria-haspopup="menu">
-                {FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio} <span>⌄</span>
-              </button>
-              {formatOpen && (
-                <div role="menu">
-                  {FORMAT_OPTIONS.map((option) => (
-                    <button key={option.id} role="menuitem" className={g.aspectRatio === option.id ? s.activeFormat : ""} onClick={() => selectFormat(option.id)}>
-                      <span>{option.label}</span><small>{option.description}</small><b>{g.aspectRatio === option.id ? "✓" : ""}</b>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <button
-              className={showGuides ? s.toolActive : ""}
-              onClick={() => setShowGuides(!showGuides)}
-              aria-label={showGuides ? "Ocultar guías" : "Mostrar guías"}
-              aria-pressed={showGuides}
-            >⌗</button>
-            <button
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              aria-label={isFullscreen ? "Salir de pantalla completa" : "Expandir vista"}
-              aria-pressed={isFullscreen}
-            >⛶</button>
-          </div>
+      {/* COLUMNA DERECHA: Preview grande */}
+      <div
+        className="flex-1 min-w-0 h-full overflow-y-auto rounded-[28px] relative"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.005) 100%), rgba(30,28,26,0.22)",
+          backdropFilter: "blur(14px) saturate(125%)",
+          WebkitBackdropFilter: "blur(14px) saturate(125%)",
+          border: "1px solid rgba(255,255,255,0.05)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.04), 0 6px 24px rgba(0,0,0,0.14)",
+        }}
+      >
+        <div className="p-5 h-full relative z-10">
+          <ResultPanel
+            phase={g.phase}
+            result={g.result}
+            generatedImages={g.generatedImages}
+            progress={g.progress}
+            error={g.error}
+            aspectRatio={g.aspectRatio}
+            selectedAngle={g.selectedAngle}
+            sessionHistory={g.sessionHistory}
+            onRetry={g.handleRetry}
+            onDownload={g.handleDownload}
+            onDownloadAll={g.handleDownloadAll}
+            onSelectFromGenerated={g.handleSelectFromGenerated}
+            onSelectFromHistory={g.handleSelectFromHistory}
+            videoPhase={v.videoPhase}
+            videoUrl={v.videoUrl}
+            videoError={v.videoError}
+            onGenerateVideo={handleGenerateVideo}
+            onResetVideo={v.resetVideo}
+          />
         </div>
-
-        <ResultPanel
-          phase={g.phase}
-          result={g.result}
-          generatedImages={g.generatedImages}
-          progress={g.progress}
-          error={g.error}
-          aspectRatio={g.aspectRatio}
-          selectedAngle={g.selectedAngle}
-          sessionHistory={g.sessionHistory}
-          showGuides={showGuides}
-          credits={g.credits}
-          cantidad={g.cantidad}
-          safeZoneMeta={g.safeZoneMeta}
-          onRetry={g.handleRetry}
-          onDownload={g.handleDownload}
-          onDownloadAll={g.handleDownloadAll}
-          onSelectFromGenerated={g.handleSelectFromGenerated}
-          onSelectFromHistory={g.handleSelectFromHistory}
-        />
-      </section>
-
-      <section className={s.contextRail} aria-label="Resumen del creativo">
-        <div className={s.railLabel}><span>Resumen del creativo</span><small>Configuración actual de la generación</small></div>
-        <div className={s.summaryGrid}>
-          <span><small>Ángulo</small><b>{selectedAngleLabel}</b></span>
-          <span><small>Formato</small><b>{FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio}</b></span>
-          <span><small>Cantidad</small><b>{g.cantidad} {g.cantidad === 1 ? "creativo" : "creativos"}</b></span>
-          <span><small>Zona Segura</small><b>{g.safeZoneMeta ? "Activada" : "Desactivada"}</b></span>
-          <span className={s.summaryStatus}><small>Estado</small><b><i />{summaryStatus}</b></span>
-        </div>
-      </section>
       </div>
-
-      <aside className={`${s.aiCard} ${s.builderAiCard} ${advisorOpen ? s.aiCardActive : ""}`}>
-        <div className={s.aiHead}>
-          <span><Sparkles className="w-4 h-4" strokeWidth={1.5} /></span>
-          <div><b>Pixel IA</b><small>Asistente estratégico</small></div><i />
-        </div>
-        <p>Piensa la estrategia antes de generar y recomienda el mejor ángulo.</p>
-        <button onClick={() => setAdvisorOpen(true)} aria-expanded={advisorOpen} aria-controls="pixel-ai-panel">
-          {advisorOpen ? "Pixel IA abierta" : "Iniciar con Pixel IA"} <span>→</span>
-        </button>
-      </aside>
-
-      <PixelAdvisor
-        onApplyRecommendation={handleApplyRecommendation}
-        accessToken={advisorToken}
-        hideBubble
-        inline
-        open={advisorOpen}
-        onOpenChange={setAdvisorOpen}
-      />
-      </section>
     </div>
   )
 }
