@@ -1,5 +1,6 @@
 export type VideoOption = { id: string; label: string; description: string; icon: string; swatch?: string }
-export type VideoChunk = { id: number; purpose: string; duration: 6 }
+export type VideoChunkStatus = "pending" | "configured" | "generating" | "generated" | "error"
+export type VideoChunk = { id: number; purpose: string; duration: 6; status: VideoChunkStatus; videoUrl?: string }
 
 export const VIDEO_ANGLES: VideoOption[] = [
   { id: "problem", label: "Problema → Solución", description: "Presenta la tensión y resuélvela.", icon: "↗", swatch: "linear-gradient(145deg,#d77a59,#642f25)" },
