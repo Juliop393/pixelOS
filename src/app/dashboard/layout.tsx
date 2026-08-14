@@ -6,6 +6,8 @@ import { AuthGuard } from "@/components/dashboard/AuthGuard"
 import { CreditsProvider } from "@/lib/credits-context"
 import styles from "@/components/dashboard/DashboardShell.module.css"
 
+export const dynamic = "force-dynamic"
+
 export default function DashboardLayout({
   children,
 }: {
