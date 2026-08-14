@@ -23,11 +23,6 @@ interface ResultPanelProps {
   onDownloadAll: () => void
   onSelectFromGenerated: (img: { imageUrl: string; angle: string }, copy: string) => void
   onSelectFromHistory: (item: { imageUrl: string; angle: string }) => void
-  videoPhase: "idle" | "generating" | "generated" | "error"
-  videoUrl: string | null
-  videoError: string | null
-  onGenerateVideo: () => void
-  onResetVideo: () => void
 }
 
 export default function ResultPanel({
@@ -44,11 +39,6 @@ export default function ResultPanel({
   onDownloadAll,
   onSelectFromGenerated,
   onSelectFromHistory,
-  videoPhase,
-  videoUrl,
-  videoError,
-  onGenerateVideo,
-  onResetVideo,
 }: ResultPanelProps) {
   const selectedAngleData = ANGLES.find((a) => a.id === selectedAngle)
 
@@ -371,96 +361,6 @@ export default function ResultPanel({
                 </button>
               )}
             </div>
-          </div>
-
-          {/* SECCIÓN DE VIDEO */}
-          <div
-            className="rounded-2xl p-4 flex-shrink-0"
-            style={{
-              background: "rgba(42,40,38,0.4)",
-              border: "1px solid rgba(58,56,51,0.5)",
-            }}
-          >
-            {videoPhase === "idle" && (
-              <button
-                onClick={onGenerateVideo}
-                className="w-full py-3 px-4 rounded-xl bg-[#1E1C1A] text-[#F5F0E8] font-semibold text-sm border border-[#3A3833] hover:border-[#D97757]/50 hover:bg-[#2A2826] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
-              >
-                <svg className="w-4 h-4" width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                Generar video
-              </button>
-            )}
-
-            {videoPhase === "generating" && (
-              <div className="flex flex-col items-center justify-center py-6">
-                <div className="relative w-12 h-12 mx-auto mb-4">
-                  <div className="absolute inset-0 rounded-full border-2 border-[#D97757]/10" />
-                  <div
-                    className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#D97757] animate-spin"
-                    style={{ animationDuration: "1.5s" }}
-                  />
-                </div>
-                <p className="text-[#E8E6E1] font-medium text-sm mb-1">
-                  Generando video...
-                </p>
-                <p className="text-[#9A9893]/70 text-xs">
-                  Esto puede tardar varios minutos
-                </p>
-              </div>
-            )}
-
-            {videoPhase === "generated" && videoUrl && (
-              <div className="space-y-3">
-                <div className="relative w-full mx-auto" style={{ maxWidth: "270px" }}>
-                  <div className="relative w-full rounded-xl overflow-hidden bg-black" style={{ aspectRatio: "9 / 16" }}>
-                    <video
-                      src={videoUrl}
-                      controls
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                </div>
-                <a
-                  href={videoUrl}
-                  download={`video-${selectedAngle ?? "creativo"}-${Date.now()}.mp4`}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[#D97757] text-white font-semibold text-xs hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  <svg className="w-3.5 h-3.5" width={14} height={14} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Descargar video
-                </a>
-                <button
-                  onClick={onResetVideo}
-                  className="w-full py-2 px-4 rounded-xl bg-[#1E1C1A] text-[#9A9893] font-medium text-xs border border-[#3A3833] hover:text-[#F5F0E8] hover:border-[#D97757]/30 transition-all duration-200"
-                >
-                  Generar otro video
-                </button>
-              </div>
-            )}
-
-            {videoPhase === "error" && (
-              <div className="flex flex-col items-center py-4">
-                <p className="text-red-400 font-medium text-sm mb-2">
-                  No se pudo generar el video
-                </p>
-                <p className="text-[#9A9893]/70 text-xs mb-4 text-center">
-                  {videoError || "Intenta de nuevo"}
-                </p>
-                <button
-                  onClick={onGenerateVideo}
-                  className="px-5 py-2.5 rounded-xl bg-[#D97757] text-white font-semibold text-xs hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200"
-                >
-                  Reintentar
-                </button>
-              </div>
-            )}
           </div>
 
           <SessionHistory sessionHistory={sessionHistory} onSelect={onSelectFromHistory} />

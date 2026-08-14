@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { useCreativeGenerator } from "@/hooks/useCreativeGenerator"
-import { useVideoGenerator } from "@/hooks/useVideoGenerator"
 import { supabase } from "@/lib/supabase"
 import AngleSelector from "@/components/dashboard/AngleSelector"
 import FormatSelector from "@/components/dashboard/FormatSelector"
@@ -18,7 +17,6 @@ type Tab = "product" | "angle" | "design"
 
 export default function DashboardPage() {
   const g = useCreativeGenerator()
-  const v = useVideoGenerator()
   const [activeTab, setActiveTab] = useState<Tab>("product")
   const [advisorToken, setAdvisorToken] = useState<string | undefined>()
   const [highlightProduct, setHighlightProduct] = useState(false)
@@ -56,12 +54,6 @@ export default function DashboardPage() {
         setHighlightProduct(true)
       }
     }
-  }
-
-  const handleGenerateVideo = () => {
-    if (!g.result?.imageUrl) return
-    const hookText = [g.titulo.trim(), g.subtitulo.trim()].filter(Boolean).join(" — ")
-    v.generateVideo(g.result.imageUrl, g.selectedAngle ?? "", hookText, g.visualStyle)
   }
 
   const canGenerate =
@@ -271,11 +263,6 @@ export default function DashboardPage() {
             onDownloadAll={g.handleDownloadAll}
             onSelectFromGenerated={g.handleSelectFromGenerated}
             onSelectFromHistory={g.handleSelectFromHistory}
-            videoPhase={v.videoPhase}
-            videoUrl={v.videoUrl}
-            videoError={v.videoError}
-            onGenerateVideo={handleGenerateVideo}
-            onResetVideo={v.resetVideo}
           />
         </div>
       </div>

@@ -15,7 +15,7 @@ export default function VideoSourcePicker({ source, previewUrl, fileName, fileEr
     ) : previewUrl ? (
       <div className={s.uploadPreview}><img src={previewUrl} alt="Referencia para el video" /><div><span>{fileName}</span><button onClick={onClear}><Trash2 />Quitar</button></div></div>
     ) : (
-      <label className={s.uploadBox}><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { onUpload(event.target.files?.[0]); event.currentTarget.value = "" }} /><Upload /><b>Sube tu imagen de referencia</b><small>JPG, PNG o WEBP · No se sube al servidor</small></label>
+      <label className={s.uploadBox}><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { onUpload(event.target.files?.[0]); event.currentTarget.value = "" }} /><Upload /><b>Sube tu imagen de referencia</b><small>JPG, PNG o WEBP · Máximo 5 MB</small></label>
     )}
     {fileError && <p className={s.fileError} role="alert">{fileError}</p>}
     <div className={s.formatLock}><span><Video />Stories / Reels</span><b>9:16</b></div>
