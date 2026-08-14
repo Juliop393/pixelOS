@@ -174,20 +174,25 @@ export async function POST(req: NextRequest) {
 
     const n8nData = await n8nResponse.json()
 
-    const isSuccess =
+    const isProcessing =
       n8nResponse.ok &&
       typeof n8nData === "object" &&
       n8nData !== null &&
       (n8nData as Record<string, unknown>).success === true &&
-      typeof (n8nData as Record<string, unknown>).videoUrl === "string"
+      (n8nData as Record<string, unknown>).status === "processing" &&
+      typeof (n8nData as Record<string, unknown>).requestId === "string" &&
+      typeof (n8nData as Record<string, unknown>).statusUrl === "string" &&
+      typeof (n8nData as Record<string, unknown>).responseUrl === "string"
 
-    if (isSuccess) {
+    if (isProcessing) {
       const d = n8nData as Record<string, unknown>
       return NextResponse.json(
         {
           success: true,
-          videoUrl: d.videoUrl as string,
-          requestId: d.requestId ?? null,
+          status: "processing",
+          requestId: d.requestId as string,
+          statusUrl: d.statusUrl as string,
+          responseUrl: d.responseUrl as string,
         },
         { status: 200, headers: headersNoStore }
       )
