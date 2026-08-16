@@ -15,9 +15,9 @@ type VideoTab = "source" | "angle" | "hook" | "style"
 
 const VIDEO_TABS: { id: VideoTab; step: string; label: string }[] = [
   { id: "source", step: "01", label: "Fuente visual" },
-  { id: "angle", step: "02", label: "Ángulo" },
-  { id: "hook", step: "03", label: "Gancho" },
-  { id: "style", step: "04", label: "Estilo" },
+  { id: "angle", step: "02", label: "Qué quieres comunicar" },
+  { id: "hook", step: "03", label: "Cómo empieza" },
+  { id: "style", step: "04", label: "Cómo se ve" },
 ]
 
 const VIDEO_ANGLE_API_MAP: Record<string, string> = {
@@ -182,9 +182,9 @@ export default function VideoWorkspace() {
       </nav>
       <div className={s.configScroll}>
         {activeTab === "source" && <section className={s.card}><SectionTitle step="01" title="Fuente visual" description="Elige la imagen que dará vida al video." /><VideoSourcePicker source={source} previewUrl={previewUrl} fileName={fileName} fileError={fileError} onSourceChange={setSource} onUpload={handleUpload} onClear={clearPreview} /></section>}
-        {activeTab === "angle" && <section className={s.card}><SectionTitle step="02" title="Ángulo" description="Define la idea persuasiva de la secuencia." /><VideoOptionGrid options={VIDEO_ANGLES} selected={angle} onSelect={setAngle} /></section>}
-        {activeTab === "hook" && <section className={s.card}><SectionTitle step="03" title="Gancho" description="Decide cómo ganar el primer segundo." /><VideoOptionGrid options={VIDEO_HOOKS} selected={hook} onSelect={setHook} /></section>}
-        {activeTab === "style" && <section className={s.card}><SectionTitle step="04" title="Estilo de video" description="Marca el lenguaje visual y el ritmo." /><VideoOptionGrid options={VIDEO_STYLES} selected={style} onSelect={setStyle} /></section>}
+        {activeTab === "angle" && <section className={s.card}><SectionTitle step="02" title="Qué quieres comunicar" description="El beneficio, problema o idea principal del fragmento." /><VideoOptionGrid options={VIDEO_ANGLES} selected={angle} onSelect={setAngle} /></section>}
+        {activeTab === "hook" && <section className={s.card}><SectionTitle step="03" title="Cómo empieza" description="Lo que ocurre en los primeros segundos para captar atención." /><VideoOptionGrid options={VIDEO_HOOKS} selected={hook} onSelect={setHook} /></section>}
+        {activeTab === "style" && <section className={s.card}><SectionTitle step="04" title="Cómo se ve" description="Define cámara, ritmo y apariencia visual." /><VideoOptionGrid options={VIDEO_STYLES} selected={style} onSelect={setStyle} /></section>}
       </div>
       <footer className={s.generateDock}><button disabled={!canGenerate} onClick={generateVideoChunk}><WandSparkles />Generar video</button><small>{generateFeedback || (canGenerate ? "Configuración completa · Lista para generar" : "Selecciona una fuente visual para continuar")}</small></footer>
     </aside>
