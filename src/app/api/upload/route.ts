@@ -79,6 +79,42 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Configuración del servidor incompleta" }, { status: 500, headers: headersNoStore })
   }
 
+  // ---- Atomic rate limit ----
+  try {
+    const admin = getSupabaseAdmin()
+    if (!admin) throw new Error("Admin client unavailable")
+
+    const { data: rateStatus, error: rateError } = await admin.rpc(
+      "check_and_record_api_rate_limit",
+      {
+        p_user_id: user.id,
+        p_endpoint: "upload",
+        p_short_limit: UPLOAD_SHORT_LIMIT,
+        p_short_window_seconds: UPLOAD_SHORT_SECONDS,
+        p_daily_limit: UPLOAD_DAILY_LIMIT,
+      }
+    )
+
+    if (rateError) throw rateError
+
+    if (rateStatus === "short_limit") {
+      return NextResponse.json(
+        { error: "Estás subiendo demasiadas imágenes seguidas. Espera unos minutos e inténtalo nuevamente." },
+        { status: 429, headers: { ...headersNoStore, "Retry-After": String(UPLOAD_SHORT_SECONDS) } }
+      )
+    }
+
+    if (rateStatus === "daily_limit") {
+      return NextResponse.json(
+        { error: "Alcanzaste el límite diario de imágenes. Podrás volver a subir más adelante." },
+        { status: 429, headers: headersNoStore }
+      )
+    }
+  } catch (e) {
+    console.error("Rate limit RPC failed for upload:", e)
+    return NextResponse.json({ error: "Error interno al verificar límites" }, { status: 500, headers: headersNoStore })
+  }
+
   try {
     const formData = await req.formData()
     const file = formData.get("file") as File | null
@@ -114,42 +150,6 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(arrayBuffer)
-
-    // ---- Atomic rate limit ----
-    try {
-      const admin = getSupabaseAdmin()
-      if (!admin) throw new Error("Admin client unavailable")
-
-      const { data: rateStatus, error: rateError } = await admin.rpc(
-        "check_and_record_api_rate_limit",
-        {
-          p_user_id: user.id,
-          p_endpoint: "upload",
-          p_short_limit: UPLOAD_SHORT_LIMIT,
-          p_short_window_seconds: UPLOAD_SHORT_SECONDS,
-          p_daily_limit: UPLOAD_DAILY_LIMIT,
-        }
-      )
-
-      if (rateError) throw rateError
-
-      if (rateStatus === "short_limit") {
-        return NextResponse.json(
-          { error: "Estás subiendo demasiadas imágenes seguidas. Espera unos minutos e inténtalo nuevamente." },
-          { status: 429, headers: { ...headersNoStore, "Retry-After": String(UPLOAD_SHORT_SECONDS) } }
-        )
-      }
-
-      if (rateStatus === "daily_limit") {
-        return NextResponse.json(
-          { error: "Alcanzaste el límite diario de imágenes. Podrás volver a subir más adelante." },
-          { status: 429, headers: headersNoStore }
-        )
-      }
-    } catch (e) {
-      console.error("Rate limit RPC failed for upload:", e)
-      return NextResponse.json({ error: "Error interno al verificar límites" }, { status: 500, headers: headersNoStore })
-    }
 
     // ---- Upload ----
     const randomPart = Math.random().toString(36).substring(2, 8)
