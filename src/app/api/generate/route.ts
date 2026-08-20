@@ -21,18 +21,25 @@ const MAX_SUBTITLE_CHARS = 300
 const N8N_TIMEOUT_MS = 90_000
 
 const headersNoStore = { "Cache-Control": "no-store" }
+const REFERENCE_BUCKETS = new Set(["referencias"])
+const BRAND_ASSET_BUCKETS = new Set(["brand-assets"])
 
-function getSupabaseStorageDomain(): string | null {
+function getSupabaseStorageOrigin(): URL | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   if (!url) return null
   try {
-    return new URL(url).hostname
+    const parsed = new URL(url)
+    return parsed.protocol === "https:" ? parsed : null
   } catch {
     return null
   }
 }
 
-function isValidReferenceUrl(url: string | null | undefined): boolean {
+function isValidStorageAssetUrl(
+  url: string | null | undefined,
+  userId: string,
+  allowedBuckets: ReadonlySet<string>
+): boolean {
   if (!url || typeof url !== "string") return true // null is valid (no reference)
   if (url.length > 2048) return false
 
@@ -43,21 +50,37 @@ function isValidReferenceUrl(url: string | null | undefined): boolean {
     return false
   }
 
-  // Only HTTPS
   if (parsed.protocol !== "https:") return false
-
-  // Block localhost and loopback
-  if (["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(parsed.hostname)) return false
-
-  // Block private IPs (simple check)
-  if (parsed.hostname.match(/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/)) return false
-
-  // Block credentials
   if (parsed.username || parsed.password) return false
 
-  // Allow only Supabase Storage
-  const allowedDomain = getSupabaseStorageDomain()
-  if (allowedDomain && parsed.hostname !== allowedDomain) return false
+  const storageOrigin = getSupabaseStorageOrigin()
+  if (!storageOrigin || parsed.origin !== storageOrigin.origin) return false
+
+  let segments: string[]
+  try {
+    segments = parsed.pathname.split("/").slice(1).map((segment) => decodeURIComponent(segment))
+  } catch {
+    return false
+  }
+
+  if (
+    segments.length < 7 ||
+    segments[0] !== "storage" ||
+    segments[1] !== "v1" ||
+    segments[2] !== "object" ||
+    segments[3] !== "public"
+  ) {
+    return false
+  }
+
+  const bucket = segments[4]
+  const ownerId = segments[5]
+  const objectSegments = segments.slice(6)
+
+  if (!allowedBuckets.has(bucket) || ownerId !== userId) return false
+  if (objectSegments.some((segment) => !segment || segment === "." || segment === ".." || segment.includes("/") || segment.includes("\\"))) {
+    return false
+  }
 
   return true
 }
@@ -85,7 +108,7 @@ function buildCleanPayload(body: Record<string, unknown>, userId: string): Recor
   const brandColor = typeof body.brandColor === "string" ? body.brandColor.trim().slice(0, 20) : null
 
   const imagenReferencia = typeof body.imagenReferencia === "string" ? body.imagenReferencia : null
-  if (!isValidReferenceUrl(imagenReferencia)) return { error: "URL de referencia no permitida" }
+  if (!isValidStorageAssetUrl(imagenReferencia, userId, REFERENCE_BUCKETS)) return { error: "URL de referencia no permitida" }
 
   const brandIdentity = (() => {
     const raw = body.brandIdentity
@@ -107,8 +130,8 @@ function buildCleanPayload(body: Record<string, unknown>, userId: string): Recor
     const logoUrl = typeof bi.logoUrl === "string" ? bi.logoUrl.trim() : null
     const faceUrl = typeof bi.faceUrl === "string" ? bi.faceUrl.trim() : null
 
-    if (logoUrl && !isValidReferenceUrl(logoUrl)) return { error: "URL del logo no permitida" } as const
-    if (faceUrl && !isValidReferenceUrl(faceUrl)) return { error: "URL de la foto no permitida" } as const
+    if (logoUrl && !isValidStorageAssetUrl(logoUrl, userId, BRAND_ASSET_BUCKETS)) return { error: "URL del logo no permitida" } as const
+    if (faceUrl && !isValidStorageAssetUrl(faceUrl, userId, BRAND_ASSET_BUCKETS)) return { error: "URL de la foto no permitida" } as const
 
     return { brandName, brandColors, hasLogo, logoUrl, hasFace, faceUrl }
   })()
