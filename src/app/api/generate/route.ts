@@ -315,8 +315,14 @@ export async function POST(req: NextRequest) {
       (n8nData as Record<string, unknown>).success === true
 
     if (isSuccess) {
+      const resultData = n8nData as Record<string, unknown>
       return NextResponse.json(
-        { ...(n8nData as Record<string, unknown>), credits: newCredits },
+        {
+          success: true,
+          imageUrl: typeof resultData.imageUrl === "string" ? resultData.imageUrl : null,
+          copy: typeof resultData.copy === "string" ? resultData.copy : null,
+          credits: newCredits,
+        },
         { status: 200, headers: headersNoStore }
       )
     }
