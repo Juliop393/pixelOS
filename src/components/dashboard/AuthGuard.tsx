@@ -41,13 +41,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         .eq("user_id", uid)
         .maybeSingle()
 
-      if (existing) {
-        setCredits(existing.credits ?? 0)
-      } else {
-        // No existe: lo creamos con 0 créditos (hasta que compre un plan).
-        await supabase.from("user_credits").insert({ user_id: uid, credits: 0 })
-        setCredits(0)
-      }
+      setCredits(existing?.credits ?? 0)
 
       setChecked(true)
     }
