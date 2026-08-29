@@ -203,6 +203,51 @@
 .sectionContext b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #f2e9e0; font-size: 14px; font-weight: 650; }
 .sectionContext small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #817970; font-size: 11px; }
 
+.creatorNav {
+  height: 44px;
+  padding: 4px;
+  border: 1px solid rgba(255, 242, 232, 0.08);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  background: rgba(8, 7, 6, 0.24);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+  transform: translate(-50%, -50%);
+}
+
+.creatorNavLink {
+  height: 34px;
+  padding: 0 11px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #8f8780;
+  font-size: 12px;
+  font-weight: 620;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 220ms ease, border-color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
+}
+
+.creatorNavLink svg { flex: 0 0 16px; }
+.creatorNavLink:hover { color: #e2d7ce; background: rgba(255, 255, 255, 0.035); }
+
+.creatorNavActive {
+  color: #fff3eb;
+  border-color: rgba(239, 148, 114, 0.24);
+  background: linear-gradient(135deg, rgba(226, 123, 87, 0.24), rgba(189, 86, 55, 0.14));
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.06), 0 6px 18px rgba(112, 45, 27, 0.12);
+}
+
+.creatorNavActive:hover { color: #fff; background: linear-gradient(135deg, rgba(226, 123, 87, 0.3), rgba(189, 86, 55, 0.18)); }
+
 .accountArea {
   min-width: 0;
   margin-left: auto;
@@ -298,12 +343,16 @@
   .accountArea { gap: 7px; }
   .recharge, .accountDivider { display: none; }
   .credits { padding-inline: 10px; }
+  .sectionContext > span { display: none; }
+  .creatorNav { padding: 3px; gap: 2px; }
+  .creatorNavLink { padding-inline: 8px; gap: 5px; font-size: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .navLink,
   .navLink::after,
   .credits,
+  .creatorNavLink,
   .profile,
   .logout { transition: none; }
 }

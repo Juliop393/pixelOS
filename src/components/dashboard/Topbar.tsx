@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
@@ -19,6 +19,7 @@ const sectionDetails = [
 export default function Topbar() {
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { credits } = useCredits()
   const [userEmail, setUserEmail] = useState("")
   const [fullName, setFullName] = useState("")
@@ -50,9 +51,12 @@ export default function Topbar() {
 
   const displayName = fullName || userEmail.split("@")[0] || "Usuario"
   const avatarLetter = (displayName[0] ?? "U").toUpperCase()
-  const activeSection = sectionDetails.find((section) =>
-    section.path === "/dashboard" ? pathname === section.path : pathname.startsWith(section.path)
-  ) ?? sectionDetails[sectionDetails.length - 1]
+  const pixelAiActive = pathname === "/dashboard" && searchParams.get("pixelai") === "open"
+  const activeSection = pixelAiActive
+    ? { title: "PixelAI", description: "Asistente estratégico" }
+    : sectionDetails.find((section) =>
+        section.path === "/dashboard" ? pathname === section.path : pathname.startsWith(section.path)
+      ) ?? sectionDetails[sectionDetails.length - 1]
 
   return (
     <header className={styles.topbar}>
@@ -67,6 +71,39 @@ export default function Topbar() {
           <small>{activeSection.description}</small>
         </span>
       </div>
+
+      <nav className={styles.creatorNav} aria-label="Herramientas de creación">
+        <Link
+          href="/dashboard"
+          aria-current={pathname === "/dashboard" && !pixelAiActive ? "page" : undefined}
+          className={`${styles.creatorNavLink} ${pathname === "/dashboard" && !pixelAiActive ? styles.creatorNavActive : ""}`}
+        >
+          <svg width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="m4 16 4.6-4.6a2 2 0 0 1 2.8 0L16 16m-2-2 1.6-1.6a2 2 0 0 1 2.8 0L20 14M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
+          </svg>
+          <span>Generar imagen</span>
+        </Link>
+        <Link
+          href="/dashboard/videos"
+          aria-current={pathname.startsWith("/dashboard/videos") ? "page" : undefined}
+          className={`${styles.creatorNavLink} ${pathname.startsWith("/dashboard/videos") ? styles.creatorNavActive : ""}`}
+        >
+          <svg width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="m15 10 4.6-2.3A1 1 0 0 1 21 8.6v6.8a1 1 0 0 1-1.4.9L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z" />
+          </svg>
+          <span>Generar video</span>
+        </Link>
+        <Link
+          href="/dashboard?pixelai=open"
+          aria-current={pixelAiActive ? "page" : undefined}
+          className={`${styles.creatorNavLink} ${pixelAiActive ? styles.creatorNavActive : ""}`}
+        >
+          <svg width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M12 3 13.4 7.6 18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4L12 3Zm6 11 .7 2.3L21 17l-2.3.7L18 20l-.7-2.3L15 17l2.3-.7L18 14Z" />
+          </svg>
+          <span>PixelAI</span>
+        </Link>
+      </nav>
 
       <div className={styles.accountArea}>
         <Link href="/pricing" aria-label="Ver planes y comprar créditos" className={styles.credits}>

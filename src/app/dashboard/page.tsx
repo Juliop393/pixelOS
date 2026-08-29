@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Sparkles } from "lucide-react"
 import { useCreativeGenerator } from "@/hooks/useCreativeGenerator"
 import { supabase } from "@/lib/supabase"
@@ -27,6 +28,8 @@ const FORMAT_OPTIONS = [
 type Tab = "product" | "angle" | "design"
 
 export default function DashboardPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const g = useCreativeGenerator()
   const [activeTab, setActiveTab] = useState<Tab>("product")
   const [advisorToken, setAdvisorToken] = useState<string | undefined>()
@@ -35,6 +38,7 @@ export default function DashboardPage() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [formatOpen, setFormatOpen] = useState(false)
   const [advisorOpen, setAdvisorOpen] = useState(false)
+  const pixelAiRequested = searchParams.get("pixelai") === "open"
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -48,6 +52,17 @@ export default function DashboardPage() {
       return () => clearTimeout(timer)
     }
   }, [highlightProduct])
+
+  useEffect(() => {
+    setAdvisorOpen(pixelAiRequested)
+  }, [pixelAiRequested])
+
+  const handleAdvisorOpenChange = (open: boolean) => {
+    setAdvisorOpen(open)
+    if (open !== pixelAiRequested) {
+      router.replace(open ? "/dashboard?pixelai=open" : "/dashboard", { scroll: false })
+    }
+  }
 
   const handleApplyRecommendation = (rec: {
     angleId: string; styleId: string; format: string; safeZoneMeta: boolean; productDescription?: string
@@ -303,7 +318,7 @@ export default function DashboardPage() {
           <div><b>Pixel IA</b><small>Asistente estratégico</small></div><i />
         </div>
         <p>Piensa la estrategia antes de generar y recomienda el mejor ángulo.</p>
-        <button onClick={() => setAdvisorOpen(true)} aria-expanded={advisorOpen} aria-controls="pixel-ai-panel">
+        <button onClick={() => handleAdvisorOpenChange(true)} aria-expanded={advisorOpen} aria-controls="pixel-ai-panel">
           {advisorOpen ? "Pixel IA abierta" : "Iniciar con Pixel IA"} <span>→</span>
         </button>
       </aside>
@@ -314,7 +329,7 @@ export default function DashboardPage() {
         hideBubble
         inline
         open={advisorOpen}
-        onOpenChange={setAdvisorOpen}
+        onOpenChange={handleAdvisorOpenChange}
       />
       </section>
     </div>
