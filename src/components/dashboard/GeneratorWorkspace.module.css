@@ -239,7 +239,7 @@
 @media(max-width:680px){.resultMeta button{width:34px;height:34px}.resultActions a,.resultActions button{font-size:12px}}
 
 /* === FINAL CODEX WORKSPACE V3 === */
-.generatorPage{--line:rgba(255,242,232,.09);--accent:#d76b45;--accent-2:#ef9472;--muted:#aaa097;width:100%;height:100%;min-height:0;padding:14px 4px 40px;overflow-x:hidden;overflow-y:auto;position:relative;scrollbar-width:thin;scrollbar-color:#4d443d transparent}
+.generatorPage{--line:rgba(255,242,232,.09);--accent:#d76b45;--accent-2:#ef9472;--muted:#aaa097;width:100%;height:100%;min-height:0;padding:14px 4px 40px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;position:relative;scrollbar-width:thin;scrollbar-color:#4d443d transparent}
 .ambient{position:fixed;inset:0;pointer-events:none;overflow:hidden;opacity:.42}
 .ambient:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:64px 64px;mask-image:linear-gradient(to bottom,#000,transparent 86%)}
 .ambient i{position:absolute;width:420px;height:420px;border-radius:50%;filter:blur(110px);opacity:.1;background:#c45f3d}
@@ -259,6 +259,7 @@
 .canvasTools .formatBtn{width:auto;min-width:72px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .canvasTools .previewNavButton{width:auto;min-width:0;height:34px;padding:0 11px;border:1px solid rgba(243,234,223,.09);border-radius:9px;display:flex;align-items:center;justify-content:center;gap:6px;background:#12100f;color:#9b9187;font-size:11px;font-weight:600;line-height:1;text-decoration:none;white-space:nowrap;cursor:pointer;transition:border-color .25s ease,color .25s ease,background-color .25s ease}
 .canvasTools .previewNavButton:hover{color:#e6d8ce;border-color:rgba(215,107,69,.28);background:rgba(215,107,69,.06)}
+.canvasTools .previewNavButton:disabled{opacity:.42;cursor:not-allowed;color:#756d66;border-color:rgba(243,234,223,.07);background:#12100f}
 .previewNavButton svg{width:14px;height:14px;flex:0 0 14px;color:#d9896b}
 .canvasToolDivider{width:1px;height:22px!important;padding:0!important;border:0!important;border-radius:0!important;background:rgba(243,234,223,.09)}
 .formatMenu>div{position:absolute;right:0;top:42px;width:210px;padding:7px;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:rgba(20,18,16,.98);box-shadow:0 24px 55px rgba(0,0,0,.45);z-index:40}

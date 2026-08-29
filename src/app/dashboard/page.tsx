@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import Link from "next/link"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Sparkles } from "lucide-react"
 import { useCreativeGenerator } from "@/hooks/useCreativeGenerator"
 import { supabase } from "@/lib/supabase"
@@ -29,6 +28,8 @@ type Tab = "product" | "angle" | "design"
 
 export default function DashboardPage() {
   const g = useCreativeGenerator()
+  const generatorScrollRef = useRef<HTMLDivElement>(null)
+  const pixelAiSectionRef = useRef<HTMLElement>(null)
   const [activeTab, setActiveTab] = useState<Tab>("product")
   const [advisorToken, setAdvisorToken] = useState<string | undefined>()
   const [highlightProduct, setHighlightProduct] = useState(false)
@@ -51,9 +52,15 @@ export default function DashboardPage() {
   }, [highlightProduct])
 
   const scrollToPixelAi = () => {
-    document.getElementById("pixel-ai-section")?.scrollIntoView({
+    const scrollContainer = generatorScrollRef.current
+    const pixelAiSection = pixelAiSectionRef.current
+    if (!scrollContainer || !pixelAiSection) return
+
+    const containerRect = scrollContainer.getBoundingClientRect()
+    const sectionRect = pixelAiSection.getBoundingClientRect()
+    scrollContainer.scrollTo({
+      top: scrollContainer.scrollTop + sectionRect.top - containerRect.top,
       behavior: "smooth",
-      block: "center",
     })
   }
 
@@ -106,7 +113,7 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div id="generator-root" className={s.generatorPage}>
+    <div ref={generatorScrollRef} id="generator-root" className={s.generatorPage}>
       <div className={s.ambient} aria-hidden="true"><i /><i /></div>
 
       <section className={s.workspace}>
@@ -244,17 +251,19 @@ export default function DashboardPage() {
             <div><b>Vista previa</b><small>Tu creativo se actualizará aquí</small></div>
           </div>
           <div className={s.canvasTools}>
-            <Link
-              href="/dashboard/videos"
+            <button
+              type="button"
               className={s.previewNavButton}
-              aria-label="Abrir generador de video"
-              title="Generar video"
+              onClick={g.handleGenerate}
+              disabled={!canGenerate}
+              aria-label="Generar imagen"
+              title="Generar imagen"
             >
               <svg width={14} height={14} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="m15 10 4.6-2.3A1 1 0 0 1 21 8.6v6.8a1 1 0 0 1-1.4.9L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="m4 16 4.6-4.6a2 2 0 0 1 2.8 0L16 16m-2-2 1.6-1.6a2 2 0 0 1 2.8 0L20 14M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
               </svg>
-              <span>Generar video</span>
-            </Link>
+              <span>Generar imagen</span>
+            </button>
             <button
               type="button"
               className={s.previewNavButton}
@@ -327,7 +336,7 @@ export default function DashboardPage() {
       </section>
       </div>
 
-      <aside id="pixel-ai-section" className={`${s.aiCard} ${s.builderAiCard} ${advisorOpen ? s.aiCardActive : ""}`}>
+      <aside ref={pixelAiSectionRef} id="pixel-ai-section" className={`${s.aiCard} ${s.builderAiCard} ${advisorOpen ? s.aiCardActive : ""}`}>
         <div className={s.aiHead}>
           <span><Sparkles className="w-4 h-4" strokeWidth={1.5} /></span>
           <div><b>Pixel IA</b><small>Asistente estratégico</small></div><i />
