@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { Sparkles } from "lucide-react"
 import { useCreativeGenerator } from "@/hooks/useCreativeGenerator"
 import { supabase } from "@/lib/supabase"
@@ -28,8 +28,6 @@ const FORMAT_OPTIONS = [
 type Tab = "product" | "angle" | "design"
 
 export default function DashboardPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const g = useCreativeGenerator()
   const [activeTab, setActiveTab] = useState<Tab>("product")
   const [advisorToken, setAdvisorToken] = useState<string | undefined>()
@@ -38,7 +36,6 @@ export default function DashboardPage() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [formatOpen, setFormatOpen] = useState(false)
   const [advisorOpen, setAdvisorOpen] = useState(false)
-  const pixelAiRequested = searchParams.get("pixelai") === "open"
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -53,15 +50,11 @@ export default function DashboardPage() {
     }
   }, [highlightProduct])
 
-  useEffect(() => {
-    setAdvisorOpen(pixelAiRequested)
-  }, [pixelAiRequested])
-
-  const handleAdvisorOpenChange = (open: boolean) => {
-    setAdvisorOpen(open)
-    if (open !== pixelAiRequested) {
-      router.replace(open ? "/dashboard?pixelai=open" : "/dashboard", { scroll: false })
-    }
+  const scrollToPixelAi = () => {
+    document.getElementById("pixel-ai-section")?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    })
   }
 
   const handleApplyRecommendation = (rec: {
@@ -251,6 +244,28 @@ export default function DashboardPage() {
             <div><b>Vista previa</b><small>Tu creativo se actualizará aquí</small></div>
           </div>
           <div className={s.canvasTools}>
+            <Link
+              href="/dashboard/videos"
+              className={s.previewNavButton}
+              aria-label="Abrir generador de video"
+              title="Generar video"
+            >
+              <svg width={14} height={14} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="m15 10 4.6-2.3A1 1 0 0 1 21 8.6v6.8a1 1 0 0 1-1.4.9L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z" />
+              </svg>
+              <span>Generar video</span>
+            </Link>
+            <button
+              type="button"
+              className={s.previewNavButton}
+              onClick={scrollToPixelAi}
+              aria-label="Ir a Pixel IA"
+              title="PixelAI"
+            >
+              <Sparkles size={14} strokeWidth={1.7} aria-hidden="true" />
+              <span>PixelAI</span>
+            </button>
+            <span className={s.canvasToolDivider} aria-hidden="true" />
             <div className={s.formatMenu}>
               <button className={s.formatBtn} onClick={() => setFormatOpen(!formatOpen)} aria-expanded={formatOpen} aria-haspopup="menu">
                 {FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio} <span>⌄</span>
@@ -312,13 +327,13 @@ export default function DashboardPage() {
       </section>
       </div>
 
-      <aside className={`${s.aiCard} ${s.builderAiCard} ${advisorOpen ? s.aiCardActive : ""}`}>
+      <aside id="pixel-ai-section" className={`${s.aiCard} ${s.builderAiCard} ${advisorOpen ? s.aiCardActive : ""}`}>
         <div className={s.aiHead}>
           <span><Sparkles className="w-4 h-4" strokeWidth={1.5} /></span>
           <div><b>Pixel IA</b><small>Asistente estratégico</small></div><i />
         </div>
         <p>Piensa la estrategia antes de generar y recomienda el mejor ángulo.</p>
-        <button onClick={() => handleAdvisorOpenChange(true)} aria-expanded={advisorOpen} aria-controls="pixel-ai-panel">
+        <button onClick={() => setAdvisorOpen(true)} aria-expanded={advisorOpen} aria-controls="pixel-ai-panel">
           {advisorOpen ? "Pixel IA abierta" : "Iniciar con Pixel IA"} <span>→</span>
         </button>
       </aside>
@@ -329,7 +344,7 @@ export default function DashboardPage() {
         hideBubble
         inline
         open={advisorOpen}
-        onOpenChange={handleAdvisorOpenChange}
+        onOpenChange={setAdvisorOpen}
       />
       </section>
     </div>

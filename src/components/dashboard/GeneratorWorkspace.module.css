@@ -257,6 +257,10 @@
 .canvasPanel[data-format="9:16"] .previewArea{min-height:786px}
 .formatMenu{position:relative}
 .canvasTools .formatBtn{width:auto;min-width:72px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.canvasTools .previewNavButton{width:auto;min-width:0;height:34px;padding:0 11px;border:1px solid rgba(243,234,223,.09);border-radius:9px;display:flex;align-items:center;justify-content:center;gap:6px;background:#12100f;color:#9b9187;font-size:11px;font-weight:600;line-height:1;text-decoration:none;white-space:nowrap;cursor:pointer;transition:border-color .25s ease,color .25s ease,background-color .25s ease}
+.canvasTools .previewNavButton:hover{color:#e6d8ce;border-color:rgba(215,107,69,.28);background:rgba(215,107,69,.06)}
+.previewNavButton svg{width:14px;height:14px;flex:0 0 14px;color:#d9896b}
+.canvasToolDivider{width:1px;height:22px!important;padding:0!important;border:0!important;border-radius:0!important;background:rgba(243,234,223,.09)}
 .formatMenu>div{position:absolute;right:0;top:42px;width:210px;padding:7px;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:rgba(20,18,16,.98);box-shadow:0 24px 55px rgba(0,0,0,.45);z-index:40}
 .formatMenu>div button{width:100%;height:auto;min-height:48px;padding:8px 10px;border:0;background:transparent;display:grid;grid-template-columns:42px 1fr 18px;align-items:center;text-align:left;color:#aaa097}
 .formatMenu>div button:hover,.formatMenu>div .activeFormat{background:rgba(215,107,69,.08);color:#f1b39c}
@@ -285,12 +289,13 @@
 .summaryGrid b{font-size:12px}
 .summaryStatus{grid-column:auto;min-height:46px;flex-direction:column;align-items:flex-start;justify-content:center}
 .summaryStatus>b{font-size:12px}
-.builderAiCard{grid-column:1;grid-row:2;align-self:start;width:100%;height:auto;min-height:150px;padding:18px}
+.builderAiCard{grid-column:1;grid-row:2;align-self:start;width:100%;height:auto;min-height:150px;padding:18px;scroll-margin-block:18px}
 .aiCardActive{border-color:rgba(215,107,69,.34);box-shadow:0 17px 38px rgba(0,0,0,.2),inset 0 0 0 1px rgba(215,107,69,.08)}
 .aiPanel{grid-column:2;grid-row:2;position:relative;width:100%;height:540px;min-height:520px;max-height:680px;z-index:4;border:1px solid rgba(215,107,69,.32);border-radius:18px;background:rgba(24,21,19,.98)!important;backdrop-filter:blur(28px);box-shadow:0 30px 80px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.04);display:flex;flex-direction:column;overflow:hidden;animation:panelIn .35s ease both}
 @keyframes panelIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @media(max-width:1420px){.workspace{grid-template-columns:390px minmax(0,1fr);column-gap:16px}.generatorPage{padding-inline:0}}
 @media(max-width:1180px){.workspace{grid-template-columns:370px minmax(0,1fr)}.summaryGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.summaryStatus{grid-column:auto}}
+@media(min-width:921px) and (max-width:1120px){.canvasTools .previewNavButton{width:34px;padding:0}.previewNavButton span{display:none}}
 @media(max-width:920px){.generatorPage{overflow-y:auto}.workspace{display:flex;flex-direction:column;gap:12px}.builderPanel{order:1;height:760px;min-height:680px;contain:none}.previewColumn{order:2;grid-column:auto;grid-row:auto}.builderAiCard{order:3}.aiPanel{order:4;grid-column:auto;grid-row:auto;width:100%;height:540px}}
 @media(max-width:640px){.generatorPage{padding:8px 0 28px}.builderPanel{height:710px;min-height:650px}.canvasPanel{min-height:650px}.canvasStage{min-height:580px}.previewArea{min-height:540px;padding:22px 14px 18px}.canvasPanel[data-format="4:5"] .canvasStage,.canvasPanel[data-format="9:16"] .canvasStage{min-height:680px}.canvasPanel[data-format="4:5"] .previewArea,.canvasPanel[data-format="9:16"] .previewArea{min-height:620px}.resultViewport,.canvasPanel[data-format="4:5"] .resultViewport,.canvasPanel[data-format="9:16"] .resultViewport{height:520px;flex-basis:520px;padding:10px}.resultFrame[data-format="1:1"],.resultFrame[data-format="4:5"],.resultFrame[data-format="9:16"]{max-width:calc(100% - 4px);max-height:calc(100% - 4px)}.resultsStrip{display:block;margin:0 12px 12px;padding:14px}.resultsStrip .railLabel{margin-bottom:12px}.contextRail{display:block;padding:13px}.railLabel{width:auto;margin-bottom:11px}.summaryGrid{grid-template-columns:1fr 1fr}.summaryStatus{grid-column:1/-1}.resultActions{align-items:flex-start;flex-direction:column}.resultActions>div{justify-content:flex-start}.aiPanel{min-height:520px}}
 @media(prefers-reduced-motion:reduce){.aiPanel{animation:none}.ambient i{display:none}}
