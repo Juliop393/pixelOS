@@ -86,9 +86,23 @@ Si aún falta información, responde con:
 
 En TODOS los casos, tu respuesta debe ser un JSON válido.`
 
-const RECOMMEND_SYSTEM_PROMPT = `Eres Pixel IA, un asesor de estrategia publicitaria para Meta Ads.
+function buildRecommendSystemPrompt(recommendationCount: 1 | 2 | 3) {
+  const exampleAngles = ["problem-solution", "primary-benefit", "product-demo"]
+  const exampleStyles = ["lifestyle", "benefits-infographic", "product-action"]
+  const exampleFormats = ["story", "4:5", "square"]
+  const exampleRecommendations = Array.from({ length: recommendationCount }, (_, index) => ({
+    angleId: exampleAngles[index],
+    angleName: ANGLE_NAMES[exampleAngles[index]],
+    reason: "Explicación breve",
+    styleId: exampleStyles[index],
+    styleName: STYLE_NAMES[exampleStyles[index]],
+    format: exampleFormats[index],
+    safeZoneMeta: exampleFormats[index] === "story",
+  }))
 
-El usuario ya confirmó la siguiente información sobre su negocio. Ahora debes recomendar exactamente 3 ángulos de venta.
+  return `Eres Pixel IA, un asesor de estrategia publicitaria para Meta Ads.
+
+El usuario ya confirmó la siguiente información sobre su negocio. Ahora debes recomendar exactamente ${recommendationCount} ${recommendationCount === 1 ? "ángulo" : "ángulos"} de venta.
 
 Ángulos disponibles:
 1. comparison — Contraste competitivo
@@ -108,22 +122,13 @@ Responde ÚNICAMENTE con JSON:
 {
   "summary": "Análisis breve",
   "productDescription": "Descripción clara del producto, público y modalidad. Máx 180 caracteres.",
-  "recommendations": [
-    {
-      "angleId": "problem-solution",
-      "angleName": "Problema y solución",
-      "reason": "Explicación breve",
-      "styleId": "lifestyle",
-      "styleName": "Lifestyle y contexto",
-      "format": "story",
-      "safeZoneMeta": true
-    }
-  ]
+  "recommendations": ${JSON.stringify(exampleRecommendations, null, 2)}
 }
 
 productDescription debe ser claro, específico, incluir qué se vende y para quién, máximo 180 caracteres, sin inventar precios ni cifras.
 
-3 recomendaciones distintas, sin inventar datos.`
+Devuelve exactamente ${recommendationCount} ${recommendationCount === 1 ? "recomendación" : "recomendaciones distintas"}, sin inventar datos.`
+}
 
 function getAdminClient() {
   return createClient(
@@ -169,7 +174,7 @@ async function cleanupOldRecords() {
   }
 }
 
-function validateBody(body: unknown): { valid: true; action: "chat"; messages: Array<{ role: string; content: string }> } | { valid: true; action: "recommend"; collectedContext: { product: string; audience: string; goal: string } } | { valid: false; error: string; status: number } {
+function validateBody(body: unknown): { valid: true; action: "chat"; messages: Array<{ role: string; content: string }> } | { valid: true; action: "recommend"; collectedContext: { product: string; audience: string; goal: string }; recommendationCount: 1 | 2 | 3 } | { valid: false; error: string; status: number } {
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return { valid: false, error: "Cuerpo de solicitud inválido", status: 400 }
   }
@@ -218,6 +223,13 @@ function validateBody(body: unknown): { valid: true; action: "chat"; messages: A
   const product = typeof context.product === "string" ? context.product : ""
   const audience = typeof context.audience === "string" ? context.audience : ""
   const goal = typeof context.goal === "string" ? context.goal : ""
+  const requestedCount = b.recommendationCount
+  const recommendationCount = typeof requestedCount === "number"
+    && Number.isInteger(requestedCount)
+    && requestedCount >= 1
+    && requestedCount <= 3
+      ? requestedCount as 1 | 2 | 3
+      : 3
 
   const combined = (product + audience + goal).length
   if (combined > MAX_COMBINED_CHARS) {
@@ -228,7 +240,7 @@ function validateBody(body: unknown): { valid: true; action: "chat"; messages: A
     return { valid: false, error: "Falta información del producto, público u objetivo", status: 400 }
   }
 
-  return { valid: true, action: "recommend", collectedContext: { product, audience, goal } }
+  return { valid: true, action: "recommend", collectedContext: { product, audience, goal }, recommendationCount }
 }
 
 async function callKimi(messages: Array<{ role: string; content: string }>, jsonMode: boolean): Promise<{ ok: boolean; status: number; data: Record<string, unknown> } | null> {
@@ -358,10 +370,11 @@ export async function POST(req: NextRequest) {
 
   // ---- Recommend action ----
   const { product, audience, goal } = validation.collectedContext
+  const { recommendationCount } = validation
   const description = `Producto: ${product}\nPúblico: ${audience}\nObjetivo: ${goal}`
 
   const apiMessages = [
-    { role: "system", content: RECOMMEND_SYSTEM_PROMPT },
+    { role: "system", content: buildRecommendSystemPrompt(recommendationCount) },
     { role: "user", content: description },
   ]
 
@@ -380,17 +393,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Respuesta inesperada del servicio de IA" }, { status: 502, headers: cacheHeaders })
   }
 
-  let parsed: Record<string, unknown>
-  try { parsed = JSON.parse(rawContent) } catch {
+  let parsedValue: unknown
+  try { parsedValue = JSON.parse(rawContent) } catch {
     return NextResponse.json({ error: "El servicio de IA devolvió un formato inesperado" }, { status: 502, headers: cacheHeaders })
   }
 
-  const recommendations = Array.isArray(parsed.recommendations) ? parsed.recommendations : []
-  if (recommendations.length < 3) {
-    return NextResponse.json({ error: "El servicio de IA no generó suficientes recomendaciones" }, { status: 502, headers: cacheHeaders })
+  if (typeof parsedValue !== "object" || parsedValue === null || Array.isArray(parsedValue)) {
+    return NextResponse.json({ error: "El servicio de IA devolvió recomendaciones con un formato inválido" }, { status: 502, headers: cacheHeaders })
+  }
+  const parsed = parsedValue as Record<string, unknown>
+
+  if (!Array.isArray(parsed.recommendations)) {
+    return NextResponse.json({ error: "El servicio de IA devolvió recomendaciones con un formato inválido" }, { status: 502, headers: cacheHeaders })
+  }
+  const recommendations = parsed.recommendations
+  if (recommendations.length < recommendationCount) {
+    return NextResponse.json({ error: "El servicio de IA no generó la cantidad de recomendaciones solicitada" }, { status: 502, headers: cacheHeaders })
   }
 
-  const validated = recommendations.slice(0, 3).map((rec: unknown, idx: number) => {
+  const selectedRecommendations = recommendations.slice(0, recommendationCount)
+  if (selectedRecommendations.some((rec) => typeof rec !== "object" || rec === null || Array.isArray(rec))) {
+    return NextResponse.json({ error: "El servicio de IA incluyó una recomendación con formato inválido" }, { status: 502, headers: cacheHeaders })
+  }
+
+  const validated = selectedRecommendations.map((rec: unknown, idx: number) => {
     const r = rec as Record<string, unknown>
     const angleId = typeof r.angleId === "string" && ALLOWED_ANGLES.includes(r.angleId) ? r.angleId : ALLOWED_ANGLES[idx]
     const styleId = typeof r.styleId === "string" && ALLOWED_STYLES.includes(r.styleId) ? r.styleId : "lifestyle"

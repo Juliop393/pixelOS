@@ -22,6 +22,24 @@ type Message = {
   content: string
 }
 
+function detectRecommendationCount(message: string): 1 | 2 | 3 | null {
+  const normalized = message
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+
+  const mentionsAngles = /\bangulos?\b/.test(normalized)
+  const requestsRecommendation = /\b(recomiend\w*|recomend\w*|sugier\w*|suger\w*|propon\w*|dame|quiero|necesito)\b/.test(normalized)
+  if (!mentionsAngles || !requestsRecommendation) return null
+
+  const numericCount = normalized.match(/\b([123])\b/)
+  if (numericCount) return Number(numericCount[1]) as 1 | 2 | 3
+  if (/\btres\b/.test(normalized)) return 3
+  if (/\bdos\b/.test(normalized)) return 2
+  if (/\b(un|uno|una)\b/.test(normalized)) return 1
+  return 3
+}
+
 interface PixelAdvisorProps {
   onApplyRecommendation?: (rec: Recommendation) => void
   accessToken?: string
@@ -52,6 +70,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [summary, setSummary] = useState("")
   const [confirmationMessage, setConfirmationMessage] = useState("")
+  const [requestedRecommendationCount, setRequestedRecommendationCount] = useState<1 | 2 | 3>(3)
   const [appliedIndex, setAppliedIndex] = useState<number | null>(null)
   const [appliedDetails, setAppliedDetails] = useState<Recommendation | null>(null)
 
@@ -82,6 +101,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
     setRecommendations([])
     setSummary("")
     setConfirmationMessage("")
+    setRequestedRecommendationCount(3)
     setError(null)
     setAppliedIndex(null)
     setAppliedDetails(null)
@@ -148,6 +168,9 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
     const userMessage = input.trim()
     if (!userMessage || isLoading) return
 
+    const detectedCount = detectRecommendationCount(userMessage)
+    if (detectedCount !== null) setRequestedRecommendationCount(detectedCount)
+
     setMessages((prev) => [...prev, { role: "user", content: userMessage }])
     setInput("")
 
@@ -171,6 +194,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         body: JSON.stringify({
           action: "recommend",
           collectedContext,
+          recommendationCount: requestedRecommendationCount,
         }),
       })
 
