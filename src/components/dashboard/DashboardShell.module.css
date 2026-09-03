@@ -307,3 +307,45 @@
   .profile,
   .logout { transition: none; }
 }
+
+/* Image generator only: clearer graphite layers without changing the shared video shell. */
+@media (min-width: 768px) {
+  .desktopRoot:has(:global(#generator-root)) {
+    background:
+      radial-gradient(circle at 18% -10%, rgba(148, 73, 47, 0.09), transparent 30%),
+      radial-gradient(circle at 94% 94%, rgba(116, 57, 38, 0.06), transparent 28%),
+      linear-gradient(145deg, #0c0d0e, #090a0a 68%);
+  }
+
+  .shell:has(:global(#generator-root)) .sidebar,
+  .shell:has(:global(#generator-root)) .topbar {
+    border-color: rgba(244, 239, 233, 0.12);
+    background: linear-gradient(145deg, rgba(29, 30, 30, 0.96), rgba(19, 20, 20, 0.97));
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34), inset 0 1px rgba(255, 255, 255, 0.055);
+  }
+
+  .shell:has(:global(#generator-root)) .sidebarDivider,
+  .shell:has(:global(#generator-root)) .accountDivider {
+    background: rgba(244, 239, 233, 0.11);
+  }
+
+  .shell:has(:global(#generator-root)) .navLink:not(.navActive) {
+    color: #a29d97;
+  }
+
+  .shell:has(:global(#generator-root)) .navLink:not(.navActive):hover {
+    color: #e3ded8;
+    border-color: rgba(255, 255, 255, 0.085);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .shell:has(:global(#generator-root)) .sectionContext b,
+  .shell:has(:global(#generator-root)) .profileText b {
+    color: #f4efe9;
+  }
+
+  .shell:has(:global(#generator-root)) .sectionContext small,
+  .shell:has(:global(#generator-root)) .profileText small {
+    color: #969089;
+  }
+}

@@ -427,3 +427,106 @@
 @media(max-width:920px){.angleGrid{grid-template-columns:1fr 1fr}.styleGrid{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.angleGrid,.styleGrid{grid-template-columns:1fr}.formatChoices{gap:6px}.formatChoices button{height:82px}.formCard{padding:15px}}
 @media(prefers-reduced-motion:reduce){.stepTabs button,.panelInput,.panelTextarea,.uploadDrop,.angleGrid>button,.formatChoices button,.quantityGrid button,.styleGrid>button,.generateButton{transition:none}}
+
+/* === IMAGE WORKSPACE — GRAPHITE HIERARCHY REFINEMENT === */
+.generatorPage{
+  --line:rgba(244,239,233,.115);
+  --muted:#aaa49e;
+  color:#f3eee8;
+  background:linear-gradient(180deg,rgba(17,18,18,.2),rgba(9,10,10,.08));
+}
+.builderPanel{
+  border-color:rgba(244,239,233,.14);
+  background:linear-gradient(155deg,rgba(31,32,32,.98),rgba(22,23,23,.98));
+  box-shadow:0 32px 82px rgba(0,0,0,.36),inset 0 1px rgba(255,255,255,.06);
+}
+.panelIntro h1,.formHeading h2,.selectorIntro h3{color:#f5f0ea}
+.panelIntro p{color:#b0aaa3}
+.stepTabs{
+  border-color:rgba(244,239,233,.115);
+  background:#151616;
+  box-shadow:inset 0 1px rgba(255,255,255,.025);
+}
+.stepTabs button{color:#aaa49d}
+.stepTabs button span{color:#77716b}
+.stepTabs button:hover{color:#e7e1db;background:rgba(255,255,255,.045)}
+.stepTabs .stepActive{
+  color:#f6ded4!important;
+  border-color:rgba(215,107,69,.38)!important;
+  background:linear-gradient(145deg,rgba(215,107,69,.18),rgba(215,107,69,.1))!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.06),0 6px 18px rgba(87,39,25,.12)!important;
+}
+.formScroll{scrollbar-color:#66605a transparent}
+.formScroll::-webkit-scrollbar-thumb{background:#66605a}
+.formCard{
+  border-color:rgba(244,239,233,.125);
+  background:linear-gradient(145deg,rgba(42,43,43,.88),rgba(31,32,32,.9));
+  box-shadow:0 10px 24px rgba(0,0,0,.12),inset 0 1px rgba(255,255,255,.045);
+}
+.formHeading p,.selectorIntro p,.helper{color:#a59f98}
+.formCard label{color:#b5afa8}
+.formCard .panelInput,.formCard .panelTextarea{
+  border-color:rgba(244,239,233,.12);
+  background:#171818;
+  color:#eee8e2;
+}
+.formCard .panelInput:hover,.formCard .panelTextarea:hover{
+  border-color:rgba(244,239,233,.19);
+  background:#141515;
+}
+.formCard .panelInput::placeholder,.formCard .panelTextarea::placeholder{color:#77716b}
+.uploadDrop,.uploadState{
+  border-color:rgba(215,107,69,.3);
+  background:rgba(18,19,19,.58);
+}
+.uploadDrop p{color:#e7e1db}
+.uploadDrop small,.quantityMeta{color:#969089}
+.angleGrid>button,.formatChoices button,.toggleRow,.styleGrid>button{
+  border-color:rgba(244,239,233,.12);
+  background:linear-gradient(145deg,rgba(29,30,30,.96),rgba(22,23,23,.96));
+}
+.angleGrid>button:hover,.styleGrid>button:hover{
+  background:linear-gradient(145deg,rgba(37,38,38,.98),rgba(27,28,28,.98));
+}
+.angleGrid>button>p{color:#aaa49d}
+.styleGrid>button>span:not(.styleInfo) b,.toggleRow>span b{color:#ddd7d0}
+.styleGrid>button>span:not(.styleInfo) small,.toggleRow>span small,.formatChoices button small,.quantityGrid small{color:#8f8983}
+.quantityGrid{
+  border-color:rgba(244,239,233,.1);
+  background:#181919;
+}
+.quantityGrid button{color:#b8b2ab}
+.generateDock{
+  border-color:rgba(244,239,233,.13);
+  background:linear-gradient(180deg,rgba(27,28,28,.98),rgba(22,23,23,.99));
+  box-shadow:0 -18px 38px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.025);
+}
+.generateDock>div{color:#9b958e}
+.canvasPanel{
+  border-color:rgba(244,239,233,.1);
+  background:#121313;
+  box-shadow:0 30px 80px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.025);
+}
+.canvasHeader{
+  border-color:rgba(244,239,233,.095);
+  background:linear-gradient(180deg,rgba(28,29,29,.68),rgba(21,22,22,.62));
+}
+.canvasHeader b{color:#eee9e3}
+.canvasHeader small{color:#969089}
+.canvasStage{
+  background:radial-gradient(circle at 50% 42%,rgba(116,63,44,.065),transparent 32%),#0d0e0e;
+}
+.previewEmpty,.generatingState{
+  border-color:rgba(215,107,69,.16);
+  background:radial-gradient(circle at 50% 8%,rgba(215,107,69,.065),transparent 34%),linear-gradient(145deg,rgba(25,26,26,.94),rgba(15,16,16,.97));
+}
+.resultsStrip,.contextRail,.aiCard{
+  border-color:rgba(244,239,233,.11);
+  background:linear-gradient(145deg,rgba(29,30,30,.94),rgba(22,23,23,.96));
+}
+.summaryGrid>span{
+  border-color:rgba(244,239,233,.085);
+  background:rgba(255,255,255,.026);
+}
+.summaryGrid small,.railLabel>small,.aiHead small{color:#938d87}
+.summaryGrid b,.railLabel>span,.aiHead b{color:#ded8d2}
