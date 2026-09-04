@@ -11,6 +11,7 @@ import ProductForm from "@/components/dashboard/ProductForm"
 import ResultPanel from "@/components/dashboard/ResultPanel"
 import Accordion from "@/components/ui/Accordion"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
+import EditorHeader from "@/components/dashboard/EditorHeader"
 import s from "@/components/dashboard/GeneratorWorkspace.module.css"
 
 const FORMAT_LABELS: Record<string, string> = {
@@ -92,6 +93,7 @@ export default function DashboardPage() {
   return (
     <div id="generator-root" className={s.generatorPage}>
       <div className={s.ambient} aria-hidden="true"><i /><i /></div>
+      <EditorHeader tool="images" />
 
       <section className={s.workspace}>
       {/* ===== LEFT PANEL ===== */}

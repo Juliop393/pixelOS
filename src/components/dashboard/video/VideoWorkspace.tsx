@@ -5,6 +5,7 @@ import { Sparkles, WandSparkles } from "lucide-react"
 import { useVideoGenerator } from "@/hooks/useVideoGenerator"
 import { supabase } from "@/lib/supabase"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
+import EditorHeader from "@/components/dashboard/EditorHeader"
 import VideoOptionGrid from "./VideoOptionGrid"
 import VideoPreview from "./VideoPreview"
 import VideoSourcePicker from "./VideoSourcePicker"
@@ -176,7 +177,9 @@ export default function VideoWorkspace() {
     // TODO: conectar aquí el endpoint productivo de unión de fragmentos.
   }
 
-  return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} className={s.page}><section className={s.workspace}>
+  return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} className={s.page}>
+    <EditorHeader tool="video" />
+    <section className={s.workspace}>
     <aside className={s.configPanel}>
       <header className={s.intro}><span>NUEVO VIDEO</span><h1>Dirige tu anuncio</h1><p>Construye una secuencia pensada para detener el scroll.</p></header>
       <nav className={s.stepTabs} aria-label="Configuración del video">
@@ -198,5 +201,6 @@ export default function VideoWorkspace() {
       <Sparkles /><span>PixelIA</span>
     </button>}
     <PixelAiDrawer open={pixelAiOpen} onOpenChange={setPixelAiOpen} focusMode />
-  </section></div>
+    </section>
+  </div>
 }

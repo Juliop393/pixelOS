@@ -310,6 +310,26 @@
 
 /* Image generator only: clearer graphite layers without changing the shared video shell. */
 @media (min-width: 768px) {
+  /* The two editors use a dedicated local header and the full application viewport. */
+  .shell:has(:global(#generator-root)),
+  .shell:has(:global(#video-workspace)) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 10px;
+  }
+
+  .shell:has(:global(#generator-root)) .sidebar,
+  .shell:has(:global(#generator-root)) .topbar,
+  .shell:has(:global(#video-workspace)) .sidebar,
+  .shell:has(:global(#video-workspace)) .topbar {
+    display: none;
+  }
+
+  .shell:has(:global(#generator-root)) .shellBody,
+  .shell:has(:global(#video-workspace)) .shellBody {
+    gap: 0;
+  }
+
   .desktopRoot:has(:global(#generator-root)) {
     background:
       radial-gradient(circle at 18% -10%, rgba(148, 73, 47, 0.09), transparent 30%),
