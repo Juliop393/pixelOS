@@ -530,3 +530,25 @@
 }
 .summaryGrid small,.railLabel>small,.aiHead small{color:#938d87}
 .summaryGrid b,.railLabel>span,.aiHead b{color:#ded8d2}
+
+/* Reusable PixelAI drawer. Video can opt into a full-height focus variant. */
+.drawerPanel{
+  position:fixed;
+  top:100px;
+  right:14px;
+  bottom:14px;
+  z-index:50;
+  width:430px;
+  max-width:calc(100vw - 28px);
+  display:flex;
+  flex-direction:column;
+  border-radius:24px;
+  overflow:hidden;
+  animation:pixelAiDrawerIn .3s cubic-bezier(.22,1,.36,1) both;
+}
+.drawerFocusPanel{top:14px}
+@keyframes pixelAiDrawerIn{
+  from{opacity:0;transform:translateX(28px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@media(prefers-reduced-motion:reduce){.drawerPanel{animation:none}}

@@ -5,19 +5,13 @@ import s from "./VideoWorkspace.module.css"
 export default function VideoPreview(props: {
   previewUrl: string | null; activeChunk: VideoChunk; activeIndex: number; totalDuration: number
   hookLabel?: string; angleLabel?: string; styleLabel?: string; strategyFeedback: string; onRecommend: () => void
-  onOpenPixelAi: () => void
 }) {
   const { previewUrl, activeChunk, activeIndex, totalDuration, hookLabel, angleLabel, styleLabel } = props
 
   return <>
     <header className={s.stageHeader}>
       <div><span className={s.liveDot} /><span><b>Vista previa</b><small>Fragmento {activeIndex + 1} · {activeChunk.purpose}</small></span></div>
-      <div className={s.stageActions}>
-        <button type="button" className={s.pixelAiButton} onClick={props.onOpenPixelAi} aria-controls="pixel-ai-panel">
-          <Sparkles />PixelIA
-        </button>
-        <div className={s.duration}><small>Duración estimada</small><b>{totalDuration}s</b></div>
-      </div>
+      <div className={s.duration}><small>Duración estimada</small><b>{totalDuration}s</b></div>
     </header>
     <div className={s.previewStage}>
       <div className={s.phoneFrame}>

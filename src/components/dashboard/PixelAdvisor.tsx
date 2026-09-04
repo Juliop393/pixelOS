@@ -53,6 +53,7 @@ interface PixelAdvisorProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   initialRequest?: PixelAiInitialRequest | null
+  focusMode?: boolean
 }
 
 const INITIAL_MESSAGE: Message = {
@@ -60,7 +61,7 @@ const INITIAL_MESSAGE: Message = {
   content: "Cuéntame qué vendes, a quién se lo vendes y qué quieres conseguir con el anuncio.",
 }
 
-export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideBubble, inline = false, open, onOpenChange, initialRequest }: PixelAdvisorProps) {
+export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideBubble, inline = false, open, onOpenChange, initialRequest, focusMode = false }: PixelAdvisorProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
   const isOpen = open ?? uncontrolledOpen
   const setIsOpen = (next: boolean) => {
@@ -287,7 +288,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         id="pixel-ai-panel"
         aria-label="Panel de Pixel IA"
         role="dialog"
-        className={inline ? styles.aiPanel : "fixed top-[100px] bottom-[14px] right-[14px] z-50 w-[430px] max-w-[calc(100vw-28px)] flex flex-col rounded-[24px] overflow-hidden transition-all duration-300"}
+        className={inline ? styles.aiPanel : `${styles.drawerPanel} ${focusMode ? styles.drawerFocusPanel : ""}`}
         style={{
           background: "linear-gradient(135deg, rgba(30,28,26,0.92) 0%, rgba(26,26,26,0.88) 100%)",
           backdropFilter: "blur(28px) saturate(150%)",

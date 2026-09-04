@@ -348,4 +348,18 @@
   .shell:has(:global(#generator-root)) .profileText small {
     color: #969089;
   }
+
+  /* Video focus mode: the editor and PixelAI become the only active surfaces. */
+  .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) .sidebar,
+  .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) .topbar {
+    display: none;
+  }
+
+  .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) .shellBody {
+    gap: 0;
+  }
 }

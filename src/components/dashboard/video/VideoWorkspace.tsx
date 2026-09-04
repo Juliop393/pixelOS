@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { WandSparkles } from "lucide-react"
+import { Sparkles, WandSparkles } from "lucide-react"
 import { useVideoGenerator } from "@/hooks/useVideoGenerator"
 import { supabase } from "@/lib/supabase"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
@@ -176,7 +176,7 @@ export default function VideoWorkspace() {
     // TODO: conectar aquí el endpoint productivo de unión de fragmentos.
   }
 
-  return <div className={s.page}><section className={s.workspace}>
+  return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} className={s.page}><section className={s.workspace}>
     <aside className={s.configPanel}>
       <header className={s.intro}><span>NUEVO VIDEO</span><h1>Dirige tu anuncio</h1><p>Construye una secuencia pensada para detener el scroll.</p></header>
       <nav className={s.stepTabs} aria-label="Configuración del video">
@@ -191,9 +191,12 @@ export default function VideoWorkspace() {
       <footer className={s.generateDock}><button disabled={!canGenerate} onClick={generateVideoChunk}><WandSparkles />Generar video</button><small>{generateFeedback || (canGenerate ? "Configuración completa · Lista para generar" : "Selecciona una fuente visual para continuar")}</small></footer>
     </aside>
     <main className={s.stagePanel}>
-      <VideoPreview previewUrl={source === "upload" ? previewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={chunks.length * 6} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} onOpenPixelAi={() => setPixelAiOpen(true)} />
+      <VideoPreview previewUrl={source === "upload" ? previewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={chunks.length * 6} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} />
       <VideoTimeline chunks={chunks} activeId={activeId} hookLabel={hookLabel} finalVideoUrl={finalVideoUrl} onSelect={setActiveId} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={mergeVideoChunks} />
     </main>
-    <PixelAiDrawer open={pixelAiOpen} onOpenChange={setPixelAiOpen} />
+    {!pixelAiOpen && <button type="button" className={s.pixelAiFloat} onClick={() => setPixelAiOpen(true)} aria-controls="pixel-ai-panel" aria-expanded="false">
+      <Sparkles /><span>PixelIA</span>
+    </button>}
+    <PixelAiDrawer open={pixelAiOpen} onOpenChange={setPixelAiOpen} focusMode />
   </section></div>
 }
