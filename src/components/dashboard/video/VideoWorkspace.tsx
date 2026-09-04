@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { WandSparkles } from "lucide-react"
 import { useVideoGenerator } from "@/hooks/useVideoGenerator"
 import { supabase } from "@/lib/supabase"
+import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
 import VideoOptionGrid from "./VideoOptionGrid"
 import VideoPreview from "./VideoPreview"
 import VideoSourcePicker from "./VideoSourcePicker"
@@ -64,6 +65,7 @@ export default function VideoWorkspace() {
   const [strategyFeedback, setStrategyFeedback] = useState("")
   const [generateFeedback, setGenerateFeedback] = useState("")
   const [finalVideoUrl] = useState<string | null>(null)
+  const [pixelAiOpen, setPixelAiOpen] = useState(false)
 
   const clearPreview = () => { setPreviewUrl(null); setFileName(""); setFileError(""); setGenerateFeedback("") }
   const handleUpload = async (file?: File) => {
@@ -189,8 +191,9 @@ export default function VideoWorkspace() {
       <footer className={s.generateDock}><button disabled={!canGenerate} onClick={generateVideoChunk}><WandSparkles />Generar video</button><small>{generateFeedback || (canGenerate ? "Configuración completa · Lista para generar" : "Selecciona una fuente visual para continuar")}</small></footer>
     </aside>
     <main className={s.stagePanel}>
-      <VideoPreview previewUrl={source === "upload" ? previewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={chunks.length * 6} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} />
+      <VideoPreview previewUrl={source === "upload" ? previewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={chunks.length * 6} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} onOpenPixelAi={() => setPixelAiOpen(true)} />
       <VideoTimeline chunks={chunks} activeId={activeId} hookLabel={hookLabel} finalVideoUrl={finalVideoUrl} onSelect={setActiveId} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={mergeVideoChunks} />
     </main>
+    <PixelAiDrawer open={pixelAiOpen} onOpenChange={setPixelAiOpen} />
   </section></div>
 }

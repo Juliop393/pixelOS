@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { Sparkles } from "lucide-react"
 import styles from "./GeneratorWorkspace.module.css"
 
-type Recommendation = {
+export type Recommendation = {
   angleId: string
   angleName: string
   reason: string
@@ -20,6 +20,11 @@ type ConvState = "collecting" | "confirming" | "recommending" | "completed"
 type Message = {
   role: "user" | "assistant"
   content: string
+}
+
+export type PixelAiInitialRequest = {
+  id: number
+  message: string
 }
 
 function detectRecommendationCount(message: string): 1 | 2 | 3 | null {
@@ -47,6 +52,7 @@ interface PixelAdvisorProps {
   inline?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  initialRequest?: PixelAiInitialRequest | null
 }
 
 const INITIAL_MESSAGE: Message = {
@@ -54,7 +60,7 @@ const INITIAL_MESSAGE: Message = {
   content: "Cuéntame qué vendes, a quién se lo vendes y qué quieres conseguir con el anuncio.",
 }
 
-export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideBubble, inline = false, open, onOpenChange }: PixelAdvisorProps) {
+export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideBubble, inline = false, open, onOpenChange, initialRequest }: PixelAdvisorProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
   const isOpen = open ?? uncontrolledOpen
   const setIsOpen = (next: boolean) => {
@@ -75,6 +81,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
   const [appliedDetails, setAppliedDetails] = useState<Recommendation | null>(null)
 
   const scrollRef = useRef<HTMLDivElement>(null)
+  const processedInitialRequest = useRef<number | null>(null)
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -177,6 +184,21 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
     await sendChatMessage(userMessage)
   }
 
+  useEffect(() => {
+    if (!isOpen || !accessToken || !initialRequest || isLoading) return
+    if (processedInitialRequest.current === initialRequest.id) return
+
+    const userMessage = initialRequest.message.trim()
+    if (!userMessage) return
+
+    processedInitialRequest.current = initialRequest.id
+    const detectedCount = detectRecommendationCount(userMessage)
+    if (detectedCount !== null) setRequestedRecommendationCount(detectedCount)
+    setMessages((prev) => [...prev, { role: "user", content: userMessage }])
+    setInput("")
+    void sendChatMessage(userMessage)
+  }, [accessToken, initialRequest, isLoading, isOpen])
+
   const handleConfirm = async () => {
     if (!accessToken) return
 
@@ -260,11 +282,12 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
       </button>
       )}
 
-      {/* Panel de conversación: inline en el generador, flotante en usos legacy */}
+      {/* Panel de conversación: inline para compatibilidad o drawer lateral reutilizable. */}
       {isOpen && <div
         id="pixel-ai-panel"
         aria-label="Panel de Pixel IA"
-        className={inline ? styles.aiPanel : "fixed bottom-6 right-6 z-50 w-[400px] h-[600px] max-h-[calc(100vh-48px)] flex flex-col rounded-[28px] overflow-hidden transition-all duration-300"}
+        role="dialog"
+        className={inline ? styles.aiPanel : "fixed top-[100px] bottom-[14px] right-[14px] z-50 w-[430px] max-w-[calc(100vw-28px)] flex flex-col rounded-[24px] overflow-hidden transition-all duration-300"}
         style={{
           background: "linear-gradient(135deg, rgba(30,28,26,0.92) 0%, rgba(26,26,26,0.88) 100%)",
           backdropFilter: "blur(28px) saturate(150%)",
@@ -452,7 +475,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                         </span>
                       )}
                     </div>
-                    <button
+                    {onApplyRecommendation && <button
                       onClick={() => handleApply(rec, idx)}
                       className={`w-full py-2 rounded-lg text-xs font-semibold transition-colors ${
                         appliedIndex === idx
@@ -461,11 +484,11 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                       }`}
                     >
                       {appliedIndex === idx ? "✓ Aplicado" : "Aplicar recomendación"}
-                    </button>
+                    </button>}
                   </div>
                 ))}
 
-                {appliedDetails && (
+                {onApplyRecommendation && appliedDetails && (
                   <div className="rounded-xl p-3 mt-2" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)" }}>
                     <p className="text-xs font-semibold text-emerald-400 mb-2">✓ Recomendación aplicada al generador</p>
                     <div className="text-xs text-[#F5F0E8] space-y-0.5">

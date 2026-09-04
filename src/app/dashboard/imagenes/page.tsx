@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Sparkles } from "lucide-react"
 import { useCreativeGenerator } from "@/hooks/useCreativeGenerator"
-import { supabase } from "@/lib/supabase"
 import { ANGLES } from "@/lib/angles-data"
 import AngleSelector from "@/components/dashboard/AngleSelector"
 import FormatSelector from "@/components/dashboard/FormatSelector"
@@ -11,7 +10,7 @@ import StyleSelector from "@/components/dashboard/StyleSelector"
 import ProductForm from "@/components/dashboard/ProductForm"
 import ResultPanel from "@/components/dashboard/ResultPanel"
 import Accordion from "@/components/ui/Accordion"
-import PixelAdvisor from "@/components/dashboard/PixelAdvisor"
+import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
 import s from "@/components/dashboard/GeneratorWorkspace.module.css"
 
 const FORMAT_LABELS: Record<string, string> = {
@@ -28,10 +27,7 @@ type Tab = "product" | "angle" | "design"
 
 export default function DashboardPage() {
   const g = useCreativeGenerator()
-  const generatorScrollRef = useRef<HTMLDivElement>(null)
-  const pixelAiSectionRef = useRef<HTMLElement>(null)
   const [activeTab, setActiveTab] = useState<Tab>("product")
-  const [advisorToken, setAdvisorToken] = useState<string | undefined>()
   const [highlightProduct, setHighlightProduct] = useState(false)
   const [showGuides, setShowGuides] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -39,30 +35,11 @@ export default function DashboardPage() {
   const [advisorOpen, setAdvisorOpen] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setAdvisorToken(session?.access_token)
-    })
-  }, [])
-
-  useEffect(() => {
     if (highlightProduct) {
       const timer = setTimeout(() => setHighlightProduct(false), 2000)
       return () => clearTimeout(timer)
     }
   }, [highlightProduct])
-
-  const scrollToPixelAi = () => {
-    const scrollContainer = generatorScrollRef.current
-    const pixelAiSection = pixelAiSectionRef.current
-    if (!scrollContainer || !pixelAiSection) return
-
-    const containerRect = scrollContainer.getBoundingClientRect()
-    const sectionRect = pixelAiSection.getBoundingClientRect()
-    scrollContainer.scrollTo({
-      top: scrollContainer.scrollTop + sectionRect.top - containerRect.top,
-      behavior: "smooth",
-    })
-  }
 
   const handleApplyRecommendation = (rec: {
     angleId: string; styleId: string; format: string; safeZoneMeta: boolean; productDescription?: string
@@ -113,7 +90,7 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div ref={generatorScrollRef} id="generator-root" className={s.generatorPage}>
+    <div id="generator-root" className={s.generatorPage}>
       <div className={s.ambient} aria-hidden="true"><i /><i /></div>
 
       <section className={s.workspace}>
@@ -267,8 +244,10 @@ export default function DashboardPage() {
             <button
               type="button"
               className={s.previewNavButton}
-              onClick={scrollToPixelAi}
-              aria-label="Ir a Pixel IA"
+              onClick={() => setAdvisorOpen(true)}
+              aria-label="Abrir Pixel IA"
+              aria-expanded={advisorOpen}
+              aria-controls="pixel-ai-panel"
               title="PixelAI"
             >
               <Sparkles size={14} strokeWidth={1.7} aria-hidden="true" />
@@ -336,22 +315,8 @@ export default function DashboardPage() {
       </section>
       </div>
 
-      <aside ref={pixelAiSectionRef} id="pixel-ai-section" className={`${s.aiCard} ${s.builderAiCard} ${advisorOpen ? s.aiCardActive : ""}`}>
-        <div className={s.aiHead}>
-          <span><Sparkles className="w-4 h-4" strokeWidth={1.5} /></span>
-          <div><b>Pixel IA</b><small>Asistente estratégico</small></div><i />
-        </div>
-        <p>Piensa la estrategia antes de generar y recomienda el mejor ángulo.</p>
-        <button onClick={() => setAdvisorOpen(true)} aria-expanded={advisorOpen} aria-controls="pixel-ai-panel">
-          {advisorOpen ? "Pixel IA abierta" : "Iniciar con Pixel IA"} <span>→</span>
-        </button>
-      </aside>
-
-      <PixelAdvisor
+      <PixelAiDrawer
         onApplyRecommendation={handleApplyRecommendation}
-        accessToken={advisorToken}
-        hideBubble
-        inline
         open={advisorOpen}
         onOpenChange={setAdvisorOpen}
       />

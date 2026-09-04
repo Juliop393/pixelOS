@@ -156,8 +156,10 @@
   font-size: 12px;
 }
 
-.pixelAiPrompt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pixelAiPrompt i { width: 38px; height: 38px; margin-left: auto; border-radius: 11px; display: grid; place-items: center; flex: 0 0 38px; color: #bc7458; background: rgba(215, 107, 69, .08); }
+.pixelAiPrompt input { min-width: 0; flex: 1; border: 0; outline: 0; color: #e8e1da; background: transparent; font: inherit; }
+.pixelAiPrompt input::placeholder { color: #77716b; }
+.pixelAiPrompt button { width: 38px; height: 38px; margin-left: auto; border: 1px solid rgba(215, 107, 69, .15); border-radius: 11px; display: grid; place-items: center; flex: 0 0 38px; color: #e58b6a; background: rgba(215, 107, 69, .1); cursor: pointer; transition: color .22s ease, background-color .22s ease, border-color .22s ease; }
+.pixelAiPrompt button:hover { color: #fff1e8; border-color: rgba(215, 107, 69, .32); background: rgba(215, 107, 69, .18); }
 .pixelAiPrompt svg { width: 16px; height: 16px; }
 
 @media (max-width: 1100px) {
@@ -178,5 +180,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .actionCard,
-  .actionLink svg { transition: none; }
+  .actionLink svg,
+  .pixelAiPrompt button { transition: none; }
 }

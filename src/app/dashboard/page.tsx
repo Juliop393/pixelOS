@@ -1,5 +1,10 @@
+"use client"
+
 import Link from "next/link"
+import { useRef, useState } from "react"
 import { ArrowUpRight, FolderOpen, Image as ImageIcon, Sparkles, Video } from "lucide-react"
+import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
+import type { PixelAiInitialRequest } from "@/components/dashboard/PixelAdvisor"
 import styles from "@/components/dashboard/DashboardHome.module.css"
 
 const primaryActions = [
@@ -27,6 +32,22 @@ const primaryActions = [
 ]
 
 export default function DashboardHomePage() {
+  const requestId = useRef(0)
+  const [pixelAiOpen, setPixelAiOpen] = useState(false)
+  const [pixelAiInput, setPixelAiInput] = useState("")
+  const [initialRequest, setInitialRequest] = useState<PixelAiInitialRequest | null>(null)
+
+  const openPixelAi = () => {
+    const message = pixelAiInput.trim()
+    setPixelAiOpen(true)
+
+    if (message) {
+      requestId.current += 1
+      setInitialRequest({ id: requestId.current, message })
+      setPixelAiInput("")
+    }
+  }
+
   return (
     <div className={styles.homePage}>
       <main className={styles.homeContent}>
@@ -55,12 +76,22 @@ export default function DashboardHomePage() {
             <h2 id="pixel-ai-home-title">¿Qué quieres crear?</h2>
             <p>Describe tu producto o tu idea. Pixel IA te ayudará a encontrar un punto de partida creativo.</p>
           </div>
-          <div className={styles.pixelAiPrompt} aria-label="Vista previa de Pixel IA">
-            <span>Cuéntame qué tienes en mente…</span>
-            <i aria-hidden="true"><Sparkles /></i>
-          </div>
+          <form className={styles.pixelAiPrompt} onSubmit={(event) => { event.preventDefault(); openPixelAi() }}>
+            <input
+              value={pixelAiInput}
+              onChange={(event) => setPixelAiInput(event.target.value)}
+              aria-label="Mensaje para Pixel IA"
+              placeholder="Cuéntame qué tienes en mente…"
+            />
+            <button type="submit" aria-label="Abrir Pixel IA" title="Abrir Pixel IA"><Sparkles /></button>
+          </form>
         </section>
       </main>
+      <PixelAiDrawer
+        open={pixelAiOpen}
+        onOpenChange={setPixelAiOpen}
+        initialRequest={initialRequest}
+      />
     </div>
   )
 }
