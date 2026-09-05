@@ -212,18 +212,29 @@
 }
 
 .homeBrand img {
-  width: 36px;
-  height: 36px;
-  flex: 0 0 36px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   border-radius: 50%;
   object-fit: contain;
   box-shadow: 0 7px 20px rgba(170, 69, 42, 0.18);
 }
 
 .homeBrand > span { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-.homeBrand b { color: #f4eee8; font-size: 15px; line-height: 1.1; font-weight: 690; letter-spacing: -.025em; }
+.homeBrand b { color: #f4eee8; font-size: 17px; line-height: 1.1; font-weight: 690; letter-spacing: -.03em; }
 .homeBrand strong { color: #ef7f59; font: inherit; }
 .homeBrand small { color: #817970; font-size: 10px; }
+
+.sectionDivider {
+  width: 1px;
+  height: 28px;
+  margin-inline: 4px 1px;
+  background: rgba(255, 242, 232, 0.1);
+}
+
+.currentSection { min-width: 0; }
+.currentSection b { color: #e8e0d8; font-size: 13px; font-weight: 620; }
+.currentSection small { color: #817970; font-size: 10px; }
 
 .accountArea {
   min-width: 0;
@@ -265,6 +276,24 @@
 
 .recharge { padding: 10px 5px; color: #e58968; font-size: 13px; text-decoration: none; transition: color 220ms ease; }
 .recharge:hover { color: #f1a184; }
+.settingsLink {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 242, 232, 0.085);
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #9b938c;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.018);
+  font-size: 11px;
+  font-weight: 590;
+  transition: color 220ms ease, border-color 220ms ease, background-color 220ms ease;
+}
+.settingsLink svg { width: 16px; height: 16px; color: #c57a60; }
+.settingsLink:hover { color: #e6dcd3; border-color: rgba(215, 107, 69, 0.28); background: rgba(215, 107, 69, 0.055); }
+.settingsActive { color: #f0d6cb; border-color: rgba(215, 107, 69, 0.32); background: rgba(215, 107, 69, 0.085); }
 .accountDivider { width: 1px; height: 26px; background: rgba(255, 242, 232, 0.09); }
 
 .profile {
@@ -318,8 +347,9 @@
 
 @media (max-width: 920px) {
   .accountArea { gap: 7px; }
-  .recharge, .accountDivider { display: none; }
+  .recharge, .accountDivider, .settingsLink span { display: none; }
   .credits { padding-inline: 10px; }
+  .settingsLink { width: 38px; padding: 0; justify-content: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -332,20 +362,26 @@
 
 /* Image generator only: clearer graphite layers without changing the shared video shell. */
 @media (min-width: 768px) {
-  /* Home keeps the compact account header but no longer needs global side navigation. */
-  .shell:has(:global(#dashboard-home)) {
+  /* General product pages share one clean topbar without legacy side navigation. */
+  .shell:has(:global(#dashboard-home)),
+  .shell:has(:global(#dashboard-assets)),
+  .shell:has(:global(#dashboard-settings)) {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .shell:has(:global(#dashboard-home)) .sidebar {
+  .shell:has(:global(#dashboard-home)) .sidebar,
+  .shell:has(:global(#dashboard-assets)) .sidebar,
+  .shell:has(:global(#dashboard-settings)) .sidebar {
     display: none;
   }
 
-  .shell:has(:global(#dashboard-home)) .topbar {
-    height: 64px;
-    flex-basis: 64px;
-    padding-inline: 15px 17px;
-    border-radius: 20px;
+  .shell:has(:global(#dashboard-home)) .topbar,
+  .shell:has(:global(#dashboard-assets)) .topbar,
+  .shell:has(:global(#dashboard-settings)) .topbar {
+    height: 78px;
+    flex-basis: 78px;
+    padding-inline: 17px 19px;
+    border-radius: 22px;
   }
 
   /* The two editors use a dedicated local header and the full application viewport. */

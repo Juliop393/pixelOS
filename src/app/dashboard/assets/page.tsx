@@ -59,7 +59,7 @@ export default function MisCreativosPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto h-full overflow-y-auto">
+    <div id="dashboard-assets" className="max-w-6xl mx-auto h-full overflow-y-auto">
       <div className="mb-10">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Mis Creativos</h1>
         <p className="text-[#9A9893]">Tus creativos generados con IA</p>
