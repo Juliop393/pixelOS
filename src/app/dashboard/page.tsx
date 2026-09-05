@@ -49,7 +49,7 @@ export default function DashboardHomePage() {
   }
 
   return (
-    <div className={styles.homePage}>
+    <div id="dashboard-home" className={styles.homePage}>
       <main className={styles.homeContent}>
         <header className={styles.intro}>
           <span>ESPACIO CREATIVO</span>

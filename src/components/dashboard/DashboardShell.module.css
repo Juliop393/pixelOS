@@ -203,6 +203,28 @@
 .sectionContext b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #f2e9e0; font-size: 14px; font-weight: 650; }
 .sectionContext small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #817970; font-size: 11px; }
 
+.homeBrand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f2e9e0;
+  text-decoration: none;
+}
+
+.homeBrand img {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 50%;
+  object-fit: contain;
+  box-shadow: 0 7px 20px rgba(170, 69, 42, 0.18);
+}
+
+.homeBrand > span { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.homeBrand b { color: #f4eee8; font-size: 15px; line-height: 1.1; font-weight: 690; letter-spacing: -.025em; }
+.homeBrand strong { color: #ef7f59; font: inherit; }
+.homeBrand small { color: #817970; font-size: 10px; }
+
 .accountArea {
   min-width: 0;
   margin-left: auto;
@@ -310,6 +332,22 @@
 
 /* Image generator only: clearer graphite layers without changing the shared video shell. */
 @media (min-width: 768px) {
+  /* Home keeps the compact account header but no longer needs global side navigation. */
+  .shell:has(:global(#dashboard-home)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shell:has(:global(#dashboard-home)) .sidebar {
+    display: none;
+  }
+
+  .shell:has(:global(#dashboard-home)) .topbar {
+    height: 64px;
+    flex-basis: 64px;
+    padding-inline: 15px 17px;
+    border-radius: 20px;
+  }
+
   /* The two editors use a dedicated local header and the full application viewport. */
   .shell:has(:global(#generator-root)),
   .shell:has(:global(#video-workspace)) {

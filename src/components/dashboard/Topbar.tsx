@@ -51,6 +51,7 @@ export default function Topbar() {
 
   const displayName = fullName || userEmail.split("@")[0] || "Usuario"
   const avatarLetter = (displayName[0] ?? "U").toUpperCase()
+  const isHome = pathname === "/dashboard"
   const activeSection = sectionDetails.find((section) =>
     section.path === "/dashboard" ? pathname === section.path : pathname.startsWith(section.path)
   ) ?? sectionDetails[sectionDetails.length - 1]
@@ -58,6 +59,15 @@ export default function Topbar() {
   return (
     <header className={styles.topbar}>
       <div className={styles.sectionContext}>
+        {isHome ? (
+          <Link href="/dashboard" className={styles.homeBrand} aria-label="PixelFM — Inicio">
+            <img src="/logo_PixelOS.png" width={36} height={36} alt="" />
+            <span>
+              <b>Pixel<strong>FM</strong></b>
+              <small>Tu espacio creativo</small>
+            </span>
+          </Link>
+        ) : (<>
         <i className={styles.contextMark} aria-hidden="true">
           <svg width={17} height={17} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M12 3v2m6.364.636-1.414 1.414M21 12h-2M5 12H3m4.05-4.95L5.636 5.636M9 18h6m-5 3h4m3-9a5 5 0 1 0-8.18 3.86c.74.62 1.18 1.52 1.18 2.49h4c0-.97.44-1.87 1.18-2.49A4.98 4.98 0 0 0 17 12Z" />
@@ -67,6 +77,7 @@ export default function Topbar() {
           <b>{activeSection.title}</b>
           <small>{activeSection.description}</small>
         </span>
+        </>)}
       </div>
 
       <div className={styles.accountArea}>
