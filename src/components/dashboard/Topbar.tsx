@@ -13,7 +13,6 @@ const sectionDetails = [
   { path: "/dashboard/campanas", title: "Identidad", description: "Marca y recursos visuales" },
   { path: "/dashboard/assets", title: "Mis Creativos", description: "Biblioteca de resultados" },
   { path: "/dashboard/configuracion", title: "Configuración", description: "Preferencias de la cuenta" },
-  { path: "/dashboard/perfil", title: "Perfil", description: "Información de tu cuenta" },
   { path: "/dashboard", title: "Inicio", description: "Tu espacio creativo" },
 ]
 
@@ -112,7 +111,11 @@ export default function Topbar() {
 
         <span className={styles.accountDivider} aria-hidden="true" />
 
-        <Link href="/dashboard/perfil" className={styles.profile} aria-label="Abrir perfil">
+        <Link
+          href="/dashboard/configuracion#cuenta"
+          className={styles.profile}
+          aria-label="Abrir configuración de cuenta"
+        >
           <i className={styles.avatar}>{avatarLetter}</i>
           <span className={styles.profileText}>
             <b>{displayName}</b>
