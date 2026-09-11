@@ -124,7 +124,7 @@ export default function ConfiguracionPage() {
   return (
     <div
       id="dashboard-settings"
-      className="mx-auto h-full max-w-6xl overflow-y-auto scroll-smooth px-1 pb-12"
+      className="mx-auto w-full max-w-6xl scroll-mt-6 px-1 pb-12"
     >
       <header className="mb-9 pt-1">
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D97757]">

@@ -366,7 +366,34 @@
   .shell:has(:global(#dashboard-home)),
   .shell:has(:global(#dashboard-assets)),
   .shell:has(:global(#dashboard-settings)) {
+    height: auto;
+    min-height: 100vh;
     grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .desktopRoot:has(:global(#dashboard-home)),
+  .desktopRoot:has(:global(#dashboard-assets)),
+  .desktopRoot:has(:global(#dashboard-settings)) {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .shell:has(:global(#dashboard-home)) .shellBody,
+  .shell:has(:global(#dashboard-assets)) .shellBody,
+  .shell:has(:global(#dashboard-settings)) .shellBody,
+  .shell:has(:global(#dashboard-home)) .content,
+  .shell:has(:global(#dashboard-assets)) .content,
+  .shell:has(:global(#dashboard-settings)) .content {
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .shell:has(:global(#dashboard-home)) .content,
+  .shell:has(:global(#dashboard-assets)) .content,
+  .shell:has(:global(#dashboard-settings)) .content {
+    flex: 0 0 auto;
   }
 
   .shell:has(:global(#dashboard-home)) .sidebar,
@@ -382,6 +409,8 @@
     flex-basis: 78px;
     padding-inline: 17px 19px;
     border-radius: 22px;
+    position: sticky;
+    top: 14px;
   }
 
   /* The two editors use a dedicated local header and the full application viewport. */
