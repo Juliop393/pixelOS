@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
+import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
 import styles from "./DashboardShell.module.css"
@@ -19,7 +20,7 @@ const sectionDetails = [
 export default function Topbar() {
   const router = useRouter()
   const pathname = usePathname()
-  const { credits } = useCredits()
+  const { credits, setCredits, setUserId } = useCredits()
   const [userEmail, setUserEmail] = useState("")
   const [fullName, setFullName] = useState("")
 
@@ -43,8 +44,21 @@ export default function Topbar() {
   }, [])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/login")
+    const { error } = await supabase.auth.signOut()
+
+    if (error) {
+      // Si la revocación remota falla, elimina al menos la sesión de este navegador.
+      const { error: localError } = await supabase.auth.signOut({ scope: "local" })
+
+      if (localError) {
+        toast.error("No pudimos cerrar la sesión. Inténtalo nuevamente.")
+        return
+      }
+    }
+
+    setCredits(0)
+    setUserId(null)
+    router.replace("/login")
     router.refresh()
   }
 

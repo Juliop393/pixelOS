@@ -33,15 +33,42 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [duplicateEmail, setDuplicateEmail] = useState(false)
   const [loading, setLoading] = useState(false)
   const [oauthLoading, setOauthLoading] = useState(false)
+  const [checkingSession, setCheckingSession] = useState(!isRegister)
   const passwordStrength = getPasswordStrength(password)
 
   useEffect(() => {
-    const oauthError = new URLSearchParams(window.location.search).get("oauth_error")
+    let active = true
 
-    if (oauthError === "callback") {
-      setError("No pudimos iniciar sesión con Google. Inténtalo nuevamente.")
+    const checkExistingSession = async () => {
+      const oauthError = new URLSearchParams(window.location.search).get("oauth_error")
+
+      if (oauthError === "callback") {
+        setError("No pudimos iniciar sesión con Google. Inténtalo nuevamente.")
+      }
+
+      if (isRegister) return
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!active) return
+
+      if (user) {
+        router.replace("/dashboard")
+        router.refresh()
+        return
+      }
+
+      setCheckingSession(false)
     }
-  }, [])
+
+    void checkExistingSession()
+
+    return () => {
+      active = false
+    }
+  }, [isRegister, router])
 
   const handleGoogleAuth = async () => {
     setError("")
@@ -120,6 +147,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (checkingSession) {
+    return (
+      <main className="min-h-screen bg-[#1E1C1A] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-[#D97757]/30 border-t-[#D97757] animate-spin" aria-label="Comprobando sesión" />
+      </main>
+    )
   }
 
   return (

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { createBrowserClient } from "@supabase/ssr"
+import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -11,27 +11,31 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { setCredits, setUserId } = useCredits()
 
   useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      setChecked(true)
-      return
-    }
+    let active = true
 
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
+    const redirectToLogin = () => {
+      if (!active) return
+      setCredits(0)
+      setUserId(null)
+      setChecked(false)
+      router.replace("/login")
+      router.refresh()
+    }
 
     const init = async () => {
       const {
-        data: { session },
-      } = await supabase.auth.getSession()
+        data: { user },
+        error,
+      } = await supabase.auth.getUser()
 
-      if (!session) {
-        router.push("/login")
+      if (!active) return
+
+      if (error || !user) {
+        redirectToLogin()
         return
       }
 
-      const uid = session.user.id
+      const uid = user.id
       setUserId(uid)
 
       // Buscamos el registro de créditos del usuario.
@@ -41,12 +45,26 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         .eq("user_id", uid)
         .maybeSingle()
 
-      setCredits(existing?.credits ?? 0)
+      if (!active) return
 
+      setCredits(existing?.credits ?? 0)
       setChecked(true)
     }
 
-    init()
+    void init()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || !session) {
+        redirectToLogin()
+      }
+    })
+
+    return () => {
+      active = false
+      subscription.unsubscribe()
+    }
   }, [router, setCredits, setUserId])
 
   if (!checked) {
