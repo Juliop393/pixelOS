@@ -188,32 +188,34 @@ export default function VideoWorkspace() {
     <section className={s.workspace}>
     <aside className={s.configPanel}>
       <header className={s.intro}><span>NUEVO VIDEO</span><h1>Dirige tu anuncio</h1><p>Construye una secuencia pensada para detener el scroll.</p></header>
-      <nav className={s.stepTabs} aria-label="Configuración del video">
-        {VIDEO_TABS.map((tab) => <button key={tab.id} className={activeTab === tab.id ? s.stepActive : ""} onClick={() => setActiveTab(tab.id)}><span>{tab.step}</span>{tab.label}</button>)}
-      </nav>
-      <div className={s.configScroll}>
-        {activeTab === "source" && <section className={s.card}><SectionTitle step="01" title="Fuente visual" description="Elige la imagen que dará vida al video." /><VideoSourcePicker source={source} previewUrl={previewUrl} fileName={fileName} fileError={fileError} onSourceChange={setSource} onUpload={handleUpload} onClear={clearPreview} /></section>}
-        {activeTab === "angle" && <section className={s.card}><SectionTitle step="02" title="Qué quieres comunicar" description="El beneficio, problema o idea principal del fragmento." /><VideoOptionGrid options={VIDEO_ANGLES} selected={angle} onSelect={setAngle} /></section>}
-        {activeTab === "hook" && <section className={s.card}><SectionTitle step="03" title="Cómo empieza" description="Lo que ocurre en los primeros segundos para captar atención." /><VideoOptionGrid options={VIDEO_HOOKS} selected={hook} onSelect={setHook} /></section>}
-        {activeTab === "style" && <section className={s.card}><SectionTitle step="04" title="Cómo se ve" description="Define cámara, ritmo y apariencia visual." /><VideoOptionGrid options={VIDEO_STYLES} selected={style} onSelect={setStyle} /></section>}
-        {activeTab === "direction" && <section className={s.card}>
-          <SectionTitle step="05" title="Dirección de escena" description="Describe libremente qué debe ocurrir en este fragmento." />
-          <div className={s.sceneDirectionField}>
-            <label htmlFor={`scene-direction-${activeChunk.id}`}>Qué sucede visualmente</label>
-            <textarea
-              id={`scene-direction-${activeChunk.id}`}
-              value={activeChunk.sceneDirection}
-              onChange={(event) => updateSceneDirection(event.target.value)}
-              maxLength={600}
-              rows={7}
-              placeholder="Ej. Una creadora muestra el producto y habla a cámara en una cocina luminosa. Travelling suave, energía natural y cierre con primer plano del empaque."
-            />
-            <div>
-              <span>Puedes incluir diálogo, locación, cámara, animación, ritmo o energía.</span>
-              <b>{activeChunk.sceneDirection.length}/600</b>
+      <div className={s.configBody}>
+        <nav className={s.stepTabs} aria-label="Configuración del video">
+          {VIDEO_TABS.map((tab) => <button type="button" key={tab.id} className={activeTab === tab.id ? s.stepActive : ""} aria-current={activeTab === tab.id ? "step" : undefined} onClick={() => setActiveTab(tab.id)}><span>{tab.step}</span>{tab.label}</button>)}
+        </nav>
+        <div className={s.configScroll}>
+          {activeTab === "source" && <section className={s.card}><SectionTitle step="01" title="Fuente visual" description="Elige la imagen que dará vida al video." /><VideoSourcePicker source={source} previewUrl={previewUrl} fileName={fileName} fileError={fileError} onSourceChange={setSource} onUpload={handleUpload} onClear={clearPreview} /></section>}
+          {activeTab === "angle" && <section className={s.card}><SectionTitle step="02" title="Qué quieres comunicar" description="El beneficio, problema o idea principal del fragmento." /><VideoOptionGrid options={VIDEO_ANGLES} selected={angle} onSelect={setAngle} /></section>}
+          {activeTab === "hook" && <section className={s.card}><SectionTitle step="03" title="Cómo empieza" description="Lo que ocurre en los primeros segundos para captar atención." /><VideoOptionGrid options={VIDEO_HOOKS} selected={hook} onSelect={setHook} /></section>}
+          {activeTab === "style" && <section className={s.card}><SectionTitle step="04" title="Cómo se ve" description="Define cámara, ritmo y apariencia visual." /><VideoOptionGrid options={VIDEO_STYLES} selected={style} onSelect={setStyle} /></section>}
+          {activeTab === "direction" && <section className={s.card}>
+            <SectionTitle step="05" title="Dirección de escena" description="Describe libremente qué debe ocurrir en este fragmento." />
+            <div className={s.sceneDirectionField}>
+              <label htmlFor={`scene-direction-${activeChunk.id}`}>Qué sucede visualmente</label>
+              <textarea
+                id={`scene-direction-${activeChunk.id}`}
+                value={activeChunk.sceneDirection}
+                onChange={(event) => updateSceneDirection(event.target.value)}
+                maxLength={600}
+                rows={7}
+                placeholder="Ej. Una creadora muestra el producto y habla a cámara en una cocina luminosa. Travelling suave, energía natural y cierre con primer plano del empaque."
+              />
+              <div>
+                <span>Puedes incluir diálogo, locación, cámara, animación, ritmo o energía.</span>
+                <b>{activeChunk.sceneDirection.length}/600</b>
+              </div>
             </div>
-          </div>
-        </section>}
+          </section>}
+        </div>
       </div>
       <footer className={s.generateDock}><button disabled={!canGenerate} onClick={generateVideoChunk}><WandSparkles />Generar video</button><small>{generateFeedback || (canGenerate ? "Configuración completa · Lista para generar" : "Selecciona una fuente visual para continuar")}</small></footer>
     </aside>
