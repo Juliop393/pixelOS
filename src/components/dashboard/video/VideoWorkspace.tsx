@@ -13,13 +13,14 @@ import VideoTimeline from "./VideoTimeline"
 import { CHUNK_PURPOSES, VIDEO_ANGLES, VIDEO_HOOKS, VIDEO_STYLES, type VideoChunk } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
-type VideoTab = "source" | "angle" | "hook" | "style"
+type VideoTab = "source" | "angle" | "hook" | "style" | "direction"
 
 const VIDEO_TABS: { id: VideoTab; step: string; label: string }[] = [
   { id: "source", step: "01", label: "Fuente visual" },
   { id: "angle", step: "02", label: "Qué quieres comunicar" },
   { id: "hook", step: "03", label: "Cómo empieza" },
   { id: "style", step: "04", label: "Cómo se ve" },
+  { id: "direction", step: "05", label: "Dirección de escena" },
 ]
 
 const VIDEO_ANGLE_API_MAP: Record<string, string> = {
@@ -61,7 +62,7 @@ export default function VideoWorkspace() {
   const [hook, setHook] = useState("result")
   const [style, setStyle] = useState("cinematic")
   const [activeTab, setActiveTab] = useState<VideoTab>("source")
-  const [chunks, setChunks] = useState<VideoChunk[]>([{ id: 1, purpose: CHUNK_PURPOSES[0], duration: 6, status: "pending" }])
+  const [chunks, setChunks] = useState<VideoChunk[]>([{ id: 1, purpose: CHUNK_PURPOSES[0], duration: 6, status: "pending", sceneDirection: "" }])
   const [activeId, setActiveId] = useState(1)
   const [strategyFeedback, setStrategyFeedback] = useState("")
   const [generateFeedback, setGenerateFeedback] = useState("")
@@ -104,12 +105,17 @@ export default function VideoWorkspace() {
       setUploading(false)
     }
   }
-  const addChunk = () => { if (chunks.length >= 5) return; const chunk: VideoChunk = { id: nextId.current++, purpose: CHUNK_PURPOSES[chunks.length], duration: 6, status: source === "upload" && previewUrl ? "configured" : "pending" }; setChunks([...chunks, chunk]); setActiveId(chunk.id) }
+  const addChunk = () => { if (chunks.length >= 5) return; const chunk: VideoChunk = { id: nextId.current++, purpose: CHUNK_PURPOSES[chunks.length], duration: 6, status: source === "upload" && previewUrl ? "configured" : "pending", sceneDirection: "" }; setChunks([...chunks, chunk]); setActiveId(chunk.id) }
   const removeChunk = (id: number) => { if (chunks.length === 1) return; const removedIndex = chunks.findIndex((chunk) => chunk.id === id); const next = chunks.filter((chunk) => chunk.id !== id); setChunks(next); if (activeId === id) setActiveId(next[Math.min(removedIndex, next.length - 1)].id) }
   const moveChunk = (index: number, direction: -1 | 1) => { const target = index + direction; if (target < 0 || target >= chunks.length) return; const next = [...chunks]; [next[index], next[target]] = [next[target], next[index]]; setChunks(next) }
 
   const activeChunk = chunks.find((chunk) => chunk.id === activeId) ?? chunks[0]
   const activeIndex = chunks.findIndex((chunk) => chunk.id === activeId)
+  const updateSceneDirection = (sceneDirection: string) => {
+    setChunks((current) => current.map((chunk) => (
+      chunk.id === activeId ? { ...chunk, sceneDirection } : chunk
+    )))
+  }
   const angleLabel = VIDEO_ANGLES.find((item) => item.id === angle)?.label
   const hookLabel = VIDEO_HOOKS.find((item) => item.id === hook)?.label
   const styleLabel = VIDEO_STYLES.find((item) => item.id === style)?.label
@@ -190,6 +196,24 @@ export default function VideoWorkspace() {
         {activeTab === "angle" && <section className={s.card}><SectionTitle step="02" title="Qué quieres comunicar" description="El beneficio, problema o idea principal del fragmento." /><VideoOptionGrid options={VIDEO_ANGLES} selected={angle} onSelect={setAngle} /></section>}
         {activeTab === "hook" && <section className={s.card}><SectionTitle step="03" title="Cómo empieza" description="Lo que ocurre en los primeros segundos para captar atención." /><VideoOptionGrid options={VIDEO_HOOKS} selected={hook} onSelect={setHook} /></section>}
         {activeTab === "style" && <section className={s.card}><SectionTitle step="04" title="Cómo se ve" description="Define cámara, ritmo y apariencia visual." /><VideoOptionGrid options={VIDEO_STYLES} selected={style} onSelect={setStyle} /></section>}
+        {activeTab === "direction" && <section className={s.card}>
+          <SectionTitle step="05" title="Dirección de escena" description="Describe libremente qué debe ocurrir en este fragmento." />
+          <div className={s.sceneDirectionField}>
+            <label htmlFor={`scene-direction-${activeChunk.id}`}>Qué sucede visualmente</label>
+            <textarea
+              id={`scene-direction-${activeChunk.id}`}
+              value={activeChunk.sceneDirection}
+              onChange={(event) => updateSceneDirection(event.target.value)}
+              maxLength={600}
+              rows={7}
+              placeholder="Ej. Una creadora muestra el producto y habla a cámara en una cocina luminosa. Travelling suave, energía natural y cierre con primer plano del empaque."
+            />
+            <div>
+              <span>Puedes incluir diálogo, locación, cámara, animación, ritmo o energía.</span>
+              <b>{activeChunk.sceneDirection.length}/600</b>
+            </div>
+          </div>
+        </section>}
       </div>
       <footer className={s.generateDock}><button disabled={!canGenerate} onClick={generateVideoChunk}><WandSparkles />Generar video</button><small>{generateFeedback || (canGenerate ? "Configuración completa · Lista para generar" : "Selecciona una fuente visual para continuar")}</small></footer>
     </aside>
