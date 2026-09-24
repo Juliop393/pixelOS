@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Sparkles, WandSparkles } from "lucide-react"
+import { ArrowLeft, Sparkles, WandSparkles } from "lucide-react"
 import { useVideoGenerator } from "@/hooks/useVideoGenerator"
 import { supabase } from "@/lib/supabase"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
@@ -9,11 +9,13 @@ import EditorHeader from "@/components/dashboard/EditorHeader"
 import VideoOptionGrid from "./VideoOptionGrid"
 import VideoPreview from "./VideoPreview"
 import VideoSourcePicker from "./VideoSourcePicker"
+import VideoStoryboard from "./VideoStoryboard"
 import VideoTimeline from "./VideoTimeline"
 import { CHUNK_PURPOSES, VIDEO_ANGLES, VIDEO_HOOKS, VIDEO_STYLES, type VideoChunk } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
 type VideoTab = "source" | "angle" | "hook" | "style" | "direction"
+type VideoWorkspaceMode = "storyboard" | "advanced"
 
 const VIDEO_TABS: { id: VideoTab; step: string; label: string }[] = [
   { id: "source", step: "01", label: "Fuente visual" },
@@ -62,6 +64,7 @@ export default function VideoWorkspace() {
   const [hook, setHook] = useState("result")
   const [style, setStyle] = useState("cinematic")
   const [activeTab, setActiveTab] = useState<VideoTab>("source")
+  const [workspaceMode, setWorkspaceMode] = useState<VideoWorkspaceMode>("storyboard")
   const [chunks, setChunks] = useState<VideoChunk[]>([{ id: 1, purpose: CHUNK_PURPOSES[0], duration: 6, status: "pending", sceneDirection: "" }])
   const [activeId, setActiveId] = useState(1)
   const [strategyFeedback, setStrategyFeedback] = useState("")
@@ -186,8 +189,19 @@ export default function VideoWorkspace() {
   return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} className={s.page}>
     <EditorHeader tool="video" />
     <section className={s.workspace}>
+    {workspaceMode === "storyboard" ? <VideoStoryboard
+      chunks={chunks}
+      angleLabel={angleLabel}
+      hookLabel={hookLabel}
+      styleLabel={styleLabel}
+      sourceReady={Boolean(source === "upload" && previewUrl?.startsWith("https://"))}
+      canGenerate={canGenerate}
+      generateFeedback={generateFeedback}
+      onAdjust={() => setWorkspaceMode("advanced")}
+      onGenerate={generateVideoChunk}
+    /> : <>
     <aside className={s.configPanel}>
-      <header className={s.intro}><span>NUEVO VIDEO</span><h1>Dirige tu anuncio</h1><p>Construye una secuencia pensada para detener el scroll.</p></header>
+      <header className={s.intro}><button type="button" className={s.advancedBack} onClick={() => setWorkspaceMode("storyboard")}><ArrowLeft />Volver al storyboard</button><span>AJUSTAR ESCENAS</span><h1>Dirige tu anuncio</h1><p>Refina la estrategia global y la dirección de la escena activa.</p></header>
       <div className={s.configBody}>
         <nav className={s.stepTabs} aria-label="Configuración del video">
           {VIDEO_TABS.map((tab) => <button type="button" key={tab.id} className={activeTab === tab.id ? s.stepActive : ""} aria-current={activeTab === tab.id ? "step" : undefined} onClick={() => setActiveTab(tab.id)}><span>{tab.step}</span>{tab.label}</button>)}
@@ -223,6 +237,7 @@ export default function VideoWorkspace() {
       <VideoPreview previewUrl={source === "upload" ? previewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={chunks.length * 6} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} />
       <VideoTimeline chunks={chunks} activeId={activeId} hookLabel={hookLabel} finalVideoUrl={finalVideoUrl} onSelect={setActiveId} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={mergeVideoChunks} />
     </main>
+    </>}
     {!pixelAiOpen && <button type="button" className={s.pixelAiFloat} onClick={() => setPixelAiOpen(true)} aria-controls="pixel-ai-panel" aria-expanded="false">
       <Sparkles /><span>PixelIA</span>
     </button>}
