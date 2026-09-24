@@ -1,6 +1,6 @@
 "use client"
 
-import { Clapperboard, Clock3, SlidersHorizontal, WandSparkles } from "lucide-react"
+import { ArrowLeft, ArrowRight, Clapperboard, Clock3, PencilLine, Plus, SlidersHorizontal, Trash2, WandSparkles } from "lucide-react"
 import type { VideoChunk } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
@@ -29,8 +29,14 @@ type VideoStoryboardProps = {
   sourceReady: boolean
   canGenerate: boolean
   generateFeedback: string
+  activeId: number
   onAdjust: () => void
   onGenerate: () => void
+  onSelect: (id: number) => void
+  onEdit: (id: number) => void
+  onAdd: () => void
+  onRemove: (id: number) => void
+  onMove: (index: number, direction: -1 | 1) => void
 }
 
 export default function VideoStoryboard({
@@ -41,8 +47,14 @@ export default function VideoStoryboard({
   sourceReady,
   canGenerate,
   generateFeedback,
+  activeId,
   onAdjust,
   onGenerate,
+  onSelect,
+  onEdit,
+  onAdd,
+  onRemove,
+  onMove,
 }: VideoStoryboardProps) {
   const totalDuration = chunks.reduce((total, chunk) => total + chunk.duration, 0)
 
@@ -83,12 +95,25 @@ export default function VideoStoryboard({
           <p><Clapperboard />{chunks.length} {chunks.length === 1 ? "escena" : "escenas"} · {totalDuration} segundos</p>
         </header>
         <div className={s.storyboardTrack}>
-          {chunks.map((chunk, index) => <article key={chunk.id} className={s.storyboardScene} data-status={chunk.status}>
-            <div className={s.storyboardSceneMeta}><span>{String(index + 1).padStart(2, "0")}</span><b>{chunk.duration}s</b></div>
-            <h3>{chunk.purpose}</h3>
-            <p>{chunk.sceneDirection.trim() || sceneFallback(chunk.purpose, hookLabel, angleLabel)}</p>
-            <footer><i />{STATUS_LABELS[chunk.status]}</footer>
+          {chunks.map((chunk, index) => <article key={chunk.id} className={`${s.storyboardScene} ${activeId === chunk.id ? s.storyboardSceneActive : ""}`} data-status={chunk.status}>
+            <button type="button" className={s.storyboardSceneSelect} aria-pressed={activeId === chunk.id} onClick={() => onSelect(chunk.id)}>
+              <div className={s.storyboardSceneMeta}><span>{String(index + 1).padStart(2, "0")}</span><b>{chunk.duration}s</b></div>
+              <h3>{chunk.purpose}</h3>
+              <p>{chunk.sceneDirection.trim() || sceneFallback(chunk.purpose, hookLabel, angleLabel)}</p>
+              <footer><i />{STATUS_LABELS[chunk.status]}</footer>
+            </button>
+            <div className={s.storyboardSceneActions}>
+              <button type="button" className={s.storyboardEditScene} onClick={() => onEdit(chunk.id)}><PencilLine />Editar</button>
+              <span>
+                <button type="button" className={s.storyboardMovePrevious} disabled={index === 0} onClick={() => onMove(index, -1)} aria-label="Mover escena hacia el inicio"><ArrowLeft /></button>
+                <button type="button" className={s.storyboardMoveNext} disabled={index === chunks.length - 1} onClick={() => onMove(index, 1)} aria-label="Mover escena hacia el final"><ArrowRight /></button>
+                <button type="button" disabled={chunks.length === 1} onClick={() => onRemove(chunk.id)} aria-label="Eliminar escena"><Trash2 /></button>
+              </span>
+            </div>
           </article>)}
+          <button type="button" className={s.storyboardAddScene} disabled={chunks.length >= 5} onClick={onAdd}>
+            <i><Plus /></i><b>+ Añadir escena</b><small>{chunks.length >= 5 ? "Máximo de 5 escenas alcanzado" : "Amplía la secuencia en 6 segundos"}</small>
+          </button>
         </div>
       </section>
 

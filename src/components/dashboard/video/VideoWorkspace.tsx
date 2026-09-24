@@ -186,7 +186,13 @@ export default function VideoWorkspace() {
     // TODO: conectar aquí el endpoint productivo de unión de fragmentos.
   }
 
-  return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} className={s.page}>
+  const editChunk = (id: number) => {
+    setActiveId(id)
+    setActiveTab("direction")
+    setWorkspaceMode("advanced")
+  }
+
+  return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} data-workspace-mode={workspaceMode} className={s.page}>
     <EditorHeader tool="video" />
     <section className={s.workspace}>
     {workspaceMode === "storyboard" ? <VideoStoryboard
@@ -197,8 +203,14 @@ export default function VideoWorkspace() {
       sourceReady={Boolean(source === "upload" && previewUrl?.startsWith("https://"))}
       canGenerate={canGenerate}
       generateFeedback={generateFeedback}
+      activeId={activeId}
       onAdjust={() => setWorkspaceMode("advanced")}
       onGenerate={generateVideoChunk}
+      onSelect={setActiveId}
+      onEdit={editChunk}
+      onAdd={addChunk}
+      onRemove={removeChunk}
+      onMove={moveChunk}
     /> : <>
     <aside className={s.configPanel}>
       <header className={s.intro}><button type="button" className={s.advancedBack} onClick={() => setWorkspaceMode("storyboard")}><ArrowLeft />Volver al storyboard</button><span>AJUSTAR ESCENAS</span><h1>Dirige tu anuncio</h1><p>Refina la estrategia global y la dirección de la escena activa.</p></header>

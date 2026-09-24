@@ -485,4 +485,27 @@
   .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) .shellBody {
     gap: 0;
   }
+
+  /* Storyboard mode grows with its scenes and delegates scrolling to the document. */
+  .desktopRoot:has(:global(#video-workspace[data-workspace-mode="storyboard"])) {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .shell:has(:global(#video-workspace[data-workspace-mode="storyboard"])) {
+    height: auto;
+    min-height: 100vh;
+    align-items: start;
+  }
+
+  .shell:has(:global(#video-workspace[data-workspace-mode="storyboard"])) .shellBody,
+  .shell:has(:global(#video-workspace[data-workspace-mode="storyboard"])) .content {
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .shell:has(:global(#video-workspace[data-workspace-mode="storyboard"])) .content {
+    flex: 0 0 auto;
+  }
 }
