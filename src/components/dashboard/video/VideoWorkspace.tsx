@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { ArrowLeft, Sparkles, WandSparkles } from "lucide-react"
+import { ArrowLeft, ChevronDown, Compass, Palette, Sparkles, WandSparkles, Zap } from "lucide-react"
 import { useVideoGenerator } from "@/hooks/useVideoGenerator"
 import { supabase } from "@/lib/supabase"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
@@ -222,7 +222,13 @@ export default function VideoWorkspace() {
   }
 
   return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} data-workspace-mode={workspaceMode} className={s.page}>
-    <EditorHeader tool="video" />
+    <EditorHeader tool="video" action={<button
+      type="button"
+      className={`${s.pixelAiHeaderButton} ${pixelAiOpen ? s.pixelAiHeaderButtonActive : ""}`}
+      onClick={() => setPixelAiOpen((open) => !open)}
+      aria-controls="pixel-ai-panel"
+      aria-expanded={pixelAiOpen}
+    ><Sparkles /><span>PixelIA</span><i>{pixelAiOpen ? "Abierto" : "Asistente creativo"}</i></button>} />
     <section className={s.workspace}>
     {workspaceMode === "storyboard" ? <VideoStoryboard
       chunks={chunks}
@@ -244,11 +250,11 @@ export default function VideoWorkspace() {
     <aside className={s.configPanel}>
       <header className={s.intro}><button type="button" className={s.advancedBack} onClick={() => setWorkspaceMode("storyboard")}><ArrowLeft />Volver al storyboard</button><span>AJUSTAR ESCENAS</span><h1>Dirige tu anuncio</h1><p>Define qué vemos, qué ocurre y cómo se ejecuta cada escena.</p></header>
       <section className={s.globalStrategyEditor} aria-label="Estrategia global del anuncio">
-        <header><div><span>GLOBAL</span><b>Estrategia del anuncio</b></div><small>Se aplica a todas las escenas</small></header>
+        <header><div><span>GLOBAL</span><b>Estrategia del anuncio</b></div><small>Decisiones creativas que se aplican a todas las escenas</small></header>
         <div>
-          <label>Hipótesis / ángulo<select value={angle} onChange={(event) => setAngle(event.target.value)}>{VIDEO_ANGLES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-          <label>Hook principal<select value={hook} onChange={(event) => setHook(event.target.value)}>{VIDEO_HOOKS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-          <label>Estilo general<select value={style} onChange={(event) => setStyle(event.target.value)}>{VIDEO_STYLES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+          <label><span className={s.strategyControlHeader}><i><Compass /></i>Hipótesis / ángulo</span><span className={s.strategySelectWrap}><select value={angle} onChange={(event) => setAngle(event.target.value)}>{VIDEO_ANGLES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><ChevronDown /></span></label>
+          <label><span className={s.strategyControlHeader}><i><Zap /></i>Hook principal</span><span className={s.strategySelectWrap}><select value={hook} onChange={(event) => setHook(event.target.value)}>{VIDEO_HOOKS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><ChevronDown /></span></label>
+          <label><span className={s.strategyControlHeader}><i><Palette /></i>Estilo general</span><span className={s.strategySelectWrap}><select value={style} onChange={(event) => setStyle(event.target.value)}>{VIDEO_STYLES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><ChevronDown /></span></label>
         </div>
       </section>
       <div className={s.configBody}>
@@ -283,12 +289,9 @@ export default function VideoWorkspace() {
     </aside>
     <main className={s.stagePanel}>
       <VideoPreview previewUrl={activeSource === "upload" ? activePreviewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={chunks.length * 6} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} />
-      <VideoTimeline chunks={chunks} activeId={activeId} hookLabel={hookLabel} finalVideoUrl={finalVideoUrl} onSelect={selectChunk} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={mergeVideoChunks} />
+      <VideoTimeline chunks={chunks} activeId={activeId} hookLabel={hookLabel} styleLabel={styleLabel} finalVideoUrl={finalVideoUrl} onSelect={selectChunk} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={mergeVideoChunks} />
     </main>
     </>}
-    {!pixelAiOpen && <button type="button" className={s.pixelAiFloat} onClick={() => setPixelAiOpen(true)} aria-controls="pixel-ai-panel" aria-expanded="false">
-      <Sparkles /><span>PixelIA</span>
-    </button>}
     <PixelAiDrawer open={pixelAiOpen} onOpenChange={setPixelAiOpen} focusMode />
     </section>
   </div>

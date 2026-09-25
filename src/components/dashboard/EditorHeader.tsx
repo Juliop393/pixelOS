@@ -1,8 +1,9 @@
 import Link from "next/link"
+import type { ReactNode } from "react"
 import { ArrowLeft, Image as ImageIcon, Video } from "lucide-react"
 import styles from "./EditorHeader.module.css"
 
-export default function EditorHeader({ tool }: { tool: "images" | "video" }) {
+export default function EditorHeader({ tool, action }: { tool: "images" | "video"; action?: ReactNode }) {
   const isVideo = tool === "video"
   const ToolIcon = isVideo ? Video : ImageIcon
   const title = isVideo ? "Video" : "Imágenes"
@@ -18,6 +19,7 @@ export default function EditorHeader({ tool }: { tool: "images" | "video" }) {
         <ToolIcon aria-hidden="true" />
         <span>{title}</span>
       </div>
+      {action && <div className={styles.actionSlot}>{action}</div>}
     </nav>
   )
 }

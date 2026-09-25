@@ -60,6 +60,14 @@
 
 .toolName svg { width: 15px; height: 15px; color: #ef9472; }
 
+.actionSlot {
+  min-width: 0;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .backButton { transition: none; }
 }
