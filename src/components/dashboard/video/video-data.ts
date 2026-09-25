@@ -1,6 +1,23 @@
 export type VideoOption = { id: string; label: string; description: string; icon: string; swatch?: string }
 export type VideoChunkStatus = "pending" | "configured" | "generating" | "generated" | "error"
-export type VideoChunk = { id: number; purpose: string; duration: 6; status: VideoChunkStatus; sceneDirection: string; videoUrl?: string }
+export type VideoReferenceSource = "library" | "upload"
+export type VideoChunk = {
+  id: number
+  purpose: string
+  duration: 6
+  status: VideoChunkStatus
+  referenceSource: VideoReferenceSource
+  referenceImageUrl?: string
+  referenceFileName: string
+  referenceDescription: string
+  action: string
+  camera: string
+  dialogue: string
+  sceneStyle: string
+  /** Compatibilidad con escenas creadas antes del nuevo modelo. Se sincroniza con `action`. */
+  sceneDirection: string
+  videoUrl?: string
+}
 
 export const VIDEO_ANGLES: VideoOption[] = [
   { id: "problem", label: "Problema → Solución", description: "Presenta la tensión y resuélvela.", icon: "🧩", swatch: "linear-gradient(145deg,#d77a59,#642f25)" },

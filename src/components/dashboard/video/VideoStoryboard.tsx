@@ -99,7 +99,7 @@ export default function VideoStoryboard({
             <button type="button" className={s.storyboardSceneSelect} aria-pressed={activeId === chunk.id} onClick={() => onSelect(chunk.id)}>
               <div className={s.storyboardSceneMeta}><span>{String(index + 1).padStart(2, "0")}</span><b>{chunk.duration}s</b></div>
               <h3>{chunk.purpose}</h3>
-              <p>{chunk.sceneDirection.trim() || sceneFallback(chunk.purpose, hookLabel, angleLabel)}</p>
+              <p>{chunk.action?.trim() || chunk.sceneDirection.trim() || sceneFallback(chunk.purpose, hookLabel, angleLabel)}</p>
               <footer><i />{STATUS_LABELS[chunk.status]}</footer>
             </button>
             <div className={s.storyboardSceneActions}>
@@ -119,7 +119,7 @@ export default function VideoStoryboard({
 
       <footer className={s.storyboardLegend}>
         <span>Global: hipótesis, hook, CTA, estilo y formato.</span>
-        <span>Por escena: referencia, acción, encuadre, diálogo y dirección.</span>
+        <span>Por escena: referencia, acción, cámara, diálogo y estilo local.</span>
       </footer>
     </div>
   </main>
