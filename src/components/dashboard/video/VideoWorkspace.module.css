@@ -244,3 +244,29 @@
 .storyboardAddScene>i{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:rgba(225,112,76,.1);color:#ef9472;box-shadow:inset 0 0 0 1px rgba(225,112,76,.19)}.storyboardAddScene svg{width:19px}.storyboardAddScene b{font-size:13px}.storyboardAddScene small{max-width:150px;color:#7f756e;font-size:9px;line-height:1.45}
 @media(max-width:620px){.storyboardSceneSelect{min-height:170px}.storyboardAddScene{min-height:219px}.storyboardMovePrevious svg,.storyboardMoveNext svg{transform:rotate(90deg)}}
 @media(prefers-reduced-motion:reduce){.storyboardSceneActions button,.storyboardAddScene{transition:none}}
+
+/* Laptop/desktop balance: wider editing canvas and document-level scrolling in both modes. */
+.page[data-workspace-mode="advanced"]{height:auto;min-height:100%;overflow:visible}
+.page[data-workspace-mode="advanced"] .workspace{height:auto;min-height:calc(100dvh - 20px);flex:0 0 auto;align-items:start}
+.page[data-workspace-mode="advanced"] .configPanel,.page[data-workspace-mode="advanced"] .stagePanel{height:auto;min-height:820px}
+.page[data-workspace-mode="advanced"] .configPanel{position:relative;top:auto;overflow:visible}
+.page[data-workspace-mode="advanced"] .configBody{flex:0 0 auto;min-height:0}
+.page[data-workspace-mode="advanced"] .configScroll{overflow:visible;overscroll-behavior:auto}
+.page[data-workspace-mode="advanced"] .stagePanel{overflow:hidden}
+.workspace{grid-template-columns:660px minmax(0,1fr);gap:20px}
+.configBody{grid-template-columns:190px minmax(0,1fr)}
+.configScroll{padding:24px}.configScroll>.card{padding:26px}.cardTitle{margin-bottom:22px}
+.optionGrid{gap:12px}.optionGrid>button,.optionGrid>button.styleOption{min-height:88px;padding:12px}
+.sourceTabs{gap:12px}.sourceTabs button{height:94px;padding:14px}.libraryEmpty,.uploadBox{min-height:158px}
+.sceneDirectionField textarea{min-height:250px}
+.previewStage{grid-template-columns:minmax(300px,390px) minmax(220px,260px);gap:30px;padding-inline:28px}
+.timeline{padding-inline:24px}
+@media(max-width:1680px){.workspace{grid-template-columns:630px minmax(0,1fr)}.configBody{grid-template-columns:184px minmax(0,1fr)}}
+@media(max-width:1540px){.workspace{grid-template-columns:610px minmax(0,1fr)}.configBody{grid-template-columns:178px minmax(0,1fr)}.configScroll{padding:22px}.configScroll>.card{padding:24px}}
+@media(max-width:1450px){.workspace{grid-template-columns:590px minmax(0,1fr)}.configBody{grid-template-columns:172px minmax(0,1fr)}.previewStage{grid-template-columns:minmax(280px,350px) minmax(200px,230px);gap:24px;padding-inline:24px}}
+@media(max-width:1380px){.workspace{grid-template-columns:570px minmax(0,1fr)}.configBody{grid-template-columns:166px minmax(0,1fr)}.stepTabs{padding-inline:11px}.stepTabs button{padding-inline:11px}.configScroll{padding:20px}.configScroll>.card{padding:22px}.optionGrid{gap:10px}.optionGrid>button,.optionGrid>button.styleOption{min-height:84px;padding:10px}.sourceTabs button{height:88px;padding:11px}.libraryEmpty,.uploadBox{min-height:145px}}
+@media(max-width:1260px){.workspace{grid-template-columns:530px minmax(0,1fr)}.configBody{grid-template-columns:152px minmax(0,1fr)}.stepTabs{padding-inline:9px}.stepTabs button{padding-inline:9px;font-size:11px}.configScroll{padding:16px}.configScroll>.card{padding:19px}.previewStage{grid-template-columns:minmax(260px,320px);padding-inline:20px}.directionCard{display:none}}
+@media(max-width:1180px){.workspace{grid-template-columns:500px minmax(0,1fr)}.configBody{grid-template-columns:148px minmax(0,1fr)}.optionGrid{grid-template-columns:1fr}.optionGrid>button,.optionGrid>button.styleOption{min-height:76px}.sourceTabs{grid-template-columns:1fr}.sourceTabs button{height:76px}.page[data-workspace-mode="advanced"] .configPanel,.page[data-workspace-mode="advanced"] .stagePanel{min-height:860px}}
+@media(max-width:1040px){.workspace{grid-template-columns:460px minmax(0,1fr)}.configBody{grid-template-columns:138px minmax(0,1fr)}.configScroll{padding:13px}.configScroll>.card{padding:17px}.stageHeader{padding-inline:18px}.timeline{padding-inline:18px}}
+@media(max-width:920px){.page[data-workspace-mode="advanced"] .workspace{display:flex;min-height:0}.page[data-workspace-mode="advanced"] .configPanel{width:100%;min-height:0}.page[data-workspace-mode="advanced"] .stagePanel{width:100%;min-height:820px}.configBody{grid-template-columns:170px minmax(0,1fr)}.configScroll{padding:18px}.optionGrid{grid-template-columns:1fr 1fr}.sourceTabs{grid-template-columns:1fr 1fr}}
+@media(max-width:680px){.configBody{grid-template-columns:132px minmax(0,1fr)}.configScroll{padding:10px}.configScroll>.card{padding:15px}.optionGrid,.sourceTabs{grid-template-columns:1fr}.stepTabs{padding-inline:7px}.stepTabs button{font-size:10px}.storyboardHeroCopy h1{font-size:clamp(34px,10vw,42px)}}
