@@ -16,7 +16,7 @@ export default function VideoPreview(props: {
     <div className={s.previewStage}>
       <div className={s.phoneFrame}>
         {activeChunk.videoUrl ? <video src={activeChunk.videoUrl} controls playsInline /> : previewUrl ? <img src={previewUrl} alt="Preview del fragmento activo" /> : <div className={s.previewEmpty}><Film /><p>Selecciona una imagen para preparar este fragmento.</p></div>}
-        {!activeChunk.videoUrl && <div className={s.previewOverlay}><span>FRAGMENTO {activeIndex + 1}</span><b>{activeChunk.purpose}</b><small>6 segundos · {styleLabel}</small></div>}
+        {!activeChunk.videoUrl && <div className={s.previewOverlay}><span>FRAGMENTO {activeIndex + 1}</span><b>{activeChunk.purpose}</b><small>{activeChunk.duration} segundos · {activeChunk.sceneStyle.trim() || styleLabel}</small></div>}
       </div>
       <aside className={s.directionCard}>
         <span><Sparkles />RESUMEN CREATIVO</span>

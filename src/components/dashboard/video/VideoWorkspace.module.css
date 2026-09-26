@@ -336,6 +336,20 @@
 .strategySelectWrap:focus-within { background: var(--pf-input); box-shadow: inset 0 0 0 1px var(--pf-action), var(--pf-focus); }
 .strategySelectWrap select { color: var(--pf-primary); }
 .globalStrategyEditor option { background: var(--pf-card); color: var(--pf-primary); }
+.strategySelectWrap input { width:100%;height:100%;min-width:0;padding:0 12px;border:0;border-radius:inherit;outline:none;background:transparent;color:var(--pf-primary);font:inherit;font-size:12px; }
+.strategySelectWrap input::placeholder { color:var(--pf-tertiary); }
+.globalStrategyEditor label>small { color:var(--pf-secondary);font-size:11px;line-height:1.5; }
+.globalStrategyEditor>div { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.storyboardInner>.globalStrategyEditor { margin:0; }
+.storyboardInner>.globalStrategyEditor>div { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.sceneMetadata { margin:0 22px 20px;display:flex;align-items:center;gap:16px; }
+.sceneMetadata label { flex:1;min-width:0;display:grid;gap:8px;color:var(--pf-primary);font-size:13px;font-weight:600; }
+.sceneMetadata select { width:100%;border:0;border-radius:inherit;appearance:none;color:var(--pf-primary);font:inherit; }
+.sceneMetadata option { background:var(--pf-card); }
+.sceneMetadata>small { max-width:160px;color:var(--pf-secondary);font-size:12px;line-height:1.5; }
+.chunkCard div small { display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere; }
+.storyboardScene p { overflow-wrap:anywhere; }
+@media(max-width:680px){.globalStrategyEditor>div,.storyboardInner>.globalStrategyEditor>div{grid-template-columns:1fr}.sceneMetadata{margin-inline:12px;align-items:stretch;flex-direction:column}.sceneMetadata>small{max-width:none}}
 .storyboardHero { background: linear-gradient(135deg, var(--pf-elevated), var(--pf-card)); box-shadow: var(--pf-shadow), var(--pf-highlight); }
 .storyboardHero:before { background: var(--pf-brand); box-shadow: none; }
 .storyboardActions, .storyboardDuration { background: var(--pf-panel); box-shadow: inset 0 0 0 1px var(--pf-border); }

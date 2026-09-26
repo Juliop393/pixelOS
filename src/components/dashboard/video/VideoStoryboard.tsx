@@ -1,7 +1,8 @@
 "use client"
 
 import { ArrowLeft, ArrowRight, Clapperboard, Clock3, PencilLine, Plus, SlidersHorizontal, Trash2, WandSparkles } from "lucide-react"
-import type { VideoChunk } from "./video-data"
+import type { ReactNode } from "react"
+import { getSceneDescription, getVideoDuration, VIDEO_GENERATION_DURATION, VIDEO_MAX_SCENES, type VideoChunk } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
 const STATUS_LABELS: Record<VideoChunk["status"], string> = {
@@ -12,20 +13,9 @@ const STATUS_LABELS: Record<VideoChunk["status"], string> = {
   error: "Revisar",
 }
 
-function sceneFallback(purpose: string, hookLabel?: string, angleLabel?: string) {
-  if (purpose.includes("Gancho")) return `Abre con ${hookLabel?.toLowerCase() || "un gancho claro"} para captar atención.`
-  if (purpose.includes("Producto")) return "Presenta el producto y demuestra su uso principal."
-  if (purpose.includes("Beneficio")) return `Refuerza ${angleLabel?.toLowerCase() || "el beneficio central"} de forma visual.`
-  if (purpose.includes("Prueba")) return "Añade una prueba o detalle que sostenga la promesa."
-  if (purpose.includes("CTA")) return "Cierra con una acción clara para el espectador."
-  return "Desarrolla el siguiente momento de la historia."
-}
-
 type VideoStoryboardProps = {
   chunks: VideoChunk[]
-  angleLabel?: string
-  hookLabel?: string
-  styleLabel?: string
+  strategyEditor: ReactNode
   sourceReady: boolean
   canGenerate: boolean
   generateFeedback: string
@@ -41,9 +31,7 @@ type VideoStoryboardProps = {
 
 export default function VideoStoryboard({
   chunks,
-  angleLabel,
-  hookLabel,
-  styleLabel,
+  strategyEditor,
   sourceReady,
   canGenerate,
   generateFeedback,
@@ -56,38 +44,25 @@ export default function VideoStoryboard({
   onRemove,
   onMove,
 }: VideoStoryboardProps) {
-  const totalDuration = chunks.reduce((total, chunk) => total + chunk.duration, 0)
+  const totalDuration = getVideoDuration(chunks)
 
   return <main className={s.storyboardOverview}>
     <div className={s.storyboardInner}>
       <header className={s.storyboardHero}>
         <div className={s.storyboardHeroCopy}>
-          <span>STORYBOARD PROPUESTO</span>
-          <h1>Tu anuncio, listo para revisar.</h1>
-          <p>Valida la idea y la secuencia. Puedes generar directamente o entrar al detalle de cada escena.</p>
+          <span>MODO PRO · STORYBOARD</span>
+          <h1>Tu anuncio, escena por escena.</h1>
+          <p>Define una estrategia, construye la secuencia y controla la ejecución visual de cada escena.</p>
         </div>
         <div className={s.storyboardActions}>
           <div className={s.storyboardDuration}><Clock3 /><span>Duración estimada</span><b>{totalDuration}s</b></div>
           <button type="button" className={s.storyboardGenerate} disabled={!canGenerate} onClick={onGenerate}><WandSparkles />Generar video</button>
           <button type="button" className={s.storyboardAdjust} onClick={onAdjust}><SlidersHorizontal />Ajustar escenas</button>
-          <small>{generateFeedback || (sourceReady ? "Storyboard listo para generar" : "Añade una fuente visual desde Ajustar escenas")}</small>
+          <small>{generateFeedback || (sourceReady ? "Se generará la escena seleccionada" : "Añade una fuente visual a la escena seleccionada")}</small>
         </div>
       </header>
 
-      <section className={s.globalBrief}>
-        <header>
-          <span>ESTRATEGIA GLOBAL</span>
-          <h2>{angleLabel || "Hipótesis del anuncio"}</h2>
-          <p>Esta dirección se aplica al anuncio completo; las escenas desarrollan la historia sin redefinirla.</p>
-        </header>
-        <dl>
-          <div><dt>Hipótesis / ángulo</dt><dd>{angleLabel || "Por definir"}</dd></div>
-          <div><dt>Hook principal</dt><dd>{hookLabel || "Por definir"}</dd></div>
-          <div><dt>CTA</dt><dd>Se define en la escena final</dd></div>
-          <div><dt>Estilo general</dt><dd>{styleLabel || "Por definir"}</dd></div>
-          <div><dt>Formato</dt><dd>Stories / Reels · 9:16</dd></div>
-        </dl>
-      </section>
+      {strategyEditor}
 
       <section className={s.storyboardSection}>
         <header>
@@ -99,7 +74,7 @@ export default function VideoStoryboard({
             <button type="button" className={s.storyboardSceneSelect} aria-pressed={activeId === chunk.id} onClick={() => onSelect(chunk.id)}>
               <div className={s.storyboardSceneMeta}><span>{String(index + 1).padStart(2, "0")}</span><b>{chunk.duration}s</b></div>
               <h3>{chunk.purpose}</h3>
-              <p>{chunk.action?.trim() || chunk.sceneDirection.trim() || sceneFallback(chunk.purpose, hookLabel, angleLabel)}</p>
+              <p>{getSceneDescription(chunk)}</p>
               <footer><i />{STATUS_LABELS[chunk.status]}</footer>
             </button>
             <div className={s.storyboardSceneActions}>
@@ -111,8 +86,8 @@ export default function VideoStoryboard({
               </span>
             </div>
           </article>)}
-          <button type="button" className={s.storyboardAddScene} disabled={chunks.length >= 5} onClick={onAdd}>
-            <i><Plus /></i><b>+ Añadir escena</b><small>{chunks.length >= 5 ? "Máximo de 5 escenas alcanzado" : "Amplía la secuencia en 6 segundos"}</small>
+          <button type="button" className={s.storyboardAddScene} disabled={chunks.length >= VIDEO_MAX_SCENES} onClick={onAdd}>
+            <i><Plus /></i><b>+ Añadir escena</b><small>{chunks.length >= VIDEO_MAX_SCENES ? `Máximo actual de ${VIDEO_MAX_SCENES} escenas alcanzado` : `Nueva escena · ${VIDEO_GENERATION_DURATION} segundos disponibles`}</small>
           </button>
         </div>
       </section>

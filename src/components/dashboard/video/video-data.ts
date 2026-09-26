@@ -4,7 +4,7 @@ export type VideoReferenceSource = "library" | "upload"
 export type VideoChunk = {
   id: number
   purpose: string
-  duration: 6
+  duration: number
   status: VideoChunkStatus
   referenceSource: VideoReferenceSource
   referenceImageUrl?: string
@@ -14,9 +14,41 @@ export type VideoChunk = {
   camera: string
   dialogue: string
   sceneStyle: string
-  /** Compatibilidad con escenas creadas antes del nuevo modelo. Se sincroniza con `action`. */
-  sceneDirection: string
   videoUrl?: string
+}
+
+export type VideoStrategy = { angle: string; hook: string; cta: string; style: string; format: string }
+
+// Current generation capabilities, not assumptions about the scene model.
+export const VIDEO_GENERATION_DURATION = 6
+export const VIDEO_MAX_SCENES = 5
+export const VIDEO_FORMAT = "9:16"
+export const VIDEO_SCENE_ROLES = ["Hook / apertura", "Problema", "Producto / demostración", "Beneficio", "Prueba", "Resultado", "CTA", "Personalizada"]
+
+/** Preserve previous scene direction without keeping a second editable action field. */
+export function migrateVideoChunk(chunk: VideoChunk & { sceneDirection?: string }): VideoChunk {
+  const { sceneDirection, ...scene } = chunk
+  return { ...scene, action: scene.action || sceneDirection || "" }
+}
+
+export function createVideoChunk(id: number, purpose = "Personalizada"): VideoChunk {
+  return {
+    id, purpose, duration: VIDEO_GENERATION_DURATION, status: "pending",
+    referenceSource: "library", referenceFileName: "", referenceDescription: "",
+    action: "", camera: "", dialogue: "", sceneStyle: "",
+  }
+}
+
+export const getVideoDuration = (chunks: VideoChunk[]) => chunks.reduce((total, chunk) => total + chunk.duration, 0)
+export const getSceneDescription = (chunk: VideoChunk) =>
+  [chunk.action, chunk.referenceDescription, chunk.dialogue, chunk.camera, chunk.sceneStyle].find((value) => value.trim()) || "Escena sin configurar"
+
+export function moveVideoChunk(chunks: VideoChunk[], index: number, direction: -1 | 1): VideoChunk[] {
+  const target = index + direction
+  if (index < 0 || index >= chunks.length || target < 0 || target >= chunks.length) return chunks
+  const next = [...chunks]
+  ;[next[index], next[target]] = [next[target], next[index]]
+  return next
 }
 
 export const VIDEO_ANGLES: VideoOption[] = [
@@ -51,5 +83,3 @@ export const VIDEO_STYLES: VideoOption[] = [
   { id: "minimal", label: "Minimal Product", description: "Producto, espacio y mensaje esencial.", icon: "◻", swatch: "linear-gradient(145deg,#e8e5df,#6d7475)" },
   { id: "b2b", label: "B2B / Professional", description: "Sobrio y orientado a negocio.", icon: "🏢", swatch: "linear-gradient(145deg,#57778c,#172d3b)" },
 ]
-
-export const CHUNK_PURPOSES = ["Gancho / apertura", "Producto / demostración", "Beneficio", "Prueba / refuerzo", "CTA"]
