@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
+import { getVideoGenerationContext, type VideoGenerationContext } from "@/lib/video-generation-payload"
 
 export type VideoPhase = "idle" | "generating" | "generated" | "error"
 
@@ -28,6 +29,7 @@ export function useVideoGenerator() {
     angle: string,
     hook: string,
     style: string,
+    context: VideoGenerationContext = {},
   ) => {
     if (!imageUrl) {
       toast.error("Genera un creativo primero")
@@ -61,7 +63,7 @@ export function useVideoGenerator() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ imageUrl, angle, hook, style }),
+        body: JSON.stringify({ imageUrl, angle, hook, style, ...getVideoGenerationContext(context) }),
       })
 
       const startData = await startResponse.json()

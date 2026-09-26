@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { getVideoGenerationContext } from "@/lib/video-generation-payload"
 
 const ALLOWED_ANGLES = [
   "comparison", "problem-solution", "primary-benefit", "social-proof",
@@ -141,6 +142,7 @@ export async function POST(req: NextRequest) {
   const hook = typeof body.hook === "string" ? body.hook.trim().slice(0, MAX_HOOK_CHARS) : ""
 
   const prompt = buildVideoPrompt(angle, hook, style)
+  const context = getVideoGenerationContext(body)
 
   const n8nVideoUrl = process.env.N8N_VIDEO_WEBHOOK_URL
   const internalSecret = (process.env.N8N_INTERNAL_SECRET ?? "").trim()
@@ -160,7 +162,8 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
         "X-PixelFM-Secret": internalSecret,
       },
-      body: JSON.stringify({ imageUrl, prompt }),
+      // Keep the existing prompt/model behavior; Pro fields are metadata for the current START flow.
+      body: JSON.stringify({ imageUrl, prompt, angle, hook, style, ...context }),
       signal: controller.signal,
     })
 
