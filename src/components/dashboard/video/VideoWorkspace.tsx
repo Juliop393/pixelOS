@@ -292,7 +292,7 @@ export default function VideoWorkspace() {
       <VideoTimeline chunks={chunks} activeId={activeId} hookLabel={hookLabel} styleLabel={styleLabel} finalVideoUrl={finalVideoUrl} onSelect={selectChunk} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={mergeVideoChunks} />
     </main>
     </>}
-    <PixelAiDrawer open={pixelAiOpen} onOpenChange={setPixelAiOpen} focusMode />
+    <PixelAiDrawer open={pixelAiOpen} onOpenChange={setPixelAiOpen} focusMode videoContext />
     </section>
   </div>
 }

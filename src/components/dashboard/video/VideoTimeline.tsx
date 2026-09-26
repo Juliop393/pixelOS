@@ -36,6 +36,7 @@ export default function VideoTimeline({ chunks, activeId, hookLabel, styleLabel,
       {chunks.length < 5 && <button className={s.addChunk} onClick={onAdd}><Plus /><b>Añadir fragmento</b><small>+ 6 segundos</small></button>}
     </div>
     <footer className={s.timelineSummary}>
+      <div className={s.timelineSummaryHeading}><span>RESUMEN DE PRODUCCIÓN</span><b>Tu video de un vistazo</b></div>
       <div className={s.timelineMetric}><Clock3 /><span>Duración total<b>{chunks.length * 6} segundos</b></span></div>
       <div className={s.timelineMetric}><Layers3 /><span>Secuencia<b>{chunks.length} {chunks.length === 1 ? "escena" : "escenas"}</b></span></div>
       <div className={s.timelineMetric}><RectangleVertical /><span>Formato<b>Stories / Reels · 9:16</b></span></div>

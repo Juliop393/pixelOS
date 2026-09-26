@@ -86,6 +86,12 @@ Si aún falta información, responde con:
 
 En TODOS los casos, tu respuesta debe ser un JSON válido.`
 
+const VIDEO_CHAT_SYSTEM_PROMPT = `Eres Pixel IA, copiloto creativo del editor de Video de PixelFM.
+
+Ayuda en español a idear anuncios de video para redes: ángulos publicitarios, hooks, storyboard breve, secuencia de escenas, enfoque visual y ritmo. Da ideas concretas y útiles para avanzar rápido. Si faltan datos, propone un ejemplo adaptable y pregunta solo lo imprescindible; no inventes hechos sobre el producto. Para un storyboard, organiza hasta cinco escenas de seis segundos cada una y describe qué se ve y ocurre en cada escena.
+
+Puedes conversar y proponer ideas, pero no afirmes que has cambiado el editor, generado un video, aplicado una escena o guardado una configuración. Las recomendaciones son sugerencias en el chat. Sé breve, claro y práctico. Responde ÚNICAMENTE con JSON válido: {"message":"Tu respuesta para el usuario","collectedContext":{}}.`
+
 function buildRecommendSystemPrompt(recommendationCount: 1 | 2 | 3) {
   const exampleAngles = ["problem-solution", "primary-benefit", "product-demo"]
   const exampleStyles = ["lifestyle", "benefits-infographic", "product-action"]
@@ -174,7 +180,7 @@ async function cleanupOldRecords() {
   }
 }
 
-function validateBody(body: unknown): { valid: true; action: "chat"; messages: Array<{ role: string; content: string }> } | { valid: true; action: "recommend"; collectedContext: { product: string; audience: string; goal: string }; recommendationCount: 1 | 2 | 3 } | { valid: false; error: string; status: number } {
+function validateBody(body: unknown): { valid: true; action: "chat"; messages: Array<{ role: string; content: string }>; assistantContext: "video" | "default" } | { valid: true; action: "recommend"; collectedContext: { product: string; audience: string; goal: string }; recommendationCount: 1 | 2 | 3 } | { valid: false; error: string; status: number } {
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return { valid: false, error: "Cuerpo de solicitud inválido", status: 400 }
   }
@@ -212,7 +218,7 @@ function validateBody(body: unknown): { valid: true; action: "chat"; messages: A
     }
 
     const sliced = messages.slice(-MAX_MESSAGES)
-    return { valid: true, action: "chat", messages: sliced }
+    return { valid: true, action: "chat", messages: sliced, assistantContext: b.assistantContext === "video" ? "video" : "default" }
   }
 
   // action === "recommend"
@@ -331,7 +337,7 @@ export async function POST(req: NextRequest) {
   // ---- Chat action ----
   if (validation.action === "chat") {
     const apiMessages = [
-      { role: "system", content: CHAT_SYSTEM_PROMPT },
+      { role: "system", content: validation.assistantContext === "video" ? VIDEO_CHAT_SYSTEM_PROMPT : CHAT_SYSTEM_PROMPT },
       ...validation.messages,
     ]
 
@@ -354,7 +360,7 @@ export async function POST(req: NextRequest) {
       const parsed = JSON.parse(rawContent) as Record<string, unknown>
       return NextResponse.json(
         {
-          type: parsed.readyToConfirm ? "confirmation" : "question",
+          type: validation.assistantContext === "video" ? "answer" : parsed.readyToConfirm ? "confirmation" : "question",
           message: typeof parsed.message === "string" ? parsed.message : "¿En qué más puedo ayudarte?",
           collectedContext: parsed.collectedContext ?? {},
         },

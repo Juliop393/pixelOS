@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Sparkles } from "lucide-react"
+import { Clapperboard, Lightbulb, ListVideo, Sparkles, Target, Zap } from "lucide-react"
 import styles from "./GeneratorWorkspace.module.css"
 
 export type Recommendation = {
@@ -54,6 +54,7 @@ interface PixelAdvisorProps {
   onOpenChange?: (open: boolean) => void
   initialRequest?: PixelAiInitialRequest | null
   focusMode?: boolean
+  videoContext?: boolean
 }
 
 const INITIAL_MESSAGE: Message = {
@@ -61,7 +62,20 @@ const INITIAL_MESSAGE: Message = {
   content: "Cuéntame qué vendes, a quién se lo vendes y qué quieres conseguir con el anuncio.",
 }
 
-export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideBubble, inline = false, open, onOpenChange, initialRequest, focusMode = false }: PixelAdvisorProps) {
+const VIDEO_INITIAL_MESSAGE: Message = {
+  role: "assistant",
+  content: "Puedo ayudarte a encontrar un ángulo, proponer un hook y ordenar las escenas de tu video. Cuéntame tu idea o elige un punto de partida.",
+}
+
+const VIDEO_STARTERS = [
+  { label: "Recomiéndame un ángulo", prompt: "Recomiéndame un ángulo para un anuncio de video y dime qué dato necesitas para afinarlo.", Icon: Target },
+  { label: "Propón un hook", prompt: "Propón tres ideas de hook para abrir un video publicitario. Si necesitas contexto, dime cuál.", Icon: Zap },
+  { label: "Arma un storyboard rápido", prompt: "Arma un storyboard breve para un anuncio de video. Dame un ejemplo adaptable por escenas de seis segundos.", Icon: ListVideo },
+  { label: "Estructura mi video", prompt: "Ayúdame a estructurar un anuncio de video: apertura, demostración, beneficio y cierre.", Icon: Clapperboard },
+  { label: "Algo simple y directo", prompt: "Quiero un anuncio de video simple y directo. Dame un enfoque fácil de ejecutar.", Icon: Lightbulb },
+]
+
+export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideBubble, inline = false, open, onOpenChange, initialRequest, focusMode = false, videoContext = false }: PixelAdvisorProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
   const isOpen = open ?? uncontrolledOpen
   const setIsOpen = (next: boolean) => {
@@ -70,7 +84,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
   }
   const [input, setInput] = useState("")
   const [convState, setConvState] = useState<ConvState>("collecting")
-  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE])
+  const [messages, setMessages] = useState<Message[]>([videoContext ? VIDEO_INITIAL_MESSAGE : INITIAL_MESSAGE])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [collectedContext, setCollectedContext] = useState<Record<string, unknown>>({})
@@ -103,7 +117,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
 
   const handleReset = () => {
     setConvState("collecting")
-    setMessages([INITIAL_MESSAGE])
+    setMessages([videoContext ? VIDEO_INITIAL_MESSAGE : INITIAL_MESSAGE])
     setInput("")
     setCollectedContext({})
     setRecommendations([])
@@ -138,6 +152,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         },
         body: JSON.stringify({
           action: "chat",
+          assistantContext: videoContext ? "video" : undefined,
           messages: chatMessages,
           collectedContext: context ?? collectedContext,
         }),
@@ -172,8 +187,8 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
     }
   }
 
-  const handleRecommend = async () => {
-    const userMessage = input.trim()
+  const submitMessage = async (message: string) => {
+    const userMessage = message.trim()
     if (!userMessage || isLoading) return
 
     const detectedCount = detectRecommendationCount(userMessage)
@@ -184,6 +199,8 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
 
     await sendChatMessage(userMessage)
   }
+
+  const handleRecommend = () => { void submitMessage(input) }
 
   useEffect(() => {
     if (!isOpen || !accessToken || !initialRequest || isLoading) return
@@ -288,13 +305,13 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         id="pixel-ai-panel"
         aria-label="Panel de Pixel IA"
         role="dialog"
-        className={inline ? styles.aiPanel : `${styles.drawerPanel} ${focusMode ? styles.drawerFocusPanel : ""}`}
+        className={inline ? styles.aiPanel : `${styles.drawerPanel} ${focusMode ? styles.drawerFocusPanel : ""} ${videoContext ? styles.videoAssistantPanel : ""}`}
         style={{
-          background: "linear-gradient(135deg, rgba(30,28,26,0.92) 0%, rgba(26,26,26,0.88) 100%)",
+          background: videoContext ? "linear-gradient(155deg, rgba(39,31,27,0.97), rgba(18,17,16,0.96) 68%)" : "linear-gradient(135deg, rgba(30,28,26,0.92) 0%, rgba(26,26,26,0.88) 100%)",
           backdropFilter: "blur(28px) saturate(150%)",
           WebkitBackdropFilter: "blur(28px) saturate(150%)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
+          border: videoContext ? "1px solid rgba(224,126,90,0.24)" : "1px solid rgba(255,255,255,0.08)",
+          boxShadow: videoContext ? "0 32px 80px rgba(0,0,0,0.54), 0 0 42px rgba(215,107,69,0.1), inset 0 1px rgba(255,255,255,0.07)" : "0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
         }}
       >
         {/* Reflejo superior */}
@@ -306,7 +323,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
 
         {/* Cabecera */}
         <div
-          className="flex-shrink-0 px-5 py-3.5 flex items-center justify-between relative z-10"
+          className={`flex-shrink-0 px-5 py-3.5 flex items-center justify-between relative z-10 ${videoContext ? styles.videoAssistantHeader : ""}`}
           style={{ borderBottom: "1px solid rgba(58,56,51,0.5)" }}
         >
           <div className="flex items-center gap-2.5">
@@ -319,10 +336,10 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
             >
               <Sparkles className="w-4 h-4 text-[#D97757]" strokeWidth={1.5} />
             </div>
-            <div>
+            <div className={videoContext ? styles.videoAssistantTitle : undefined}>
               <span className="text-sm font-bold text-[#F5F0E8]">Pixel IA</span>
-              <span className="text-[10px] text-[#9CA3AF] ml-2 hidden sm:inline">
-                Estrategia creativa para tus anuncios.
+              <span className={videoContext ? "" : "text-[10px] text-[#9CA3AF] ml-2 hidden sm:inline"}>
+                {videoContext ? "Copiloto creativo de Video" : "Estrategia creativa para tus anuncios."}
               </span>
             </div>
           </div>
@@ -341,8 +358,19 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         </div>
 
         {/* Área de conversación */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4 relative z-10">
+        <div ref={scrollRef} className={`flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4 relative z-10 ${videoContext ? styles.videoAssistantConversation : ""}`}>
+          {videoContext && messages.length === 1 && <section className={styles.videoAssistantWelcome}>
+            <div className={styles.videoAssistantWelcomeIcon}><Clapperboard /></div>
+            <span>IDEAS PARA TU VIDEO</span>
+            <h2>Del primer hook a la última escena.</h2>
+            <p>{VIDEO_INITIAL_MESSAGE.content}</p>
+            <div className={styles.videoAssistantStarters}>
+              {VIDEO_STARTERS.map(({ label, prompt, Icon }) => <button type="button" key={label} disabled={isLoading} onClick={() => { void submitMessage(prompt) }}><Icon /><span>{label}</span></button>)}
+            </div>
+            <small>Ideas para revisar en el chat; tus escenas no cambian automáticamente.</small>
+          </section>}
           {messages.map((msg, idx) => {
+            if (videoContext && idx === 0) return null
             const isUser = msg.role === "user"
             return (
               <div key={idx} className={`flex items-start gap-2 ${isUser ? "justify-end" : ""}`}>
@@ -518,7 +546,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         {/* Zona de entrada (solo en collecting y confirming) */}
         {(convState === "collecting" || convState === "confirming") && (
           <div
-            className="flex-shrink-0 p-3 relative z-10"
+            className={`flex-shrink-0 p-3 relative z-10 ${videoContext ? styles.videoAssistantComposer : ""}`}
             style={{ borderTop: "1px solid rgba(58,56,51,0.5)" }}
           >
             <div className="flex items-end gap-2">
@@ -526,7 +554,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 rows={2}
-                placeholder="Escribe tu respuesta..."
+                placeholder={videoContext ? "Describe tu video o pide una idea para avanzar..." : "Escribe tu respuesta..."}
                 className="flex-1 resize-none bg-[#1E1C1A] border border-[#3A3833] px-3.5 py-2.5 rounded-xl text-sm text-[#F5F0E8] placeholder:text-[#9CA3AF]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey && !isLoading) {

@@ -10,12 +10,14 @@ export default function PixelAiDrawer({
   initialRequest,
   onApplyRecommendation,
   focusMode = false,
+  videoContext = false,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialRequest?: PixelAiInitialRequest | null
   onApplyRecommendation?: (recommendation: Recommendation) => void
   focusMode?: boolean
+  videoContext?: boolean
 }) {
   const [accessToken, setAccessToken] = useState<string>()
 
@@ -38,6 +40,7 @@ export default function PixelAiDrawer({
       initialRequest={initialRequest}
       onApplyRecommendation={onApplyRecommendation}
       focusMode={focusMode}
+      videoContext={videoContext}
     />
   )
 }
