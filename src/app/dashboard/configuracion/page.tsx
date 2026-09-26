@@ -130,8 +130,8 @@ export default function ConfiguracionPage() {
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D97757]">
           Tu espacio
         </p>
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-[#F2EEE8]">Configuración</h1>
-        <p className="text-[#9A9893]">Administra tu cuenta, plan y accesos desde un solo lugar.</p>
+        <h1 className="mb-2 text-3xl font-bold tracking-tight text-[var(--pf-headline)]">Configuración</h1>
+        <p className="text-[var(--pf-secondary)]">Administra tu cuenta, plan y accesos desde un solo lugar.</p>
       </header>
 
       {message && (
@@ -152,20 +152,20 @@ export default function ConfiguracionPage() {
         <form
           id="cuenta"
           onSubmit={handleSave}
-          className="scroll-mt-6 rounded-2xl border border-[#3A3833] bg-[#2A2826] p-6"
+          className="scroll-mt-6 rounded-2xl border border-[var(--pf-border)] bg-[var(--pf-card)] shadow-[var(--pf-highlight)] p-6"
         >
           <div className="mb-6 flex items-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#D97757]/25 bg-[#D97757]/10 text-[#E58A68]">
               <User className="h-5 w-5" strokeWidth={1.6} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[#F2EEE8]">Cuenta</h2>
-              <p className="text-sm text-[#9A9893]">Tu identidad dentro de PixelFM.</p>
+              <h2 className="text-lg font-bold text-[var(--pf-headline)]">Cuenta</h2>
+              <p className="text-sm text-[var(--pf-secondary)]">Tu identidad dentro de PixelFM.</p>
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <label className="space-y-2 text-sm text-[#B8B4AE]" htmlFor="fullName">
+            <label className="space-y-2 text-sm text-[var(--pf-secondary)]" htmlFor="fullName">
               Nombre
               <input
                 id="fullName"
@@ -175,11 +175,11 @@ export default function ConfiguracionPage() {
                 disabled={loading || saving}
                 placeholder={loading ? "Cargando..." : "Tu nombre"}
                 autoComplete="name"
-                className="w-full rounded-xl border border-[#3A3833] bg-[#1E1C1A] px-4 py-3 text-sm text-[#F2EEE8] outline-none transition-colors placeholder:text-[#6F6B65] focus:border-[#D97757]/60 disabled:opacity-60"
+                className="w-full rounded-xl border border-[var(--pf-border)] bg-[var(--pf-panel)] px-4 py-3 text-sm text-[var(--pf-headline)] outline-none transition-colors placeholder:text-[var(--pf-tertiary)] focus:border-[var(--pf-action)] focus:shadow-[var(--pf-focus)] disabled:opacity-60"
               />
             </label>
 
-            <label className="space-y-2 text-sm text-[#B8B4AE]" htmlFor="agencyName">
+            <label className="space-y-2 text-sm text-[var(--pf-secondary)]" htmlFor="agencyName">
               Nombre de la agencia
               <input
                 id="agencyName"
@@ -188,18 +188,18 @@ export default function ConfiguracionPage() {
                 onChange={(event) => setAgencyName(event.target.value)}
                 disabled={loading || saving}
                 placeholder={loading ? "Cargando..." : "Nombre de tu agencia"}
-                className="w-full rounded-xl border border-[#3A3833] bg-[#1E1C1A] px-4 py-3 text-sm text-[#F2EEE8] outline-none transition-colors placeholder:text-[#6F6B65] focus:border-[#D97757]/60 disabled:opacity-60"
+                className="w-full rounded-xl border border-[var(--pf-border)] bg-[var(--pf-panel)] px-4 py-3 text-sm text-[var(--pf-headline)] outline-none transition-colors placeholder:text-[var(--pf-tertiary)] focus:border-[var(--pf-action)] focus:shadow-[var(--pf-focus)] disabled:opacity-60"
               />
             </label>
 
-            <label className="space-y-2 text-sm text-[#B8B4AE] md:col-span-2" htmlFor="accountEmail">
+            <label className="space-y-2 text-sm text-[var(--pf-secondary)] md:col-span-2" htmlFor="accountEmail">
               Email
               <input
                 id="accountEmail"
                 type="email"
                 value={email}
                 disabled
-                className="w-full rounded-xl border border-[#3A3833] bg-[#1E1C1A]/70 px-4 py-3 text-sm text-[#9A9893] disabled:cursor-not-allowed"
+                className="w-full rounded-xl border border-[var(--pf-border)] bg-[var(--pf-panel)] px-4 py-3 text-sm text-[var(--pf-secondary)] disabled:cursor-not-allowed"
               />
             </label>
           </div>
@@ -208,46 +208,46 @@ export default function ConfiguracionPage() {
             <button
               type="submit"
               disabled={loading || saving}
-              className="rounded-xl bg-[#D97757] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#D97757]/15 transition-all hover:bg-[#C96949] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl bg-[var(--pf-action)] px-5 py-2.5 text-sm font-semibold text-[var(--pf-action-ink)] shadow-lg shadow-[#FF8A4C]/10 transition-all hover:bg-[var(--pf-action-hover)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Guardando..." : "Guardar cambios"}
             </button>
           </div>
         </form>
 
-        <section className="rounded-2xl border border-[#3A3833] bg-[#2A2826] p-6">
+        <section className="rounded-2xl border border-[var(--pf-border)] bg-[var(--pf-card)] shadow-[var(--pf-highlight)] p-6">
           <div className="mb-6 flex items-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#D97757]/25 bg-[#D97757]/10 text-[#E58A68]">
               <CreditCard className="h-5 w-5" strokeWidth={1.6} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[#F2EEE8]">Plan y facturación</h2>
-              <p className="text-sm text-[#9A9893]">Consulta tu plan, créditos y suscripción.</p>
+              <h2 className="text-lg font-bold text-[var(--pf-headline)]">Plan y facturación</h2>
+              <p className="text-sm text-[var(--pf-secondary)]">Consulta tu plan, créditos y suscripción.</p>
             </div>
           </div>
 
           <div className="mb-5 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-[#3A3833] bg-[#1E1C1A] p-4">
-              <p className="mb-1 text-xs uppercase tracking-[0.16em] text-[#77736D]">Plan actual</p>
+            <div className="rounded-xl border border-[var(--pf-border)] bg-[var(--pf-panel)] p-4">
+              <p className="mb-1 text-xs uppercase tracking-[0.16em] text-[var(--pf-tertiary)]">Plan actual</p>
               <p className="text-lg font-bold text-[#E58A68]">{planLabel}</p>
             </div>
-            <div className="rounded-xl border border-[#3A3833] bg-[#1E1C1A] p-4">
-              <p className="mb-1 text-xs uppercase tracking-[0.16em] text-[#77736D]">Créditos disponibles</p>
-              <p className="text-lg font-bold text-[#F2EEE8]">{loading ? "—" : credits ?? 0}</p>
+            <div className="rounded-xl border border-[var(--pf-border)] bg-[var(--pf-panel)] p-4">
+              <p className="mb-1 text-xs uppercase tracking-[0.16em] text-[var(--pf-tertiary)]">Créditos disponibles</p>
+              <p className="text-lg font-bold text-[var(--pf-headline)]">{loading ? "—" : credits ?? 0}</p>
             </div>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link
               href="/pricing"
-              className="flex flex-1 items-center justify-center rounded-xl border border-[#4A4640] bg-[#1E1C1A] px-4 py-3 text-sm font-semibold text-[#E8E6E1] transition-colors hover:border-[#D97757]/45 hover:text-white"
+              className="flex flex-1 items-center justify-center rounded-xl border border-[var(--pf-border-hover)] bg-[var(--pf-panel)] px-4 py-3 text-sm font-semibold text-[var(--pf-primary)] transition-colors hover:border-[#D97757]/45 hover:text-white"
             >
               Ver planes
             </Link>
             <button
               type="button"
               onClick={openBillingPortal}
-              className="flex flex-1 items-center justify-center rounded-xl bg-[#D97757] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#D97757]/15 transition-all hover:bg-[#C96949] active:scale-[0.98]"
+              className="flex flex-1 items-center justify-center rounded-xl bg-[var(--pf-action)] px-4 py-3 text-sm font-semibold text-[var(--pf-action-ink)] shadow-lg shadow-[#FF8A4C]/10 transition-all hover:bg-[var(--pf-action-hover)] active:scale-[0.98]"
             >
               Gestionar suscripción
             </button>
@@ -255,37 +255,37 @@ export default function ConfiguracionPage() {
         </section>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <section className="rounded-2xl border border-[#3A3833] bg-[#2A2826] p-6">
+          <section className="rounded-2xl border border-[var(--pf-border)] bg-[var(--pf-card)] shadow-[var(--pf-highlight)] p-6">
             <div className="mb-4 flex items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#3A3833] bg-[#1E1C1A] text-[#D97757]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--pf-border)] bg-[var(--pf-panel)] text-[#D97757]">
                 <Mail className="h-5 w-5" strokeWidth={1.5} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-[#F2EEE8]">Soporte</h2>
-                <p className="text-sm text-[#9A9893]">Ayuda directa del equipo PixelFM.</p>
+                <h2 className="text-lg font-bold text-[var(--pf-headline)]">Soporte</h2>
+                <p className="text-sm text-[var(--pf-secondary)]">Ayuda directa del equipo PixelFM.</p>
               </div>
             </div>
             <a
               href="mailto:team@pixelfm.com?subject=Soporte%20PixelFM&body=Hola%20equipo%20de%20PixelFM%2C%0A%0ANecesito%20ayuda%20con%3A%0A"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#4A4640] bg-[#1E1C1A] px-4 py-3 text-sm font-semibold text-[#E8E6E1] transition-colors hover:border-[#D97757]/45 hover:text-white"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--pf-border-hover)] bg-[var(--pf-panel)] px-4 py-3 text-sm font-semibold text-[var(--pf-primary)] transition-colors hover:border-[#D97757]/45 hover:text-white"
             >
               <Mail className="h-4 w-4" strokeWidth={1.5} />
               team@pixelfm.com
             </a>
           </section>
 
-          <section className="rounded-2xl border border-[#3A3833] bg-[#2A2826] p-6">
+          <section className="rounded-2xl border border-[var(--pf-border)] bg-[var(--pf-card)] shadow-[var(--pf-highlight)] p-6">
             <div className="mb-4 flex items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#3A3833] bg-[#1E1C1A] text-[#D97757]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--pf-border)] bg-[var(--pf-panel)] text-[#D97757]">
                 <KeyRound className="h-5 w-5" strokeWidth={1.5} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-[#F2EEE8]">API y conexiones</h2>
-                <p className="text-sm text-[#9A9893]">Accesos para futuras integraciones.</p>
+                <h2 className="text-lg font-bold text-[var(--pf-headline)]">API y conexiones</h2>
+                <p className="text-sm text-[var(--pf-secondary)]">Accesos para futuras integraciones.</p>
               </div>
             </div>
-            <div className="flex items-center justify-between border-t border-[#3A3833] pt-4">
-              <span className="text-sm text-[#9A9893]">API Keys</span>
+            <div className="flex items-center justify-between border-t border-[var(--pf-border)] pt-4">
+              <span className="text-sm text-[var(--pf-secondary)]">API Keys</span>
               <span className="rounded-full border border-[#D97757]/20 bg-[#D97757]/10 px-3 py-1 text-xs font-semibold text-[#D97757]">
                 Próximamente
               </span>
@@ -299,14 +299,14 @@ export default function ConfiguracionPage() {
               <TriangleAlert className="h-5 w-5" strokeWidth={1.5} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[#F2EEE8]">Zona de peligro</h2>
-              <p className="text-sm text-[#9A9893]">Acciones permanentes sobre tu cuenta.</p>
+              <h2 className="text-lg font-bold text-[var(--pf-headline)]">Zona de peligro</h2>
+              <p className="text-sm text-[var(--pf-secondary)]">Acciones permanentes sobre tu cuenta.</p>
             </div>
           </div>
           <div className="flex flex-col gap-4 border-t border-red-400/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-[#E8E6E1]">Eliminar cuenta</p>
-              <p className="mt-1 text-xs text-[#85817B]">Esta opción estará disponible próximamente.</p>
+              <p className="text-sm font-semibold text-[var(--pf-primary)]">Eliminar cuenta</p>
+              <p className="mt-1 text-xs text-[var(--pf-tertiary)]">Esta opción estará disponible próximamente.</p>
             </div>
             <button
               type="button"

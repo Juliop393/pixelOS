@@ -292,3 +292,76 @@
 @media(max-width:1540px){.timeline>.timelineSummary{grid-template-columns:repeat(auto-fit,minmax(166px,1fr));padding:16px}.timelineGlobalMetric{grid-column:auto}}
 @media(max-width:1380px){.timeline{flex-basis:auto;min-height:0}.timeline>.timelineSummary{grid-template-columns:repeat(auto-fit,minmax(165px,1fr));margin-top:22px}.page[data-workspace-mode="advanced"] .previewStage{min-height:520px}}
 @media(max-width:680px){.timeline{padding-inline:16px}.timeline>.timelineSummary{grid-template-columns:repeat(auto-fit,minmax(145px,1fr));margin-inline:0;padding:13px}.timelineSummaryHeading{align-items:flex-start;flex-direction:column}.timelineGlobalMetric{grid-column:auto}}
+
+/* Tonal system only: preserve all existing dimensions, responsive rules and scene behavior. */
+.page { color: var(--pf-primary); }
+.configPanel, .stagePanel, .storyboardOverview { background: var(--pf-panel); border-color: var(--pf-border); box-shadow: var(--pf-shadow), var(--pf-highlight); }
+.card, .globalBrief, .storyboardSection, .timeline { background: var(--pf-card); border-color: var(--pf-border); box-shadow: var(--pf-highlight); }
+.stageHeader, .generateDock { background: var(--pf-card); border-color: var(--pf-border); }
+.previewStage { background: radial-gradient(circle at 42% 38%, rgba(217,119,87,.035), transparent 36%), var(--pf-canvas); }
+.phoneFrame { background: var(--pf-input); border-color: var(--pf-border-hover); }
+.directionCard { background: var(--pf-panel); border-color: var(--pf-border); }
+.creativeSummary > div { background: var(--pf-card); border-color: var(--pf-border); }
+.stageHeader b { color: var(--pf-headline); }
+.stageHeader small { color: var(--pf-secondary); }
+.timelineSummaryHeading { border-color: var(--pf-border); }
+.previewEmpty { background: linear-gradient(165deg, var(--pf-panel), var(--pf-input)); }
+.intro h1, .cardTitle h2, .storyboardHeroCopy h1, .globalBrief h2, .storyboardSection h2, .timeline h2, .timelineSummaryHeading b { color: var(--pf-headline); }
+.intro p, .cardTitle p, .storyboardHeroCopy p, .globalBrief header p, .storyboardScene p, .previewEmpty p { color: var(--pf-secondary); }
+.intro > span, .cardTitle > i, .timeline > header span, .timelineSummaryHeading span { color: var(--pf-brand); }
+.stepTabs { background: var(--pf-panel); border-color: var(--pf-border); }
+.stepTabs button, .stepTabs button span { color: var(--pf-secondary); }
+.stepTabs button:hover { background: var(--pf-elevated); color: var(--pf-headline); }
+.stepTabs .stepActive { color: var(--pf-headline); background: var(--pf-selected); border-color: var(--pf-selected-border); box-shadow: inset 0 0 0 1px var(--pf-selected-border); }
+.stepTabs .stepActive span { color: var(--pf-action); }
+.sourceTabs button, .optionGrid > button, .optionGrid > button.styleOption { background: var(--pf-elevated); border-color: var(--pf-border); color: var(--pf-primary); }
+.sourceTabs button:hover, .optionGrid > button:hover, .optionGrid > button.styleOption:hover { background: var(--pf-elevated); border-color: var(--pf-border-hover); }
+.sourceTabs .sourceActive, .optionGrid .optionActive, .optionGrid > button.styleOption.optionActive { background: var(--pf-selected); border-color: var(--pf-selected-border); box-shadow: var(--pf-highlight); }
+.sourceTabs button b, .optionGrid b, .optionGrid > button.styleOption b, .sceneFieldHeading label { color: var(--pf-primary); }
+.sourceTabs button small, .optionGrid small, .optionGrid > button.styleOption small, .libraryEmpty small, .uploadBox small { color: var(--pf-secondary); }
+.libraryEmpty, .uploadBox, .formatLock { background: var(--pf-panel); border-color: var(--pf-border); }
+.libraryEmpty b, .uploadBox b, .formatLock b { color: var(--pf-primary); }
+.libraryEmpty span, .formatLock span, .sceneField footer, .sceneField footer b, .generateDock > small { color: var(--pf-tertiary); }
+.sceneField textarea, .sceneDirectionField textarea { background: var(--pf-input); color: var(--pf-primary); box-shadow: inset 0 0 0 1px var(--pf-border); }
+.sceneField textarea::placeholder, .sceneDirectionField textarea::placeholder { color: var(--pf-tertiary); }
+.sceneField textarea:focus, .sceneDirectionField textarea:focus { background: var(--pf-input); box-shadow: inset 0 0 0 1px var(--pf-action), var(--pf-focus); }
+.sceneSuggestions button { background: var(--pf-elevated); color: var(--pf-secondary); box-shadow: inset 0 0 0 1px var(--pf-border); }
+.sceneSuggestions button:hover { background: var(--pf-selected); color: var(--pf-primary); box-shadow: inset 0 0 0 1px var(--pf-selected-border); }
+.globalStrategyEditor { background: linear-gradient(145deg, var(--pf-elevated), var(--pf-card)); box-shadow: var(--pf-shadow), var(--pf-highlight), 0 0 0 1px var(--pf-border-hover); }
+.globalStrategyEditor > header b { color: var(--pf-headline); }
+.globalStrategyEditor > header small, .strategyControlHeader { color: var(--pf-secondary); }
+.globalStrategyEditor > header span { color: var(--pf-brand); background: var(--pf-panel); }
+.globalStrategyEditor label, .globalStrategyEditor label:hover { background: var(--pf-card); box-shadow: inset 0 0 0 1px var(--pf-border); }
+.strategySelectWrap { background: var(--pf-input); box-shadow: inset 0 0 0 1px var(--pf-border); }
+.strategySelectWrap:focus-within { background: var(--pf-input); box-shadow: inset 0 0 0 1px var(--pf-action), var(--pf-focus); }
+.strategySelectWrap select { color: var(--pf-primary); }
+.globalStrategyEditor option { background: var(--pf-card); color: var(--pf-primary); }
+.storyboardHero { background: linear-gradient(135deg, var(--pf-elevated), var(--pf-card)); box-shadow: var(--pf-shadow), var(--pf-highlight); }
+.storyboardHero:before { background: var(--pf-brand); box-shadow: none; }
+.storyboardActions, .storyboardDuration { background: var(--pf-panel); box-shadow: inset 0 0 0 1px var(--pf-border); }
+.storyboardDuration span { color: var(--pf-secondary); }
+.storyboardDuration b { color: var(--pf-headline); }
+.globalBrief dl > div, .globalBrief dl > div:first-child, .storyboardScene, .timeline > .timelineSummary { background: var(--pf-elevated); box-shadow: var(--pf-highlight), 0 0 0 1px var(--pf-border); }
+.globalBrief dt, .creativeSummary dt { color: var(--pf-tertiary); }
+.globalBrief dd, .creativeSummary dd, .storyboardScene h3, .chunkCard b, .timelineMetric b { color: var(--pf-primary); }
+.storyboardSceneActive, .storyboardScene:hover { box-shadow: var(--pf-shadow), var(--pf-highlight), 0 0 0 1px var(--pf-selected-border); }
+.storyboardSceneActive .storyboardSceneMeta span { background: var(--pf-action); color: var(--pf-action-ink); box-shadow: var(--pf-highlight); }
+.storyboardSceneMeta b, .storyboardLegend, .storyboardActions > small, .storyboardScene footer, .timeline > header p, .timelineMetric > span { color: var(--pf-secondary); }
+.storyboardSceneActions, .timelineMetric, .timelineGlobalMetric { background: var(--pf-card); border-color: var(--pf-border); box-shadow: inset 0 0 0 1px var(--pf-border); }
+.chunkCard, .addChunk, .storyboardAddScene { background: var(--pf-elevated); border-color: var(--pf-border); color: var(--pf-primary); }
+.chunkCard small, .addChunk small, .storyboardAddScene small { color: var(--pf-secondary); }
+.chunkActive { background: var(--pf-selected); border-color: var(--pf-selected-border); box-shadow: var(--pf-highlight); }
+.chunkActions button { background: var(--pf-card); border-color: var(--pf-border); color: var(--pf-secondary); }
+.chunkActions button:hover:not(:disabled) { background: var(--pf-elevated); border-color: var(--pf-border-hover); color: var(--pf-primary); }
+.generateDock > button, .storyboardGenerate { background: linear-gradient(135deg, var(--pf-action), var(--pf-action-end)); color: var(--pf-action-ink); border-color: var(--pf-selected-border); box-shadow: 0 10px 28px rgba(255,138,76,.16), var(--pf-highlight); }
+.generateDock > button:hover:not(:disabled), .storyboardGenerate:hover:not(:disabled) { background: var(--pf-action-hover); }
+.generateDock > button:disabled, .storyboardGenerate:disabled { background: var(--pf-elevated); color: var(--pf-tertiary); box-shadow: none; }
+.storyboardAdjust { background: var(--pf-elevated); color: var(--pf-primary); box-shadow: inset 0 0 0 1px var(--pf-border-hover); }
+.page :is(button, a):focus-visible { outline: 2px solid var(--pf-action); outline-offset: 3px; }
+.pixelAiHeaderButton { background: var(--pf-card); color: var(--pf-primary); border-color: var(--pf-ai-border); box-shadow: var(--pf-highlight), 0 0 18px rgba(143,211,255,.045); }
+.pixelAiHeaderButton svg { color: var(--pf-ai); filter: drop-shadow(0 0 6px rgba(143,211,255,.15)); }
+.pixelAiHeaderButton i { color: var(--pf-secondary); background: var(--pf-panel); }
+.pixelAiHeaderButton:hover { background: var(--pf-elevated); border-color: var(--pf-ai); box-shadow: var(--pf-shadow), var(--pf-highlight); }
+.pixelAiHeaderButtonActive { background: linear-gradient(145deg, var(--pf-ai-tint), transparent), var(--pf-elevated); border-color: var(--pf-ai); box-shadow: var(--pf-ai-focus), var(--pf-highlight); }
+.pixelAiHeaderButtonActive i { color: var(--pf-ai); background: var(--pf-ai-tint); }
+.page .pixelAiHeaderButton:focus-visible { outline-color: var(--pf-ai); }

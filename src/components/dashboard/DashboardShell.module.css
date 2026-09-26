@@ -211,6 +211,7 @@
   text-decoration: none;
 }
 
+
 .homeBrand img {
   width: 44px;
   height: 44px;
@@ -509,3 +510,25 @@
     flex: 0 0 auto;
   }
 }
+
+/* Shared tonal hierarchy; geometry and scroll behavior remain unchanged. */
+.desktopRoot,
+.desktopRoot:has(:global(#generator-root)) {
+  color: var(--pf-primary);
+  background: radial-gradient(ellipse at 18% 0, rgba(217, 119, 87, .035), transparent 40%), var(--pf-canvas);
+}
+.sidebar, .topbar {
+  background: linear-gradient(145deg, var(--pf-card), var(--pf-panel));
+  border-color: var(--pf-border);
+  box-shadow: var(--pf-shadow), var(--pf-highlight);
+}
+.brand, .homeBrand, .homeBrand b, .sectionContext b, .profileText b { color: var(--pf-headline); }
+.currentSection b, .credits, .profile { color: var(--pf-primary); }
+.sectionContext small, .homeBrand small, .currentSection small, .credits small, .profileText small, .logout { color: var(--pf-secondary); }
+.brand b, .homeBrand strong, .contextMark, .settingsLink svg, .recharge { color: var(--pf-brand); }
+.credits, .settingsLink { background: var(--pf-panel); border-color: var(--pf-border); }
+.settingsLink, .navLink { color: var(--pf-secondary); }
+.settingsLink:hover, .credits:hover, .navLink:not(.navActive):hover { background: var(--pf-elevated); border-color: var(--pf-border-hover); color: var(--pf-headline); }
+.settingsActive { color: var(--pf-action); border-color: var(--pf-selected-border); background: var(--pf-selected); }
+.navActive, .navActive:hover { background: var(--pf-action); color: var(--pf-action-ink); border-color: var(--pf-selected-border); box-shadow: var(--pf-highlight); }
+.accountArea :is(a, button):focus-visible { outline: 2px solid var(--pf-action); outline-offset: 3px; }

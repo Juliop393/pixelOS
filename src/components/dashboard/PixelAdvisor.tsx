@@ -287,16 +287,16 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
           isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
         style={{
-          background: "linear-gradient(135deg, rgba(30,28,26,0.85) 0%, rgba(26,26,26,0.78) 100%)",
+          background: "linear-gradient(135deg, var(--pf-elevated), var(--pf-card))",
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
-          border: "1px solid rgba(217,119,87,0.25)",
-          boxShadow: "0 4px 20px rgba(217,119,87,0.15), inset 0 1px 0 rgba(255,255,255,0.05)",
+          border: "1px solid var(--pf-ai-border)",
+          boxShadow: "0 4px 20px rgba(143,211,255,.06), var(--pf-highlight)",
           animationDuration: "3s",
         }}
       >
-        <Sparkles className="w-5 h-5 text-[#D97757]" strokeWidth={1.5} />
-        <span className="text-sm font-semibold text-[#F5F0E8]">Pixel IA</span>
+        <Sparkles className="w-5 h-5 text-[var(--pf-ai)]" strokeWidth={1.5} />
+        <span className="text-sm font-semibold text-[var(--pf-primary)]">Pixel IA</span>
       </button>
       )}
 
@@ -307,11 +307,11 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         role="dialog"
         className={inline ? styles.aiPanel : `${styles.drawerPanel} ${focusMode ? styles.drawerFocusPanel : ""} ${videoContext ? styles.videoAssistantPanel : ""}`}
         style={{
-          background: videoContext ? "linear-gradient(155deg, rgba(39,31,27,0.97), rgba(18,17,16,0.96) 68%)" : "linear-gradient(135deg, rgba(30,28,26,0.92) 0%, rgba(26,26,26,0.88) 100%)",
+          background: "linear-gradient(155deg, var(--pf-card), var(--pf-panel) 68%)",
           backdropFilter: "blur(28px) saturate(150%)",
           WebkitBackdropFilter: "blur(28px) saturate(150%)",
-          border: videoContext ? "1px solid rgba(224,126,90,0.24)" : "1px solid rgba(255,255,255,0.08)",
-          boxShadow: videoContext ? "0 32px 80px rgba(0,0,0,0.54), 0 0 42px rgba(215,107,69,0.1), inset 0 1px rgba(255,255,255,0.07)" : "0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
+          border: "1px solid var(--pf-ai-border)",
+          boxShadow: "0 24px 64px rgba(0,0,0,.48), var(--pf-highlight)",
         }}
       >
         {/* Reflejo superior */}
@@ -324,32 +324,32 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         {/* Cabecera */}
         <div
           className={`flex-shrink-0 px-5 py-3.5 flex items-center justify-between relative z-10 ${videoContext ? styles.videoAssistantHeader : ""}`}
-          style={{ borderBottom: "1px solid rgba(58,56,51,0.5)" }}
+          style={{ borderBottom: "1px solid var(--pf-border)" }}
         >
           <div className="flex items-center gap-2.5">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
               style={{
-                background: "linear-gradient(135deg, rgba(217,119,87,0.2) 0%, rgba(217,119,87,0.08) 100%)",
-                border: "1px solid rgba(217,119,87,0.2)",
+                background: "var(--pf-ai-tint)",
+                border: "1px solid var(--pf-ai-border)",
               }}
             >
-              <Sparkles className="w-4 h-4 text-[#D97757]" strokeWidth={1.5} />
+              <Sparkles className="w-4 h-4 text-[var(--pf-ai)]" strokeWidth={1.5} />
             </div>
             <div className={videoContext ? styles.videoAssistantTitle : undefined}>
-              <span className="text-sm font-bold text-[#F5F0E8]">Pixel IA</span>
-              <span className={videoContext ? "" : "text-[10px] text-[#9CA3AF] ml-2 hidden sm:inline"}>
+              <span className="text-sm font-bold text-[var(--pf-headline)]">Pixel IA</span>
+              <span className={videoContext ? "" : "text-[10px] text-[var(--pf-secondary)] ml-2 hidden sm:inline"}>
                 {videoContext ? "Copiloto creativo de Video" : "Estrategia creativa para tus anuncios."}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={() => setIsOpen(false)} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#9CA3AF] hover:text-[#F5F0E8] hover:bg-[#3A3833]/40 transition-colors" title="Minimizar">
+            <button onClick={() => setIsOpen(false)} className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--pf-secondary)] hover:text-[var(--pf-primary)] hover:bg-[var(--pf-elevated)] transition-colors" title="Minimizar">
               <svg className="w-3.5 h-3.5" width={14} height={14} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
               </svg>
             </button>
-            <button onClick={handleClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#9CA3AF] hover:text-[#F5F0E8] hover:bg-[#3A3833]/40 transition-colors" title="Cerrar">
+            <button onClick={handleClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--pf-secondary)] hover:text-[var(--pf-primary)] hover:bg-[var(--pf-elevated)] transition-colors" title="Cerrar">
               <svg className="w-3.5 h-3.5" width={14} height={14} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -378,11 +378,11 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                   <div
                     className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center"
                     style={{
-                      background: "linear-gradient(135deg, rgba(217,119,87,0.2) 0%, rgba(217,119,87,0.08) 100%)",
-                      border: "1px solid rgba(217,119,87,0.15)",
+                      background: "var(--pf-ai-tint)",
+                      border: "1px solid var(--pf-ai-border)",
                     }}
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-[#D97757]" strokeWidth={1.5} />
+                    <Sparkles className="w-3.5 h-3.5 text-[var(--pf-ai)]" strokeWidth={1.5} />
                   </div>
                 )}
                 <div
@@ -392,16 +392,16 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                   style={
                     isUser
                       ? {
-                          background: "linear-gradient(135deg, rgba(217,119,87,0.25) 0%, rgba(217,119,87,0.12) 100%)",
-                          border: "1px solid rgba(217,119,87,0.15)",
+                          background: "linear-gradient(135deg, var(--pf-elevated), var(--pf-card))",
+                          border: "1px solid var(--pf-ai-border)",
                         }
                       : {
-                          background: "rgba(42,40,38,0.6)",
-                          border: "1px solid rgba(58,56,51,0.5)",
+                          background: "var(--pf-elevated)",
+                          border: "1px solid var(--pf-border)",
                         }
                   }
                 >
-                  <p className="text-sm text-[#F5F0E8] leading-relaxed">{msg.content}</p>
+                  <p className="text-sm text-[var(--pf-primary)] leading-relaxed">{msg.content}</p>
 
                   {/* Botones de confirmación en el último mensaje del asistente */}
                   {convState === "confirming" && !isUser && idx === messages.length - 1 && (
@@ -409,14 +409,14 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                       <button
                         onClick={handleConfirm}
                         disabled={isLoading}
-                        className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold bg-[#D97757] text-white hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 disabled:opacity-50"
+                        className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold bg-[var(--pf-ai)] text-[var(--pf-action-ink)] hover:bg-[var(--pf-ai-hover)] active:scale-[0.98] transition-all duration-200 disabled:opacity-50"
                       >
                         {isLoading ? "..." : "Sí, recomendar ángulos"}
                       </button>
                       <button
                         onClick={handleCorrect}
                         disabled={isLoading}
-                        className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[#9CA3AF] border border-[#3A3833] hover:border-[#D97757]/50 hover:text-[#F5F0E8] transition-colors disabled:opacity-50"
+                        className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[var(--pf-secondary)] border border-[var(--pf-border)] hover:border-[var(--pf-ai)] hover:text-[var(--pf-primary)] transition-colors disabled:opacity-50"
                       >
                         Corregir
                       </button>
@@ -433,20 +433,20 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
               <div
                 className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center"
                 style={{
-                  background: "linear-gradient(135deg, rgba(217,119,87,0.2) 0%, rgba(217,119,87,0.08) 100%)",
-                  border: "1px solid rgba(217,119,87,0.15)",
+                  background: "var(--pf-ai-tint)",
+                  border: "1px solid var(--pf-ai-border)",
                 }}
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#D97757]" strokeWidth={1.5} />
+                <Sparkles className="w-3.5 h-3.5 text-[var(--pf-ai)]" strokeWidth={1.5} />
               </div>
               <div
                 className="rounded-2xl rounded-tl-md px-4 py-3"
-                style={{ background: "rgba(42,40,38,0.6)", border: "1px solid rgba(58,56,51,0.5)" }}
+                style={{ background: "var(--pf-elevated)", border: "1px solid var(--pf-border)" }}
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#D97757] animate-pulse" style={{ animationDelay: "0ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-[#D97757] animate-pulse" style={{ animationDelay: "200ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-[#D97757] animate-pulse" style={{ animationDelay: "400ms" }} />
+                  <div className="w-2 h-2 rounded-full bg-[var(--pf-ai)] animate-pulse" style={{ animationDelay: "0ms" }} />
+                  <div className="w-2 h-2 rounded-full bg-[var(--pf-ai)] animate-pulse" style={{ animationDelay: "200ms" }} />
+                  <div className="w-2 h-2 rounded-full bg-[var(--pf-ai)] animate-pulse" style={{ animationDelay: "400ms" }} />
                 </div>
               </div>
             </div>
@@ -458,15 +458,15 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
               <div
                 className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center"
                 style={{
-                  background: "linear-gradient(135deg, rgba(217,119,87,0.2) 0%, rgba(217,119,87,0.08) 100%)",
-                  border: "1px solid rgba(217,119,87,0.15)",
+                  background: "var(--pf-ai-tint)",
+                  border: "1px solid var(--pf-ai-border)",
                 }}
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#D97757]" strokeWidth={1.5} />
+                <Sparkles className="w-3.5 h-3.5 text-[var(--pf-ai)]" strokeWidth={1.5} />
               </div>
               <div className="max-w-[85%] space-y-2">
                 <div className="rounded-2xl rounded-tl-md px-3.5 py-2.5" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}>
-                  <p className="text-sm text-[#F5F0E8]">{error}</p>
+                  <p className="text-sm text-[var(--pf-primary)]">{error}</p>
                 </div>
               </div>
             </div>
@@ -478,28 +478,28 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
               <div
                 className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center"
                 style={{
-                  background: "linear-gradient(135deg, rgba(217,119,87,0.2) 0%, rgba(217,119,87,0.08) 100%)",
-                  border: "1px solid rgba(217,119,87,0.15)",
+                  background: "var(--pf-ai-tint)",
+                  border: "1px solid var(--pf-ai-border)",
                 }}
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#D97757]" strokeWidth={1.5} />
+                <Sparkles className="w-3.5 h-3.5 text-[var(--pf-ai)]" strokeWidth={1.5} />
               </div>
               <div className="max-w-[90%] space-y-2.5">
-                {summary && <p className="text-xs text-[#9CA3AF] ml-1">{summary}</p>}
+                {summary && <p className="text-xs text-[var(--pf-secondary)] ml-1">{summary}</p>}
 
                 {recommendations.map((rec, idx) => (
-                  <div key={idx} className="rounded-xl p-3" style={{ background: "rgba(42,40,38,0.5)", border: "1px solid rgba(58,56,51,0.4)" }}>
-                    <p className="text-sm font-bold text-[#F5F0E8] mb-1">{rec.angleName}</p>
-                    <p className="text-xs text-[#9CA3AF] mb-2 leading-relaxed">{rec.reason}</p>
+                  <div key={idx} className="rounded-xl p-3" style={{ background: "var(--pf-elevated)", border: "1px solid var(--pf-border)" }}>
+                    <p className="text-sm font-bold text-[var(--pf-primary)] mb-1">{rec.angleName}</p>
+                    <p className="text-xs text-[var(--pf-secondary)] mb-2 leading-relaxed">{rec.reason}</p>
                     <div className="flex gap-1.5 mb-2.5 flex-wrap">
-                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold text-[#9CA3AF] bg-[#1E1C1A]/60 border border-[#3A3833]/50">
+                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold text-[var(--pf-secondary)] bg-[var(--pf-panel)] border border-[var(--pf-border)]">
                         {formatLabels[rec.format] ?? rec.format}
                       </span>
-                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold text-[#9CA3AF] bg-[#1E1C1A]/60 border border-[#3A3833]/50">
+                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold text-[var(--pf-secondary)] bg-[var(--pf-panel)] border border-[var(--pf-border)]">
                         {rec.styleName}
                       </span>
                       {rec.safeZoneMeta && (
-                        <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold text-[#D97757] bg-[#D97757]/10 border border-[#D97757]/20">
+                        <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold text-[var(--pf-ai)] bg-[var(--pf-ai-tint)] border border-[var(--pf-ai-border)]">
                           Zona segura
                         </span>
                       )}
@@ -509,7 +509,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                       className={`w-full py-2 rounded-lg text-xs font-semibold transition-colors ${
                         appliedIndex === idx
                           ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : "text-[#D97757] border border-[#D97757]/30 hover:bg-[#D97757]/10"
+                          : "text-[var(--pf-ai)] border border-[var(--pf-ai-border)] hover:bg-[var(--pf-ai-tint)]"
                       }`}
                     >
                       {appliedIndex === idx ? "✓ Aplicado" : "Aplicar recomendación"}
@@ -520,19 +520,19 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                 {onApplyRecommendation && appliedDetails && (
                   <div className="rounded-xl p-3 mt-2" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)" }}>
                     <p className="text-xs font-semibold text-emerald-400 mb-2">✓ Recomendación aplicada al generador</p>
-                    <div className="text-xs text-[#F5F0E8] space-y-0.5">
+                    <div className="text-xs text-[var(--pf-primary)] space-y-0.5">
                       {appliedDetails.productDescription && (
-                        <p><span className="text-[#9CA3AF]">Producto:</span> {appliedDetails.productDescription}</p>
+                        <p><span className="text-[var(--pf-secondary)]">Producto:</span> {appliedDetails.productDescription}</p>
                       )}
-                      <p><span className="text-[#9CA3AF]">Ángulo:</span> {appliedDetails.angleName}</p>
-                      <p><span className="text-[#9CA3AF]">Estilo:</span> {appliedDetails.styleName}</p>
-                      <p><span className="text-[#9CA3AF]">Formato:</span> {formatLabels[appliedDetails.format] ?? appliedDetails.format}</p>
-                      <p><span className="text-[#9CA3AF]">Zona Segura Meta:</span> {appliedDetails.safeZoneMeta ? "Activada" : "Desactivada"}</p>
+                      <p><span className="text-[var(--pf-secondary)]">Ángulo:</span> {appliedDetails.angleName}</p>
+                      <p><span className="text-[var(--pf-secondary)]">Estilo:</span> {appliedDetails.styleName}</p>
+                      <p><span className="text-[var(--pf-secondary)]">Formato:</span> {formatLabels[appliedDetails.format] ?? appliedDetails.format}</p>
+                      <p><span className="text-[var(--pf-secondary)]">Zona Segura Meta:</span> {appliedDetails.safeZoneMeta ? "Activada" : "Desactivada"}</p>
                     </div>
                   </div>
                 )}
 
-                <button onClick={handleReset} className="text-xs font-medium text-[#9CA3AF] hover:text-[#F5F0E8] transition-colors flex items-center gap-1 ml-1">
+                <button onClick={handleReset} className="text-xs font-medium text-[var(--pf-secondary)] hover:text-[var(--pf-primary)] transition-colors flex items-center gap-1 ml-1">
                   <svg className="w-3 h-3" width={12} height={12} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
@@ -547,7 +547,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         {(convState === "collecting" || convState === "confirming") && (
           <div
             className={`flex-shrink-0 p-3 relative z-10 ${videoContext ? styles.videoAssistantComposer : ""}`}
-            style={{ borderTop: "1px solid rgba(58,56,51,0.5)" }}
+            style={{ borderTop: "1px solid var(--pf-border)" }}
           >
             <div className="flex items-end gap-2">
               <textarea
@@ -555,7 +555,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                 onChange={(e) => setInput(e.target.value)}
                 rows={2}
                 placeholder={videoContext ? "Describe tu video o pide una idea para avanzar..." : "Escribe tu respuesta..."}
-                className="flex-1 resize-none bg-[#1E1C1A] border border-[#3A3833] px-3.5 py-2.5 rounded-xl text-sm text-[#F5F0E8] placeholder:text-[#9CA3AF]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
+                className="flex-1 resize-none bg-[var(--pf-input)] border border-[var(--pf-border)] px-3.5 py-2.5 rounded-xl text-sm text-[var(--pf-primary)] placeholder:text-[var(--pf-tertiary)] focus:outline-none focus:border-[var(--pf-ai)] focus:shadow-[var(--pf-ai-focus)] transition-colors"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey && !isLoading) {
                     e.preventDefault()
@@ -566,7 +566,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
               <button
                 onClick={handleRecommend}
                 disabled={isLoading || !input.trim()}
-                className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center bg-[#D97757] text-white hover:bg-[#C26547] active:scale-[0.95] transition-all duration-200 shadow-lg shadow-[#D97757]/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center bg-[var(--pf-ai)] text-[var(--pf-action-ink)] hover:bg-[var(--pf-ai-hover)] active:scale-[0.95] transition-all duration-200 shadow-lg shadow-[#8FD3FF]/10 disabled:opacity-40 disabled:cursor-not-allowed"
                 title="Enviar"
               >
                 <svg className="w-4 h-4" width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">

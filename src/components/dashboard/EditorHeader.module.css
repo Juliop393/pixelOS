@@ -71,3 +71,9 @@
 @media (prefers-reduced-motion: reduce) {
   .backButton { transition: none; }
 }
+
+.backButton, .toolName { background: var(--pf-card); border-color: var(--pf-border); color: var(--pf-primary); box-shadow: var(--pf-highlight); }
+.backButton:hover { background: var(--pf-elevated); border-color: var(--pf-border-hover); color: var(--pf-headline); }
+.backButton svg, .toolName svg { color: var(--pf-brand); }
+.backButton:focus-visible { outline-color: var(--pf-action); }
+.divider { background: var(--pf-border); }

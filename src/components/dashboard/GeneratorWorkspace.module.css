@@ -567,3 +567,73 @@
 @media(max-width:460px){.videoAssistantStarters{grid-template-columns:1fr}.videoAssistantWelcome{padding:16px}.videoAssistantWelcome h2{font-size:21px}.videoAssistantComposer{padding:12px!important}}
 @media(prefers-reduced-motion:reduce){.videoAssistantStarters button{transition:none}}
 .videoAssistantStarters button{font-family:inherit;font-size:11px;font-weight:600;line-height:1.25}
+
+/* Shared palette: a recessed viewer, layered controls and localized action color. */
+.generatorPage { color: var(--pf-primary); }
+.builderPanel, .canvasPanel { background: var(--pf-panel); border-color: var(--pf-border); box-shadow: var(--pf-shadow), var(--pf-highlight); }
+.formCard, .resultsStrip, .contextRail, .aiCard { background: var(--pf-card); border-color: var(--pf-border); box-shadow: var(--pf-highlight); }
+.canvasHeader, .generateDock { background: var(--pf-card); border-color: var(--pf-border); }
+.canvasStage { background: radial-gradient(circle at 50% 42%, rgba(217,119,87,.035), transparent 36%), var(--pf-canvas); }
+.previewEmpty, .generatingState { background: linear-gradient(145deg, var(--pf-panel), var(--pf-input)); border-color: var(--pf-border); }
+.panelIntro h1, .formHeading h2, .canvasHeader b, .previewEmpty h2, .generatingState h2 { color: var(--pf-headline); }
+.selectorIntro h3 { color: var(--pf-headline); }
+.selectorIntro p, .summaryStatus > b { color: var(--pf-secondary); }
+.loadingStages, .stageComplete { color: var(--pf-tertiary); }
+.stageActive { color: var(--pf-primary); }
+.panelIntro p, .formHeading p, .canvasHeader small, .previewEmpty > p, .generatingState > p, .angleGrid > button > p { color: var(--pf-secondary); }
+.formCard label, .helper, .generateDock > div, .summaryGrid small, .railLabel > small, .quantityMeta, .uploadDrop small { color: var(--pf-tertiary); }
+.panelIntro .eyebrow, .formHeading > span { color: var(--pf-brand); }
+.formCard .panelInput, .formCard .panelTextarea { background: var(--pf-input); border-color: var(--pf-border); color: var(--pf-primary); }
+.formCard .panelInput:hover, .formCard .panelTextarea:hover { background: var(--pf-input); border-color: var(--pf-border-hover); }
+.formCard .panelInput::placeholder, .formCard .panelTextarea::placeholder { color: var(--pf-tertiary); }
+.formCard .panelInput:focus, .formCard .panelTextarea:focus { border-color: var(--pf-action); box-shadow: var(--pf-focus); }
+.stepTabs, .quantityGrid, .uploadDrop, .uploadState { background: var(--pf-panel); border-color: var(--pf-border); }
+.stepTabs button, .stepTabs button span { color: var(--pf-secondary); }
+.stepTabs button:hover { background: var(--pf-elevated); color: var(--pf-headline); }
+.stepTabs .stepActive { color: var(--pf-headline)!important; background: var(--pf-selected)!important; box-shadow: inset 0 0 0 1px var(--pf-selected-border)!important; }
+.stepActive span { color: var(--pf-action)!important; }
+.angleGrid > button, .styleGrid > button, .formatChoices button, .toggleRow, .segmented button { background: var(--pf-elevated); border-color: var(--pf-border); color: var(--pf-primary); }
+.angleGrid > button:hover, .styleGrid > button:hover, .formatChoices button:hover, .segmented button:hover { background: var(--pf-elevated); border-color: var(--pf-border-hover); }
+.angleGrid .angleSelected, .styleGrid .styleSelected, .formatChoices .selected, .segmented .segSelected { background: var(--pf-selected); border-color: var(--pf-selected-border); box-shadow: var(--pf-highlight); color: var(--pf-headline); }
+.styleGrid > button > span:not(.styleInfo) b, .toggleRow > span b, .summaryGrid b, .railLabel > span { color: var(--pf-primary); }
+.styleGrid > button > span:not(.styleInfo) small, .toggleRow > span small, .formatChoices button small, .quantityGrid small { color: var(--pf-secondary); }
+.quantityGrid button { color: var(--pf-secondary); }
+.quantityGrid .selected { background: var(--pf-action); border-color: var(--pf-selected-border); color: var(--pf-action-ink); }
+.quantityGrid .selected small { color: var(--pf-action-ink); }
+.generateButton { background: linear-gradient(135deg, var(--pf-action), var(--pf-action-end)); color: var(--pf-action-ink); box-shadow: 0 10px 28px rgba(255,138,76,.16), var(--pf-highlight); }
+.generateButton > span { color: inherit; }
+.generateButton:hover:not(:disabled) { background: var(--pf-action-hover); }
+.generateButton:disabled { background: var(--pf-elevated); color: var(--pf-tertiary); box-shadow: none; }
+.canvasTools button, .canvasTools .formatBtn, .resultActions a, .resultActions button { background: var(--pf-card); border-color: var(--pf-border); color: var(--pf-secondary); }
+.canvasTools button:hover, .resultActions :is(a,button):hover { background: var(--pf-elevated); border-color: var(--pf-border-hover); color: var(--pf-primary); }
+.canvasTools .previewNavButton { color: var(--pf-primary); background: var(--pf-elevated); border-color: var(--pf-border-hover); }
+.canvasTools button[aria-controls="pixel-ai-panel"] { color: var(--pf-ai); border-color: var(--pf-ai-border); background: var(--pf-ai-tint); }
+.canvasTools button[aria-controls="pixel-ai-panel"]:focus-visible { outline-color: var(--pf-ai); }
+.formatMenu > div { background: var(--pf-elevated); border-color: var(--pf-border-hover); }
+.summaryGrid > span { background: var(--pf-elevated); border-color: var(--pf-border); }
+.toolActive { color: var(--pf-action)!important; background: var(--pf-selected)!important; border-color: var(--pf-selected-border)!important; }
+.thumbnailActive { border-color: var(--pf-action)!important; }
+.builderPanel button:focus-visible, .canvasPanel :is(a,button):focus-visible { outline: 2px solid var(--pf-action); outline-offset: 3px; }
+
+/* PixelIA gets a restrained cool signal, not a second product palette. */
+.aiHead > span { color: var(--pf-ai); background: var(--pf-ai-tint); border-color: var(--pf-ai-border); }
+.aiHead b { color: var(--pf-headline); }
+.aiHead small, .aiCard p { color: var(--pf-secondary); }
+.aiCard button { color: var(--pf-ai); }
+.aiPanel, .drawerPanel { color: var(--pf-primary); }
+.aiPanel button:focus-visible, .drawerPanel button:focus-visible { outline: 2px solid var(--pf-ai); outline-offset: 3px; }
+.drawerFocusPanel { box-shadow: 0 24px 64px rgba(0,0,0,.48), var(--pf-highlight)!important; }
+.videoAssistantHeader { background: linear-gradient(115deg, var(--pf-ai-tint), transparent); }
+.videoAssistantTitle > span:last-child { color: var(--pf-secondary); }
+.videoAssistantWelcome { background: radial-gradient(circle at 100% 0, var(--pf-ai-tint), transparent 45%), var(--pf-card); box-shadow: var(--pf-shadow), var(--pf-highlight), 0 0 0 1px var(--pf-ai-border); }
+.videoAssistantWelcomeIcon { background: var(--pf-ai-tint); color: var(--pf-ai); box-shadow: inset 0 0 0 1px var(--pf-ai-border); }
+.videoAssistantWelcome > span, .videoAssistantStarters svg { color: var(--pf-ai); }
+.videoAssistantWelcome h2 { color: var(--pf-headline); }
+.videoAssistantWelcome p { color: var(--pf-secondary); }
+.videoAssistantWelcome > small { color: var(--pf-tertiary); }
+.videoAssistantStarters button { background: var(--pf-panel); color: var(--pf-primary); box-shadow: inset 0 0 0 1px var(--pf-border); }
+.videoAssistantStarters button:hover:not(:disabled) { background: var(--pf-elevated); box-shadow: inset 0 0 0 1px var(--pf-ai-border); }
+.videoAssistantStarters button:focus-visible { outline-color: var(--pf-ai); }
+.videoAssistantComposer { background: var(--pf-panel); }
+.videoAssistantComposer textarea { background: var(--pf-input); border-color: var(--pf-border); }
+.videoAssistantComposer textarea:focus { border-color: var(--pf-ai); box-shadow: var(--pf-ai-focus); }

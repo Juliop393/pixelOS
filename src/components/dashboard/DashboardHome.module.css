@@ -864,3 +864,44 @@
 
   .creativeSkeleton { animation: none; }
 }
+
+/* Tonal depth shared with the creative editors; illustrative canvases keep their artwork. */
+.homePage { color: var(--pf-primary); }
+.hero, .recentSection, .inspirationSection {
+  background: linear-gradient(145deg, var(--pf-card), var(--pf-panel));
+  border-color: var(--pf-border);
+  box-shadow: var(--pf-shadow), var(--pf-highlight);
+}
+.heroGlow { background: rgba(217, 119, 87, .055); }
+.creationCard, .creativeCard, .ideaCard, .ideaCard:nth-child(n) {
+  background: var(--pf-card);
+  border-color: var(--pf-border);
+}
+.creationCard, .creationCard[data-tone="video"] { background: linear-gradient(145deg, var(--pf-elevated), var(--pf-card)); }
+.creationCard:hover, .creationCard[data-tone="video"]:hover, .creativeCard:hover {
+  background: var(--pf-elevated);
+  border-color: var(--pf-selected-border);
+  box-shadow: var(--pf-shadow), var(--pf-highlight);
+}
+.intro h1, .creationCard h2, .pixelAiCopy h2, .sectionHeader h2, .emptyLibrary h3 { color: var(--pf-headline); }
+.creativeDetails strong, .ideaCard h3 { color: var(--pf-primary); }
+.intro p, .creationCard p, .pixelAiCopy p, .sectionHeader p, .emptyLibrary p, .ideaCard p { color: var(--pf-secondary); }
+.heroLinks > span, .creativeDetails > span, .creativeDetails small, .ideaLabel, .ideaIndex { color: var(--pf-tertiary); }
+.eyebrow, .actionMeta, .sectionHeader > div > span { color: var(--pf-brand); }
+.actionLink { color: var(--pf-action); }
+.heroLinks > a, .sectionHeader > a { background: var(--pf-card); color: var(--pf-primary); border-color: var(--pf-border); }
+.heroLinks > a:hover, .sectionHeader > a:hover { background: var(--pf-elevated); border-color: var(--pf-border-hover); color: var(--pf-headline); }
+.emptyLibrary { background: var(--pf-panel); border-color: var(--pf-border-hover); }
+.emptyLibrary > a { background: var(--pf-action); color: var(--pf-action-ink); border-color: var(--pf-selected-border); box-shadow: var(--pf-highlight); }
+.pixelAiCard { background: radial-gradient(circle at 0 50%, var(--pf-ai-tint), transparent 36%), linear-gradient(145deg, var(--pf-card), var(--pf-panel)); border-color: var(--pf-ai-border); }
+.pixelAiAura { background: rgba(143, 211, 255, .045); }
+.pixelAiMark { color: var(--pf-ai); background: var(--pf-ai-tint); border-color: var(--pf-ai-border); box-shadow: var(--pf-highlight); }
+.pixelAiCopy > span { color: var(--pf-ai); }
+.pixelAiPrompt { background: var(--pf-input); border-color: var(--pf-border); }
+.pixelAiPrompt:focus-within { background: var(--pf-input); border-color: var(--pf-ai); box-shadow: var(--pf-ai-focus); }
+.pixelAiPrompt textarea { color: var(--pf-primary); }
+.pixelAiPrompt textarea::placeholder { color: var(--pf-tertiary); }
+.pixelAiPrompt button { background: var(--pf-elevated); color: var(--pf-ai); border-color: var(--pf-ai-border); box-shadow: var(--pf-highlight); }
+.pixelAiPrompt button:hover { background: var(--pf-ai-tint); }
+.homePage :is(a, button):focus-visible { outline: 2px solid var(--pf-action); outline-offset: 3px; }
+.pixelAiCard button:focus-visible { outline-color: var(--pf-ai); }

@@ -3,6 +3,33 @@
 @tailwind utilities;
 
 :root {
+  /* Authenticated workspace palette. Independent from the landing's legacy tokens. */
+  --pf-canvas: #0a0807;
+  --pf-panel: #14110f;
+  --pf-card: #1e1916;
+  --pf-elevated: #28211d;
+  --pf-input: #100d0b;
+  --pf-headline: #faf7f4;
+  --pf-primary: #e8dfd8;
+  --pf-secondary: #b7aaa0;
+  --pf-tertiary: #9a8c82;
+  --pf-border: rgba(247, 244, 241, .12);
+  --pf-border-hover: rgba(247, 244, 241, .22);
+  --pf-brand: #d97757;
+  --pf-action: #ff8a4c;
+  --pf-action-end: #f47940;
+  --pf-action-hover: #ffa16b;
+  --pf-action-ink: #241107;
+  --pf-selected: rgba(255, 138, 76, .08);
+  --pf-selected-border: rgba(255, 138, 76, .62);
+  --pf-ai: #8fd3ff;
+  --pf-ai-hover: #b7e2ff;
+  --pf-ai-tint: rgba(143, 211, 255, .07);
+  --pf-ai-border: rgba(143, 211, 255, .28);
+  --pf-highlight: inset 0 1px rgba(255, 255, 255, .045);
+  --pf-shadow: 0 18px 48px rgba(0, 0, 0, .24);
+  --pf-focus: 0 0 0 3px rgba(255, 138, 76, .16);
+  --pf-ai-focus: 0 0 0 3px rgba(143, 211, 255, .13);
   background: #1E1C1A;
   color: #E8E6E1;
 }
