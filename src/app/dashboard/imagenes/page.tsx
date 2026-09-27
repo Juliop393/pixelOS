@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Sparkles } from "lucide-react"
+import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import { useCreativeGenerator } from "@/hooks/useCreativeGenerator"
 import { ANGLES } from "@/lib/angles-data"
 import AngleSelector from "@/components/dashboard/AngleSelector"
@@ -252,7 +252,7 @@ export default function DashboardPage() {
               aria-controls="pixel-ai-panel"
               title="PixelAI"
             >
-              <Sparkles size={14} strokeWidth={1.7} aria-hidden="true" />
+              <PixelAiIcon size={14} strokeWidth={1.7} aria-hidden="true" />
               <span>PixelAI</span>
             </button>
             <span className={s.canvasToolDivider} aria-hidden="true" />

@@ -893,15 +893,15 @@
 .heroLinks > a:hover, .sectionHeader > a:hover { background: var(--pf-elevated); border-color: var(--pf-border-hover); color: var(--pf-headline); }
 .emptyLibrary { background: var(--pf-panel); border-color: var(--pf-border-hover); }
 .emptyLibrary > a { background: var(--pf-action); color: var(--pf-action-ink); border-color: var(--pf-selected-border); box-shadow: var(--pf-highlight); }
-.pixelAiCard { background: radial-gradient(circle at 0 50%, var(--pf-ai-tint), transparent 36%), linear-gradient(145deg, var(--pf-card), var(--pf-panel)); border-color: var(--pf-ai-border); }
-.pixelAiAura { background: rgba(143, 211, 255, .045); }
-.pixelAiMark { color: var(--pf-ai); background: var(--pf-ai-tint); border-color: var(--pf-ai-border); box-shadow: var(--pf-highlight); }
+.pixelAiCard { background: var(--pf-ai-panel-surface); border-color: transparent; box-shadow: var(--pf-shadow), var(--pf-highlight), var(--pf-ai-halo); }
+.pixelAiAura { background: radial-gradient(ellipse at center, rgba(96,126,195,.2), rgba(139,113,184,.1) 35%, transparent 68%); opacity: .65; }
+.pixelAiMark { color: var(--pf-ai); background: var(--pf-ai-surface); border-color: transparent; box-shadow: var(--pf-highlight), var(--pf-ai-halo); }
 .pixelAiCopy > span { color: var(--pf-ai); }
 .pixelAiPrompt { background: var(--pf-input); border-color: var(--pf-border); }
-.pixelAiPrompt:focus-within { background: var(--pf-input); border-color: var(--pf-ai); box-shadow: var(--pf-ai-focus); }
+.pixelAiPrompt:focus-within { background: var(--pf-input); border-color: var(--pf-ai-border-active); box-shadow: var(--pf-ai-focus); }
 .pixelAiPrompt textarea { color: var(--pf-primary); }
 .pixelAiPrompt textarea::placeholder { color: var(--pf-tertiary); }
-.pixelAiPrompt button { background: var(--pf-elevated); color: var(--pf-ai); border-color: var(--pf-ai-border); box-shadow: var(--pf-highlight); }
-.pixelAiPrompt button:hover { background: var(--pf-ai-tint); }
+.pixelAiPrompt button { background: var(--pf-ai-surface); color: var(--pf-headline); border-color: transparent; box-shadow: var(--pf-highlight); }
+.pixelAiPrompt button:hover { background: var(--pf-ai-active-surface); box-shadow: var(--pf-ai-halo); }
 .homePage :is(a, button):focus-visible { outline: 2px solid var(--pf-action); outline-offset: 3px; }
 .pixelAiCard button:focus-visible { outline-color: var(--pf-ai); }

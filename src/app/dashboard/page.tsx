@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
-import { ArrowUpRight, FolderOpen, Image as ImageIcon, Sparkles, Video } from "lucide-react"
+import { ArrowUpRight, FolderOpen, Image as ImageIcon, Video } from "lucide-react"
+import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
 import type { PixelAiInitialRequest } from "@/components/dashboard/PixelAdvisor"
 import styles from "@/components/dashboard/DashboardHome.module.css"
@@ -146,7 +147,7 @@ export default function DashboardHomePage() {
             </p>
 
             <div className={styles.heroLinks}>
-              <span><Sparkles aria-hidden="true" /> Pixel IA piensa la estrategia antes de generar.</span>
+              <span><PixelAiIcon aria-hidden="true" /> Pixel IA piensa la estrategia antes de generar.</span>
               <Link href="/dashboard/assets">
                 <FolderOpen aria-hidden="true" />
                 Mis creativos
@@ -198,7 +199,7 @@ export default function DashboardHomePage() {
         <section className={styles.pixelAiCard} aria-labelledby="pixel-ai-home-title">
           <span className={styles.pixelAiAura} aria-hidden="true" />
           <div className={styles.pixelAiIntro}>
-            <span className={styles.pixelAiMark} aria-hidden="true"><Sparkles /></span>
+            <span className={styles.pixelAiMark} aria-hidden="true"><PixelAiIcon /></span>
             <div className={styles.pixelAiCopy}>
               <span>PIXEL IA · BRIEF RÁPIDO</span>
               <h2 id="pixel-ai-home-title">Cuéntame qué quieres anunciar</h2>
@@ -221,7 +222,7 @@ export default function DashboardHomePage() {
               placeholder="Ej. Quiero anunciar una crema facial para mujeres de 30 a 45 años y destacar su efecto hidratante…"
             />
             <button type="submit" aria-label="Abrir Pixel IA con este brief">
-              <Sparkles aria-hidden="true" />
+              <PixelAiIcon aria-hidden="true" />
               Pensar con Pixel IA
             </button>
           </form>

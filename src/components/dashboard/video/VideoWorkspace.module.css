@@ -372,10 +372,10 @@
 .generateDock > button:disabled, .storyboardGenerate:disabled { background: var(--pf-elevated); color: var(--pf-tertiary); box-shadow: none; }
 .storyboardAdjust { background: var(--pf-elevated); color: var(--pf-primary); box-shadow: inset 0 0 0 1px var(--pf-border-hover); }
 .page :is(button, a):focus-visible { outline: 2px solid var(--pf-action); outline-offset: 3px; }
-.pixelAiHeaderButton { background: var(--pf-card); color: var(--pf-primary); border-color: var(--pf-ai-border); box-shadow: var(--pf-highlight), 0 0 18px rgba(143,211,255,.045); }
-.pixelAiHeaderButton svg { color: var(--pf-ai); filter: drop-shadow(0 0 6px rgba(143,211,255,.15)); }
+.pixelAiHeaderButton { min-height: 40px; border-radius: 14px; background: var(--pf-ai-surface); color: var(--pf-primary); border-color: transparent; box-shadow: var(--pf-highlight), var(--pf-ai-halo); }
+.pixelAiHeaderButton svg { color: var(--pf-ai); filter: drop-shadow(0 0 5px rgba(136,163,215,.16)); }
 .pixelAiHeaderButton i { color: var(--pf-secondary); background: var(--pf-panel); }
-.pixelAiHeaderButton:hover { background: var(--pf-elevated); border-color: var(--pf-ai); box-shadow: var(--pf-shadow), var(--pf-highlight); }
-.pixelAiHeaderButtonActive { background: linear-gradient(145deg, var(--pf-ai-tint), transparent), var(--pf-elevated); border-color: var(--pf-ai); box-shadow: var(--pf-ai-focus), var(--pf-highlight); }
+.pixelAiHeaderButton:hover { background: var(--pf-ai-active-surface); border-color: transparent; box-shadow: var(--pf-ai-halo), var(--pf-highlight); }
+.pixelAiHeaderButtonActive { background: var(--pf-ai-active-surface); border-color: transparent; box-shadow: var(--pf-ai-halo), var(--pf-highlight); }
 .pixelAiHeaderButtonActive i { color: var(--pf-ai); background: var(--pf-ai-tint); }
 .page .pixelAiHeaderButton:focus-visible { outline-color: var(--pf-ai); }

@@ -607,7 +607,9 @@
 .canvasTools button, .canvasTools .formatBtn, .resultActions a, .resultActions button { background: var(--pf-card); border-color: var(--pf-border); color: var(--pf-secondary); }
 .canvasTools button:hover, .resultActions :is(a,button):hover { background: var(--pf-elevated); border-color: var(--pf-border-hover); color: var(--pf-primary); }
 .canvasTools .previewNavButton { color: var(--pf-primary); background: var(--pf-elevated); border-color: var(--pf-border-hover); }
-.canvasTools button[aria-controls="pixel-ai-panel"] { color: var(--pf-ai); border-color: var(--pf-ai-border); background: var(--pf-ai-tint); }
+.canvasTools button[aria-controls="pixel-ai-panel"] { color: var(--pf-primary); border-color: transparent; background: var(--pf-ai-surface); box-shadow: var(--pf-highlight); }
+.canvasTools button[aria-controls="pixel-ai-panel"]:hover,
+.canvasTools button[aria-controls="pixel-ai-panel"][aria-expanded="true"] { background: var(--pf-ai-active-surface); border-color: transparent; color: var(--pf-headline); box-shadow: var(--pf-ai-halo), var(--pf-highlight); }
 .canvasTools button[aria-controls="pixel-ai-panel"]:focus-visible { outline-color: var(--pf-ai); }
 .formatMenu > div { background: var(--pf-elevated); border-color: var(--pf-border-hover); }
 .summaryGrid > span { background: var(--pf-elevated); border-color: var(--pf-border); }
@@ -615,25 +617,39 @@
 .thumbnailActive { border-color: var(--pf-action)!important; }
 .builderPanel button:focus-visible, .canvasPanel :is(a,button):focus-visible { outline: 2px solid var(--pf-action); outline-offset: 3px; }
 
-/* PixelIA gets a restrained cool signal, not a second product palette. */
+/* Localized aurora illumination; neutral dark surfaces and readable content. */
 .aiHead > span { color: var(--pf-ai); background: var(--pf-ai-tint); border-color: var(--pf-ai-border); }
 .aiHead b { color: var(--pf-headline); }
 .aiHead small, .aiCard p { color: var(--pf-secondary); }
 .aiCard button { color: var(--pf-ai); }
 .aiPanel, .drawerPanel { color: var(--pf-primary); }
 .aiPanel button:focus-visible, .drawerPanel button:focus-visible { outline: 2px solid var(--pf-ai); outline-offset: 3px; }
-.drawerFocusPanel { box-shadow: 0 24px 64px rgba(0,0,0,.48), var(--pf-highlight)!important; }
-.videoAssistantHeader { background: linear-gradient(115deg, var(--pf-ai-tint), transparent); }
+.drawerFocusPanel { box-shadow: var(--pf-ai-panel-shadow)!important; }
+.pixelAiTrigger { color: var(--pf-primary); box-shadow: var(--pf-ai-halo), var(--pf-shadow), var(--pf-highlight); }
+.pixelAiTrigger:hover { box-shadow: var(--pf-ai-focus), var(--pf-ai-halo), var(--pf-shadow); }
+.pixelAiTrigger:focus-visible { outline: 2px solid var(--pf-ai); outline-offset: 4px; }
+.pixelAiHeader, .videoAssistantHeader { background: var(--pf-ai-ambient); }
 .videoAssistantTitle > span:last-child { color: var(--pf-secondary); }
-.videoAssistantWelcome { background: radial-gradient(circle at 100% 0, var(--pf-ai-tint), transparent 45%), var(--pf-card); box-shadow: var(--pf-shadow), var(--pf-highlight), 0 0 0 1px var(--pf-ai-border); }
-.videoAssistantWelcomeIcon { background: var(--pf-ai-tint); color: var(--pf-ai); box-shadow: inset 0 0 0 1px var(--pf-ai-border); }
+.videoAssistantWelcome { background: var(--pf-ai-panel-surface); border: 1px solid transparent; box-shadow: var(--pf-shadow), var(--pf-highlight); }
+.videoAssistantWelcomeIcon { background: var(--pf-ai-surface); border: 1px solid transparent; color: var(--pf-ai); box-shadow: var(--pf-ai-halo), var(--pf-highlight); }
 .videoAssistantWelcome > span, .videoAssistantStarters svg { color: var(--pf-ai); }
 .videoAssistantWelcome h2 { color: var(--pf-headline); }
 .videoAssistantWelcome p { color: var(--pf-secondary); }
 .videoAssistantWelcome > small { color: var(--pf-tertiary); }
-.videoAssistantStarters button { background: var(--pf-panel); color: var(--pf-primary); box-shadow: inset 0 0 0 1px var(--pf-border); }
-.videoAssistantStarters button:hover:not(:disabled) { background: var(--pf-elevated); box-shadow: inset 0 0 0 1px var(--pf-ai-border); }
+.videoAssistantStarters button { background: var(--pf-panel); color: var(--pf-primary); border: 1px solid var(--pf-border); box-shadow: var(--pf-highlight); }
+.videoAssistantStarters button:hover:not(:disabled) { background: var(--pf-ai-surface); border-color: transparent; box-shadow: var(--pf-ai-halo), var(--pf-highlight); }
 .videoAssistantStarters button:focus-visible { outline-color: var(--pf-ai); }
 .videoAssistantComposer { background: var(--pf-panel); }
-.videoAssistantComposer textarea { background: var(--pf-input); border-color: var(--pf-border); }
-.videoAssistantComposer textarea:focus { border-color: var(--pf-ai); box-shadow: var(--pf-ai-focus); }
+.aiPrimaryAction { border: 1px solid transparent; background: var(--pf-ai-surface); color: var(--pf-headline); box-shadow: var(--pf-highlight); }
+.aiPrimaryAction:hover:not(:disabled) { background: var(--pf-ai-active-surface); box-shadow: var(--pf-ai-halo); }
+.aiSecondaryAction { background: var(--pf-panel); }
+.aiSecondaryAction:hover:not(:disabled) { background: var(--pf-ai-surface); border-color: transparent; }
+.aiRecommendationAction:hover { box-shadow: var(--pf-ai-halo); }
+.aiChatInput, .videoAssistantComposer .aiChatInput { min-width: 0; background: var(--pf-input); border-color: var(--pf-border); box-shadow: var(--pf-highlight); }
+.aiChatInput:hover, .videoAssistantComposer .aiChatInput:hover { box-shadow: var(--pf-highlight), 0 0 0 1px var(--pf-ai-tint); }
+.aiChatInput:focus, .videoAssistantComposer .aiChatInput:focus { background: var(--pf-input); border-color: var(--pf-ai-border-active); box-shadow: var(--pf-ai-focus); }
+.aiSendButton { border: 1px solid var(--pf-ai-border-active); background: var(--pf-ai-send-surface); color: var(--pf-headline); box-shadow: var(--pf-highlight), var(--pf-ai-halo); }
+.aiSendButton:hover:not(:disabled) { filter: brightness(1.12); box-shadow: var(--pf-ai-focus), var(--pf-ai-halo); }
+.aiSendButton:disabled { background: var(--pf-elevated); border-color: var(--pf-border); color: var(--pf-tertiary); box-shadow: none; }
+.canvasPanel .canvasTools button[aria-controls="pixel-ai-panel"]:focus-visible { outline-color: var(--pf-ai); }
+@media(prefers-reduced-motion:reduce){.pixelAiTrigger, .aiPrimaryAction, .aiSecondaryAction, .aiChatInput, .aiSendButton { transition: none; }.pixelAiTrigger:hover { transform: none; }}

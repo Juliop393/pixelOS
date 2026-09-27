@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { ArrowLeft, Sparkles, WandSparkles } from "lucide-react"
+import { ArrowLeft, WandSparkles } from "lucide-react"
+import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import { useVideoGenerator } from "@/hooks/useVideoGenerator"
 import { supabase } from "@/lib/supabase"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
@@ -222,7 +223,7 @@ export default function VideoWorkspace() {
       onClick={() => setPixelAiOpen((open) => !open)}
       aria-controls="pixel-ai-panel"
       aria-expanded={pixelAiOpen}
-    ><Sparkles /><span>PixelIA</span><i>{pixelAiOpen ? "Abierto" : "Asistente creativo"}</i></button>} />
+    ><PixelAiIcon /><span>PixelIA</span><i>{pixelAiOpen ? "Abierto" : "Asistente creativo"}</i></button>} />
     <section className={s.workspace}>
     {workspaceMode === "storyboard" ? <VideoStoryboard
       chunks={chunks}

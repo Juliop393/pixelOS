@@ -22,14 +22,26 @@
   --pf-action-ink: #241107;
   --pf-selected: rgba(255, 138, 76, .08);
   --pf-selected-border: rgba(255, 138, 76, .62);
-  --pf-ai: #8fd3ff;
-  --pf-ai-hover: #b7e2ff;
-  --pf-ai-tint: rgba(143, 211, 255, .07);
-  --pf-ai-border: rgba(143, 211, 255, .28);
+  /* PixelIA only: localized aurora light, never a multicolor frame. */
+  --pf-ai: #b6c5e8;
+  --pf-ai-blue: #88a3d7;
+  --pf-ai-violet: #b1a6ce;
+  --pf-ai-cyan: #96c8d0;
+  --pf-ai-tint: rgba(119, 137, 190, .07);
+  --pf-ai-border: rgba(146, 158, 202, .24);
+  --pf-ai-border-active: rgba(146, 166, 219, .48);
+  --pf-ai-edge-light: radial-gradient(ellipse at 85% 0%, rgba(134, 160, 219, .46), rgba(156, 139, 196, .2) 38%, var(--pf-border) 75%);
+  --pf-ai-ambient: radial-gradient(ellipse at 100% 0%, rgba(91, 121, 194, .12), transparent 58%), radial-gradient(ellipse at 86% 20%, rgba(139, 113, 184, .055), transparent 50%);
+  --pf-ai-surface: var(--pf-ai-ambient) padding-box, linear-gradient(145deg, var(--pf-elevated), var(--pf-card)) padding-box, linear-gradient(var(--pf-ai-border), var(--pf-ai-border)) border-box;
+  --pf-ai-active-surface: var(--pf-ai-ambient) padding-box, linear-gradient(145deg, var(--pf-elevated), var(--pf-card)) padding-box, var(--pf-ai-edge-light) border-box;
+  --pf-ai-panel-surface: radial-gradient(ellipse at 100% 100%, rgba(106, 94, 167, .09), transparent 45%) padding-box, radial-gradient(ellipse at 100% 88%, rgba(96, 160, 180, .035), transparent 35%) padding-box, linear-gradient(155deg, var(--pf-card), var(--pf-panel) 68%) padding-box, linear-gradient(var(--pf-border), var(--pf-border)) border-box;
+  --pf-ai-send-surface: radial-gradient(ellipse at 85% 0%, rgba(159, 208, 222, .22), transparent 60%), linear-gradient(145deg, #344563, #3c3655);
+  --pf-ai-halo: 0 0 22px rgba(92, 120, 188, .085), 0 8px 24px rgba(140, 116, 182, .045);
+  --pf-ai-panel-shadow: 0 24px 64px rgba(0,0,0,.48), var(--pf-ai-halo), var(--pf-highlight);
   --pf-highlight: inset 0 1px rgba(255, 255, 255, .045);
   --pf-shadow: 0 18px 48px rgba(0, 0, 0, .24);
   --pf-focus: 0 0 0 3px rgba(255, 138, 76, .16);
-  --pf-ai-focus: 0 0 0 3px rgba(143, 211, 255, .13);
+  --pf-ai-focus: 0 0 0 3px rgba(119, 137, 190, .13);
   background: #1E1C1A;
   color: #E8E6E1;
 }

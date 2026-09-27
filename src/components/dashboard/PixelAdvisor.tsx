@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Clapperboard, Lightbulb, ListVideo, Sparkles, Target, Zap } from "lucide-react"
+import { Clapperboard, Lightbulb, ListVideo, Target, Zap } from "lucide-react"
+import PixelAiIcon from "./PixelAiIcon"
 import styles from "./GeneratorWorkspace.module.css"
 
 export type Recommendation = {
@@ -283,19 +284,15 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
       <button
         onClick={() => setIsOpen(true)}
         title="Abrir Pixel IA"
-        className={`fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 animate-pulse ${
+        className={`${styles.pixelAiTrigger} fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 ${
           isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
         style={{
-          background: "linear-gradient(135deg, var(--pf-elevated), var(--pf-card))",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          border: "1px solid var(--pf-ai-border)",
-          boxShadow: "0 4px 20px rgba(143,211,255,.06), var(--pf-highlight)",
-          animationDuration: "3s",
+          background: "var(--pf-ai-surface)",
+          border: "1px solid transparent",
         }}
       >
-        <Sparkles className="w-5 h-5 text-[var(--pf-ai)]" strokeWidth={1.5} />
+        <PixelAiIcon className="w-5 h-5" strokeWidth={1.5} />
         <span className="text-sm font-semibold text-[var(--pf-primary)]">Pixel IA</span>
       </button>
       )}
@@ -307,11 +304,11 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         role="dialog"
         className={inline ? styles.aiPanel : `${styles.drawerPanel} ${focusMode ? styles.drawerFocusPanel : ""} ${videoContext ? styles.videoAssistantPanel : ""}`}
         style={{
-          background: "linear-gradient(155deg, var(--pf-card), var(--pf-panel) 68%)",
-          backdropFilter: "blur(28px) saturate(150%)",
-          WebkitBackdropFilter: "blur(28px) saturate(150%)",
-          border: "1px solid var(--pf-ai-border)",
-          boxShadow: "0 24px 64px rgba(0,0,0,.48), var(--pf-highlight)",
+          background: "var(--pf-ai-panel-surface)",
+          backdropFilter: "blur(16px) saturate(115%)",
+          WebkitBackdropFilter: "blur(16px) saturate(115%)",
+          border: "1px solid transparent",
+          boxShadow: "var(--pf-ai-panel-shadow)",
         }}
       >
         {/* Reflejo superior */}
@@ -323,18 +320,18 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
 
         {/* Cabecera */}
         <div
-          className={`flex-shrink-0 px-5 py-3.5 flex items-center justify-between relative z-10 ${videoContext ? styles.videoAssistantHeader : ""}`}
+          className={`${styles.pixelAiHeader} flex-shrink-0 px-5 py-3.5 flex items-center justify-between relative z-10 ${videoContext ? styles.videoAssistantHeader : ""}`}
           style={{ borderBottom: "1px solid var(--pf-border)" }}
         >
           <div className="flex items-center gap-2.5">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
               style={{
-                background: "var(--pf-ai-tint)",
-                border: "1px solid var(--pf-ai-border)",
+                background: "var(--pf-ai-surface)",
+                border: "1px solid transparent",
               }}
             >
-              <Sparkles className="w-4 h-4 text-[var(--pf-ai)]" strokeWidth={1.5} />
+              <PixelAiIcon className="w-4 h-4" strokeWidth={1.5} />
             </div>
             <div className={videoContext ? styles.videoAssistantTitle : undefined}>
               <span className="text-sm font-bold text-[var(--pf-headline)]">Pixel IA</span>
@@ -382,7 +379,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                       border: "1px solid var(--pf-ai-border)",
                     }}
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-[var(--pf-ai)]" strokeWidth={1.5} />
+                    <PixelAiIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
                   </div>
                 )}
                 <div
@@ -409,14 +406,14 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                       <button
                         onClick={handleConfirm}
                         disabled={isLoading}
-                        className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold bg-[var(--pf-ai)] text-[var(--pf-action-ink)] hover:bg-[var(--pf-ai-hover)] active:scale-[0.98] transition-all duration-200 disabled:opacity-50"
+                        className={`${styles.aiPrimaryAction} flex-1 py-2 px-3 rounded-lg text-xs font-semibold active:scale-[0.98] transition-all duration-200 disabled:opacity-50`}
                       >
                         {isLoading ? "..." : "Sí, recomendar ángulos"}
                       </button>
                       <button
                         onClick={handleCorrect}
                         disabled={isLoading}
-                        className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[var(--pf-secondary)] border border-[var(--pf-border)] hover:border-[var(--pf-ai)] hover:text-[var(--pf-primary)] transition-colors disabled:opacity-50"
+                        className={`${styles.aiSecondaryAction} flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[var(--pf-secondary)] border border-[var(--pf-border)] hover:text-[var(--pf-primary)] transition-colors disabled:opacity-50`}
                       >
                         Corregir
                       </button>
@@ -437,7 +434,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                   border: "1px solid var(--pf-ai-border)",
                 }}
               >
-                <Sparkles className="w-3.5 h-3.5 text-[var(--pf-ai)]" strokeWidth={1.5} />
+                <PixelAiIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
               </div>
               <div
                 className="rounded-2xl rounded-tl-md px-4 py-3"
@@ -462,7 +459,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                   border: "1px solid var(--pf-ai-border)",
                 }}
               >
-                <Sparkles className="w-3.5 h-3.5 text-[var(--pf-ai)]" strokeWidth={1.5} />
+                <PixelAiIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
               </div>
               <div className="max-w-[85%] space-y-2">
                 <div className="rounded-2xl rounded-tl-md px-3.5 py-2.5" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}>
@@ -482,7 +479,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                   border: "1px solid var(--pf-ai-border)",
                 }}
               >
-                <Sparkles className="w-3.5 h-3.5 text-[var(--pf-ai)]" strokeWidth={1.5} />
+                <PixelAiIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
               </div>
               <div className="max-w-[90%] space-y-2.5">
                 {summary && <p className="text-xs text-[var(--pf-secondary)] ml-1">{summary}</p>}
@@ -506,7 +503,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                     </div>
                     {onApplyRecommendation && <button
                       onClick={() => handleApply(rec, idx)}
-                      className={`w-full py-2 rounded-lg text-xs font-semibold transition-colors ${
+                      className={`${styles.aiRecommendationAction} w-full py-2 rounded-lg text-xs font-semibold transition-colors ${
                         appliedIndex === idx
                           ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                           : "text-[var(--pf-ai)] border border-[var(--pf-ai-border)] hover:bg-[var(--pf-ai-tint)]"
@@ -555,7 +552,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                 onChange={(e) => setInput(e.target.value)}
                 rows={2}
                 placeholder={videoContext ? "Describe tu video o pide una idea para avanzar..." : "Escribe tu respuesta..."}
-                className="flex-1 resize-none bg-[var(--pf-input)] border border-[var(--pf-border)] px-3.5 py-2.5 rounded-xl text-sm text-[var(--pf-primary)] placeholder:text-[var(--pf-tertiary)] focus:outline-none focus:border-[var(--pf-ai)] focus:shadow-[var(--pf-ai-focus)] transition-colors"
+                className={`${styles.aiChatInput} flex-1 resize-none border px-3.5 py-2.5 rounded-xl text-sm text-[var(--pf-primary)] placeholder:text-[var(--pf-tertiary)] focus:outline-none transition-colors`}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey && !isLoading) {
                     e.preventDefault()
@@ -566,7 +563,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
               <button
                 onClick={handleRecommend}
                 disabled={isLoading || !input.trim()}
-                className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center bg-[var(--pf-ai)] text-[var(--pf-action-ink)] hover:bg-[var(--pf-ai-hover)] active:scale-[0.95] transition-all duration-200 shadow-lg shadow-[#8FD3FF]/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                className={`${styles.aiSendButton} w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center active:scale-[0.95] transition-all duration-200 disabled:cursor-not-allowed`}
                 title="Enviar"
               >
                 <svg className="w-4 h-4" width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
