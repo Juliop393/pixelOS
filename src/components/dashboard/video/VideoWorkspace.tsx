@@ -13,11 +13,13 @@ import VideoSourcePicker from "./VideoSourcePicker"
 import VideoStoryboard from "./VideoStoryboard"
 import VideoTimeline from "./VideoTimeline"
 import VideoStrategyEditor from "./VideoStrategyEditor"
+import VideoSimple, { SIMPLE_DURATION_LABELS, type SimpleDuration } from "./VideoSimple"
 import { createVideoChunk, getVideoDuration, migrateVideoChunk, moveVideoChunk, VIDEO_FORMAT, VIDEO_MAX_SCENES, VIDEO_SCENE_ROLES, VIDEO_ANGLES, VIDEO_HOOKS, VIDEO_STYLES, type VideoChunk, type VideoStrategy } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
 type VideoTab = "reference" | "action" | "camera" | "dialogue" | "sceneStyle"
 type VideoWorkspaceMode = "storyboard" | "advanced"
+type VideoEditorMode = "simple" | "pro"
 
 const VIDEO_TABS: { id: VideoTab; step: string; label: string }[] = [
   { id: "reference", step: "01", label: "Referencia visual" },
@@ -70,6 +72,9 @@ export default function VideoWorkspace() {
   const updateStrategy = (patch: Partial<VideoStrategy>) => setStrategy((current) => ({ ...current, ...patch }))
   const [activeTab, setActiveTab] = useState<VideoTab>("reference")
   const [workspaceMode, setWorkspaceMode] = useState<VideoWorkspaceMode>("storyboard")
+  const [editorMode, setEditorMode] = useState<VideoEditorMode>("simple")
+  const [simpleGoal, setSimpleGoal] = useState("")
+  const [simpleDuration, setSimpleDuration] = useState<SimpleDuration>("short")
   const [chunks, setChunks] = useState<VideoChunk[]>(() => [migrateVideoChunk(createVideoChunk(1, "Hook / apertura"))])
   const [activeId, setActiveId] = useState(1)
   const [strategyFeedback, setStrategyFeedback] = useState("")
@@ -82,23 +87,23 @@ export default function VideoWorkspace() {
   const activeSource = activeChunk.referenceSource ?? "library"
   const activePreviewUrl = activeChunk.referenceImageUrl ?? null
   const activeFileName = activeChunk.referenceFileName ?? ""
+  const simpleReference = chunks[0]
 
   const updateChunk = (id: number, patch: Partial<VideoChunk>) => {
     setChunks((current) => current.map((chunk) => chunk.id === id ? { ...migrateVideoChunk(chunk), ...patch } : chunk))
   }
   const updateActiveChunk = (patch: Partial<VideoChunk>) => updateChunk(activeId, patch)
   const selectChunk = (id: number) => { setActiveId(id); setFileError(""); setGenerateFeedback("") }
-  const clearPreview = () => {
-    updateActiveChunk({ referenceImageUrl: undefined, referenceFileName: "", status: "pending" })
+  const clearPreview = (id = activeId) => {
+    updateChunk(id, { referenceImageUrl: undefined, referenceFileName: "", status: "pending" })
     setFileError("")
     setGenerateFeedback("")
   }
-  const handleUpload = async (file?: File) => {
+  const handleUpload = async (file?: File, targetChunkId = activeId) => {
     if (!file) return
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { setFileError("Usa una imagen JPG, PNG o WEBP."); return }
     if (file.size > 5 * 1024 * 1024) { setFileError("La imagen debe pesar menos de 5 MB."); return }
 
-    const targetChunkId = activeId
     updateChunk(targetChunkId, { referenceSource: "upload", referenceImageUrl: undefined, referenceFileName: file.name, status: "pending" })
     setFileError(""); setUploading(true); setGenerateFeedback("Subiendo referencia visual...")
     try {
@@ -216,16 +221,43 @@ export default function VideoWorkspace() {
     setWorkspaceMode("advanced")
   }
 
-  return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} data-workspace-mode={workspaceMode} className={s.page}>
-    <EditorHeader tool="video" action={<button
+  const continueFromSimple = () => {
+    setActiveId(simpleReference.id)
+    setGenerateFeedback("Revisa los ajustes y confirma la generación desde Modo Pro. La duración deseada es orientativa.")
+    setWorkspaceMode("storyboard")
+    setEditorMode("pro")
+  }
+
+  return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} data-workspace-mode={editorMode === "simple" ? "simple" : workspaceMode} className={s.page}>
+    <EditorHeader tool="video" action={<div className={s.modeHeaderActions}><div className={s.modeSwitch} role="tablist" aria-label="Modo de edición de Video">
+      <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? s.modeSelected : ""} onClick={() => setEditorMode("simple")}>Simple</button>
+      <button type="button" role="tab" aria-selected={editorMode === "pro"} className={editorMode === "pro" ? s.modeSelected : ""} onClick={() => setEditorMode("pro")}>Modo Pro</button>
+    </div><button
       type="button"
       className={`${s.pixelAiHeaderButton} ${pixelAiOpen ? s.pixelAiHeaderButtonActive : ""}`}
       onClick={() => setPixelAiOpen((open) => !open)}
       aria-controls="pixel-ai-panel"
       aria-expanded={pixelAiOpen}
-    ><PixelAiIcon /><span>PixelIA</span><i>{pixelAiOpen ? "Abierto" : "Asistente creativo"}</i></button>} />
+    ><PixelAiIcon /><span>PixelIA</span><i>{pixelAiOpen ? "Abierto" : "Asistente creativo"}</i></button></div>} />
+    {editorMode === "pro" && simpleGoal.trim() && <div className={s.simpleContext}><b>Tu idea:</b> {simpleGoal.trim()} <span>· Duración deseada: {SIMPLE_DURATION_LABELS[simpleDuration]} (orientativa)</span></div>}
     <section className={s.workspace}>
-    {workspaceMode === "storyboard" ? <VideoStoryboard
+    {editorMode === "simple" ? <VideoSimple
+      referenceImageUrl={simpleReference.referenceImageUrl ?? null}
+      referenceFileName={simpleReference.referenceFileName}
+      fileError={fileError}
+      uploading={uploading}
+      goal={simpleGoal}
+      onGoalChange={setSimpleGoal}
+      style={style}
+      styleLabel={styleLabel}
+      onStyleChange={(nextStyle) => updateStrategy({ style: nextStyle })}
+      duration={simpleDuration}
+      onDurationChange={setSimpleDuration}
+      onUpload={(file) => { void handleUpload(file, simpleReference.id) }}
+      onClear={() => clearPreview(simpleReference.id)}
+      onIdea={() => setPixelAiOpen(true)}
+      onCreate={continueFromSimple}
+    /> : workspaceMode === "storyboard" ? <VideoStoryboard
       chunks={chunks}
       strategyEditor={<VideoStrategyEditor strategy={strategy} onChange={updateStrategy} />}
       sourceReady={Boolean(activeSource === "upload" && activePreviewUrl?.startsWith("https://"))}
@@ -257,7 +289,7 @@ export default function VideoWorkspace() {
         <div className={s.configScroll}>
           {activeTab === "reference" && <section className={s.card}>
             <SectionTitle step="01" title="Referencia visual" description="Define qué imagen, producto, persona o referencia usa esta escena." />
-            <VideoSourcePicker source={activeSource} previewUrl={activePreviewUrl} fileName={activeFileName} fileError={fileError} onSourceChange={(referenceSource) => updateActiveChunk({ referenceSource })} onUpload={handleUpload} onClear={clearPreview} />
+            <VideoSourcePicker source={activeSource} previewUrl={activePreviewUrl} fileName={activeFileName} fileError={fileError} onSourceChange={(referenceSource) => updateActiveChunk({ referenceSource })} onUpload={handleUpload} onClear={() => clearPreview()} />
             <VideoSceneField id={`scene-reference-${activeChunk.id}`} label="Qué debemos reconocer" value={activeChunk.referenceDescription ?? ""} onChange={(referenceDescription) => updateActiveChunk({ referenceDescription })} suggestions={REFERENCE_SUGGESTIONS} placeholder="Ej. El producto en manos de una persona, con el empaque visible y una cocina luminosa de fondo." helper="Complementa la imagen con el sujeto o detalle que debe mantenerse visible." maxLength={300} />
           </section>}
           {activeTab === "action" && <section className={s.card}>

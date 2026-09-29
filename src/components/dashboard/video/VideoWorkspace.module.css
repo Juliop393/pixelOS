@@ -379,3 +379,17 @@
 .pixelAiHeaderButtonActive { background: var(--pf-ai-active-surface); border-color: transparent; box-shadow: var(--pf-ai-halo), var(--pf-highlight); }
 .pixelAiHeaderButtonActive i { color: var(--pf-ai); background: var(--pf-ai-tint); }
 .page .pixelAiHeaderButton:focus-visible { outline-color: var(--pf-ai); }
+
+/* Simple entry is a separate, naturally scrolling surface; Pro keeps its existing layout. */
+.modeHeaderActions{display:flex;align-items:center;gap:10px}
+.modeSwitch{min-height:40px;padding:4px;border:1px solid var(--pf-border);border-radius:12px;display:flex;align-items:center;gap:3px;background:var(--pf-panel)}
+.modeSwitch button{min-height:31px;padding:0 14px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--pf-secondary);font:600 12px inherit;white-space:nowrap;cursor:pointer;transition:color .2s,background-color .2s,border-color .2s}
+.modeSwitch button:hover{color:var(--pf-headline)}
+.modeSwitch .modeSelected{border-color:var(--pf-selected-border);background:var(--pf-selected);color:var(--pf-headline)}
+.simpleContext{width:min(calc(100% - 8px),1600px);margin:8px auto 14px;padding:11px 16px;border:1px solid var(--pf-border);border-radius:12px;background:var(--pf-panel);color:var(--pf-primary);font-size:12px;line-height:1.5}
+.simpleContext b{color:var(--pf-headline)}.simpleContext span{margin-left:9px;color:var(--pf-secondary)}
+.page[data-workspace-mode="simple"]{height:auto;min-height:100%;overflow:visible}
+.page[data-workspace-mode="simple"] .workspace{width:min(calc(100% - 8px),1600px);height:auto;min-height:0;margin:0 auto;display:block;grid-template-columns:none}
+@media(max-width:680px){.modeHeaderActions{gap:6px}.modeSwitch button{padding-inline:9px}.pixelAiHeaderButton i{display:none}.simpleContext span{display:block;margin:3px 0 0}}
+@media(prefers-reduced-motion:reduce){.modeSwitch button{transition:none}}
+.modeSwitch button{font-family:inherit;font-size:12px;font-weight:600}
