@@ -1,18 +1,21 @@
 import { BadgePercent, Clapperboard, ImagePlus, PlaySquare, Sparkles, Trash2, Upload, UsersRound, WandSparkles } from "lucide-react"
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
-import { SIMPLE_DURATION_LABELS, SIMPLE_DURATION_RANGES, SIMPLE_STYLE_LABELS, type SimpleDuration } from "./video-plan"
+import { SIMPLE_DURATION_LABELS, SIMPLE_DURATION_RANGES, type SimpleDuration } from "./video-plan"
 import s from "./VideoSimple.module.css"
 
-const STYLES = [
-  { id: "cinematic", label: SIMPLE_STYLE_LABELS.cinematic, detail: "Luz y movimiento cuidados", Icon: Clapperboard },
-  { id: "ugc", label: SIMPLE_STYLE_LABELS.ugc, detail: "Natural y cercano", Icon: UsersRound },
-  { id: "demo", label: SIMPLE_STYLE_LABELS.demo, detail: "El producto en acción", Icon: PlaySquare },
-  { id: "commercial", label: SIMPLE_STYLE_LABELS.commercial, detail: "Directo al valor", Icon: BadgePercent },
+export const SIMPLE_APPROACHES = [
+  { id: "auto", label: "IA decide", detail: "PixelFM elige el enfoque más adecuado", Icon: Sparkles },
+  { id: "demo", label: "Producto en acción", detail: "Muestra cómo funciona o se utiliza", Icon: PlaySquare },
+  { id: "ugc", label: "UGC / natural", detail: "Cercano, espontáneo y humano", Icon: UsersRound },
+  { id: "commercial", label: "Oferta directa", detail: "Presenta rápidamente el valor o promoción", Icon: BadgePercent },
+  { id: "cinematic", label: "Cinemático", detail: "Más visual, cuidado y aspiracional", Icon: Clapperboard },
 ] as const
+
+export type SimpleApproach = (typeof SIMPLE_APPROACHES)[number]["id"] | "custom"
 
 export default function VideoSimple({
   referenceImageUrl, referenceFileName, fileError, uploading,
-  goal, onGoalChange, style, styleLabel, onStyleChange,
+  goal, onGoalChange, approach, styleLabel, onApproachChange,
   duration, onDurationChange, onUpload, onClear, onIdea, onCreate,
 }: {
   referenceImageUrl: string | null
@@ -21,9 +24,9 @@ export default function VideoSimple({
   uploading: boolean
   goal: string
   onGoalChange: (value: string) => void
-  style: string
+  approach: SimpleApproach
   styleLabel?: string
-  onStyleChange: (style: string) => void
+  onApproachChange: (approach: Exclude<SimpleApproach, "custom">) => void
   duration: SimpleDuration
   onDurationChange: (duration: SimpleDuration) => void
   onUpload: (file?: File) => void
@@ -38,7 +41,7 @@ export default function VideoSimple({
       <header className={s.hero}>
         <span>VIDEO · MODO SIMPLE</span>
         <h1 id="video-simple-title">Tu video empieza con una idea.</h1>
-        <p>Elige una imagen, cuenta qué quieres mostrar y dale una dirección visual.</p>
+        <p>Elige una imagen, cuenta qué quieres lograr y deja que PixelFM prepare el enfoque.</p>
       </header>
 
       <div className={s.layout}>
@@ -62,15 +65,15 @@ export default function VideoSimple({
           <section className={s.goalSection} aria-labelledby="simple-goal-title">
             <div className={s.sectionHeading}><span>02</span><div><h2 id="simple-goal-title">Qué quieres lograr</h2><p>Describe la idea o el resultado que quieres conseguir.</p></div></div>
             <textarea value={goal} onChange={(event) => onGoalChange(event.target.value)} rows={4} maxLength={700} aria-label="Qué quieres lograr" placeholder="Ej. Quiero mostrar este producto en uso y destacar que ahorra tiempo." />
-            <button type="button" className={s.pixelAiHelp} onClick={onIdea}><PixelAiIcon aria-hidden="true" />¿No sabes qué crear? Pídele una idea a PixelIA</button>
+            <button type="button" className={s.pixelAiHelp} onClick={onIdea}><PixelAiIcon aria-hidden="true" />¿No sabes qué crear? Generar una idea con PixelIA</button>
           </section>
 
           <section className={s.styleSection} aria-labelledby="simple-style-title">
-            <div className={s.sectionHeading}><span>03</span><div><h2 id="simple-style-title">Cómo quieres que se vea</h2><p>Elige el tono visual que mejor encaje con tu idea.</p></div></div>
+            <div className={s.sectionHeading}><span>03</span><div><h2 id="simple-style-title">Enfoque del video</h2><p>Elige una dirección sencilla o deja que PixelFM decida.</p></div></div>
             <div className={s.styleGrid}>
-              {STYLES.map(({ id, label, detail, Icon }) => <button key={id} type="button" className={style === id ? s.selected : ""} aria-pressed={style === id} onClick={() => onStyleChange(id)}><Icon aria-hidden="true" /><span><b>{label}</b><small>{detail}</small></span></button>)}
+              {SIMPLE_APPROACHES.map(({ id, label, detail, Icon }) => <button key={id} type="button" className={approach === id ? s.selected : ""} aria-pressed={approach === id} onClick={() => onApproachChange(id)}><Icon aria-hidden="true" /><span><b>{label}{id === "auto" && <em>Recomendado</em>}</b><small>{detail}</small></span></button>)}
             </div>
-            {!STYLES.some((preset) => preset.id === style) && <p className={s.advancedStyle}>Estilo actual de Modo Pro: {styleLabel}</p>}
+            {approach === "custom" && <p className={s.advancedStyle}>Estilo actual de Modo Pro: {styleLabel}</p>}
           </section>
 
           <section className={s.durationSection} aria-labelledby="simple-duration-title">
@@ -79,7 +82,7 @@ export default function VideoSimple({
           </section>
 
           <div className={s.createArea}>
-            <p className={s.planExplainer}>PixelFM preparará una propuesta inicial de escenas para que puedas revisarla antes de generar.</p>
+            <p className={s.planExplainer}>PixelFM preparará el enfoque y la estructura inicial del anuncio para que puedas revisarlos antes de generar.</p>
             <button type="button" className={s.createButton} onClick={onCreate} disabled={!canContinue}><WandSparkles aria-hidden="true" />Crear video</button>
             <p>{canContinue ? "Primero verás el Plan del anuncio; no se iniciará una generación todavía." : "Añade una imagen y describe tu idea para continuar."}</p>
           </div>

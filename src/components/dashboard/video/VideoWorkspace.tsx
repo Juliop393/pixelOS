@@ -13,7 +13,7 @@ import VideoSourcePicker from "./VideoSourcePicker"
 import VideoStoryboard from "./VideoStoryboard"
 import VideoTimeline from "./VideoTimeline"
 import VideoStrategyEditor from "./VideoStrategyEditor"
-import VideoSimple from "./VideoSimple"
+import VideoSimple, { SIMPLE_APPROACHES, type SimpleApproach } from "./VideoSimple"
 import VideoPlan from "./VideoPlan"
 import { proposeVideoPlan, SIMPLE_DURATION_LABELS, SIMPLE_DURATION_RANGES, SIMPLE_STYLE_LABELS, type SimpleDuration } from "./video-plan"
 import { createVideoChunk, getVideoDuration, migrateVideoChunk, moveVideoChunk, VIDEO_FORMAT, VIDEO_MAX_SCENES, VIDEO_SCENE_ROLES, VIDEO_ANGLES, VIDEO_HOOKS, VIDEO_STYLES, type VideoChunk, type VideoStrategy } from "./video-data"
@@ -57,6 +57,14 @@ const VIDEO_STYLE_API_MAP: Record<string, string> = {
   b2b: "b2b",
 }
 
+const SIMPLE_APPROACH_STYLE_MAP: Record<Exclude<SimpleApproach, "custom">, string> = {
+  auto: "cinematic",
+  demo: "demo",
+  ugc: "ugc",
+  commercial: "commercial",
+  cinematic: "cinematic",
+}
+
 function SectionTitle({ title, description }: { title: string; description: string }) {
   return <div className={s.cardTitle}><div><h2>{title}</h2><p>{description}</p></div></div>
 }
@@ -73,6 +81,7 @@ export default function VideoWorkspace() {
   const [activeTab, setActiveTab] = useState<VideoTab>("action")
   const [workspaceMode, setWorkspaceMode] = useState<VideoWorkspaceMode>("storyboard")
   const [editorMode, setEditorMode] = useState<VideoEditorMode>("simple")
+  const [simpleApproach, setSimpleApproach] = useState<SimpleApproach>("auto")
   const [simpleGoal, setSimpleGoal] = useState("")
   const [simpleDuration, setSimpleDuration] = useState<SimpleDuration>("short")
   const [planSeed, setPlanSeed] = useState<string | null>(null)
@@ -91,6 +100,14 @@ export default function VideoWorkspace() {
   const activePreviewUrl = activeChunk.referenceImageUrl ?? null
   const activeFileName = activeChunk.referenceFileName ?? ""
   const simpleReference = chunks[0]
+
+  const showSimpleMode = () => {
+    setSimpleApproach((current) => {
+      if (current !== "custom" && SIMPLE_APPROACH_STYLE_MAP[current] === style) return current
+      return SIMPLE_APPROACHES.find((item) => item.id === style)?.id ?? "custom"
+    })
+    setEditorMode("simple")
+  }
 
   const updateChunk = (id: number, patch: Partial<VideoChunk>) => {
     setChunks((current) => current.map((chunk) => chunk.id === id ? { ...migrateVideoChunk(chunk), ...patch } : chunk))
@@ -262,7 +279,7 @@ export default function VideoWorkspace() {
 
   return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} data-workspace-mode={editorMode === "pro" ? workspaceMode : editorMode} className={s.page}>
     <EditorHeader tool="video" action={<div className={s.modeHeaderActions}><div className={s.modeSwitch} role="tablist" aria-label="Modo de edición de Video">
-      <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? s.modeSelected : ""} onClick={() => setEditorMode("simple")}>Simple</button>
+      <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? s.modeSelected : ""} onClick={showSimpleMode}>Simple</button>
       {planSeed && <button type="button" role="tab" aria-selected={editorMode === "plan"} className={editorMode === "plan" ? s.modeSelected : ""} onClick={continueFromSimple} disabled={!simpleReference.referenceImageUrl?.startsWith("https://") || !simpleGoal.trim()}>Plan</button>}
       <button type="button" role="tab" aria-selected={editorMode === "pro"} className={editorMode === "pro" ? s.modeSelected : ""} onClick={() => setEditorMode("pro")}>Modo Pro</button>
     </div><button
@@ -281,9 +298,9 @@ export default function VideoWorkspace() {
       uploading={uploading}
       goal={simpleGoal}
       onGoalChange={setSimpleGoal}
-      style={style}
+      approach={simpleApproach}
       styleLabel={styleLabel}
-      onStyleChange={(nextStyle) => updateStrategy({ style: nextStyle })}
+      onApproachChange={(nextApproach) => { setSimpleApproach(nextApproach); updateStrategy({ style: SIMPLE_APPROACH_STYLE_MAP[nextApproach] }) }}
       duration={simpleDuration}
       onDurationChange={setSimpleDuration}
       onUpload={(file) => { void handleUpload(file, simpleReference.id) }}
@@ -293,7 +310,7 @@ export default function VideoWorkspace() {
     /> : editorMode === "plan" ? <VideoPlan
       chunks={chunks}
       goal={simpleGoal}
-      styleLabel={SIMPLE_STYLE_LABELS[style] ?? styleLabel ?? "Estilo del anuncio"}
+      styleLabel={SIMPLE_APPROACHES.find((item) => item.id === simpleApproach)?.label ?? SIMPLE_STYLE_LABELS[style] ?? styleLabel ?? "Estilo del anuncio"}
       duration={simpleDuration}
       referenceImageUrl={simpleReference.referenceImageUrl ?? null}
       notice={planNotice}
