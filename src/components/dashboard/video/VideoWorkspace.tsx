@@ -13,13 +13,15 @@ import VideoSourcePicker from "./VideoSourcePicker"
 import VideoStoryboard from "./VideoStoryboard"
 import VideoTimeline from "./VideoTimeline"
 import VideoStrategyEditor from "./VideoStrategyEditor"
-import VideoSimple, { SIMPLE_DURATION_LABELS, type SimpleDuration } from "./VideoSimple"
+import VideoSimple from "./VideoSimple"
+import VideoPlan from "./VideoPlan"
+import { proposeVideoPlan, SIMPLE_DURATION_LABELS, SIMPLE_DURATION_RANGES, SIMPLE_STYLE_LABELS, type SimpleDuration } from "./video-plan"
 import { createVideoChunk, getVideoDuration, migrateVideoChunk, moveVideoChunk, VIDEO_FORMAT, VIDEO_MAX_SCENES, VIDEO_SCENE_ROLES, VIDEO_ANGLES, VIDEO_HOOKS, VIDEO_STYLES, type VideoChunk, type VideoStrategy } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
 type VideoTab = "reference" | "action" | "camera" | "dialogue" | "sceneStyle"
 type VideoWorkspaceMode = "storyboard" | "advanced"
-type VideoEditorMode = "simple" | "pro"
+type VideoEditorMode = "simple" | "plan" | "pro"
 
 const VIDEO_TABS: { id: VideoTab; step: string; label: string }[] = [
   { id: "reference", step: "01", label: "Referencia visual" },
@@ -75,6 +77,9 @@ export default function VideoWorkspace() {
   const [editorMode, setEditorMode] = useState<VideoEditorMode>("simple")
   const [simpleGoal, setSimpleGoal] = useState("")
   const [simpleDuration, setSimpleDuration] = useState<SimpleDuration>("short")
+  const [planSeed, setPlanSeed] = useState<string | null>(null)
+  const [planNotice, setPlanNotice] = useState("")
+  const planEdited = useRef(false)
   const [chunks, setChunks] = useState<VideoChunk[]>(() => [migrateVideoChunk(createVideoChunk(1, "Hook / apertura"))])
   const [activeId, setActiveId] = useState(1)
   const [strategyFeedback, setStrategyFeedback] = useState("")
@@ -92,9 +97,10 @@ export default function VideoWorkspace() {
   const updateChunk = (id: number, patch: Partial<VideoChunk>) => {
     setChunks((current) => current.map((chunk) => chunk.id === id ? { ...migrateVideoChunk(chunk), ...patch } : chunk))
   }
-  const updateActiveChunk = (patch: Partial<VideoChunk>) => updateChunk(activeId, patch)
+  const updateActiveChunk = (patch: Partial<VideoChunk>) => { planEdited.current = true; updateChunk(activeId, patch) }
   const selectChunk = (id: number) => { setActiveId(id); setFileError(""); setGenerateFeedback("") }
   const clearPreview = (id = activeId) => {
+    if (editorMode === "pro") planEdited.current = true
     updateChunk(id, { referenceImageUrl: undefined, referenceFileName: "", status: "pending" })
     setFileError("")
     setGenerateFeedback("")
@@ -103,6 +109,7 @@ export default function VideoWorkspace() {
     if (!file) return
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { setFileError("Usa una imagen JPG, PNG o WEBP."); return }
     if (file.size > 5 * 1024 * 1024) { setFileError("La imagen debe pesar menos de 5 MB."); return }
+    if (editorMode === "pro") planEdited.current = true
 
     updateChunk(targetChunkId, { referenceSource: "upload", referenceImageUrl: undefined, referenceFileName: file.name, status: "pending" })
     setFileError(""); setUploading(true); setGenerateFeedback("Subiendo referencia visual...")
@@ -134,9 +141,9 @@ export default function VideoWorkspace() {
       setUploading(false)
     }
   }
-  const addChunk = () => { if (chunks.length >= VIDEO_MAX_SCENES) return; const chunk = createVideoChunk(nextId.current++); setChunks((current) => [...current, chunk]); selectChunk(chunk.id) }
-  const removeChunk = (id: number) => { if (chunks.length === 1) return; const removedIndex = chunks.findIndex((chunk) => chunk.id === id); const next = chunks.filter((chunk) => chunk.id !== id); setChunks(next); if (activeId === id) setActiveId(next[Math.min(removedIndex, next.length - 1)].id) }
-  const moveChunk = (index: number, direction: -1 | 1) => setChunks((current) => moveVideoChunk(current, index, direction))
+  const addChunk = () => { if (chunks.length >= VIDEO_MAX_SCENES) return; planEdited.current = true; const chunk = createVideoChunk(nextId.current++); setChunks((current) => [...current, chunk]); selectChunk(chunk.id) }
+  const removeChunk = (id: number) => { if (chunks.length === 1) return; planEdited.current = true; const removedIndex = chunks.findIndex((chunk) => chunk.id === id); const next = chunks.filter((chunk) => chunk.id !== id); setChunks(next); if (activeId === id) setActiveId(next[Math.min(removedIndex, next.length - 1)].id) }
+  const moveChunk = (index: number, direction: -1 | 1) => { planEdited.current = true; setChunks((current) => moveVideoChunk(current, index, direction)) }
 
   const angleLabel = VIDEO_ANGLES.find((item) => item.id === angle)?.label
   const hookLabel = VIDEO_HOOKS.find((item) => item.id === hook)?.label
@@ -222,15 +229,43 @@ export default function VideoWorkspace() {
   }
 
   const continueFromSimple = () => {
-    setActiveId(simpleReference.id)
-    setGenerateFeedback("Revisa los ajustes y confirma la generación desde Modo Pro. La duración deseada es orientativa.")
+    const referenceImageUrl = simpleReference.referenceImageUrl
+    if (!referenceImageUrl?.startsWith("https://") || !simpleGoal.trim() || uploading) return
+    const seed = JSON.stringify([simpleGoal.trim(), simpleDuration, style, referenceImageUrl])
+    if (planSeed !== seed) {
+      if (chunks.some((chunk) => chunk.status === "generating" || chunk.status === "generated")) {
+        setPlanNotice("Se conservan las escenas ya generadas. Los nuevos cambios de Simple no reemplazaron ese trabajo.")
+      } else {
+        if (planEdited.current && !window.confirm("Preparar otro plan reemplazará las escenas que editaste en Modo Pro. ¿Quieres continuar?")) return
+        const proposed = proposeVideoPlan({ goal: simpleGoal, duration: simpleDuration, style, referenceImageUrl, referenceFileName: simpleReference.referenceFileName, firstId: nextId.current })
+        nextId.current += proposed.length
+        setChunks(proposed)
+        setActiveId(proposed[0].id)
+        setPlanSeed(seed)
+        setPlanNotice("")
+        planEdited.current = false
+      }
+    }
+    setWorkspaceMode("storyboard")
+    setEditorMode("plan")
+  }
+
+  const reviewGenerationFromPlan = () => {
+    setGenerateFeedback("Revisa y confirma la generación de la escena seleccionada. El plan completo aún no se genera automáticamente.")
     setWorkspaceMode("storyboard")
     setEditorMode("pro")
   }
 
-  return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} data-workspace-mode={editorMode === "simple" ? "simple" : workspaceMode} className={s.page}>
+  const editPlanScenes = () => {
+    setActiveTab("action")
+    setWorkspaceMode("advanced")
+    setEditorMode("pro")
+  }
+
+  return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} data-workspace-mode={editorMode === "pro" ? workspaceMode : editorMode} className={s.page}>
     <EditorHeader tool="video" action={<div className={s.modeHeaderActions}><div className={s.modeSwitch} role="tablist" aria-label="Modo de edición de Video">
       <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? s.modeSelected : ""} onClick={() => setEditorMode("simple")}>Simple</button>
+      {planSeed && <button type="button" role="tab" aria-selected={editorMode === "plan"} className={editorMode === "plan" ? s.modeSelected : ""} onClick={continueFromSimple} disabled={!simpleReference.referenceImageUrl?.startsWith("https://") || !simpleGoal.trim()}>Plan</button>}
       <button type="button" role="tab" aria-selected={editorMode === "pro"} className={editorMode === "pro" ? s.modeSelected : ""} onClick={() => setEditorMode("pro")}>Modo Pro</button>
     </div><button
       type="button"
@@ -239,7 +274,7 @@ export default function VideoWorkspace() {
       aria-controls="pixel-ai-panel"
       aria-expanded={pixelAiOpen}
     ><PixelAiIcon /><span>PixelIA</span><i>{pixelAiOpen ? "Abierto" : "Asistente creativo"}</i></button></div>} />
-    {editorMode === "pro" && simpleGoal.trim() && <div className={s.simpleContext}><b>Tu idea:</b> {simpleGoal.trim()} <span>· Duración deseada: {SIMPLE_DURATION_LABELS[simpleDuration]} (orientativa)</span></div>}
+    {editorMode === "pro" && simpleGoal.trim() && <div className={s.simpleContext}><b>Tu idea:</b> {simpleGoal.trim()} <span>· Duración deseada: {SIMPLE_DURATION_LABELS[simpleDuration]} {SIMPLE_DURATION_RANGES[simpleDuration]} (orientativa)</span></div>}
     <section className={s.workspace}>
     {editorMode === "simple" ? <VideoSimple
       referenceImageUrl={simpleReference.referenceImageUrl ?? null}
@@ -257,6 +292,16 @@ export default function VideoWorkspace() {
       onClear={() => clearPreview(simpleReference.id)}
       onIdea={() => setPixelAiOpen(true)}
       onCreate={continueFromSimple}
+    /> : editorMode === "plan" ? <VideoPlan
+      chunks={chunks}
+      goal={simpleGoal}
+      styleLabel={SIMPLE_STYLE_LABELS[style] ?? styleLabel ?? "Estilo del anuncio"}
+      duration={simpleDuration}
+      referenceImageUrl={simpleReference.referenceImageUrl ?? null}
+      notice={planNotice}
+      onBack={() => setEditorMode("simple")}
+      onGenerate={reviewGenerationFromPlan}
+      onEdit={editPlanScenes}
     /> : workspaceMode === "storyboard" ? <VideoStoryboard
       chunks={chunks}
       strategyEditor={<VideoStrategyEditor strategy={strategy} onChange={updateStrategy} />}

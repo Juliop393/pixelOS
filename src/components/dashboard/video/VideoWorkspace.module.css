@@ -393,3 +393,5 @@
 @media(max-width:680px){.modeHeaderActions{gap:6px}.modeSwitch button{padding-inline:9px}.pixelAiHeaderButton i{display:none}.simpleContext span{display:block;margin:3px 0 0}}
 @media(prefers-reduced-motion:reduce){.modeSwitch button{transition:none}}
 .modeSwitch button{font-family:inherit;font-size:12px;font-weight:600}
+.page[data-workspace-mode="plan"]{height:auto;min-height:100%;overflow:visible}
+.page[data-workspace-mode="plan"] .workspace{width:min(calc(100% - 8px),1600px);height:auto;min-height:0;margin:0 auto;display:block;grid-template-columns:none}

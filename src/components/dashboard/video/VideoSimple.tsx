@@ -1,20 +1,13 @@
 import { BadgePercent, Clapperboard, ImagePlus, PlaySquare, Sparkles, Trash2, Upload, UsersRound, WandSparkles } from "lucide-react"
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
+import { SIMPLE_DURATION_LABELS, SIMPLE_DURATION_RANGES, SIMPLE_STYLE_LABELS, type SimpleDuration } from "./video-plan"
 import s from "./VideoSimple.module.css"
 
-export type SimpleDuration = "short" | "medium" | "long"
-
-export const SIMPLE_DURATION_LABELS: Record<SimpleDuration, string> = {
-  short: "Corto",
-  medium: "Medio",
-  long: "Largo",
-}
-
 const STYLES = [
-  { id: "cinematic", label: "Cinemático", detail: "Luz y movimiento cuidados", Icon: Clapperboard },
-  { id: "ugc", label: "UGC", detail: "Natural y cercano", Icon: UsersRound },
-  { id: "demo", label: "Demostración", detail: "El producto en acción", Icon: PlaySquare },
-  { id: "commercial", label: "Oferta", detail: "Directo al valor", Icon: BadgePercent },
+  { id: "cinematic", label: SIMPLE_STYLE_LABELS.cinematic, detail: "Luz y movimiento cuidados", Icon: Clapperboard },
+  { id: "ugc", label: SIMPLE_STYLE_LABELS.ugc, detail: "Natural y cercano", Icon: UsersRound },
+  { id: "demo", label: SIMPLE_STYLE_LABELS.demo, detail: "El producto en acción", Icon: PlaySquare },
+  { id: "commercial", label: SIMPLE_STYLE_LABELS.commercial, detail: "Directo al valor", Icon: BadgePercent },
 ] as const
 
 export default function VideoSimple({
@@ -82,16 +75,17 @@ export default function VideoSimple({
 
           <section className={s.durationSection} aria-labelledby="simple-duration-title">
             <div className={s.sectionHeading}><span>04</span><div><h2 id="simple-duration-title">Duración</h2><p>¿Qué extensión imaginas para tu anuncio?</p></div></div>
-            <div className={s.durationChoices}>{(Object.keys(SIMPLE_DURATION_LABELS) as SimpleDuration[]).map((key) => <button key={key} type="button" className={duration === key ? s.selected : ""} aria-pressed={duration === key} onClick={() => onDurationChange(key)}>{SIMPLE_DURATION_LABELS[key]}</button>)}</div>
+            <div className={s.durationChoices}>{(Object.keys(SIMPLE_DURATION_LABELS) as SimpleDuration[]).map((key) => <button key={key} type="button" className={duration === key ? s.selected : ""} aria-pressed={duration === key} onClick={() => onDurationChange(key)}><b>{SIMPLE_DURATION_LABELS[key]}</b><small>{SIMPLE_DURATION_RANGES[key]}</small></button>)}</div>
           </section>
 
           <div className={s.createArea}>
+            <p className={s.planExplainer}>PixelFM preparará una propuesta inicial de escenas para que puedas revisarla antes de generar.</p>
             <button type="button" className={s.createButton} onClick={onCreate} disabled={!canContinue}><WandSparkles aria-hidden="true" />Crear video</button>
-            <p>{canContinue ? "Revisa la configuración en Modo Pro antes de confirmar la generación." : "Añade una imagen y describe tu idea para continuar."}</p>
+            <p>{canContinue ? "Primero verás el Plan del anuncio; no se iniciará una generación todavía." : "Añade una imagen y describe tu idea para continuar."}</p>
           </div>
         </div>
       </div>
-      <footer className={s.note}><Sparkles aria-hidden="true" />Tu idea y duración deseada se conservan al abrir Ajustes avanzados. La secuencia no se crea automáticamente.</footer>
+      <footer className={s.note}><Sparkles aria-hidden="true" />La duración es orientativa. Puedes ajustar las escenas en Modo Pro antes de generar.</footer>
     </div>
   </main>
 }
