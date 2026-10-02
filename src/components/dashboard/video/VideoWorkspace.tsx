@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { ArrowLeft, WandSparkles } from "lucide-react"
+import { ArrowLeft, ChevronDown, WandSparkles } from "lucide-react"
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import { useVideoGenerator } from "@/hooks/useVideoGenerator"
 import { supabase } from "@/lib/supabase"
@@ -19,16 +19,14 @@ import { proposeVideoPlan, SIMPLE_DURATION_LABELS, SIMPLE_DURATION_RANGES, SIMPL
 import { createVideoChunk, getVideoDuration, migrateVideoChunk, moveVideoChunk, VIDEO_FORMAT, VIDEO_MAX_SCENES, VIDEO_SCENE_ROLES, VIDEO_ANGLES, VIDEO_HOOKS, VIDEO_STYLES, type VideoChunk, type VideoStrategy } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
-type VideoTab = "reference" | "action" | "camera" | "dialogue" | "sceneStyle"
+type VideoTab = "reference" | "action" | "dialogue" | "more"
 type VideoWorkspaceMode = "storyboard" | "advanced"
 type VideoEditorMode = "simple" | "plan" | "pro"
 
-const VIDEO_TABS: { id: VideoTab; step: string; label: string }[] = [
-  { id: "reference", step: "01", label: "Referencia visual" },
-  { id: "action", step: "02", label: "Acción" },
-  { id: "camera", step: "03", label: "Cámara" },
-  { id: "dialogue", step: "04", label: "Diálogo / texto" },
-  { id: "sceneStyle", step: "05", label: "Estilo de escena" },
+const VIDEO_TABS: { id: VideoTab; label: string }[] = [
+  { id: "reference", label: "Referencia" },
+  { id: "action", label: "Qué ocurre" },
+  { id: "dialogue", label: "Voz / texto" },
 ]
 
 const ACTION_SUGGESTIONS = ["Persona mostrando el producto", "Abrir una caja", "Usar el producto", "Caminar hacia cámara", "Producto girando", "Transformación antes / después"]
@@ -59,8 +57,8 @@ const VIDEO_STYLE_API_MAP: Record<string, string> = {
   b2b: "b2b",
 }
 
-function SectionTitle({ step, title, description }: { step: string; title: string; description: string }) {
-  return <div className={s.cardTitle}><i>{step}</i><div><h2>{title}</h2><p>{description}</p></div></div>
+function SectionTitle({ title, description }: { title: string; description: string }) {
+  return <div className={s.cardTitle}><div><h2>{title}</h2><p>{description}</p></div></div>
 }
 
 export default function VideoWorkspace() {
@@ -72,7 +70,7 @@ export default function VideoWorkspace() {
   const [strategy, setStrategy] = useState<VideoStrategy>({ angle: "demo", hook: "result", style: "cinematic", cta: "", format: VIDEO_FORMAT })
   const { angle, hook, style } = strategy
   const updateStrategy = (patch: Partial<VideoStrategy>) => setStrategy((current) => ({ ...current, ...patch }))
-  const [activeTab, setActiveTab] = useState<VideoTab>("reference")
+  const [activeTab, setActiveTab] = useState<VideoTab>("action")
   const [workspaceMode, setWorkspaceMode] = useState<VideoWorkspaceMode>("storyboard")
   const [editorMode, setEditorMode] = useState<VideoEditorMode>("simple")
   const [simpleGoal, setSimpleGoal] = useState("")
@@ -329,31 +327,34 @@ export default function VideoWorkspace() {
       </div>
       <VideoStrategyEditor strategy={strategy} onChange={updateStrategy} />
       <div className={s.configBody}>
-        <nav className={s.stepTabs} aria-label="Configuración del video">
-          {VIDEO_TABS.map((tab) => <button type="button" key={tab.id} className={activeTab === tab.id ? s.stepActive : ""} aria-current={activeTab === tab.id ? "step" : undefined} onClick={() => setActiveTab(tab.id)}><span>{tab.step}</span>{tab.label}</button>)}
+        <nav className={s.stepTabs} aria-label="Controles de la escena">
+          {VIDEO_TABS.map((tab) => <button type="button" key={tab.id} className={activeTab === tab.id ? s.stepActive : ""} aria-current={activeTab === tab.id ? "page" : undefined} onClick={() => setActiveTab(tab.id)}>{tab.label}</button>)}
+          <button type="button" className={`${s.moreControlsButton} ${activeTab === "more" ? s.stepActive : ""}`} aria-expanded={activeTab === "more"} aria-controls="video-scene-more-controls" onClick={() => setActiveTab((current) => current === "more" ? "action" : "more")}>Más controles<ChevronDown /></button>
         </nav>
         <div className={s.configScroll}>
           {activeTab === "reference" && <section className={s.card}>
-            <SectionTitle step="01" title="Referencia visual" description="Define qué imagen, producto, persona o referencia usa esta escena." />
+            <SectionTitle title="Referencia" description="Elige el producto, persona, objeto o elemento visual que debe reconocerse en esta escena." />
             <VideoSourcePicker source={activeSource} previewUrl={activePreviewUrl} fileName={activeFileName} fileError={fileError} onSourceChange={(referenceSource) => updateActiveChunk({ referenceSource })} onUpload={handleUpload} onClear={() => clearPreview()} />
             <VideoSceneField id={`scene-reference-${activeChunk.id}`} label="Qué debemos reconocer" value={activeChunk.referenceDescription ?? ""} onChange={(referenceDescription) => updateActiveChunk({ referenceDescription })} suggestions={REFERENCE_SUGGESTIONS} placeholder="Ej. El producto en manos de una persona, con el empaque visible y una cocina luminosa de fondo." helper="Complementa la imagen con el sujeto o detalle que debe mantenerse visible." maxLength={300} />
           </section>}
           {activeTab === "action" && <section className={s.card}>
-            <SectionTitle step="02" title="Acción" description="Define qué ocurre físicamente en esta escena." />
+            <SectionTitle title="Qué ocurre" description="Describe qué pasa en esta escena, con tus palabras." />
             <VideoSceneField id={`scene-action-${activeChunk.id}`} label="Qué ocurre" value={activeChunk.action} onChange={(action) => updateActiveChunk({ action })} suggestions={ACTION_SUGGESTIONS} placeholder="Ej. Una persona abre la caja, extrae el producto y lo muestra a cámara con un gesto natural." helper="Describe una acción concreta y observable." maxLength={500} />
           </section>}
-          {activeTab === "camera" && <section className={s.card}>
-            <SectionTitle step="03" title="Cámara" description="Define cómo se encuadra y graba la acción." />
-            <VideoSceneField id={`scene-camera-${activeChunk.id}`} label="Encuadre y movimiento" value={activeChunk.camera ?? ""} onChange={(camera) => updateActiveChunk({ camera })} suggestions={CAMERA_SUGGESTIONS} placeholder="Ej. Plano medio handheld que se acerca lentamente hasta un close-up del producto." helper="Combina plano, movimiento y punto de vista si lo necesitas." maxLength={350} />
-          </section>}
           {activeTab === "dialogue" && <section className={s.card}>
-            <SectionTitle step="04" title="Diálogo / texto" description="Añade voz, diálogo o texto visible solo si esta escena lo necesita." />
-            <VideoSceneField id={`scene-dialogue-${activeChunk.id}`} label="Qué se dice o aparece escrito" value={activeChunk.dialogue ?? ""} onChange={(dialogue) => updateActiveChunk({ dialogue })} suggestions={DIALOGUE_SUGGESTIONS} placeholder={'Ej. Voz en off: "Así simplifiqué mi rutina cada mañana". Texto en pantalla: "Listo en segundos".'} helper="Puedes dejarlo vacío para una escena completamente visual." optional maxLength={500} />
+            <SectionTitle title="Voz / texto" description="Añade lo que se dice o el texto que debe verse, si esta escena lo necesita." />
+            <VideoSceneField id={`scene-dialogue-${activeChunk.id}`} label="Lo que se dice o aparece" value={activeChunk.dialogue ?? ""} onChange={(dialogue) => updateActiveChunk({ dialogue })} suggestions={DIALOGUE_SUGGESTIONS} placeholder={'Ej. Voz en off: "Así simplifiqué mi rutina cada mañana". Texto en pantalla: "Listo en segundos".'} helper="Puedes dejarlo vacío para una escena completamente visual." optional maxLength={500} />
           </section>}
-          {activeTab === "sceneStyle" && <section className={s.card}>
-            <SectionTitle step="05" title="Estilo de escena" description="Define el matiz visual local sin cambiar el estilo global del anuncio." />
-            <VideoSceneField id={`scene-style-${activeChunk.id}`} label="Estética local" value={activeChunk.sceneStyle ?? ""} onChange={(sceneStyle) => updateActiveChunk({ sceneStyle })} suggestions={SCENE_STYLE_SUGGESTIONS} placeholder="Ej. UGC natural, luz suave de ventana y energía cercana." helper="Este matiz complementa el estilo general; no redefine el branding." maxLength={350} />
-          </section>}
+          <div id="video-scene-more-controls" className={s.advancedSceneControls} hidden={activeTab !== "more"}>
+            <section className={s.card}>
+              <SectionTitle title="Cámara" description="Opcional: indica cómo quieres ver o grabar la acción." />
+              <VideoSceneField id={`scene-camera-${activeChunk.id}`} label="Encuadre y movimiento" value={activeChunk.camera ?? ""} onChange={(camera) => updateActiveChunk({ camera })} suggestions={CAMERA_SUGGESTIONS} placeholder="Ej. Plano medio handheld que se acerca lentamente hasta un close-up del producto." helper="Si lo dejas vacío, no se añade una indicación de cámara específica." optional maxLength={350} />
+            </section>
+            <section className={s.card}>
+              <SectionTitle title="Estilo de esta escena" description="Solo cambia esto si quieres que esta escena se vea diferente al resto." />
+              <VideoSceneField id={`scene-style-${activeChunk.id}`} label="Estilo de esta escena" value={activeChunk.sceneStyle ?? ""} onChange={(sceneStyle) => updateActiveChunk({ sceneStyle })} suggestions={SCENE_STYLE_SUGGESTIONS} placeholder="Ej. UGC natural, luz suave de ventana y energía cercana." helper="El estilo general sigue aplicando a todo el anuncio." optional maxLength={350} />
+            </section>
+          </div>
         </div>
       </div>
       <footer className={s.generateDock}><button disabled={!canGenerate} onClick={generateVideoChunk}><WandSparkles />Generar video</button><small>{generateFeedback || (canGenerate ? "Configuración completa · Lista para generar" : "Selecciona una fuente visual para continuar")}</small></footer>

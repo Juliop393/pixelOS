@@ -446,3 +446,18 @@
 .modeSwitch button{font-family:inherit;font-size:12px;font-weight:600}
 .page[data-workspace-mode="plan"]{height:auto;min-height:100%;overflow:visible}
 .page[data-workspace-mode="plan"] .workspace{width:min(calc(100% - 8px),1600px);height:auto;min-height:0;margin:0 auto;display:block;grid-template-columns:none}
+
+/* The scene's essential choices stay up front; audiovisual details remain available on demand. */
+.page[data-workspace-mode="advanced"] .configBody{grid-template-columns:148px minmax(0,1fr)}
+.page[data-workspace-mode="advanced"] .stepTabs{gap:6px;padding:12px 9px}
+.page[data-workspace-mode="advanced"] .stepTabs button{min-height:52px;padding:11px 12px;font-size:12.5px;line-height:1.3}
+.page[data-workspace-mode="advanced"] .stepTabs .moreControlsButton{min-height:48px;margin-top:7px;display:flex;align-items:center;justify-content:space-between;gap:6px;border-top:1px solid var(--pf-border);color:var(--pf-secondary)}
+.page[data-workspace-mode="advanced"] .stepTabs .moreControlsButton svg{width:15px;height:15px;flex:none;transition:transform .2s ease}
+.page[data-workspace-mode="advanced"] .stepTabs .moreControlsButton[aria-expanded="true"] svg{transform:rotate(180deg)}
+.page[data-workspace-mode="advanced"] .stepTabs .moreControlsButton.stepActive{color:var(--pf-headline)}
+.page[data-workspace-mode="advanced"] .cardTitle h2{font-size:19px}
+.advancedSceneControls{display:flex;flex-direction:column;gap:16px}
+.advancedSceneControls[hidden]{display:none}
+.advancedSceneControls>.card{padding:22px;border:1px solid var(--pf-border);border-radius:16px;background:var(--pf-card);box-shadow:var(--pf-highlight)}
+.advancedSceneControls .sceneField textarea{min-height:165px}
+@media(max-width:680px){.page[data-workspace-mode="advanced"] .configBody{grid-template-columns:122px minmax(0,1fr)}.page[data-workspace-mode="advanced"] .stepTabs{padding-inline:6px}.page[data-workspace-mode="advanced"] .stepTabs button{padding-inline:8px;font-size:11px}.advancedSceneControls>.card{padding:16px}}
