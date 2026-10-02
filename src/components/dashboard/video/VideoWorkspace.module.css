@@ -362,6 +362,57 @@
 .storyboardSceneActive .storyboardSceneMeta span { background: var(--pf-action); color: var(--pf-action-ink); box-shadow: var(--pf-highlight); }
 .storyboardSceneMeta b, .storyboardLegend, .storyboardActions > small, .storyboardScene footer, .timeline > header p, .timelineMetric > span { color: var(--pf-secondary); }
 .storyboardSceneActions, .timelineMetric, .timelineGlobalMetric { background: var(--pf-card); border-color: var(--pf-border); box-shadow: inset 0 0 0 1px var(--pf-border); }
+
+/* Modo Pro: one active scene, one sequence, and global strategy on demand. */
+.sceneMetadata{display:flex;flex-wrap:wrap;align-items:end;gap:12px 16px;margin-bottom:14px}
+.sceneIdentity{flex:1 1 100%;min-width:0}
+.sceneIdentity>span{color:var(--pf-brand);font:10px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em}
+.sceneIdentity h2{margin:5px 0 0;color:var(--pf-headline);font-size:clamp(18px,1.7vw,22px);line-height:1.2;letter-spacing:-.025em}
+.sceneMetadata label{flex:1 1 210px;gap:6px}
+.sceneMetadata>small{max-width:none;padding-bottom:12px;white-space:nowrap}
+.globalStrategyEditor{padding:12px 15px;margin-bottom:16px;border-radius:13px;background:var(--pf-card);box-shadow:inset 0 0 0 1px var(--pf-border)}
+.globalStrategyEditor:before{display:none}
+.globalStrategyEditor>.strategyCompactHeader{min-width:0;margin:0;display:flex;align-items:center;gap:12px}
+.strategyCompactCopy{min-width:0;flex:1;display:flex;align-items:center;gap:8px}
+.globalStrategyEditor>header .strategyCompactCopy>span{flex:none;padding:4px 6px;font-size:9px}
+.globalStrategyEditor>header .strategyCompactCopy>b{flex:none;font-size:13px}
+.globalStrategyEditor>header .strategyCompactCopy>small{max-width:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;color:var(--pf-secondary);font-size:12px}
+.strategyExpand{flex:none;min-height:34px;padding:0 10px;border:1px solid var(--pf-border);border-radius:9px;display:inline-flex;align-items:center;gap:6px;background:var(--pf-elevated);color:var(--pf-primary);font:600 12px/1 inherit;cursor:pointer}
+.strategyExpand:hover,.strategyExpand:focus-visible{border-color:var(--pf-border-hover);color:var(--pf-headline)}
+.strategyExpand svg{width:14px;height:14px;transition:transform .2s ease}
+.strategyExpand[aria-expanded="true"] svg{transform:rotate(180deg)}
+.globalStrategyEditor>.strategyDetails{display:block;margin-top:13px;padding-top:12px;border-top:1px solid var(--pf-border)}
+.strategyDetails>p{margin:0 0 13px;color:var(--pf-secondary);font-size:12px}
+.globalStrategyEditor .strategyFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}
+.storyboardInner>.globalStrategyEditor .strategyFields{grid-template-columns:repeat(3,minmax(0,1fr))}
+.globalStrategyEditor .strategyFields label,.globalStrategyEditor .strategyFields label:hover{padding:0;background:transparent;box-shadow:none;transform:none}
+.previewHeaderActions{display:flex;align-items:center;gap:10px}
+.stageHeader .previewHeaderActions>.downloadChunk{min-height:38px;margin:0;padding:0 12px;white-space:nowrap}
+.previewStage{grid-template-columns:minmax(0,1fr);justify-items:center}
+.phoneFrame{height:min(62dvh,600px);max-height:600px;max-width:100%}
+.timeline{padding-block:18px 20px}
+.timeline>header{margin-bottom:12px}
+.timeline>.timelineSummary{min-height:0;margin:13px 0 0;padding:10px 14px;border-radius:11px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--pf-card);box-shadow:inset 0 0 0 1px var(--pf-border)}
+.timelineSummaryFacts{min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:var(--pf-secondary);font-size:12px}
+.timelineSummaryFacts b{color:var(--pf-headline);font-weight:650}
+.timelineSummaryFacts i{width:3px;height:3px;flex:none;border-radius:50%;background:var(--pf-tertiary)}
+.timelineSummaryFacts[data-status="generating"] span:last-child{color:#ee9b7d}
+.timelineSummaryFacts[data-status="generated"] span:last-child{color:#a6c99e}
+.timelineSummaryFacts[data-status="error"] span:last-child{color:#ef9d96}
+.timelineSummaryActions{grid-column:auto;margin:0;flex:none}
+.storyboardInner{gap:18px}
+.storyboardHero{min-height:0;padding:20px 26px;gap:26px;grid-template-columns:minmax(0,1fr) 290px}
+.storyboardHero:before{top:20px;bottom:20px}
+.storyboardHeroCopy h1{margin:10px 0 8px;font-size:clamp(32px,3vw,42px);line-height:1.08}
+.storyboardHeroCopy p{font-size:13px;line-height:1.5}
+.storyboardActions{padding:10px;gap:7px;box-shadow:inset 0 0 0 1px var(--pf-border)}
+.storyboardDuration{min-height:42px;padding-inline:11px}
+.storyboardActions button{min-height:42px}
+.storyboardSection{padding:20px}
+@media(max-width:1540px){.globalStrategyEditor{padding:12px 14px}.timeline>.timelineSummary{padding:10px 14px}}
+@media(max-width:1380px){.storyboardHero{padding:18px 22px;grid-template-columns:minmax(0,1fr) 275px}.phoneFrame{height:min(58dvh,550px)}}
+@media(max-width:920px){.storyboardHero{grid-template-columns:1fr}.storyboardInner>.globalStrategyEditor .strategyFields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.strategyCompactCopy{flex-wrap:wrap}.globalStrategyEditor>header .strategyCompactCopy>small{flex-basis:100%}.globalStrategyEditor .strategyFields,.storyboardInner>.globalStrategyEditor .strategyFields{grid-template-columns:1fr}.sceneMetadata>small{padding-bottom:0}.stageHeader .previewHeaderActions>.downloadChunk{font-size:0;padding:0 10px}.stageHeader .previewHeaderActions>.downloadChunk svg{width:16px}.timeline>.timelineSummary{align-items:flex-start;flex-direction:column}.storyboardHero{padding:18px}}
 .chunkCard, .addChunk, .storyboardAddScene { background: var(--pf-elevated); border-color: var(--pf-border); color: var(--pf-primary); }
 .chunkCard small, .addChunk small, .storyboardAddScene small { color: var(--pf-secondary); }
 .chunkActive { background: var(--pf-selected); border-color: var(--pf-selected-border); box-shadow: var(--pf-highlight); }

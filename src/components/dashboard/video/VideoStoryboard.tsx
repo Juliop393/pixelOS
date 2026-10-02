@@ -50,7 +50,7 @@ export default function VideoStoryboard({
     <div className={s.storyboardInner}>
       <header className={s.storyboardHero}>
         <div className={s.storyboardHeroCopy}>
-          <span>MODO PRO · STORYBOARD</span>
+          <span>MODO PRO · SECUENCIA</span>
           <h1>Tu anuncio, escena por escena.</h1>
           <p>Define una estrategia, construye la secuencia y controla la ejecución visual de cada escena.</p>
         </div>
@@ -66,7 +66,7 @@ export default function VideoStoryboard({
 
       <section className={s.storyboardSection}>
         <header>
-          <div><span>SECUENCIA</span><h2>Storyboard del anuncio</h2></div>
+          <div><span>ESCENAS</span><h2>Secuencia del anuncio</h2></div>
           <p><Clapperboard />{chunks.length} {chunks.length === 1 ? "escena" : "escenas"} · {totalDuration} segundos</p>
         </header>
         <div className={s.storyboardTrack}>

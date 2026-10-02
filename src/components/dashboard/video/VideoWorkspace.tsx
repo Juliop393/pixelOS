@@ -168,14 +168,14 @@ export default function VideoWorkspace() {
         ? { ...chunk, status: "generated", videoUrl }
         : chunk
       ))
-      setGenerateFeedback("Fragmento generado correctamente")
+      setGenerateFeedback("Escena generada correctamente")
       generatingChunkId.current = null
     } else if (videoPhase === "error") {
       setChunks((current) => current.map((chunk) => chunk.id === chunkId
         ? { ...chunk, status: "error", videoUrl: undefined }
         : chunk
       ))
-      setGenerateFeedback(videoError || "No se pudo generar el fragmento")
+      setGenerateFeedback(videoError || "No se pudo generar la escena")
       generatingChunkId.current = null
     }
   }, [videoError, videoPhase, videoUrl])
@@ -203,7 +203,7 @@ export default function VideoWorkspace() {
 
     generatingChunkId.current = chunkId
     setChunks((current) => current.map((chunk) => chunk.id === chunkId ? { ...chunk, status: "generating" } : chunk))
-    setGenerateFeedback("Generando fragmento...")
+    setGenerateFeedback("Generando escena...")
     void generateVideo(activePreviewUrl, apiAngle, hookLabel ?? hook, apiStyle, {
       cta: strategy.cta,
       format: strategy.format,
@@ -318,15 +318,16 @@ export default function VideoWorkspace() {
       onMove={moveChunk}
     /> : <>
     <aside className={s.configPanel}>
-      <header className={s.intro}><button type="button" className={s.advancedBack} onClick={() => setWorkspaceMode("storyboard")}><ArrowLeft />Volver al storyboard</button><span>MODO PRO · AJUSTAR ESCENAS</span><h1>Dirige tu anuncio</h1><p>Controla la ejecución visual de cada escena sin redefinir la estrategia global.</p></header>
-      <VideoStrategyEditor strategy={strategy} onChange={updateStrategy} />
+      <header className={s.intro}><button type="button" className={s.advancedBack} onClick={() => setWorkspaceMode("storyboard")}><ArrowLeft />Volver a secuencia</button><span>MODO PRO · AJUSTAR ESCENAS</span><h1>Dirige tu anuncio</h1><p>Controla la ejecución visual de la escena seleccionada.</p></header>
       <div className={s.sceneMetadata}>
-        <label>Rol de la escena {activeIndex + 1}<span className={s.strategySelectWrap}><select value={activeChunk.purpose} onChange={(event) => updateActiveChunk({ purpose: event.target.value })}>
+        <div className={s.sceneIdentity}><span>ESCENA ACTUAL</span><h2>Escena {activeIndex + 1} · {activeChunk.purpose}</h2></div>
+        <label>Rol de la escena<span className={s.strategySelectWrap}><select value={activeChunk.purpose} onChange={(event) => updateActiveChunk({ purpose: event.target.value })}>
           {!VIDEO_SCENE_ROLES.includes(activeChunk.purpose) && <option value={activeChunk.purpose}>{activeChunk.purpose}</option>}
           {VIDEO_SCENE_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
         </select></span></label>
-        <small>{activeChunk.duration}s · Duración disponible actualmente</small>
+        <small>{activeChunk.duration} s por escena actualmente.</small>
       </div>
+      <VideoStrategyEditor strategy={strategy} onChange={updateStrategy} />
       <div className={s.configBody}>
         <nav className={s.stepTabs} aria-label="Configuración del video">
           {VIDEO_TABS.map((tab) => <button type="button" key={tab.id} className={activeTab === tab.id ? s.stepActive : ""} aria-current={activeTab === tab.id ? "step" : undefined} onClick={() => setActiveTab(tab.id)}><span>{tab.step}</span>{tab.label}</button>)}
@@ -359,7 +360,7 @@ export default function VideoWorkspace() {
     </aside>
     <main className={s.stagePanel}>
       <VideoPreview previewUrl={activeSource === "upload" ? activePreviewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={getVideoDuration(chunks)} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} />
-      <VideoTimeline chunks={chunks} activeId={activeId} format={strategy.format} styleLabel={styleLabel} finalVideoUrl={finalVideoUrl} onSelect={selectChunk} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={mergeVideoChunks} />
+      <VideoTimeline chunks={chunks} activeId={activeId} format={strategy.format} finalVideoUrl={finalVideoUrl} onSelect={selectChunk} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={mergeVideoChunks} />
     </main>
     </>}
     <PixelAiDrawer open={pixelAiOpen} onOpenChange={setPixelAiOpen} focusMode videoContext />
