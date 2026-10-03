@@ -15,13 +15,14 @@ import VideoTimeline from "./VideoTimeline"
 import VideoStrategyEditor from "./VideoStrategyEditor"
 import VideoSimple, { SIMPLE_APPROACHES, type SimpleApproach } from "./VideoSimple"
 import VideoPlan from "./VideoPlan"
+import VideoResult from "./VideoResult"
 import { proposeVideoPlan, SIMPLE_DURATION_LABELS, SIMPLE_DURATION_RANGES, SIMPLE_STYLE_LABELS, type SimpleDuration } from "./video-plan"
 import { createVideoChunk, getVideoDuration, migrateVideoChunk, moveVideoChunk, VIDEO_FORMAT, VIDEO_MAX_SCENES, VIDEO_SCENE_ROLES, VIDEO_ANGLES, VIDEO_HOOKS, VIDEO_STYLES, type VideoChunk, type VideoStrategy } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
 type VideoTab = "reference" | "action" | "dialogue" | "more"
 type VideoWorkspaceMode = "storyboard" | "advanced"
-type VideoEditorMode = "simple" | "plan" | "pro"
+type VideoEditorMode = "simple" | "plan" | "pro" | "result"
 
 const VIDEO_TABS: { id: VideoTab; label: string }[] = [
   { id: "reference", label: "Referencia" },
@@ -88,6 +89,7 @@ export default function VideoWorkspace() {
   const [planNotice, setPlanNotice] = useState("")
   const planEdited = useRef(false)
   const [chunks, setChunks] = useState<VideoChunk[]>(() => [migrateVideoChunk(createVideoChunk(1, "Hook / apertura"))])
+  const [pendingChanges, setPendingChanges] = useState<ReadonlySet<number>>(() => new Set())
   const [activeId, setActiveId] = useState(1)
   const [strategyFeedback, setStrategyFeedback] = useState("")
   const [generateFeedback, setGenerateFeedback] = useState("")
@@ -112,10 +114,16 @@ export default function VideoWorkspace() {
   const updateChunk = (id: number, patch: Partial<VideoChunk>) => {
     setChunks((current) => current.map((chunk) => chunk.id === id ? { ...migrateVideoChunk(chunk), ...patch } : chunk))
   }
-  const updateActiveChunk = (patch: Partial<VideoChunk>) => { planEdited.current = true; updateChunk(activeId, patch) }
+  const markPendingChanges = (id: number) => {
+    if (chunks.some((chunk) => chunk.id === id && chunk.videoUrl)) {
+      setPendingChanges((current) => new Set(current).add(id))
+    }
+  }
+  const updateActiveChunk = (patch: Partial<VideoChunk>) => { planEdited.current = true; markPendingChanges(activeId); updateChunk(activeId, patch) }
   const selectChunk = (id: number) => { setActiveId(id); setFileError(""); setGenerateFeedback("") }
   const clearPreview = (id = activeId) => {
     if (editorMode === "pro") planEdited.current = true
+    markPendingChanges(id)
     updateChunk(id, { referenceImageUrl: undefined, referenceFileName: "", status: "pending" })
     setFileError("")
     setGenerateFeedback("")
@@ -125,6 +133,7 @@ export default function VideoWorkspace() {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { setFileError("Usa una imagen JPG, PNG o WEBP."); return }
     if (file.size > 5 * 1024 * 1024) { setFileError("La imagen debe pesar menos de 5 MB."); return }
     if (editorMode === "pro") planEdited.current = true
+    markPendingChanges(targetChunkId)
 
     updateChunk(targetChunkId, { referenceSource: "upload", referenceImageUrl: undefined, referenceFileName: file.name, status: "pending" })
     setFileError(""); setUploading(true); setGenerateFeedback("Subiendo referencia visual...")
@@ -184,6 +193,7 @@ export default function VideoWorkspace() {
         : chunk
       ))
       setGenerateFeedback("Escena generada correctamente")
+      setPendingChanges((current) => { const next = new Set(current); next.delete(chunkId); return next })
       generatingChunkId.current = null
     } else if (videoPhase === "error") {
       setChunks((current) => current.map((chunk) => chunk.id === chunkId
@@ -219,6 +229,7 @@ export default function VideoWorkspace() {
     generatingChunkId.current = chunkId
     setChunks((current) => current.map((chunk) => chunk.id === chunkId ? { ...chunk, status: "generating" } : chunk))
     setGenerateFeedback("Generando escena...")
+    setEditorMode("result")
     void generateVideo(activePreviewUrl, apiAngle, hookLabel ?? hook, apiStyle, {
       cta: strategy.cta,
       format: strategy.format,
@@ -282,6 +293,7 @@ export default function VideoWorkspace() {
       <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? s.modeSelected : ""} onClick={showSimpleMode}>Simple</button>
       {planSeed && <button type="button" role="tab" aria-selected={editorMode === "plan"} className={editorMode === "plan" ? s.modeSelected : ""} onClick={continueFromSimple} disabled={!simpleReference.referenceImageUrl?.startsWith("https://") || !simpleGoal.trim()}>Plan</button>}
       <button type="button" role="tab" aria-selected={editorMode === "pro"} className={editorMode === "pro" ? s.modeSelected : ""} onClick={() => setEditorMode("pro")}>Modo Pro</button>
+      <button type="button" role="tab" aria-selected={editorMode === "result"} className={editorMode === "result" ? s.modeSelected : ""} onClick={() => setEditorMode("result")}>Resultado</button>
     </div><button
       type="button"
       className={`${s.pixelAiHeaderButton} ${pixelAiOpen ? s.pixelAiHeaderButtonActive : ""}`}
@@ -317,6 +329,13 @@ export default function VideoWorkspace() {
       onBack={() => setEditorMode("simple")}
       onGenerate={reviewGenerationFromPlan}
       onEdit={editPlanScenes}
+    /> : editorMode === "result" ? <VideoResult
+      chunks={chunks}
+      format={strategy.format}
+      finalVideoUrl={finalVideoUrl}
+      pendingChanges={pendingChanges}
+      onEdit={() => { setWorkspaceMode("storyboard"); setEditorMode("pro") }}
+      onEditScene={(id) => { editChunk(id); setEditorMode("pro") }}
     /> : workspaceMode === "storyboard" ? <VideoStoryboard
       chunks={chunks}
       strategyEditor={<VideoStrategyEditor strategy={strategy} onChange={updateStrategy} />}

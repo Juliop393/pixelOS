@@ -461,3 +461,5 @@
 .advancedSceneControls>.card{padding:22px;border:1px solid var(--pf-border);border-radius:16px;background:var(--pf-card);box-shadow:var(--pf-highlight)}
 .advancedSceneControls .sceneField textarea{min-height:165px}
 @media(max-width:680px){.page[data-workspace-mode="advanced"] .configBody{grid-template-columns:122px minmax(0,1fr)}.page[data-workspace-mode="advanced"] .stepTabs{padding-inline:6px}.page[data-workspace-mode="advanced"] .stepTabs button{padding-inline:8px;font-size:11px}.advancedSceneControls>.card{padding:16px}}
+.page[data-workspace-mode="result"]{height:auto;min-height:100%;overflow:visible}
+.page[data-workspace-mode="result"] .workspace{width:min(calc(100% - 8px),1600px);height:auto;min-height:0;margin:0 auto;display:block;grid-template-columns:none}
