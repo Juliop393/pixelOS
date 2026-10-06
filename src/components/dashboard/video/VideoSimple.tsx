@@ -1,6 +1,6 @@
 import { BadgePercent, Clapperboard, ImagePlus, PlaySquare, Sparkles, Trash2, Upload, UsersRound, WandSparkles } from "lucide-react"
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
-import { SIMPLE_DURATION_LABELS, SIMPLE_DURATION_RANGES, type SimpleDuration } from "./video-plan"
+import { VIDEO_GENERATION_DURATION } from "./video-data"
 import s from "./VideoSimple.module.css"
 
 export const SIMPLE_APPROACHES = [
@@ -16,7 +16,7 @@ export type SimpleApproach = (typeof SIMPLE_APPROACHES)[number]["id"] | "custom"
 export default function VideoSimple({
   referenceImageUrl, referenceFileName, fileError, uploading,
   goal, onGoalChange, approach, styleLabel, onApproachChange,
-  duration, onDurationChange, onUpload, onClear, onIdea, onCreate,
+  onUpload, onClear, onIdea, onCreate,
   generating, videoUrl, generationError,
 }: {
   referenceImageUrl: string | null
@@ -28,8 +28,6 @@ export default function VideoSimple({
   approach: SimpleApproach
   styleLabel?: string
   onApproachChange: (approach: Exclude<SimpleApproach, "custom">) => void
-  duration: SimpleDuration
-  onDurationChange: (duration: SimpleDuration) => void
   onUpload: (file?: File) => void
   onClear: () => void
   onIdea: () => void
@@ -80,10 +78,7 @@ export default function VideoSimple({
             {approach === "custom" && <p className={s.advancedStyle}>Estilo actual de Modo Pro: {styleLabel}</p>}
           </section>
 
-          <section className={s.durationSection} aria-labelledby="simple-duration-title">
-            <div className={s.sectionHeading}><span>04</span><div><h2 id="simple-duration-title">Duración</h2><p>¿Qué extensión imaginas para tu anuncio?</p></div></div>
-            <div className={s.durationChoices}>{(Object.keys(SIMPLE_DURATION_LABELS) as SimpleDuration[]).map((key) => <button key={key} type="button" className={duration === key ? s.selected : ""} aria-pressed={duration === key} onClick={() => onDurationChange(key)}><b>{SIMPLE_DURATION_LABELS[key]}</b><small>{SIMPLE_DURATION_RANGES[key]}</small></button>)}</div>
-          </section>
+          <div className={s.durationFixed}><span>Duración</span><strong>{VIDEO_GENERATION_DURATION} segundos</strong></div>
 
           <div className={s.createArea}>
             <p className={s.planExplainer}>Genera un solo clip a partir de tu imagen, objetivo y enfoque.</p>
@@ -99,7 +94,6 @@ export default function VideoSimple({
         {generationError && <p className={s.resultError} role="alert">{generationError}</p>}
         {videoUrl && <div className={s.resultPlayer}><video key={videoUrl} src={videoUrl} controls playsInline preload="metadata" poster={referenceImageUrl ?? undefined} aria-label="Video generado en Modo Simple" /><small>{generating || generationError ? "Se muestra el último clip generado; los cambios recientes aún no aparecen en él." : "Si cambias la configuración, genera otro clip para aplicar los cambios."}</small></div>}
       </section>}
-      <footer className={s.note}><Sparkles aria-hidden="true" />La duración elegida es orientativa; la generación actual produce un solo clip de 6 segundos.</footer>
     </div>
   </main>
 }

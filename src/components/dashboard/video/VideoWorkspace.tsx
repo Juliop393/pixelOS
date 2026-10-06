@@ -86,7 +86,7 @@ export default function VideoWorkspace() {
   const [editorMode, setEditorMode] = useState<VideoEditorMode>("simple")
   const [simpleApproach, setSimpleApproach] = useState<SimpleApproach>("auto")
   const [simpleGoal, setSimpleGoal] = useState("")
-  const [simpleDuration, setSimpleDuration] = useState<SimpleDuration>("short")
+  const simpleDuration: SimpleDuration = "short"
   const [simpleReference, setSimpleReference] = useState<VideoChunk>(() => createVideoChunk(0, "Video simple"))
   const [planSeed, setPlanSeed] = useState<string | null>(null)
   const [planNotice, setPlanNotice] = useState("")
@@ -348,8 +348,6 @@ export default function VideoWorkspace() {
       approach={simpleApproach}
       styleLabel={SIMPLE_APPROACHES.find((item) => item.id === simpleApproach)?.label}
       onApproachChange={setSimpleApproach}
-      duration={simpleDuration}
-      onDurationChange={setSimpleDuration}
       onUpload={(file) => { void handleUpload(file, simpleReference.id) }}
       onClear={() => clearPreview(simpleReference.id)}
       onIdea={() => setPixelAiOpen(true)}
