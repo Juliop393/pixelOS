@@ -291,9 +291,7 @@ export default function VideoWorkspace() {
   return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} data-workspace-mode={editorMode === "pro" ? workspaceMode : editorMode} className={s.page}>
     <EditorHeader tool="video" action={<div className={s.modeHeaderActions}><div className={s.modeSwitch} role="tablist" aria-label="Modo de edición de Video">
       <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? s.modeSelected : ""} onClick={showSimpleMode}>Simple</button>
-      {planSeed && <button type="button" role="tab" aria-selected={editorMode === "plan"} className={editorMode === "plan" ? s.modeSelected : ""} onClick={continueFromSimple} disabled={!simpleReference.referenceImageUrl?.startsWith("https://") || !simpleGoal.trim()}>Plan</button>}
       <button type="button" role="tab" aria-selected={editorMode === "pro"} className={editorMode === "pro" ? s.modeSelected : ""} onClick={() => setEditorMode("pro")}>Modo Pro</button>
-      <button type="button" role="tab" aria-selected={editorMode === "result"} className={editorMode === "result" ? s.modeSelected : ""} onClick={() => setEditorMode("result")}>Resultado</button>
     </div><button
       type="button"
       className={`${s.pixelAiHeaderButton} ${pixelAiOpen ? s.pixelAiHeaderButtonActive : ""}`}
