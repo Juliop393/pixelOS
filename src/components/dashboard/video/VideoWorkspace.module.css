@@ -463,3 +463,6 @@
 @media(max-width:680px){.page[data-workspace-mode="advanced"] .configBody{grid-template-columns:122px minmax(0,1fr)}.page[data-workspace-mode="advanced"] .stepTabs{padding-inline:6px}.page[data-workspace-mode="advanced"] .stepTabs button{padding-inline:8px;font-size:11px}.advancedSceneControls>.card{padding:16px}}
 .page[data-workspace-mode="result"]{height:auto;min-height:100%;overflow:visible}
 .page[data-workspace-mode="result"] .workspace{width:min(calc(100% - 8px),1600px);height:auto;min-height:0;margin:0 auto;display:block;grid-template-columns:none}
+.storyboardActions>.storyboardRegenerate,.generateDock>.regenerateScene{border:1px solid var(--pf-border-hover);background:var(--pf-elevated);color:var(--pf-primary);box-shadow:var(--pf-highlight)}
+.storyboardActions>.storyboardRegenerate:hover:not(:disabled),.generateDock>.regenerateScene:hover:not(:disabled){background:var(--pf-card);border-color:var(--pf-selected-border);box-shadow:var(--pf-highlight)}
+.storyboardActions>.storyboardRegenerate:disabled,.generateDock>.regenerateScene:disabled{border-color:var(--pf-border);background:var(--pf-elevated);color:var(--pf-tertiary);box-shadow:none}

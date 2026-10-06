@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight, Clapperboard, Download, Link2, Plus, Trash2 } fr
 import { getSceneDescription, getVideoDuration, VIDEO_GENERATION_DURATION, VIDEO_MAX_SCENES, type VideoChunk } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
-const STATUS_LABEL = { pending: "Pendiente", configured: "Configurado", generating: "Generando…", generated: "Listo", error: "Error" }
+const STATUS_LABEL = { pending: "Sin generar", configured: "Sin generar", generating: "Generando…", generated: "Lista", error: "Error" }
 
 export default function VideoTimeline({ chunks, activeId, format, finalVideoUrl, onSelect, onAdd, onRemove, onMove, onMerge }: {
   chunks: VideoChunk[]; activeId: number; format: string; finalVideoUrl: string | null
@@ -29,7 +29,7 @@ export default function VideoTimeline({ chunks, activeId, format, finalVideoUrl,
         <div className={s.chunkActions}>
           <button onClick={() => onMove(index, -1)} disabled={index === 0} aria-label="Mover escena a la izquierda"><ArrowLeft /></button>
           <button onClick={() => onMove(index, 1)} disabled={index === chunks.length - 1} aria-label="Mover escena a la derecha"><ArrowRight /></button>
-          <button onClick={() => onRemove(chunk.id)} disabled={chunks.length === 1} aria-label="Eliminar escena"><Trash2 /></button>
+          <button onClick={() => onRemove(chunk.id)} disabled={chunks.length === 1 || chunk.status === "generating"} aria-label="Eliminar escena"><Trash2 /></button>
         </div>
         {index < chunks.length - 1 && <span className={s.connector}>→</span>}
       </div>)}

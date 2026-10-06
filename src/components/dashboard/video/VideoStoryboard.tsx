@@ -1,16 +1,16 @@
 "use client"
 
-import { ArrowLeft, ArrowRight, Clapperboard, Clock3, PencilLine, Plus, SlidersHorizontal, Trash2, WandSparkles } from "lucide-react"
+import { ArrowLeft, ArrowRight, Clapperboard, Clock3, PencilLine, Plus, RotateCcw, SlidersHorizontal, Trash2, WandSparkles } from "lucide-react"
 import type { ReactNode } from "react"
 import { getSceneDescription, getVideoDuration, VIDEO_GENERATION_DURATION, VIDEO_MAX_SCENES, type VideoChunk } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
 const STATUS_LABELS: Record<VideoChunk["status"], string> = {
-  pending: "Pendiente",
-  configured: "Lista",
+  pending: "Sin generar",
+  configured: "Sin generar",
   generating: "Generando",
-  generated: "Generada",
-  error: "Revisar",
+  generated: "Lista",
+  error: "Error",
 }
 
 type VideoStoryboardProps = {
@@ -45,6 +45,8 @@ export default function VideoStoryboard({
   onMove,
 }: VideoStoryboardProps) {
   const totalDuration = getVideoDuration(chunks)
+  const selectedChunk = chunks.find((chunk) => chunk.id === activeId)
+  const anotherSceneGenerating = chunks.some((chunk) => chunk.id !== activeId && chunk.status === "generating")
 
   return <main className={s.storyboardOverview}>
     <div className={s.storyboardInner}>
@@ -56,9 +58,9 @@ export default function VideoStoryboard({
         </div>
         <div className={s.storyboardActions}>
           <div className={s.storyboardDuration}><Clock3 /><span>Duración estimada</span><b>{totalDuration}s</b></div>
-          <button type="button" className={s.storyboardGenerate} disabled={!canGenerate} onClick={onGenerate}><WandSparkles />Generar video</button>
+          <button type="button" className={`${s.storyboardGenerate} ${selectedChunk?.videoUrl ? s.storyboardRegenerate : ""}`} disabled={!canGenerate} onClick={onGenerate}>{selectedChunk?.videoUrl ? <RotateCcw /> : <WandSparkles />}{selectedChunk?.videoUrl ? "Regenerar escena" : "Generar escena"}</button>
           <button type="button" className={s.storyboardAdjust} onClick={onAdjust}><SlidersHorizontal />Ajustar escenas</button>
-          <small>{generateFeedback || (sourceReady ? "Se generará la escena seleccionada" : "Añade una fuente visual a la escena seleccionada")}</small>
+          <small>{selectedChunk?.status === "generating" ? "Generando esta escena…" : anotherSceneGenerating ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (sourceReady ? selectedChunk?.videoUrl ? "Solo se regenerará la escena seleccionada" : "Se generará la escena seleccionada" : "Añade una fuente visual a la escena seleccionada")}</small>
         </div>
       </header>
 
@@ -82,7 +84,7 @@ export default function VideoStoryboard({
               <span>
                 <button type="button" className={s.storyboardMovePrevious} disabled={index === 0} onClick={() => onMove(index, -1)} aria-label="Mover escena hacia el inicio"><ArrowLeft /></button>
                 <button type="button" className={s.storyboardMoveNext} disabled={index === chunks.length - 1} onClick={() => onMove(index, 1)} aria-label="Mover escena hacia el final"><ArrowRight /></button>
-                <button type="button" disabled={chunks.length === 1} onClick={() => onRemove(chunk.id)} aria-label="Eliminar escena"><Trash2 /></button>
+                <button type="button" disabled={chunks.length === 1 || chunk.status === "generating"} onClick={() => onRemove(chunk.id)} aria-label="Eliminar escena"><Trash2 /></button>
               </span>
             </div>
           </article>)}
