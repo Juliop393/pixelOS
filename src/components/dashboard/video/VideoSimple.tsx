@@ -17,6 +17,7 @@ export default function VideoSimple({
   referenceImageUrl, referenceFileName, fileError, uploading,
   goal, onGoalChange, approach, styleLabel, onApproachChange,
   duration, onDurationChange, onUpload, onClear, onIdea, onCreate,
+  generating, videoUrl, generationError,
 }: {
   referenceImageUrl: string | null
   referenceFileName: string
@@ -33,8 +34,11 @@ export default function VideoSimple({
   onClear: () => void
   onIdea: () => void
   onCreate: () => void
+  generating: boolean
+  videoUrl: string | null
+  generationError: string
 }) {
-  const canContinue = Boolean(referenceImageUrl?.startsWith("https://") && goal.trim() && !uploading)
+  const canContinue = Boolean(referenceImageUrl?.startsWith("https://") && goal.trim() && !uploading && !generating)
 
   return <main className={s.simple} aria-labelledby="video-simple-title">
     <div className={s.inner}>
@@ -82,13 +86,20 @@ export default function VideoSimple({
           </section>
 
           <div className={s.createArea}>
-            <p className={s.planExplainer}>PixelFM preparará el enfoque y la estructura inicial del anuncio para que puedas revisarlos antes de generar.</p>
-            <button type="button" className={s.createButton} onClick={onCreate} disabled={!canContinue}><WandSparkles aria-hidden="true" />Crear video</button>
-            <p>{canContinue ? "Primero verás el Plan del anuncio; no se iniciará una generación todavía." : "Añade una imagen y describe tu idea para continuar."}</p>
+            <p className={s.planExplainer}>Genera un solo clip a partir de tu imagen, objetivo y enfoque.</p>
+            <button type="button" className={s.createButton} onClick={onCreate} disabled={!canContinue}><WandSparkles aria-hidden="true" />{generating ? "Generando tu video…" : "Crear video"}</button>
+            <p>{generating ? "Puedes revisar tu configuración mientras se genera." : canContinue ? "El resultado aparecerá aquí sin salir de Modo Simple." : "Añade una imagen y describe tu idea para continuar."}</p>
           </div>
         </div>
       </div>
-      <footer className={s.note}><Sparkles aria-hidden="true" />La duración es orientativa. Puedes ajustar las escenas en Modo Pro antes de generar.</footer>
+      {(generating || videoUrl || generationError) && <section className={`${s.resultSection} ${videoUrl ? s.resultWithPlayer : ""}`} aria-label="Resultado del video" aria-live="polite">
+        <div className={s.resultHeading}><span>VIDEO · MODO SIMPLE</span><h2>{generating ? "Generando tu video…" : generationError ? "No se pudo generar el video" : "Tu video está listo"}</h2>
+          <p>{generating ? "Tu imagen, objetivo y enfoque permanecen disponibles mientras se prepara el clip." : generationError ? "Tu configuración se conservó. Puedes volver a intentarlo." : "Reproduce tu clip sin salir de Modo Simple."}</p>
+        </div>
+        {generationError && <p className={s.resultError} role="alert">{generationError}</p>}
+        {videoUrl && <div className={s.resultPlayer}><video key={videoUrl} src={videoUrl} controls playsInline preload="metadata" poster={referenceImageUrl ?? undefined} aria-label="Video generado en Modo Simple" /><small>{generating || generationError ? "Se muestra el último clip generado; los cambios recientes aún no aparecen en él." : "Si cambias la configuración, genera otro clip para aplicar los cambios."}</small></div>}
+      </section>}
+      <footer className={s.note}><Sparkles aria-hidden="true" />La duración elegida es orientativa; la generación actual produce un solo clip de 6 segundos.</footer>
     </div>
   </main>
 }

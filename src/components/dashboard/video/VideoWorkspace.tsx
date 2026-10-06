@@ -16,8 +16,8 @@ import VideoStrategyEditor from "./VideoStrategyEditor"
 import VideoSimple, { SIMPLE_APPROACHES, type SimpleApproach } from "./VideoSimple"
 import VideoPlan from "./VideoPlan"
 import VideoResult from "./VideoResult"
-import { proposeVideoPlan, SIMPLE_DURATION_LABELS, SIMPLE_DURATION_RANGES, SIMPLE_STYLE_LABELS, type SimpleDuration } from "./video-plan"
-import { createVideoChunk, getVideoDuration, migrateVideoChunk, moveVideoChunk, VIDEO_FORMAT, VIDEO_MAX_SCENES, VIDEO_SCENE_ROLES, VIDEO_ANGLES, VIDEO_HOOKS, VIDEO_STYLES, type VideoChunk, type VideoStrategy } from "./video-data"
+import { proposeVideoPlan, SIMPLE_STYLE_LABELS, type SimpleDuration } from "./video-plan"
+import { createVideoChunk, getVideoDuration, migrateVideoChunk, moveVideoChunk, VIDEO_FORMAT, VIDEO_GENERATION_DURATION, VIDEO_MAX_SCENES, VIDEO_SCENE_ROLES, VIDEO_ANGLES, VIDEO_HOOKS, VIDEO_STYLES, type VideoChunk, type VideoStrategy } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
 type VideoTab = "reference" | "action" | "dialogue" | "more"
@@ -75,6 +75,8 @@ export default function VideoWorkspace() {
   const generatingChunkId = useRef<number | null>(null)
   const { videoUrl, videoPhase, videoError, generateVideo } = useVideoGenerator()
   const [fileError, setFileError] = useState("")
+  const [simpleFileError, setSimpleFileError] = useState("")
+  const [simpleError, setSimpleError] = useState("")
   const [uploading, setUploading] = useState(false)
   const [strategy, setStrategy] = useState<VideoStrategy>({ angle: "demo", hook: "result", style: "cinematic", cta: "", format: VIDEO_FORMAT })
   const { angle, hook, style } = strategy
@@ -85,6 +87,7 @@ export default function VideoWorkspace() {
   const [simpleApproach, setSimpleApproach] = useState<SimpleApproach>("auto")
   const [simpleGoal, setSimpleGoal] = useState("")
   const [simpleDuration, setSimpleDuration] = useState<SimpleDuration>("short")
+  const [simpleReference, setSimpleReference] = useState<VideoChunk>(() => createVideoChunk(0, "Video simple"))
   const [planSeed, setPlanSeed] = useState<string | null>(null)
   const [planNotice, setPlanNotice] = useState("")
   const planEdited = useRef(false)
@@ -101,15 +104,7 @@ export default function VideoWorkspace() {
   const activeSource = activeChunk.referenceSource ?? "library"
   const activePreviewUrl = activeChunk.referenceImageUrl ?? null
   const activeFileName = activeChunk.referenceFileName ?? ""
-  const simpleReference = chunks[0]
-
-  const showSimpleMode = () => {
-    setSimpleApproach((current) => {
-      if (current !== "custom" && SIMPLE_APPROACH_STYLE_MAP[current] === style) return current
-      return SIMPLE_APPROACHES.find((item) => item.id === style)?.id ?? "custom"
-    })
-    setEditorMode("simple")
-  }
+  const showSimpleMode = () => setEditorMode("simple")
 
   const updateChunk = (id: number, patch: Partial<VideoChunk>) => {
     setChunks((current) => current.map((chunk) => chunk.id === id ? { ...migrateVideoChunk(chunk), ...patch } : chunk))
@@ -122,6 +117,12 @@ export default function VideoWorkspace() {
   const updateActiveChunk = (patch: Partial<VideoChunk>) => { planEdited.current = true; markPendingChanges(activeId); updateChunk(activeId, patch) }
   const selectChunk = (id: number) => { setActiveId(id); setFileError(""); setGenerateFeedback("") }
   const clearPreview = (id = activeId) => {
+    if (id === 0) {
+      setSimpleReference((current) => ({ ...current, referenceImageUrl: undefined, referenceFileName: "", status: "pending" }))
+      setSimpleFileError("")
+      setSimpleError("")
+      return
+    }
     if (editorMode === "pro") planEdited.current = true
     markPendingChanges(id)
     updateChunk(id, { referenceImageUrl: undefined, referenceFileName: "", status: "pending" })
@@ -130,13 +131,22 @@ export default function VideoWorkspace() {
   }
   const handleUpload = async (file?: File, targetChunkId = activeId) => {
     if (!file) return
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { setFileError("Usa una imagen JPG, PNG o WEBP."); return }
-    if (file.size > 5 * 1024 * 1024) { setFileError("La imagen debe pesar menos de 5 MB."); return }
-    if (editorMode === "pro") planEdited.current = true
-    markPendingChanges(targetChunkId)
+    const isSimple = targetChunkId === 0
+    const setTargetError = isSimple ? setSimpleFileError : setFileError
+    const updateTarget = (patch: Partial<VideoChunk>) => isSimple
+      ? setSimpleReference((current) => ({ ...current, ...patch }))
+      : updateChunk(targetChunkId, patch)
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { setTargetError("Usa una imagen JPG, PNG o WEBP."); return }
+    if (file.size > 5 * 1024 * 1024) { setTargetError("La imagen debe pesar menos de 5 MB."); return }
+    if (!isSimple) {
+      if (editorMode === "pro") planEdited.current = true
+      markPendingChanges(targetChunkId)
+    }
 
-    updateChunk(targetChunkId, { referenceSource: "upload", referenceImageUrl: undefined, referenceFileName: file.name, status: "pending" })
-    setFileError(""); setUploading(true); setGenerateFeedback("Subiendo referencia visual...")
+    updateTarget({ referenceSource: "upload", referenceImageUrl: undefined, referenceFileName: file.name, status: "pending" })
+    setTargetError(""); setUploading(true)
+    if (isSimple) setSimpleError("")
+    else setGenerateFeedback("Subiendo referencia visual...")
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) throw new Error("Tu sesión expiró. Vuelve a iniciar sesión.")
@@ -155,12 +165,12 @@ export default function VideoWorkspace() {
       }
       if (!data.publicUrl.startsWith("https://")) throw new Error("La fuente visual no devolvió una URL segura")
 
-      updateChunk(targetChunkId, { referenceSource: "upload", referenceImageUrl: data.publicUrl, referenceFileName: file.name, status: "configured" })
-      setGenerateFeedback("Referencia visual lista para generar")
+      updateTarget({ referenceSource: "upload", referenceImageUrl: data.publicUrl, referenceFileName: file.name, status: "configured" })
+      if (!isSimple) setGenerateFeedback("Referencia visual lista para generar")
     } catch (error) {
-      updateChunk(targetChunkId, { referenceImageUrl: undefined, status: "pending" })
-      setFileError(error instanceof Error ? error.message : "No se pudo subir la fuente visual")
-      setGenerateFeedback("")
+      updateTarget({ referenceImageUrl: undefined, status: "pending" })
+      setTargetError(error instanceof Error ? error.message : "No se pudo subir la fuente visual")
+      if (!isSimple) setGenerateFeedback("")
     } finally {
       setUploading(false)
     }
@@ -188,19 +198,29 @@ export default function VideoWorkspace() {
     if (chunkId === null) return
 
     if (videoPhase === "generated" && videoUrl) {
-      setChunks((current) => current.map((chunk) => chunk.id === chunkId
-        ? { ...chunk, status: "generated", videoUrl }
-        : chunk
-      ))
-      setGenerateFeedback("Escena generada correctamente")
-      setPendingChanges((current) => { const next = new Set(current); next.delete(chunkId); return next })
+      if (chunkId === 0) {
+        setSimpleReference((current) => ({ ...current, status: "generated", videoUrl }))
+        setSimpleError("")
+      } else {
+        setChunks((current) => current.map((chunk) => chunk.id === chunkId
+          ? { ...chunk, status: "generated", videoUrl }
+          : chunk
+        ))
+        setGenerateFeedback("Escena generada correctamente")
+        setPendingChanges((current) => { const next = new Set(current); next.delete(chunkId); return next })
+      }
       generatingChunkId.current = null
     } else if (videoPhase === "error") {
-      setChunks((current) => current.map((chunk) => chunk.id === chunkId
-        ? { ...chunk, status: "error", videoUrl: undefined }
-        : chunk
-      ))
-      setGenerateFeedback(videoError || "No se pudo generar la escena")
+      if (chunkId === 0) {
+        setSimpleReference((current) => ({ ...current, status: "error" }))
+        setSimpleError(videoError || "No se pudo generar el video")
+      } else {
+        setChunks((current) => current.map((chunk) => chunk.id === chunkId
+          ? { ...chunk, status: "error", videoUrl: undefined }
+          : chunk
+        ))
+        setGenerateFeedback(videoError || "No se pudo generar la escena")
+      }
       generatingChunkId.current = null
     }
   }, [videoError, videoPhase, videoUrl])
@@ -239,6 +259,25 @@ export default function VideoWorkspace() {
       dialogue: activeChunk.dialogue,
       sceneStyle: activeChunk.sceneStyle,
       duration: activeChunk.duration,
+    })
+  }
+
+  const generateSimpleVideo = () => {
+    const imageUrl = simpleReference.referenceImageUrl
+    const goal = simpleGoal.trim()
+    if (!imageUrl?.startsWith("https://") || !goal || uploading || videoPhase === "generating") return
+    const simpleStyle = simpleApproach === "custom" ? "cinematic" : SIMPLE_APPROACH_STYLE_MAP[simpleApproach]
+    const apiStyle = VIDEO_STYLE_API_MAP[simpleStyle]
+    if (!apiStyle) return
+
+    generatingChunkId.current = simpleReference.id
+    setSimpleError("")
+    setSimpleReference((current) => ({ ...current, status: "generating" }))
+    // The current service generates one 6-second clip. The user's goal is passed as
+    // the hook text because this is part of the existing prompt, not optional metadata.
+    void generateVideo(imageUrl, VIDEO_ANGLE_API_MAP.demo, goal, apiStyle, {
+      format: VIDEO_FORMAT,
+      duration: VIDEO_GENERATION_DURATION,
     })
   }
 
@@ -298,24 +337,26 @@ export default function VideoWorkspace() {
       aria-controls="pixel-ai-panel"
       aria-expanded={pixelAiOpen}
     ><PixelAiIcon /><span>PixelIA</span><i>{pixelAiOpen ? "Abierto" : "Asistente creativo"}</i></button></div>} />
-    {editorMode === "pro" && simpleGoal.trim() && <div className={s.simpleContext}><b>Tu idea:</b> {simpleGoal.trim()} <span>· Duración deseada: {SIMPLE_DURATION_LABELS[simpleDuration]} {SIMPLE_DURATION_RANGES[simpleDuration]} (orientativa)</span></div>}
     <section className={s.workspace}>
     {editorMode === "simple" ? <VideoSimple
       referenceImageUrl={simpleReference.referenceImageUrl ?? null}
       referenceFileName={simpleReference.referenceFileName}
-      fileError={fileError}
+      fileError={simpleFileError}
       uploading={uploading}
       goal={simpleGoal}
       onGoalChange={setSimpleGoal}
       approach={simpleApproach}
-      styleLabel={styleLabel}
-      onApproachChange={(nextApproach) => { setSimpleApproach(nextApproach); updateStrategy({ style: SIMPLE_APPROACH_STYLE_MAP[nextApproach] }) }}
+      styleLabel={SIMPLE_APPROACHES.find((item) => item.id === simpleApproach)?.label}
+      onApproachChange={setSimpleApproach}
       duration={simpleDuration}
       onDurationChange={setSimpleDuration}
       onUpload={(file) => { void handleUpload(file, simpleReference.id) }}
       onClear={() => clearPreview(simpleReference.id)}
       onIdea={() => setPixelAiOpen(true)}
-      onCreate={continueFromSimple}
+      onCreate={generateSimpleVideo}
+      generating={simpleReference.status === "generating"}
+      videoUrl={simpleReference.videoUrl ?? null}
+      generationError={simpleReference.status === "error" ? simpleError : ""}
     /> : editorMode === "plan" ? <VideoPlan
       chunks={chunks}
       goal={simpleGoal}
