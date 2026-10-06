@@ -15,8 +15,12 @@ export default function VideoPreview(props: {
     </header>
     <div className={s.previewStage}>
       <div className={s.phoneFrame}>
-        {activeChunk.videoUrl ? <video src={activeChunk.videoUrl} controls playsInline /> : previewUrl ? <img src={previewUrl} alt="Preview de la escena activa" /> : <div className={s.previewEmpty}><Film /><p>Selecciona una imagen para preparar esta escena.</p></div>}
-        {!activeChunk.videoUrl && <div className={s.previewOverlay}><span>ESCENA {activeIndex + 1}</span><b>{activeChunk.purpose}</b><small>{activeChunk.duration} segundos · {activeChunk.sceneStyle.trim() || styleLabel}</small></div>}
+        {activeChunk.videoUrl ? <video key={`${activeChunk.id}-${activeChunk.videoUrl}`} src={activeChunk.videoUrl} controls playsInline /> : previewUrl ? <img src={previewUrl} alt="Preview de la escena activa" /> : <div className={s.previewEmpty}><Film /><p>Selecciona una imagen para preparar esta escena.</p></div>}
+        {(activeChunk.status === "generating" || activeChunk.status === "error" || !activeChunk.videoUrl) && <div className={s.previewOverlay} role={activeChunk.status === "error" ? "alert" : "status"}>
+          <span>ESCENA {activeIndex + 1}</span>
+          <b>{activeChunk.status === "generating" ? "Generando esta escena…" : activeChunk.status === "error" ? "No se pudo generar esta escena" : activeChunk.purpose}</b>
+          <small>{activeChunk.status === "generating" ? "El video aparecerá aquí cuando esté listo." : activeChunk.status === "error" ? "Revisa la escena e inténtalo de nuevo." : `${activeChunk.duration} segundos · ${activeChunk.sceneStyle.trim() || styleLabel}`}</small>
+        </div>}
       </div>
     </div>
   </>

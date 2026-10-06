@@ -229,7 +229,6 @@ export default function VideoWorkspace() {
     generatingChunkId.current = chunkId
     setChunks((current) => current.map((chunk) => chunk.id === chunkId ? { ...chunk, status: "generating" } : chunk))
     setGenerateFeedback("Generando escena...")
-    setEditorMode("result")
     void generateVideo(activePreviewUrl, apiAngle, hookLabel ?? hook, apiStyle, {
       cta: strategy.cta,
       format: strategy.format,
