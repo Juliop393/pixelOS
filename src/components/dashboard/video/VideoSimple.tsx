@@ -37,6 +37,7 @@ export default function VideoSimple({
   generationError: string
 }) {
   const canContinue = Boolean(referenceImageUrl?.startsWith("https://") && goal.trim() && !uploading && !generating)
+  const showVideo = Boolean(videoUrl && !generating && !generationError)
 
   return <main className={s.simple} aria-labelledby="video-simple-title">
     <div className={s.inner}>
@@ -48,19 +49,28 @@ export default function VideoSimple({
 
       <div className={s.layout}>
         <section className={s.reference} aria-labelledby="simple-reference-title">
-          <div className={s.sectionHeading}><span>01</span><div><h2 id="simple-reference-title">Referencia visual</h2><p>La imagen que dará vida a tu video.</p></div></div>
-          {referenceImageUrl ? <div className={s.preview}><img src={referenceImageUrl} alt="Referencia visual elegida" /></div> : <label className={s.uploadZone}>
+          <div className={s.sectionHeading}><span>01</span><div><h2 id="simple-reference-title">{showVideo ? "Tu video" : "Referencia visual"}</h2><p>{showVideo ? "Tu clip, listo para reproducir." : "La imagen que dará vida a tu video."}</p></div></div>
+          {showVideo ? <div className={`${s.preview} ${s.videoPreview}`}>
+            <video key={videoUrl} src={videoUrl ?? undefined} controls playsInline preload="metadata" poster={referenceImageUrl ?? undefined} aria-label="Video generado en Modo Simple" />
+          </div> : referenceImageUrl ? <div className={`${s.preview} ${generating || generationError ? s.statusPreview : ""}`}>
+            <img src={referenceImageUrl} alt="Referencia visual elegida" />
+            {generating && <div className={s.statusOverlay} aria-live="polite"><WandSparkles aria-hidden="true" /><strong>Generando tu video…</strong><p>Puede tardar un momento. Tu configuración sigue disponible.</p></div>}
+            {generationError && <div className={s.statusOverlay} role="alert"><strong>No se pudo generar el video</strong><p>{generationError}</p><small>Tu referencia y configuración se conservaron. Puedes reintentar.</small></div>}
+          </div> : <label className={s.uploadZone}>
             <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(event) => { onUpload(event.target.files?.[0]); event.currentTarget.value = "" }} />
             <span><ImagePlus aria-hidden="true" /></span>
             <b>{uploading ? "Subiendo imagen..." : "Subir imagen"}</b>
             <small>JPG, PNG o WEBP · máximo 5 MB</small>
           </label>}
-          {referenceImageUrl && <div className={s.referenceActions}>
-            <span title={referenceFileName}>{referenceFileName || "Imagen seleccionada"}</span>
-            <label><input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(event) => { onUpload(event.target.files?.[0]); event.currentTarget.value = "" }} /><Upload aria-hidden="true" />Cambiar</label>
-            <button type="button" onClick={onClear} aria-label="Quitar referencia visual"><Trash2 aria-hidden="true" /></button>
+          {(referenceImageUrl || showVideo) && <div className={s.referenceActions}>
+            {showVideo && referenceImageUrl && <img className={s.referenceThumb} src={referenceImageUrl} alt="Referencia original" />}
+            <span title={referenceFileName}>{referenceImageUrl ? referenceFileName || "Imagen seleccionada" : "Sin referencia actual"}</span>
+            <label><input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(event) => { onUpload(event.target.files?.[0]); event.currentTarget.value = "" }} /><Upload aria-hidden="true" />{showVideo ? "Cambiar referencia" : "Cambiar imagen"}</label>
+            {referenceImageUrl && <button type="button" onClick={onClear} aria-label="Quitar referencia visual"><Trash2 aria-hidden="true" /></button>}
           </div>}
           {fileError && <p className={s.error} role="alert">{fileError}</p>}
+          {generationError && !referenceImageUrl && <p className={s.error} role="alert">{generationError}</p>}
+          {showVideo && <p className={s.videoHint}>Si cambias la configuración, genera otro clip para aplicar los cambios.</p>}
         </section>
 
         <div className={s.decisions}>
@@ -83,17 +93,10 @@ export default function VideoSimple({
           <div className={s.createArea}>
             <p className={s.planExplainer}>Genera un solo clip a partir de tu imagen, objetivo y enfoque.</p>
             <button type="button" className={s.createButton} onClick={onCreate} disabled={!canContinue}><WandSparkles aria-hidden="true" />{generating ? "Generando tu video…" : "Crear video"}</button>
-            <p>{generating ? "Puedes revisar tu configuración mientras se genera." : canContinue ? "El resultado aparecerá aquí sin salir de Modo Simple." : "Añade una imagen y describe tu idea para continuar."}</p>
+            <p>{generating ? "Puedes revisar tu configuración mientras se genera." : showVideo ? "Puedes crear otra versión sin perder tu configuración." : canContinue ? "El resultado aparecerá en la tarjeta izquierda." : "Añade una imagen y describe tu idea para continuar."}</p>
           </div>
         </div>
       </div>
-      {(generating || videoUrl || generationError) && <section className={`${s.resultSection} ${videoUrl ? s.resultWithPlayer : ""}`} aria-label="Resultado del video" aria-live="polite">
-        <div className={s.resultHeading}><span>VIDEO · MODO SIMPLE</span><h2>{generating ? "Generando tu video…" : generationError ? "No se pudo generar el video" : "Tu video está listo"}</h2>
-          <p>{generating ? "Tu imagen, objetivo y enfoque permanecen disponibles mientras se prepara el clip." : generationError ? "Tu configuración se conservó. Puedes volver a intentarlo." : "Reproduce tu clip sin salir de Modo Simple."}</p>
-        </div>
-        {generationError && <p className={s.resultError} role="alert">{generationError}</p>}
-        {videoUrl && <div className={s.resultPlayer}><video key={videoUrl} src={videoUrl} controls playsInline preload="metadata" poster={referenceImageUrl ?? undefined} aria-label="Video generado en Modo Simple" /><small>{generating || generationError ? "Se muestra el último clip generado; los cambios recientes aún no aparecen en él." : "Si cambias la configuración, genera otro clip para aplicar los cambios."}</small></div>}
-      </section>}
     </div>
   </main>
 }
