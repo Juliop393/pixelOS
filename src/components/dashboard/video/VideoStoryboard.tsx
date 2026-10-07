@@ -18,10 +18,13 @@ type VideoStoryboardProps = {
   strategyEditor: ReactNode
   sourceReady: boolean
   canGenerate: boolean
+  canGenerateAnnouncement: boolean
+  announcementProgress: { phase: "running" | "error" | "done"; total: number; completed: number; current: number; error?: string } | null
   generateFeedback: string
   activeId: number
   onAdjust: () => void
   onGenerate: () => void
+  onGenerateAnnouncement: () => void
   onSelect: (id: number) => void
   onEdit: (id: number) => void
   onAdd: () => void
@@ -34,10 +37,13 @@ export default function VideoStoryboard({
   strategyEditor,
   sourceReady,
   canGenerate,
+  canGenerateAnnouncement,
+  announcementProgress,
   generateFeedback,
   activeId,
   onAdjust,
   onGenerate,
+  onGenerateAnnouncement,
   onSelect,
   onEdit,
   onAdd,
@@ -47,6 +53,10 @@ export default function VideoStoryboard({
   const totalDuration = getVideoDuration(chunks)
   const selectedChunk = chunks.find((chunk) => chunk.id === activeId)
   const anotherSceneGenerating = chunks.some((chunk) => chunk.id !== activeId && chunk.status === "generating")
+  const readyCount = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl?.startsWith("https://")).length
+  const generatingCount = chunks.filter((chunk) => chunk.status === "generating").length
+  const errorCount = chunks.filter((chunk) => chunk.status === "error").length
+  const pendingCount = chunks.length - readyCount - generatingCount - errorCount
 
   return <main className={s.storyboardOverview}>
     <div className={s.storyboardInner}>
@@ -69,8 +79,13 @@ export default function VideoStoryboard({
       <section className={s.storyboardSection}>
         <header>
           <div><span>ESCENAS</span><h2>Secuencia del anuncio</h2></div>
-          <p><Clapperboard />{chunks.length} {chunks.length === 1 ? "escena" : "escenas"} · {totalDuration} segundos</p>
+          <div className={s.storyboardSectionActions}>
+            <p><Clapperboard />{chunks.length} {chunks.length === 1 ? "escena" : "escenas"} · {readyCount} listas · {generatingCount} generando · {pendingCount} sin generar{errorCount > 0 ? ` · ${errorCount} error` : ""}</p>
+            <button type="button" disabled={!canGenerateAnnouncement} onClick={onGenerateAnnouncement}><WandSparkles />Generar anuncio</button>
+          </div>
         </header>
+        {announcementProgress?.phase === "running" && <p className={s.storyboardBatchProgress} role="status">Generando anuncio · {announcementProgress.current} de {announcementProgress.total} escenas · {announcementProgress.completed} listas en esta tanda</p>}
+        {announcementProgress?.phase === "error" && <p className={s.storyboardBatchError} role="alert">{announcementProgress.error} Los clips listos se conservaron. Puedes reintentar la escena o volver a generar el anuncio.</p>}
         <div className={s.storyboardTrack}>
           {chunks.map((chunk, index) => <article key={chunk.id} className={`${s.storyboardScene} ${activeId === chunk.id ? s.storyboardSceneActive : ""}`} data-status={chunk.status}>
             <button type="button" className={s.storyboardSceneSelect} aria-pressed={activeId === chunk.id} onClick={() => onSelect(chunk.id)}>

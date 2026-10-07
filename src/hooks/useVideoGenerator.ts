@@ -6,6 +6,10 @@ import { supabase } from "@/lib/supabase"
 import { getVideoGenerationContext, type VideoGenerationContext } from "@/lib/video-generation-payload"
 
 export type VideoPhase = "idle" | "generating" | "generated" | "error"
+export type VideoGenerationOutcome =
+  | { status: "generated"; videoUrl: string }
+  | { status: "error"; error: string }
+  | { status: "busy" }
 
 const VIDEO_POLL_INTERVAL_MS = 5_000
 const VIDEO_POLL_MAX_ATTEMPTS = 72
@@ -30,16 +34,16 @@ export function useVideoGenerator() {
     hook: string,
     style: string,
     context: VideoGenerationContext = {},
-  ) => {
+  ): Promise<VideoGenerationOutcome> => {
     if (!imageUrl) {
       toast.error("Genera un creativo primero")
-      return
+      return { status: "error", error: "Genera un creativo primero" }
     }
     if (!angle) {
       toast.error("Selecciona un ángulo de venta")
-      return
+      return { status: "error", error: "Selecciona un ángulo de venta" }
     }
-    if (inFlightRef.current) return
+    if (inFlightRef.current) return { status: "busy" }
 
     const runId = ++runIdRef.current
     inFlightRef.current = true
@@ -87,7 +91,7 @@ export function useVideoGenerator() {
 
       for (let attempt = 0; attempt < VIDEO_POLL_MAX_ATTEMPTS; attempt += 1) {
         await wait(VIDEO_POLL_INTERVAL_MS)
-        if (runIdRef.current !== runId) return
+        if (runIdRef.current !== runId) return { status: "busy" }
 
         const statusResponse = await fetch("/api/video/status", {
           method: "POST",
@@ -111,7 +115,7 @@ export function useVideoGenerator() {
           toast.success("Video generado", {
             description: "Tu video está listo para descargar",
           })
-          return
+          return { status: "generated", videoUrl: statusData.videoUrl }
         }
 
         if (statusData.status === "error") {
@@ -123,13 +127,14 @@ export function useVideoGenerator() {
 
       throw new Error("La generación del video superó el tiempo máximo de espera")
     } catch (err) {
-      if (runIdRef.current !== runId) return
+      if (runIdRef.current !== runId) return { status: "busy" }
       const message = err instanceof Error ? err.message : "Error de conexión"
       setVideoPhase("error")
       setVideoError(message)
       toast.error(message === "Sesión expirada" ? "Sesión expirada" : "Error al generar video", {
         description: message === "Sesión expirada" ? "Vuelve a iniciar sesión para continuar" : message,
       })
+      return { status: "error", error: message }
     } finally {
       if (runIdRef.current === runId) inFlightRef.current = false
     }

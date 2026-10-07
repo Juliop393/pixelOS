@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { ArrowLeft, ChevronDown, RotateCcw, WandSparkles } from "lucide-react"
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
-import { useVideoGenerator } from "@/hooks/useVideoGenerator"
+import { useVideoGenerator, type VideoGenerationOutcome } from "@/hooks/useVideoGenerator"
 import { supabase } from "@/lib/supabase"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
 import EditorHeader from "@/components/dashboard/EditorHeader"
@@ -23,6 +23,10 @@ import s from "./VideoWorkspace.module.css"
 type VideoTab = "reference" | "action" | "dialogue" | "more"
 type VideoWorkspaceMode = "storyboard" | "advanced"
 type VideoEditorMode = "simple" | "plan" | "pro" | "result"
+type AnnouncementProgress = { phase: "running" | "error" | "done"; total: number; completed: number; current: number; error?: string }
+
+const hasValidVideo = (chunk: VideoChunk) => Boolean(chunk.videoUrl?.startsWith("https://"))
+const hasValidReference = (chunk: VideoChunk) => chunk.referenceSource === "upload" && Boolean(chunk.referenceImageUrl?.startsWith("https://"))
 
 const VIDEO_TABS: { id: VideoTab; label: string }[] = [
   { id: "reference", label: "Referencia" },
@@ -73,12 +77,16 @@ function SectionTitle({ title, description }: { title: string; description: stri
 export default function VideoWorkspace() {
   const nextId = useRef(2)
   const generatingChunkId = useRef<number | null>(null)
+  const batchRunning = useRef(false)
+  const batchRunId = useRef(0)
   const { videoUrl, videoPhase, videoError, generateVideo } = useVideoGenerator()
   const [fileError, setFileError] = useState("")
   const [simpleFileError, setSimpleFileError] = useState("")
   const [simpleError, setSimpleError] = useState("")
   const [uploading, setUploading] = useState(false)
   const [strategy, setStrategy] = useState<VideoStrategy>({ angle: "demo", hook: "result", style: "cinematic", cta: "", format: VIDEO_FORMAT })
+  const strategyRef = useRef(strategy)
+  strategyRef.current = strategy
   const { angle, hook, style } = strategy
   const updateStrategy = (patch: Partial<VideoStrategy>) => setStrategy((current) => ({ ...current, ...patch }))
   const [activeTab, setActiveTab] = useState<VideoTab>("action")
@@ -92,12 +100,19 @@ export default function VideoWorkspace() {
   const [planNotice, setPlanNotice] = useState("")
   const planEdited = useRef(false)
   const [chunks, setChunks] = useState<VideoChunk[]>(() => [migrateVideoChunk(createVideoChunk(1, "Hook / apertura"))])
+  const chunksRef = useRef(chunks)
+  chunksRef.current = chunks
   const [pendingChanges, setPendingChanges] = useState<ReadonlySet<number>>(() => new Set())
   const [activeId, setActiveId] = useState(1)
+  const activeIdRef = useRef(activeId)
+  activeIdRef.current = activeId
   const [strategyFeedback, setStrategyFeedback] = useState("")
   const [generateFeedback, setGenerateFeedback] = useState("")
+  const [announcementProgress, setAnnouncementProgress] = useState<AnnouncementProgress | null>(null)
   const [finalVideoUrl] = useState<string | null>(null)
   const [pixelAiOpen, setPixelAiOpen] = useState(false)
+
+  useEffect(() => () => { batchRunId.current += 1 }, [])
 
   const activeChunk = chunks.find((chunk) => chunk.id === activeId) ?? chunks[0]
   const activeIndex = chunks.findIndex((chunk) => chunk.id === activeId)
@@ -182,9 +197,10 @@ export default function VideoWorkspace() {
   const angleLabel = VIDEO_ANGLES.find((item) => item.id === angle)?.label
   const hookLabel = VIDEO_HOOKS.find((item) => item.id === hook)?.label
   const styleLabel = VIDEO_STYLES.find((item) => item.id === style)?.label
-  const generationInProgress = generatingChunkId.current !== null || videoPhase === "generating"
+  const generationInProgress = batchRunning.current || generatingChunkId.current !== null || videoPhase === "generating"
   const activeSceneConfigured = Boolean(activeSource === "upload" && activePreviewUrl?.startsWith("https://") && angle && hook && style && activeChunk && !uploading)
   const canGenerate = activeSceneConfigured && !generationInProgress && activeChunk.status !== "generating"
+  const canGenerateAnnouncement = chunks.some((chunk) => !hasValidVideo(chunk)) && !generationInProgress
   const generatedChunks = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl)
 
   useEffect(() => {
@@ -197,35 +213,18 @@ export default function VideoWorkspace() {
 
   useEffect(() => {
     const chunkId = generatingChunkId.current
-    if (chunkId === null) return
+    if (chunkId !== 0) return
 
     if (videoPhase === "generated" && videoUrl) {
-      if (chunkId === 0) {
-        setSimpleReference((current) => ({ ...current, status: "generated", videoUrl }))
-        setSimpleError("")
-      } else {
-        setChunks((current) => current.map((chunk) => chunk.id === chunkId
-          ? { ...chunk, status: "generated", videoUrl }
-          : chunk
-        ))
-        setGenerateFeedback(activeId === chunkId ? "Escena generada correctamente" : "")
-        setPendingChanges((current) => { const next = new Set(current); next.delete(chunkId); return next })
-      }
+      setSimpleReference((current) => ({ ...current, status: "generated", videoUrl }))
+      setSimpleError("")
       generatingChunkId.current = null
     } else if (videoPhase === "error") {
-      if (chunkId === 0) {
-        setSimpleReference((current) => ({ ...current, status: "error" }))
-        setSimpleError(videoError || "No se pudo generar el video")
-      } else {
-        setChunks((current) => current.map((chunk) => chunk.id === chunkId
-          ? { ...chunk, status: "error" }
-          : chunk
-        ))
-        setGenerateFeedback(activeId === chunkId ? videoError || "No se pudo generar la escena" : "")
-      }
+      setSimpleReference((current) => ({ ...current, status: "error" }))
+      setSimpleError(videoError || "No se pudo generar el video")
       generatingChunkId.current = null
     }
-  }, [activeId, videoError, videoPhase, videoUrl])
+  }, [videoError, videoPhase, videoUrl])
 
   const recommendStrategy = () => {
     const recommendation = style === "ugc" || style === "lifestyle"
@@ -241,27 +240,89 @@ export default function VideoWorkspace() {
     setStrategyFeedback(`${nextHook} · ${nextAngle}`)
   }
 
-  const generateVideoChunk = () => {
-    if (!canGenerate || !activePreviewUrl || generatingChunkId.current !== null) return
-    const chunkId = activeChunk.id
-    const apiAngle = VIDEO_ANGLE_API_MAP[angle]
-    const apiStyle = VIDEO_STYLE_API_MAP[style]
-    if (!apiAngle || !apiStyle) return
+  const generateVideoChunk = async (chunk: VideoChunk): Promise<VideoGenerationOutcome> => {
+    if (generatingChunkId.current !== null) return { status: "busy" }
+    if (!hasValidReference(chunk) || uploading) return { status: "error", error: "La escena necesita una fuente visual subida para generar." }
+    const currentStrategy = strategyRef.current
+    const apiAngle = VIDEO_ANGLE_API_MAP[currentStrategy.angle]
+    const apiStyle = VIDEO_STYLE_API_MAP[currentStrategy.style]
+    if (!apiAngle || !apiStyle) return { status: "error", error: "Completa la estrategia global antes de generar." }
 
+    const chunkId = chunk.id
     generatingChunkId.current = chunkId
     setChunks((current) => current.map((chunk) => chunk.id === chunkId ? { ...chunk, status: "generating" } : chunk))
-    setGenerateFeedback("Generando escena...")
-    void generateVideo(activePreviewUrl, apiAngle, hookLabel ?? hook, apiStyle, {
-      cta: strategy.cta,
-      format: strategy.format,
-      sceneRole: activeChunk.purpose,
-      referenceDescription: activeChunk.referenceDescription,
-      action: activeChunk.action,
-      camera: activeChunk.camera,
-      dialogue: activeChunk.dialogue,
-      sceneStyle: activeChunk.sceneStyle,
-      duration: activeChunk.duration,
-    })
+    setGenerateFeedback(activeIdRef.current === chunkId ? "Generando escena..." : "")
+    let outcome: VideoGenerationOutcome
+    try {
+      outcome = await generateVideo(chunk.referenceImageUrl!, apiAngle, VIDEO_HOOKS.find((item) => item.id === currentStrategy.hook)?.label ?? currentStrategy.hook, apiStyle, {
+        cta: currentStrategy.cta,
+        format: currentStrategy.format,
+        sceneRole: chunk.purpose,
+        referenceDescription: chunk.referenceDescription,
+        action: chunk.action,
+        camera: chunk.camera,
+        dialogue: chunk.dialogue,
+        sceneStyle: chunk.sceneStyle,
+        duration: chunk.duration,
+      })
+    } catch (error) {
+      outcome = { status: "error", error: error instanceof Error ? error.message : "No se pudo generar la escena" }
+    }
+    if (outcome.status === "generated") {
+      setChunks((current) => current.map((item) => item.id === chunkId ? { ...item, status: "generated", videoUrl: outcome.videoUrl } : item))
+      setPendingChanges((current) => { const next = new Set(current); next.delete(chunkId); return next })
+      setGenerateFeedback(activeIdRef.current === chunkId ? "Escena generada correctamente" : "")
+    } else if (outcome.status === "error") {
+      setChunks((current) => current.map((item) => item.id === chunkId ? { ...item, status: "error" } : item))
+      setGenerateFeedback(activeIdRef.current === chunkId ? outcome.error : "")
+    } else {
+      setChunks((current) => current.map((item) => item.id === chunkId ? { ...item, status: chunk.status } : item))
+      setGenerateFeedback(activeIdRef.current === chunkId ? "Otra generación sigue en curso. Inténtalo de nuevo." : "")
+    }
+    generatingChunkId.current = null
+    return outcome
+  }
+
+  const generateAnnouncement = async () => {
+    if (batchRunning.current || generatingChunkId.current !== null || videoPhase === "generating") return
+    const pendingIds = chunksRef.current.filter((chunk) => !hasValidVideo(chunk)).map((chunk) => chunk.id)
+    if (pendingIds.length === 0) return
+
+    batchRunning.current = true
+    const runId = ++batchRunId.current
+    let completed = 0
+    setAnnouncementProgress({ phase: "running", total: pendingIds.length, completed, current: 1 })
+    try {
+      for (const [index, chunkId] of pendingIds.entries()) {
+        if (batchRunId.current !== runId) return
+        const chunk = chunksRef.current.find((item) => item.id === chunkId)
+        if (!chunk) {
+          setAnnouncementProgress({ phase: "error", total: pendingIds.length, completed, current: index + 1, error: "Una escena de la secuencia fue eliminada. Revisa el anuncio y vuelve a intentarlo." })
+          return
+        }
+        if (hasValidVideo(chunk)) {
+          completed += 1
+          continue
+        }
+        const sceneNumber = chunksRef.current.findIndex((item) => item.id === chunkId) + 1
+        if (!hasValidReference(chunk)) {
+          setAnnouncementProgress({ phase: "error", total: pendingIds.length, completed, current: index + 1, error: `La escena ${sceneNumber} necesita una referencia visual subida antes de generar.` })
+          return
+        }
+        setAnnouncementProgress({ phase: "running", total: pendingIds.length, completed, current: index + 1 })
+        const outcome = await generateVideoChunk(chunk)
+        if (batchRunId.current !== runId) return
+        if (outcome.status !== "generated") {
+          setAnnouncementProgress({ phase: "error", total: pendingIds.length, completed, current: index + 1, error: `Falló la escena ${sceneNumber}: ${outcome.status === "error" ? outcome.error : "ya hay una generación en curso"}` })
+          return
+        }
+        completed += 1
+        setAnnouncementProgress({ phase: "running", total: pendingIds.length, completed, current: index + 1 })
+      }
+      setAnnouncementProgress({ phase: "done", total: pendingIds.length, completed, current: pendingIds.length })
+    } finally {
+      if (batchRunId.current === runId) batchRunning.current = false
+    }
   }
 
   const generateSimpleVideo = () => {
@@ -330,7 +391,7 @@ export default function VideoWorkspace() {
 
   return <div id="video-workspace" data-pixel-ai-open={pixelAiOpen ? "true" : "false"} data-workspace-mode={editorMode === "pro" ? workspaceMode : editorMode} className={s.page}>
     <EditorHeader tool="video" action={<div className={s.modeHeaderActions}><div className={s.modeSwitch} role="tablist" aria-label="Modo de edición de Video">
-      <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? s.modeSelected : ""} onClick={showSimpleMode}>Simple</button>
+      <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? s.modeSelected : ""} disabled={announcementProgress?.phase === "running"} onClick={showSimpleMode}>Simple</button>
       <button type="button" role="tab" aria-selected={editorMode === "pro"} className={editorMode === "pro" ? s.modeSelected : ""} onClick={() => setEditorMode("pro")}>Modo Pro</button>
     </div><button
       type="button"
@@ -379,10 +440,13 @@ export default function VideoWorkspace() {
       strategyEditor={<VideoStrategyEditor strategy={strategy} onChange={updateStrategy} />}
       sourceReady={Boolean(activeSource === "upload" && activePreviewUrl?.startsWith("https://"))}
       canGenerate={canGenerate}
+      canGenerateAnnouncement={canGenerateAnnouncement}
+      announcementProgress={announcementProgress}
       generateFeedback={generateFeedback}
       activeId={activeId}
       onAdjust={() => setWorkspaceMode("advanced")}
-      onGenerate={generateVideoChunk}
+      onGenerate={() => { void generateVideoChunk(activeChunk) }}
+      onGenerateAnnouncement={() => { void generateAnnouncement() }}
       onSelect={selectChunk}
       onEdit={editChunk}
       onAdd={addChunk}
@@ -431,7 +495,7 @@ export default function VideoWorkspace() {
           </div>
         </div>
       </div>
-      <footer className={s.generateDock}><button className={activeChunk.videoUrl ? s.regenerateScene : undefined} disabled={!canGenerate} onClick={generateVideoChunk}>{activeChunk.videoUrl ? <RotateCcw /> : <WandSparkles />}{activeChunk.videoUrl ? "Regenerar escena" : "Generar escena"}</button><small>{activeChunk.status === "generating" ? "Generando esta escena…" : generationInProgress ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (canGenerate ? activeChunk.videoUrl ? "Puedes regenerar únicamente esta escena" : "Escena seleccionada lista para generar" : "Selecciona una fuente visual para continuar")}</small></footer>
+      <footer className={s.generateDock}><button className={activeChunk.videoUrl ? s.regenerateScene : undefined} disabled={!canGenerate} onClick={() => { void generateVideoChunk(activeChunk) }}>{activeChunk.videoUrl ? <RotateCcw /> : <WandSparkles />}{activeChunk.videoUrl ? "Regenerar escena" : "Generar escena"}</button><small>{activeChunk.status === "generating" ? "Generando esta escena…" : generationInProgress ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (canGenerate ? activeChunk.videoUrl ? "Puedes regenerar únicamente esta escena" : "Escena seleccionada lista para generar" : "Selecciona una fuente visual para continuar")}</small></footer>
     </aside>
     <main className={s.stagePanel}>
       <VideoPreview previewUrl={activeSource === "upload" ? activePreviewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={getVideoDuration(chunks)} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} />
