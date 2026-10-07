@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { ChevronDown, Compass, Flag, Palette, RectangleVertical, Zap } from "lucide-react"
 import { VIDEO_ANGLES, VIDEO_HOOKS, VIDEO_STYLES, type VideoStrategy } from "./video-data"
+import VideoDropdown from "./VideoDropdown"
 import s from "./VideoWorkspace.module.css"
 
 export default function VideoStrategyEditor({ strategy, onChange }: {
@@ -20,9 +21,9 @@ export default function VideoStrategyEditor({ strategy, onChange }: {
     {expanded && <div className={s.strategyDetails}>
       <p>Se aplica a todo el anuncio.</p>
       <div className={s.strategyFields}>
-      <label><span className={s.strategyControlHeader}><i><Compass /></i>Hipótesis / ángulo</span><span className={s.strategySelectWrap}><select value={strategy.angle} onChange={(event) => onChange({ angle: event.target.value })}>{VIDEO_ANGLES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><ChevronDown /></span></label>
-      <label><span className={s.strategyControlHeader}><i><Zap /></i>Hook principal</span><span className={s.strategySelectWrap}><select value={strategy.hook} onChange={(event) => onChange({ hook: event.target.value })}>{VIDEO_HOOKS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><ChevronDown /></span></label>
-      <label><span className={s.strategyControlHeader}><i><Palette /></i>Estilo general</span><span className={s.strategySelectWrap}><select value={strategy.style} onChange={(event) => onChange({ style: event.target.value })}>{VIDEO_STYLES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><ChevronDown /></span></label>
+      <div className={s.strategyField}><span className={s.strategyControlHeader}><i><Compass /></i>Hipótesis / ángulo</span><span className={s.strategySelectWrap}><VideoDropdown label="Hipótesis / ángulo" value={strategy.angle} options={VIDEO_ANGLES.map((item) => ({ value: item.id, label: item.label }))} onChange={(angle) => onChange({ angle })} /></span></div>
+      <div className={s.strategyField}><span className={s.strategyControlHeader}><i><Zap /></i>Hook principal</span><span className={s.strategySelectWrap}><VideoDropdown label="Hook principal" value={strategy.hook} options={VIDEO_HOOKS.map((item) => ({ value: item.id, label: item.label }))} onChange={(hook) => onChange({ hook })} /></span></div>
+      <div className={s.strategyField}><span className={s.strategyControlHeader}><i><Palette /></i>Estilo general</span><span className={s.strategySelectWrap}><VideoDropdown label="Estilo general" value={strategy.style} options={VIDEO_STYLES.map((item) => ({ value: item.id, label: item.label }))} onChange={(style) => onChange({ style })} /></span></div>
       <label><span className={s.strategyControlHeader}><i><Flag /></i>CTA del anuncio</span><span className={s.strategySelectWrap}><input value={strategy.cta} onChange={(event) => onChange({ cta: event.target.value })} maxLength={200} placeholder="Ej. Descubre el producto" /></span></label>
       <label><span className={s.strategyControlHeader}><i><RectangleVertical /></i>Formato global</span><span className={s.strategySelectWrap}><input value={strategy.format} readOnly aria-label="Formato global" /></span></label>
       </div>

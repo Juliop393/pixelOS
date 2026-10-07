@@ -484,3 +484,7 @@
 .sceneField textarea:disabled,.sceneSuggestions button:disabled,.sourceTabs button:disabled,.uploadPreview button:disabled,.sceneMetadata select:disabled{opacity:.55;cursor:not-allowed}
 .uploadBox:has(input:disabled){opacity:.55;cursor:not-allowed}
 @media(max-width:680px){.previewPendingNotice{align-items:flex-start;flex-direction:column;gap:9px;padding:11px 15px}.previewPendingNotice button{width:100%}}
+
+/* Native Video selects are replaced without changing the surrounding form layout. */
+.globalStrategyEditor .strategyFields .strategyField{min-width:0;display:flex;flex-direction:column;gap:9px;color:var(--pf-secondary);font-size:11px}
+.sceneMetadata .sceneRoleField{flex:1 1 210px;min-width:0;display:grid;gap:6px;color:var(--pf-primary);font-size:13px;font-weight:600}

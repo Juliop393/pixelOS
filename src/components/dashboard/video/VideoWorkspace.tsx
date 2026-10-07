@@ -13,6 +13,7 @@ import VideoSourcePicker from "./VideoSourcePicker"
 import VideoStoryboard from "./VideoStoryboard"
 import VideoTimeline from "./VideoTimeline"
 import VideoStrategyEditor from "./VideoStrategyEditor"
+import VideoDropdown from "./VideoDropdown"
 import VideoSimple, { SIMPLE_APPROACHES, type SimpleApproach } from "./VideoSimple"
 import VideoPlan from "./VideoPlan"
 import VideoResult from "./VideoResult"
@@ -462,10 +463,10 @@ export default function VideoWorkspace() {
       <header className={s.intro}><button type="button" className={s.advancedBack} onClick={() => setWorkspaceMode("storyboard")}><ArrowLeft />Volver a secuencia</button><span>MODO PRO · AJUSTAR ESCENAS</span><h1>Dirige tu anuncio</h1><p>Controla la ejecución visual de la escena seleccionada.</p></header>
       <div className={s.sceneMetadata}>
         <div className={s.sceneIdentity}><span>ESCENA ACTUAL</span><h2>Escena {activeIndex + 1} · {activeChunk.purpose}</h2></div>
-        <label>Rol de la escena<span className={s.strategySelectWrap}><select value={activeChunk.purpose} disabled={activeChunk.status === "generating"} onChange={(event) => updateActiveChunk({ purpose: event.target.value })}>
-          {!VIDEO_SCENE_ROLES.includes(activeChunk.purpose) && <option value={activeChunk.purpose}>{activeChunk.purpose}</option>}
-          {VIDEO_SCENE_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
-        </select></span></label>
+        <div className={s.sceneRoleField}>Rol de la escena<span className={s.strategySelectWrap}><VideoDropdown label="Rol de la escena" value={activeChunk.purpose} disabled={activeChunk.status === "generating"} options={[
+          ...(!VIDEO_SCENE_ROLES.includes(activeChunk.purpose) ? [{ value: activeChunk.purpose, label: activeChunk.purpose }] : []),
+          ...VIDEO_SCENE_ROLES.map((role) => ({ value: role, label: role })),
+        ]} onChange={(purpose) => updateActiveChunk({ purpose })} /></span></div>
         <small>{activeChunk.duration} s por escena actualmente.</small>
       </div>
       <VideoStrategyEditor strategy={strategy} onChange={updateStrategy} />
