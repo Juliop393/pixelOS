@@ -15,6 +15,8 @@ export type VideoChunk = {
   dialogue: string
   sceneStyle: string
   videoUrl?: string
+  /** Scene inputs used for the current videoUrl, not a second editable scene state. */
+  generatedSceneSignature?: string
 }
 
 export type VideoStrategy = { angle: string; hook: string; cta: string; style: string; format: string }
@@ -40,6 +42,13 @@ export function createVideoChunk(id: number, purpose = "Personalizada"): VideoCh
 }
 
 export const getVideoDuration = (chunks: VideoChunk[]) => chunks.reduce((total, chunk) => total + chunk.duration, 0)
+export const getVideoSceneSignature = (chunk: VideoChunk) => JSON.stringify([
+  chunk.referenceSource, chunk.referenceImageUrl ?? "", chunk.purpose,
+  chunk.referenceDescription, chunk.action, chunk.camera, chunk.dialogue,
+  chunk.sceneStyle, chunk.duration,
+])
+export const hasPendingVideoSceneChanges = (chunk: VideoChunk) =>
+  Boolean(chunk.videoUrl?.startsWith("https://") && chunk.generatedSceneSignature && chunk.generatedSceneSignature !== getVideoSceneSignature(chunk))
 export const getSceneDescription = (chunk: VideoChunk) =>
   [chunk.action, chunk.referenceDescription, chunk.dialogue, chunk.camera, chunk.sceneStyle].find((value) => value.trim()) || "Escena sin configurar"
 

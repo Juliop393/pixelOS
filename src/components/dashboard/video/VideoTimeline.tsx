@@ -4,15 +4,17 @@ import s from "./VideoWorkspace.module.css"
 
 const STATUS_LABEL = { pending: "Sin generar", configured: "Sin generar", generating: "Generando…", generated: "Lista", error: "Error" }
 
-export default function VideoTimeline({ chunks, activeId, format, finalVideoUrl, onSelect, onAdd, onRemove, onMove, onMerge }: {
-  chunks: VideoChunk[]; activeId: number; format: string; finalVideoUrl: string | null
+export default function VideoTimeline({ chunks, pendingChanges, activeId, format, finalVideoUrl, onSelect, onAdd, onRemove, onMove, onMerge }: {
+  chunks: VideoChunk[]; pendingChanges: ReadonlySet<number>; activeId: number; format: string; finalVideoUrl: string | null
   onSelect: (id: number) => void; onAdd: () => void; onRemove: (id: number) => void; onMove: (index: number, direction: -1 | 1) => void; onMerge: () => void
 }) {
-  const generatedCount = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl).length
+  const generatedCount = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl && !pendingChanges.has(chunk.id)).length
   const overallStatus = chunks.some((chunk) => chunk.status === "generating")
     ? { label: "Generando", tone: "generating" }
     : chunks.some((chunk) => chunk.status === "error")
       ? { label: "Requiere revisión", tone: "error" }
+      : pendingChanges.size > 0
+        ? { label: "Cambios pendientes", tone: "changed" }
       : generatedCount === chunks.length
         ? { label: "Video listo", tone: "generated" }
         : chunks.some((chunk) => chunk.status === "configured")
@@ -22,8 +24,8 @@ export default function VideoTimeline({ chunks, activeId, format, finalVideoUrl,
     <header><div><span>MODO PRO</span><h2>Secuencia</h2></div></header>
     <div className={s.chunkTrack}>
       {chunks.map((chunk, index) => <div key={chunk.id} className={s.chunkItem}>
-        <button className={`${s.chunkCard} ${activeId === chunk.id ? s.chunkActive : ""}`} data-status={chunk.status} onClick={() => onSelect(chunk.id)}>
-          <span><i>Escena {String(index + 1).padStart(2, "0")}</i><small>{chunk.duration}s · {STATUS_LABEL[chunk.status]}</small></span>
+        <button className={`${s.chunkCard} ${activeId === chunk.id ? s.chunkActive : ""}`} data-status={chunk.status === "generating" ? "generating" : pendingChanges.has(chunk.id) ? "changed" : chunk.status} onClick={() => onSelect(chunk.id)}>
+          <span><i>Escena {String(index + 1).padStart(2, "0")}</i><small>{chunk.duration}s · {chunk.status !== "generating" && pendingChanges.has(chunk.id) ? "Cambios pendientes" : STATUS_LABEL[chunk.status]}</small></span>
           <div><Clapperboard /><span><b>{chunk.purpose}</b><small>{getSceneDescription(chunk)}</small></span></div>
         </button>
         <div className={s.chunkActions}>

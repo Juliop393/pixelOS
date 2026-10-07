@@ -15,6 +15,7 @@ const STATUS_LABELS: Record<VideoChunk["status"], string> = {
 
 type VideoStoryboardProps = {
   chunks: VideoChunk[]
+  pendingChanges: ReadonlySet<number>
   strategyEditor: ReactNode
   sourceReady: boolean
   canGenerate: boolean
@@ -34,6 +35,7 @@ type VideoStoryboardProps = {
 
 export default function VideoStoryboard({
   chunks,
+  pendingChanges,
   strategyEditor,
   sourceReady,
   canGenerate,
@@ -53,10 +55,11 @@ export default function VideoStoryboard({
   const totalDuration = getVideoDuration(chunks)
   const selectedChunk = chunks.find((chunk) => chunk.id === activeId)
   const anotherSceneGenerating = chunks.some((chunk) => chunk.id !== activeId && chunk.status === "generating")
-  const readyCount = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl?.startsWith("https://")).length
+  const readyCount = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl?.startsWith("https://") && !pendingChanges.has(chunk.id)).length
+  const changedCount = chunks.filter((chunk) => pendingChanges.has(chunk.id) && chunk.status !== "generating").length
   const generatingCount = chunks.filter((chunk) => chunk.status === "generating").length
-  const errorCount = chunks.filter((chunk) => chunk.status === "error").length
-  const pendingCount = chunks.length - readyCount - generatingCount - errorCount
+  const errorCount = chunks.filter((chunk) => chunk.status === "error" && !pendingChanges.has(chunk.id)).length
+  const pendingCount = chunks.length - readyCount - changedCount - generatingCount - errorCount
 
   return <main className={s.storyboardOverview}>
     <div className={s.storyboardInner}>
@@ -80,19 +83,19 @@ export default function VideoStoryboard({
         <header>
           <div><span>ESCENAS</span><h2>Secuencia del anuncio</h2></div>
           <div className={s.storyboardSectionActions}>
-            <p><Clapperboard />{chunks.length} {chunks.length === 1 ? "escena" : "escenas"} · {readyCount} listas · {generatingCount} generando · {pendingCount} sin generar{errorCount > 0 ? ` · ${errorCount} error` : ""}</p>
+            <p><Clapperboard />{chunks.length} {chunks.length === 1 ? "escena" : "escenas"} · {readyCount} listas{changedCount > 0 ? ` · ${changedCount} con cambios pendientes` : ""} · {generatingCount} generando · {pendingCount} sin generar{errorCount > 0 ? ` · ${errorCount} error` : ""}</p>
             <button type="button" disabled={!canGenerateAnnouncement} onClick={onGenerateAnnouncement}><WandSparkles />Generar anuncio</button>
           </div>
         </header>
         {announcementProgress?.phase === "running" && <p className={s.storyboardBatchProgress} role="status">Generando anuncio · {announcementProgress.current} de {announcementProgress.total} escenas · {announcementProgress.completed} listas en esta tanda</p>}
         {announcementProgress?.phase === "error" && <p className={s.storyboardBatchError} role="alert">{announcementProgress.error} Los clips listos se conservaron. Puedes reintentar la escena o volver a generar el anuncio.</p>}
         <div className={s.storyboardTrack}>
-          {chunks.map((chunk, index) => <article key={chunk.id} className={`${s.storyboardScene} ${activeId === chunk.id ? s.storyboardSceneActive : ""}`} data-status={chunk.status}>
+          {chunks.map((chunk, index) => <article key={chunk.id} className={`${s.storyboardScene} ${activeId === chunk.id ? s.storyboardSceneActive : ""}`} data-status={chunk.status === "generating" ? "generating" : pendingChanges.has(chunk.id) ? "changed" : chunk.status}>
             <button type="button" className={s.storyboardSceneSelect} aria-pressed={activeId === chunk.id} onClick={() => onSelect(chunk.id)}>
               <div className={s.storyboardSceneMeta}><span>{String(index + 1).padStart(2, "0")}</span><b>{chunk.duration}s</b></div>
               <h3>{chunk.purpose}</h3>
               <p>{getSceneDescription(chunk)}</p>
-              <footer><i />{STATUS_LABELS[chunk.status]}</footer>
+              <footer><i />{chunk.status !== "generating" && pendingChanges.has(chunk.id) ? "Cambios pendientes" : STATUS_LABELS[chunk.status]}</footer>
             </button>
             <div className={s.storyboardSceneActions}>
               <button type="button" className={s.storyboardEditScene} onClick={() => onEdit(chunk.id)}><PencilLine />Editar</button>

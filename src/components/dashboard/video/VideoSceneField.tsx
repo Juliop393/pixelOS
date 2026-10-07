@@ -8,6 +8,7 @@ type VideoSceneFieldProps = {
   helper: string
   suggestions: string[]
   optional?: boolean
+  disabled?: boolean
   maxLength?: number
   onChange: (value: string) => void
 }
@@ -20,6 +21,7 @@ export default function VideoSceneField({
   helper,
   suggestions,
   optional = false,
+  disabled = false,
   maxLength = 400,
   onChange,
 }: VideoSceneFieldProps) {
@@ -32,12 +34,14 @@ export default function VideoSceneField({
       {suggestions.map((suggestion) => <button
         type="button"
         key={suggestion}
+        disabled={disabled}
         onClick={() => onChange(suggestion)}
       >{suggestion}</button>)}
     </div>
     <textarea
       id={id}
       value={value}
+      disabled={disabled}
       onChange={(event) => onChange(event.target.value)}
       maxLength={maxLength}
       rows={7}
