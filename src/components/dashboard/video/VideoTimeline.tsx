@@ -16,7 +16,7 @@ export default function VideoTimeline({ chunks, pendingChanges, activeId, format
       : pendingChanges.size > 0
         ? { label: "Cambios pendientes", tone: "changed" }
       : generatedCount === chunks.length
-        ? { label: "Video listo", tone: "generated" }
+        ? { label: "Escenas listas", tone: "generated" }
         : chunks.some((chunk) => chunk.status === "configured")
           ? { label: "Listo para generar", tone: "configured" }
           : { label: "En preparación", tone: "pending" }
@@ -39,7 +39,7 @@ export default function VideoTimeline({ chunks, pendingChanges, activeId, format
     </div>
     <footer className={s.timelineSummary}>
       <div className={s.timelineSummaryFacts} data-status={overallStatus.tone} aria-label="Resumen de producción"><b>{getVideoDuration(chunks)} s</b><i /><span>{chunks.length} {chunks.length === 1 ? "escena" : "escenas"}</span><i /><span>{format}</span><i /><span>{overallStatus.label}</span></div>
-      {(generatedCount >= 2 || finalVideoUrl) && <div className={s.timelineSummaryActions}>{generatedCount >= 2 && <button onClick={onMerge}><Link2 />Unir secuencia</button>}{finalVideoUrl && <a href={finalVideoUrl} download><Download />Descargar video</a>}</div>}
+      {(generatedCount >= 2 || finalVideoUrl) && <div className={s.timelineSummaryActions}>{generatedCount >= 2 && <button disabled title="Disponible al conectar el ensamblado final" onClick={onMerge}><Link2 />Unir secuencia</button>}{finalVideoUrl && <a href={finalVideoUrl} download><Download />Descargar video</a>}</div>}
     </footer>
   </section>
 }
