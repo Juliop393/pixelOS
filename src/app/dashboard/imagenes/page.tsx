@@ -130,13 +130,13 @@ export default function DashboardPage() {
   return (
     <div id="generator-root" className={s.generatorPage}>
       <div className={s.ambient} aria-hidden="true"><i /><i /></div>
-      <EditorHeader tool="images" action={editorMode === "simple" ? <div className={simpleStyles.headerActions}>
+      <EditorHeader tool="images" action={<div className={simpleStyles.headerActions}>
         <div className={simpleStyles.headerModes} role="tablist" aria-label="Modo del generador de imágenes">
-          <button type="button" role="tab" aria-selected="true" className={simpleStyles.headerModeActive}>Simple</button>
-          <button type="button" role="tab" aria-selected="false" onClick={openPro}>Modo Pro</button>
+          <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? simpleStyles.headerModeActive : ""} onClick={() => setEditorMode("simple")}>Simple</button>
+          <button type="button" role="tab" aria-selected={editorMode === "pro"} className={editorMode === "pro" ? simpleStyles.headerModeActive : ""} onClick={openPro}>Modo Pro</button>
         </div>
         <button type="button" className={simpleStyles.headerPixelAi} onClick={() => setAdvisorOpen(true)} aria-label="Abrir PixelIA" aria-expanded={advisorOpen} aria-controls="pixel-ai-panel"><PixelAiIcon aria-hidden="true" />PixelIA</button>
-      </div> : undefined} />
+      </div>} />
 
       {editorMode === "simple" && <main className={simpleStyles.simpleWorkspace}>
         <ImageSimple
@@ -172,18 +172,13 @@ export default function DashboardPage() {
         </section>}
       </main>}
 
-      {editorMode === "pro" && <section className={s.workspace}>
+      {editorMode === "pro" && <section className={`${s.workspace} ${s.proWorkspace}`}>
       {/* ===== LEFT PANEL ===== */}
       <aside className={s.builderPanel}>
         <div className={s.panelIntro}>
           <span className={s.eyebrow}>NUEVO CREATIVO</span>
           <h1>Construye tu anuncio</h1>
           <p>Define el producto y deja que Pixel IA ordene el resto.</p>
-        </div>
-
-        <div className={s.modeTabs} role="tablist" aria-label="Modo del generador de imágenes">
-          <button type="button" role="tab" aria-selected="false" onClick={() => setEditorMode("simple")}>Simple <small>Recomendado</small></button>
-          <button type="button" role="tab" aria-selected="true" className={s.modeActive}>Pro</button>
         </div>
 
         <div className={s.stepTabs} role="tablist" aria-label="Pasos del generador">
@@ -324,18 +319,6 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="m4 16 4.6-4.6a2 2 0 0 1 2.8 0L16 16m-2-2 1.6-1.6a2 2 0 0 1 2.8 0L20 14M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
               </svg>
               <span>Generar imagen</span>
-            </button>
-            <button
-              type="button"
-              className={s.previewNavButton}
-              onClick={() => setAdvisorOpen(true)}
-              aria-label="Abrir Pixel IA"
-              aria-expanded={advisorOpen}
-              aria-controls="pixel-ai-panel"
-              title="PixelAI"
-            >
-              <PixelAiIcon size={14} strokeWidth={1.7} aria-hidden="true" />
-              <span>PixelAI</span>
             </button>
             <span className={s.canvasToolDivider} aria-hidden="true" />
             <div className={s.formatMenu}>

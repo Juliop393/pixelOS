@@ -652,14 +652,22 @@
 .aiSendButton:hover:not(:disabled) { filter: brightness(1.12); box-shadow: var(--pf-ai-focus), var(--pf-ai-halo); }
 .aiSendButton:disabled { background: var(--pf-elevated); border-color: var(--pf-border); color: var(--pf-tertiary); box-shadow: none; }
 .canvasPanel .canvasTools button[aria-controls="pixel-ai-panel"]:focus-visible { outline-color: var(--pf-ai); }
-.modeTabs{margin:0 18px 14px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:4px;border:1px solid var(--pf-border);border-radius:14px;background:var(--pf-input)}
-.modeTabs button{min-height:40px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--pf-secondary);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:color .2s,background-color .2s,border-color .2s}
-.modeTabs button:hover{color:var(--pf-headline);background:var(--pf-elevated)}
-.modeTabs .modeActive{color:var(--pf-headline);border-color:var(--pf-selected-border);background:var(--pf-selected)}
-.modeTabs small{margin-left:5px;color:var(--pf-brand);font-size:9px;font-weight:600}
-.modeTabs button:focus-visible{outline:2px solid var(--pf-action);outline-offset:2px}
 .referenceButtons{display:flex;align-items:center;gap:6px}
 .changeReference{height:30px;padding:0 9px;border:1px solid var(--pf-border);border-radius:8px;background:var(--pf-elevated);color:var(--pf-primary);font-size:10px;cursor:pointer}
 .changeReference:hover{border-color:var(--pf-border-hover)}
-@media(prefers-reduced-motion:reduce){.modeTabs button{transition:none}}
 @media(prefers-reduced-motion:reduce){.pixelAiTrigger, .aiPrimaryAction, .aiSecondaryAction, .aiChatInput, .aiSendButton { transition: none; }.pixelAiTrigger:hover { transform: none; }}
+
+/* Pro keeps its own editor structure while sharing Simple's header geometry. */
+.workspace.proWorkspace{grid-template-columns:430px minmax(0,1fr);margin-top:18px}
+.proWorkspace .builderPanel,.proWorkspace .canvasPanel:not(.canvasFullscreen){border-radius:26px}
+.proWorkspace .stepTabs{height:52px;margin:0 22px 17px;padding:5px;gap:6px}
+.proWorkspace .stepTabs button{min-width:0}
+.proWorkspace .previewColumn{gap:20px}
+.proWorkspace .canvasPanel:not(.canvasFullscreen){border-color:var(--pf-border);background:linear-gradient(145deg,var(--pf-card),var(--pf-panel) 70%);box-shadow:var(--pf-shadow),var(--pf-highlight)}
+.proWorkspace .canvasHeader{border-radius:25px 25px 0 0}
+.proWorkspace .canvasPanel:not(.canvasFullscreen) .canvasStage{margin:10px 12px 12px;border:1px solid var(--pf-border);border-radius:18px;box-shadow:var(--pf-highlight)}
+.proWorkspace .contextRail{border-radius:20px;border-color:var(--pf-border);background:var(--pf-card);box-shadow:var(--pf-highlight)}
+@media(max-width:1420px){.workspace.proWorkspace{grid-template-columns:410px minmax(0,1fr);column-gap:16px}}
+@media(max-width:1180px){.workspace.proWorkspace{grid-template-columns:390px minmax(0,1fr)}}
+@media(max-width:920px){.workspace.proWorkspace{display:flex}}
+@media(max-width:680px){.workspace.proWorkspace{margin-top:62px}.proWorkspace .stepTabs{margin-inline:12px;padding:4px;gap:4px}.proWorkspace .canvasPanel:not(.canvasFullscreen) .canvasStage{margin:8px;border-radius:16px}}
