@@ -39,6 +39,9 @@
 .statusOverlay small{max-width:38ch;margin-top:14px;color:#b7aaa0;font-size:12px;line-height:1.5}
 .referenceThumb{width:36px;height:36px;flex:0 0 36px;border:1px solid rgba(255,244,235,.13);border-radius:8px;object-fit:cover}
 .videoHint{margin:12px 0 0;color:#a99b90;font-size:12px;line-height:1.5}
+.uploadZone.uploadZoneDragOver{border-color:rgba(240,156,123,.9);background-color:#201713}
+.aspectHint{margin:10px 0 0;color:#aa9d92;font-size:12px;line-height:1.5}
+.uploadZone .aspectHint{margin-top:3px;color:#aa9d92}
 @media(max-width:620px){.videoPreview video{height:min(50vh,440px)}.referenceActions{flex-wrap:wrap}.referenceActions>span{flex-basis:calc(100% - 50px)}.referenceActions label{margin-left:auto}}
 .durationFixed{min-height:64px;padding:16px 20px;border:1px solid rgba(255,244,235,.085);border-radius:15px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(145deg,rgba(255,255,255,.036),rgba(255,255,255,.012))}
 .durationFixed span{color:#a99c92;font-size:13px}

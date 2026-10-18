@@ -1,3 +1,4 @@
+import { useRef, useState, type DragEvent } from "react"
 import { BadgePercent, Clapperboard, ImagePlus, PlaySquare, Sparkles, Trash2, Upload, UsersRound, WandSparkles } from "lucide-react"
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import { VIDEO_GENERATION_DURATION } from "./video-data"
@@ -36,8 +37,32 @@ export default function VideoSimple({
   videoUrl: string | null
   generationError: string
 }) {
+  const dragDepth = useRef(0)
+  const [isDragOver, setIsDragOver] = useState(false)
   const canContinue = Boolean(referenceImageUrl?.startsWith("https://") && goal.trim() && !uploading && !generating)
   const showVideo = Boolean(videoUrl && !generating && !generationError)
+  const handleDragEnter = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault()
+    if (uploading) return
+    dragDepth.current += 1
+    setIsDragOver(true)
+  }
+  const handleDragOver = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = uploading ? "none" : "copy"
+  }
+  const handleDragLeave = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault()
+    dragDepth.current = Math.max(0, dragDepth.current - 1)
+    if (dragDepth.current === 0) setIsDragOver(false)
+  }
+  const handleDrop = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault()
+    dragDepth.current = 0
+    setIsDragOver(false)
+    const file = event.dataTransfer.files.item(0)
+    if (!uploading && file) onUpload(file)
+  }
 
   return <main className={s.simple} aria-labelledby="video-simple-title">
     <div className={s.inner}>
@@ -56,11 +81,12 @@ export default function VideoSimple({
             <img src={referenceImageUrl} alt="Referencia visual elegida" />
             {generating && <div className={s.statusOverlay} aria-live="polite"><WandSparkles aria-hidden="true" /><strong>Generando tu video…</strong><p>Puede tardar un momento. Tu configuración sigue disponible.</p></div>}
             {generationError && <div className={s.statusOverlay} role="alert"><strong>No se pudo generar el video</strong><p>{generationError}</p><small>Tu referencia y configuración se conservaron. Puedes reintentar.</small></div>}
-          </div> : <label className={s.uploadZone}>
+          </div> : <label className={`${s.uploadZone} ${isDragOver && !uploading ? s.uploadZoneDragOver : ""}`} onDragEnter={handleDragEnter} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
             <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(event) => { onUpload(event.target.files?.[0]); event.currentTarget.value = "" }} />
             <span><ImagePlus aria-hidden="true" /></span>
             <b>{uploading ? "Subiendo imagen..." : "Subir imagen"}</b>
             <small>JPG, PNG o WEBP · máximo 5 MB</small>
+            <small className={s.aspectHint}>El video conservará la proporción de tu imagen · Recomendado 9:16</small>
           </label>}
           {(referenceImageUrl || showVideo) && <div className={s.referenceActions}>
             {showVideo && referenceImageUrl && <img className={s.referenceThumb} src={referenceImageUrl} alt="Referencia original" />}
@@ -68,6 +94,7 @@ export default function VideoSimple({
             <label><input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(event) => { onUpload(event.target.files?.[0]); event.currentTarget.value = "" }} /><Upload aria-hidden="true" />{showVideo ? "Cambiar referencia" : "Cambiar imagen"}</label>
             {referenceImageUrl && <button type="button" onClick={onClear} aria-label="Quitar referencia visual"><Trash2 aria-hidden="true" /></button>}
           </div>}
+          {referenceImageUrl && <p className={s.aspectHint}>El video conservará la proporción de tu imagen · Recomendado 9:16</p>}
           {fileError && <p className={s.error} role="alert">{fileError}</p>}
           {generationError && !referenceImageUrl && <p className={s.error} role="alert">{generationError}</p>}
           {showVideo && <p className={s.videoHint}>Si cambias la configuración, genera otro clip para aplicar los cambios.</p>}
