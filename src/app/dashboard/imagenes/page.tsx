@@ -14,6 +14,7 @@ import Accordion from "@/components/ui/Accordion"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
 import EditorHeader from "@/components/dashboard/EditorHeader"
 import s from "@/components/dashboard/GeneratorWorkspace.module.css"
+import simpleStyles from "@/components/dashboard/ImageSimple.module.css"
 
 const FORMAT_LABELS: Record<string, string> = {
   square: "1:1", story: "9:16", "4:5": "4:5",
@@ -129,23 +130,63 @@ export default function DashboardPage() {
   return (
     <div id="generator-root" className={s.generatorPage}>
       <div className={s.ambient} aria-hidden="true"><i /><i /></div>
-      <EditorHeader tool="images" />
+      <EditorHeader tool="images" action={editorMode === "simple" ? <div className={simpleStyles.headerActions}>
+        <div className={simpleStyles.headerModes} role="tablist" aria-label="Modo del generador de imágenes">
+          <button type="button" role="tab" aria-selected="true" className={simpleStyles.headerModeActive}>Simple</button>
+          <button type="button" role="tab" aria-selected="false" onClick={openPro}>Modo Pro</button>
+        </div>
+        <button type="button" className={simpleStyles.headerPixelAi} onClick={() => setAdvisorOpen(true)} aria-label="Abrir PixelIA" aria-expanded={advisorOpen} aria-controls="pixel-ai-panel"><PixelAiIcon aria-hidden="true" />PixelIA</button>
+      </div> : undefined} />
 
-      <section className={s.workspace}>
+      {editorMode === "simple" && <main className={simpleStyles.simpleWorkspace}>
+        <ImageSimple
+          referenceUploader={<ProductForm
+            producto={g.producto} setProducto={g.setProducto}
+            titulo={g.titulo} setTitulo={g.setTitulo}
+            subtitulo={g.subtitulo} setSubtitulo={g.setSubtitulo}
+            ctaContacto={g.ctaContacto} setCtaContacto={g.setCtaContacto}
+            cantidad={g.cantidad} setCantidad={g.setCantidad}
+            loading={g.loading}
+            imagenReferencia={simpleReferenceUrl} setImagenReferencia={setSimpleReferenceUrl}
+            nombreImagenReferencia={simpleReferenceName} setNombreImagenReferencia={setSimpleReferenceName}
+            showQuantity={false} referenceOnly onUploadStateChange={setSimpleUploading}
+          />}
+          prompt={simplePrompt} onPromptChange={setSimplePrompt}
+          approach={simpleApproach} onApproachChange={setSimpleApproach}
+          format={simpleFormat} onFormatChange={setSimpleFormat}
+          onOpenPixelAi={() => setAdvisorOpen(true)}
+          onGenerate={generateSimple} loading={g.loading} canGenerate={canGenerateSimple} credits={g.credits}
+        />
+        {g.phase !== "select" && <section className={`${s.canvasPanel} ${simpleStyles.simpleResult}`} aria-label="Resultado de imagen" data-format={FORMAT_LABELS[simpleFormat] ?? simpleFormat}>
+          <div className={s.canvasHeader}><div><span className={s.liveDot} /><div><b>{g.phase === "loading" ? "Creando tu imagen" : "Tu imagen"}</b><small>{g.phase === "loading" ? "El resultado aparecerá aquí" : "Resultado de Modo Simple"}</small></div></div></div>
+          <ResultPanel
+            phase={g.phase} result={g.result} generatedImages={g.generatedImages}
+            progress={g.progress} error={g.error} aspectRatio={simpleFormat}
+            selectedAngle={simpleMapping.angle} sessionHistory={g.sessionHistory}
+            showGuides={false} credits={g.credits} cantidad={1} safeZoneMeta={false}
+            onRetry={g.handleRetry} onDownload={g.handleDownload}
+            onDownloadAll={g.handleDownloadAll}
+            onSelectFromGenerated={g.handleSelectFromGenerated}
+            onSelectFromHistory={g.handleSelectFromHistory}
+          />
+        </section>}
+      </main>}
+
+      {editorMode === "pro" && <section className={s.workspace}>
       {/* ===== LEFT PANEL ===== */}
       <aside className={s.builderPanel}>
         <div className={s.panelIntro}>
-          <span className={s.eyebrow}>{editorMode === "simple" ? "IMAGEN · MODO SIMPLE" : "NUEVO CREATIVO"}</span>
-          <h1>{editorMode === "simple" ? "Tu imagen empieza con una idea." : "Construye tu anuncio"}</h1>
-          <p>{editorMode === "simple" ? "Cuéntanos qué quieres crear y PixelFM preparará el resto." : "Define el producto y deja que Pixel IA ordene el resto."}</p>
+          <span className={s.eyebrow}>NUEVO CREATIVO</span>
+          <h1>Construye tu anuncio</h1>
+          <p>Define el producto y deja que Pixel IA ordene el resto.</p>
         </div>
 
         <div className={s.modeTabs} role="tablist" aria-label="Modo del generador de imágenes">
-          <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? s.modeActive : ""} onClick={() => setEditorMode("simple")}>Simple <small>Recomendado</small></button>
-          <button type="button" role="tab" aria-selected={editorMode === "pro"} className={editorMode === "pro" ? s.modeActive : ""} onClick={openPro}>Pro</button>
+          <button type="button" role="tab" aria-selected="false" onClick={() => setEditorMode("simple")}>Simple <small>Recomendado</small></button>
+          <button type="button" role="tab" aria-selected="true" className={s.modeActive}>Pro</button>
         </div>
 
-        {editorMode === "pro" && <div className={s.stepTabs} role="tablist" aria-label="Pasos del generador">
+        <div className={s.stepTabs} role="tablist" aria-label="Pasos del generador">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -157,27 +198,9 @@ export default function DashboardPage() {
               <span>0{tabs.indexOf(tab) + 1}</span>{tab.label}
             </button>
           ))}
-        </div>}
+        </div>
 
         <div className={s.formScroll}>
-          {editorMode === "simple" ? <ImageSimple
-            referenceUploader={<ProductForm
-              producto={g.producto} setProducto={g.setProducto}
-              titulo={g.titulo} setTitulo={g.setTitulo}
-              subtitulo={g.subtitulo} setSubtitulo={g.setSubtitulo}
-              ctaContacto={g.ctaContacto} setCtaContacto={g.setCtaContacto}
-              cantidad={g.cantidad} setCantidad={g.setCantidad}
-              loading={g.loading}
-              imagenReferencia={simpleReferenceUrl} setImagenReferencia={setSimpleReferenceUrl}
-              nombreImagenReferencia={simpleReferenceName} setNombreImagenReferencia={setSimpleReferenceName}
-              showQuantity={false} referenceOnly onUploadStateChange={setSimpleUploading}
-            />}
-            prompt={simplePrompt} onPromptChange={setSimplePrompt}
-            approach={simpleApproach} onApproachChange={setSimpleApproach}
-            format={simpleFormat} onFormatChange={setSimpleFormat}
-            onOpenPixelAi={() => setAdvisorOpen(true)}
-            onGenerate={generateSimple} loading={g.loading} canGenerate={canGenerateSimple} credits={g.credits}
-          /> : <>
           {activeTab === "product" && (
             <ProductForm
               producto={g.producto}
@@ -259,10 +282,9 @@ export default function DashboardPage() {
               </section>
             </div>
           )}
-          </>}
         </div>
 
-        {editorMode === "pro" && <div className={s.generateDock}>
+        <div className={s.generateDock}>
           <button
             className={s.generateButton}
             onClick={() => g.handleGenerate()}
@@ -278,7 +300,7 @@ export default function DashboardPage() {
             <span>{g.cantidad} {g.cantidad === 1 ? "crédito" : "créditos"} · {g.cantidad} {g.cantidad === 1 ? "creativo" : "creativos"}</span>
             <span>{g.credits} disponible{g.credits === 1 ? "" : "s"}</span>
           </div>
-        </div>}
+        </div>
       </aside>
 
       {/* ===== RIGHT PANEL ===== */}
@@ -294,7 +316,7 @@ export default function DashboardPage() {
               type="button"
               className={s.previewNavButton}
               onClick={generateCurrent}
-              disabled={editorMode === "simple" ? !canGenerateSimple : !canGenerate}
+              disabled={!canGenerate}
               aria-label="Generar imagen"
               title="Generar imagen"
             >
@@ -356,7 +378,7 @@ export default function DashboardPage() {
           showGuides={showGuides}
           credits={g.credits}
           cantidad={displayQuantity}
-          safeZoneMeta={editorMode === "simple" ? false : g.safeZoneMeta}
+          safeZoneMeta={g.safeZoneMeta}
           onRetry={g.handleRetry}
           onDownload={g.handleDownload}
           onDownloadAll={g.handleDownloadAll}
@@ -368,21 +390,21 @@ export default function DashboardPage() {
       <section className={s.contextRail} aria-label="Resumen del creativo">
         <div className={s.railLabel}><span>Resumen del creativo</span><small>Configuración actual de la generación</small></div>
         <div className={s.summaryGrid}>
-          <span><small>{editorMode === "simple" ? "Enfoque" : "Ángulo"}</small><b>{editorMode === "simple" ? simpleMapping.label : selectedAngleLabel}</b></span>
+          <span><small>Ángulo</small><b>{selectedAngleLabel}</b></span>
           <span><small>Formato</small><b>{FORMAT_LABELS[displayFormat] ?? displayFormat}</b></span>
           <span><small>Cantidad</small><b>{displayQuantity} {displayQuantity === 1 ? "creativo" : "creativos"}</b></span>
-          {editorMode === "pro" && <span><small>Zona Segura</small><b>{g.safeZoneMeta ? "Activada" : "Desactivada"}</b></span>}
+          <span><small>Zona Segura</small><b>{g.safeZoneMeta ? "Activada" : "Desactivada"}</b></span>
           <span className={s.summaryStatus}><small>Estado</small><b><i />{summaryStatus}</b></span>
         </div>
       </section>
       </div>
 
+      </section>}
       <PixelAiDrawer
         onApplyRecommendation={handleApplyRecommendation}
         open={advisorOpen}
         onOpenChange={setAdvisorOpen}
       />
-      </section>
     </div>
   )
 }
