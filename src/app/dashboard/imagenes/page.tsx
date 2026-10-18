@@ -8,6 +8,7 @@ import AngleSelector from "@/components/dashboard/AngleSelector"
 import FormatSelector from "@/components/dashboard/FormatSelector"
 import StyleSelector from "@/components/dashboard/StyleSelector"
 import ProductForm from "@/components/dashboard/ProductForm"
+import ImageSimple, { SIMPLE_IMAGE_APPROACHES, type SimpleImageApproach } from "@/components/dashboard/ImageSimple"
 import ResultPanel from "@/components/dashboard/ResultPanel"
 import Accordion from "@/components/ui/Accordion"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
@@ -25,9 +26,17 @@ const FORMAT_OPTIONS = [
 ]
 
 type Tab = "product" | "angle" | "design"
+type EditorMode = "simple" | "pro"
 
 export default function DashboardPage() {
   const g = useCreativeGenerator()
+  const [editorMode, setEditorMode] = useState<EditorMode>("simple")
+  const [simplePrompt, setSimplePrompt] = useState("")
+  const [simpleApproach, setSimpleApproach] = useState<SimpleImageApproach>("auto")
+  const [simpleFormat, setSimpleFormat] = useState("square")
+  const [simpleReferenceUrl, setSimpleReferenceUrl] = useState<string | null>(null)
+  const [simpleReferenceName, setSimpleReferenceName] = useState<string | null>(null)
+  const [simpleUploading, setSimpleUploading] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>("product")
   const [highlightProduct, setHighlightProduct] = useState(false)
   const [showGuides, setShowGuides] = useState(false)
@@ -45,6 +54,10 @@ export default function DashboardPage() {
   const handleApplyRecommendation = (rec: {
     angleId: string; styleId: string; format: string; safeZoneMeta: boolean; productDescription?: string
   }) => {
+    if (editorMode === "simple") {
+      if (rec.productDescription) setSimplePrompt(rec.productDescription)
+      return
+    }
     g.handleSelectAngle(rec.angleId)
     g.setAspectRatio(rec.format)
     g.setVisualStyle(rec.styleId)
@@ -61,14 +74,37 @@ export default function DashboardPage() {
 
   const canGenerate =
     !!g.producto.trim() && !!g.selectedAngle && !g.loading && g.credits >= g.cantidad
+  const canGenerateSimple = !!simplePrompt.trim() && !simpleUploading && !g.loading && g.credits >= 1
+  const simpleMapping = SIMPLE_IMAGE_APPROACHES.find((item) => item.id === simpleApproach) ?? SIMPLE_IMAGE_APPROACHES[0]
+  const displayFormat = editorMode === "simple" ? simpleFormat : g.aspectRatio
+  const displayAngle = editorMode === "simple" ? simpleMapping.angle : g.selectedAngle
+  const displayQuantity = editorMode === "simple" ? 1 : g.cantidad
+  const generateSimple = () => g.handleGenerate({
+    producto: simplePrompt,
+    angulo: simpleMapping.angle,
+    formato: simpleFormat,
+    estiloVisual: simpleMapping.style,
+    imagenReferencia: simpleReferenceUrl,
+  })
+  const generateCurrent = () => editorMode === "simple" ? generateSimple() : g.handleGenerate()
+  const openPro = () => {
+    if (!g.producto.trim() && simplePrompt.trim()) {
+      g.setProducto(simplePrompt)
+      g.handleSelectAngle(simpleMapping.angle)
+      g.setVisualStyle(simpleMapping.style)
+      g.setAspectRatio(simpleFormat)
+    }
+    setEditorMode("pro")
+  }
 
   const selectedAngleLabel = useMemo(
-    () => ANGLES.find((angle) => angle.id === g.selectedAngle)?.title ?? "Sin seleccionar",
-    [g.selectedAngle],
+    () => ANGLES.find((angle) => angle.id === displayAngle)?.title ?? "Sin seleccionar",
+    [displayAngle],
   )
 
   const selectFormat = (format: string) => {
-    g.setAspectRatio(format)
+    if (editorMode === "simple") setSimpleFormat(format)
+    else g.setAspectRatio(format)
     setFormatOpen(false)
   }
 
@@ -78,9 +114,9 @@ export default function DashboardPage() {
       ? "Requiere atención"
       : g.phase === "result"
         ? "Creativo generado"
-        : !g.producto.trim()
-          ? "Completa el producto"
-          : !g.selectedAngle
+        : !(editorMode === "simple" ? simplePrompt : g.producto).trim()
+          ? editorMode === "simple" ? "Describe tu idea" : "Completa el producto"
+          : !displayAngle
             ? "Selecciona un ángulo"
             : "Listo para generar"
 
@@ -99,12 +135,17 @@ export default function DashboardPage() {
       {/* ===== LEFT PANEL ===== */}
       <aside className={s.builderPanel}>
         <div className={s.panelIntro}>
-          <span className={s.eyebrow}>NUEVO CREATIVO</span>
-          <h1>Construye tu anuncio</h1>
-          <p>Define el producto y deja que Pixel IA ordene el resto.</p>
+          <span className={s.eyebrow}>{editorMode === "simple" ? "IMAGEN · MODO SIMPLE" : "NUEVO CREATIVO"}</span>
+          <h1>{editorMode === "simple" ? "Tu imagen empieza con una idea." : "Construye tu anuncio"}</h1>
+          <p>{editorMode === "simple" ? "Cuéntanos qué quieres crear y PixelFM preparará el resto." : "Define el producto y deja que Pixel IA ordene el resto."}</p>
         </div>
 
-        <div className={s.stepTabs} role="tablist" aria-label="Pasos del generador">
+        <div className={s.modeTabs} role="tablist" aria-label="Modo del generador de imágenes">
+          <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? s.modeActive : ""} onClick={() => setEditorMode("simple")}>Simple <small>Recomendado</small></button>
+          <button type="button" role="tab" aria-selected={editorMode === "pro"} className={editorMode === "pro" ? s.modeActive : ""} onClick={openPro}>Pro</button>
+        </div>
+
+        {editorMode === "pro" && <div className={s.stepTabs} role="tablist" aria-label="Pasos del generador">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -116,9 +157,27 @@ export default function DashboardPage() {
               <span>0{tabs.indexOf(tab) + 1}</span>{tab.label}
             </button>
           ))}
-        </div>
+        </div>}
 
         <div className={s.formScroll}>
+          {editorMode === "simple" ? <ImageSimple
+            referenceUploader={<ProductForm
+              producto={g.producto} setProducto={g.setProducto}
+              titulo={g.titulo} setTitulo={g.setTitulo}
+              subtitulo={g.subtitulo} setSubtitulo={g.setSubtitulo}
+              ctaContacto={g.ctaContacto} setCtaContacto={g.setCtaContacto}
+              cantidad={g.cantidad} setCantidad={g.setCantidad}
+              loading={g.loading}
+              imagenReferencia={simpleReferenceUrl} setImagenReferencia={setSimpleReferenceUrl}
+              nombreImagenReferencia={simpleReferenceName} setNombreImagenReferencia={setSimpleReferenceName}
+              showQuantity={false} referenceOnly onUploadStateChange={setSimpleUploading}
+            />}
+            prompt={simplePrompt} onPromptChange={setSimplePrompt}
+            approach={simpleApproach} onApproachChange={setSimpleApproach}
+            format={simpleFormat} onFormatChange={setSimpleFormat}
+            onOpenPixelAi={() => setAdvisorOpen(true)}
+            onGenerate={generateSimple} loading={g.loading} canGenerate={canGenerateSimple} credits={g.credits}
+          /> : <>
           {activeTab === "product" && (
             <ProductForm
               producto={g.producto}
@@ -200,12 +259,13 @@ export default function DashboardPage() {
               </section>
             </div>
           )}
+          </>}
         </div>
 
-        <div className={s.generateDock}>
+        {editorMode === "pro" && <div className={s.generateDock}>
           <button
             className={s.generateButton}
-            onClick={g.handleGenerate}
+            onClick={() => g.handleGenerate()}
             disabled={!canGenerate}
           >
             <span>✦</span>
@@ -218,12 +278,12 @@ export default function DashboardPage() {
             <span>{g.cantidad} {g.cantidad === 1 ? "crédito" : "créditos"} · {g.cantidad} {g.cantidad === 1 ? "creativo" : "creativos"}</span>
             <span>{g.credits} disponible{g.credits === 1 ? "" : "s"}</span>
           </div>
-        </div>
+        </div>}
       </aside>
 
       {/* ===== RIGHT PANEL ===== */}
       <div className={s.previewColumn}>
-      <section className={`${s.canvasPanel} ${isFullscreen ? s.canvasFullscreen : ""}`} data-testid="canvas-panel" data-format={FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio}>
+      <section className={`${s.canvasPanel} ${isFullscreen ? s.canvasFullscreen : ""}`} data-testid="canvas-panel" data-format={FORMAT_LABELS[displayFormat] ?? displayFormat}>
         <div className={s.canvasHeader}>
           <div>
             <span className={s.liveDot} />
@@ -233,8 +293,8 @@ export default function DashboardPage() {
             <button
               type="button"
               className={s.previewNavButton}
-              onClick={g.handleGenerate}
-              disabled={!canGenerate}
+              onClick={generateCurrent}
+              disabled={editorMode === "simple" ? !canGenerateSimple : !canGenerate}
               aria-label="Generar imagen"
               title="Generar imagen"
             >
@@ -258,13 +318,13 @@ export default function DashboardPage() {
             <span className={s.canvasToolDivider} aria-hidden="true" />
             <div className={s.formatMenu}>
               <button className={s.formatBtn} onClick={() => setFormatOpen(!formatOpen)} aria-expanded={formatOpen} aria-haspopup="menu">
-                {FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio} <span>⌄</span>
+                {FORMAT_LABELS[displayFormat] ?? displayFormat} <span>⌄</span>
               </button>
               {formatOpen && (
                 <div role="menu">
                   {FORMAT_OPTIONS.map((option) => (
-                    <button key={option.id} role="menuitem" className={g.aspectRatio === option.id ? s.activeFormat : ""} onClick={() => selectFormat(option.id)}>
-                      <span>{option.label}</span><small>{option.description}</small><b>{g.aspectRatio === option.id ? "✓" : ""}</b>
+                    <button key={option.id} role="menuitem" className={displayFormat === option.id ? s.activeFormat : ""} onClick={() => selectFormat(option.id)}>
+                      <span>{option.label}</span><small>{option.description}</small><b>{displayFormat === option.id ? "✓" : ""}</b>
                     </button>
                   ))}
                 </div>
@@ -290,13 +350,13 @@ export default function DashboardPage() {
           generatedImages={g.generatedImages}
           progress={g.progress}
           error={g.error}
-          aspectRatio={g.aspectRatio}
-          selectedAngle={g.selectedAngle}
+          aspectRatio={displayFormat}
+          selectedAngle={displayAngle}
           sessionHistory={g.sessionHistory}
           showGuides={showGuides}
           credits={g.credits}
-          cantidad={g.cantidad}
-          safeZoneMeta={g.safeZoneMeta}
+          cantidad={displayQuantity}
+          safeZoneMeta={editorMode === "simple" ? false : g.safeZoneMeta}
           onRetry={g.handleRetry}
           onDownload={g.handleDownload}
           onDownloadAll={g.handleDownloadAll}
@@ -308,10 +368,10 @@ export default function DashboardPage() {
       <section className={s.contextRail} aria-label="Resumen del creativo">
         <div className={s.railLabel}><span>Resumen del creativo</span><small>Configuración actual de la generación</small></div>
         <div className={s.summaryGrid}>
-          <span><small>Ángulo</small><b>{selectedAngleLabel}</b></span>
-          <span><small>Formato</small><b>{FORMAT_LABELS[g.aspectRatio] ?? g.aspectRatio}</b></span>
-          <span><small>Cantidad</small><b>{g.cantidad} {g.cantidad === 1 ? "creativo" : "creativos"}</b></span>
-          <span><small>Zona Segura</small><b>{g.safeZoneMeta ? "Activada" : "Desactivada"}</b></span>
+          <span><small>{editorMode === "simple" ? "Enfoque" : "Ángulo"}</small><b>{editorMode === "simple" ? simpleMapping.label : selectedAngleLabel}</b></span>
+          <span><small>Formato</small><b>{FORMAT_LABELS[displayFormat] ?? displayFormat}</b></span>
+          <span><small>Cantidad</small><b>{displayQuantity} {displayQuantity === 1 ? "creativo" : "creativos"}</b></span>
+          {editorMode === "pro" && <span><small>Zona Segura</small><b>{g.safeZoneMeta ? "Activada" : "Desactivada"}</b></span>}
           <span className={s.summaryStatus}><small>Estado</small><b><i />{summaryStatus}</b></span>
         </div>
       </section>

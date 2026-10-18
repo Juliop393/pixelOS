@@ -10,6 +10,13 @@ export type Phase = "select" | "loading" | "result" | "error"
 export type GeneratedImage = { imageUrl: string; angle: string }
 export type Result = { imageUrl: string; copy: string; angle: string } | null
 export type Progress = { completed: number; total: number }
+export type SimpleImageInput = {
+  producto: string
+  angulo: string
+  formato: string
+  estiloVisual: string
+  imagenReferencia: string | null
+}
 
 export function useCreativeGenerator() {
   const router = useRouter()
@@ -71,17 +78,23 @@ export function useCreativeGenerator() {
     setSelectedAngle(angleId)
   }
 
-  const handleGenerate = async () => {
-    if (!producto.trim() || !selectedAngle) {
+  const handleGenerate = async (simpleInput?: SimpleImageInput) => {
+    const generationProducto = simpleInput?.producto ?? producto
+    const generationAngle = simpleInput?.angulo ?? selectedAngle
+    const generationFormat = simpleInput?.formato ?? aspectRatio
+    const generationStyle = simpleInput?.estiloVisual ?? visualStyle
+    const generationReference = simpleInput ? simpleInput.imagenReferencia : imagenReferencia
+    const generationQuantity = simpleInput ? 1 : cantidad
+    if (!generationProducto.trim() || !generationAngle) {
       toast.error("Completa los campos requeridos", {
         description: "Ingresa tu producto y selecciona un ángulo",
       })
       return
     }
 
-    if (credits < cantidad) {
+    if (credits < generationQuantity) {
       toast.error("Créditos insuficientes", {
-        description: `Necesitas ${cantidad} crédito${cantidad > 1 ? "s" : ""}, tienes ${credits}`,
+        description: `Necesitas ${generationQuantity} crédito${generationQuantity > 1 ? "s" : ""}, tienes ${credits}`,
       })
       return
     }
@@ -89,7 +102,7 @@ export function useCreativeGenerator() {
     setLoading(true)
     setError(null)
     setPhase("loading")
-    setProgress({ completed: 0, total: cantidad })
+    setProgress({ completed: 0, total: generationQuantity })
     setGeneratedImages([])
     setResult(null)
 
@@ -115,22 +128,22 @@ export function useCreativeGenerator() {
 
     // Componemos el "texto del anuncio" a partir del título y subtítulo para
     // mantener intacto el contrato del webhook de n8n (mismas claves de payload).
-    const textoAnuncio = [titulo.trim(), subtitulo.trim()].filter(Boolean).join(" — ")
+    const textoAnuncio = simpleInput ? "" : [titulo.trim(), subtitulo.trim()].filter(Boolean).join(" — ")
 
     const payload = {
-      producto,
+      producto: generationProducto,
       textoAnuncio: textoAnuncio || null,
-      ctaContacto: ctaContacto || null,
-      angulo: selectedAngle,
-      formato: aspectRatio,
-      estiloVisual: visualStyle,
-      brandColor: brandColor || null,
-      imagenReferencia: imagenReferencia || null,
+      ctaContacto: simpleInput ? null : ctaContacto || null,
+      angulo: generationAngle,
+      formato: generationFormat,
+      estiloVisual: generationStyle,
+      brandColor: simpleInput ? null : brandColor || null,
+      imagenReferencia: generationReference || null,
       brandIdentity,
-      safeZoneMeta,
+      safeZoneMeta: simpleInput ? false : safeZoneMeta,
     }
 
-    console.log(`Generando ${cantidad} creativos en paralelo...`)
+    console.log(`Generando ${generationQuantity} creativos en paralelo...`)
 
     const {
       data: { session },
@@ -180,7 +193,7 @@ export function useCreativeGenerator() {
     }
 
     try {
-      const promises = Array(cantidad).fill(null).map(() => generateOne())
+      const promises = Array(generationQuantity).fill(null).map(() => generateOne())
       const results = await Promise.all(promises)
 
       const successfulResults = results.filter((r) => r.success && r.imageUrl) as Array<{
@@ -191,7 +204,7 @@ export function useCreativeGenerator() {
       }>
 
       const successCount = successfulResults.length
-      const failCount = cantidad - successCount
+      const failCount = generationQuantity - successCount
 
       // Sincronizar créditos desde el servidor: usar el saldo más bajo devuelto.
       const creditsFromServer = results
@@ -208,14 +221,14 @@ export function useCreativeGenerator() {
 
       const newImages = successfulResults.map((r) => ({
         imageUrl: r.imageUrl,
-        angle: selectedAngle,
+        angle: generationAngle,
       }))
 
       setGeneratedImages(newImages)
       setResult({
         imageUrl: newImages[0].imageUrl,
         copy: successfulResults[0].copy || "Tu copy persuasivo aparecerá aquí una vez que el motor de IA complete el renderizado del creativo.",
-        angle: selectedAngle,
+        angle: generationAngle,
       })
       setPhase("result")
 
@@ -228,9 +241,9 @@ export function useCreativeGenerator() {
       const newCreativos = newImages.map((img, idx) => ({
         id: Date.now() + idx,
         imageUrl: img.imageUrl,
-        producto: producto,
-        angulo: selectedAngle,
-        formato: aspectRatio,
+        producto: generationProducto,
+        angulo: generationAngle,
+        formato: generationFormat,
         fecha: new Date().toISOString(),
       }))
       savedCreativos.unshift(...newCreativos)
@@ -238,7 +251,7 @@ export function useCreativeGenerator() {
 
       if (failCount > 0) {
         toast.warning("Generación parcial", {
-          description: `${successCount} de ${cantidad} creativos generados exitosamente`,
+          description: `${successCount} de ${generationQuantity} creativos generados exitosamente`,
         })
       } else {
         toast.success(`${successCount} creativo${successCount > 1 ? "s" : ""} generado${successCount > 1 ? "s" : ""}`, {

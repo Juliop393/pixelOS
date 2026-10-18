@@ -1,0 +1,28 @@
+.simple{display:grid;gap:13px;padding-bottom:18px}
+.simple>div:first-child{display:contents}
+.prompt{min-height:142px!important;resize:vertical}
+.pixelAiHelp{min-height:34px;margin-top:12px;padding:0;border:0;background:transparent;color:var(--pf-secondary);display:inline-flex;align-items:center;gap:7px;text-align:left;font-size:12px;font-weight:600;cursor:pointer}
+.pixelAiHelp svg{width:16px;height:16px;color:var(--pf-ai)}
+.pixelAiHelp:hover{color:var(--pf-headline)}
+.approaches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.approaches button{min-width:0;min-height:99px;padding:12px 10px;border:1px solid var(--pf-border);border-radius:12px;background:var(--pf-elevated);color:var(--pf-primary);display:flex;align-items:flex-start;gap:9px;text-align:left;cursor:pointer;transition:border-color .2s,background-color .2s,box-shadow .2s}
+.approaches button:hover{border-color:var(--pf-border-hover);background:var(--pf-card)}
+.approaches .selected{border-color:var(--pf-selected-border);background:var(--pf-selected);box-shadow:var(--pf-highlight)}
+.approaches button>svg{width:19px;height:19px;flex:0 0 19px;margin-top:2px;color:var(--pf-brand)}
+.approaches button span{min-width:0;display:block}
+.approaches button b{display:flex;align-items:center;flex-wrap:wrap;gap:4px;color:var(--pf-headline);font-size:12px;line-height:1.3}
+.approaches button em{font-size:9px;font-style:normal;font-weight:600;color:var(--pf-brand)}
+.approaches button small{display:block;margin-top:5px;color:var(--pf-secondary);font-size:11px;line-height:1.35}
+.formats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.formats button{height:44px;border:1px solid var(--pf-border);border-radius:10px;background:var(--pf-elevated);color:var(--pf-primary);font-size:13px;font-weight:650;cursor:pointer;transition:border-color .2s,background-color .2s}
+.formats button:hover{border-color:var(--pf-border-hover)}
+.formats .selected{border-color:var(--pf-selected-border);background:var(--pf-selected);color:var(--pf-headline)}
+.createArea{display:grid;gap:8px;padding:3px 2px 0}
+.createArea button{width:100%;display:flex;align-items:center;justify-content:center;gap:9px}
+.createArea button svg{width:17px;height:17px}
+.createArea button b{margin-left:auto}
+.createArea p,.createArea small{margin:0;text-align:center;color:var(--pf-secondary);font-size:11px;line-height:1.4}
+.createArea small{color:var(--pf-tertiary)}
+.simple button:focus-visible{outline:2px solid var(--pf-action);outline-offset:3px}
+@media(max-width:380px){.approaches{grid-template-columns:1fr}.approaches button{min-height:72px}}
+@media(prefers-reduced-motion:reduce){.approaches button,.formats button{transition:none}}

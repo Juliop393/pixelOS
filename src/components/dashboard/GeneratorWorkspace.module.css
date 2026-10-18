@@ -652,4 +652,14 @@
 .aiSendButton:hover:not(:disabled) { filter: brightness(1.12); box-shadow: var(--pf-ai-focus), var(--pf-ai-halo); }
 .aiSendButton:disabled { background: var(--pf-elevated); border-color: var(--pf-border); color: var(--pf-tertiary); box-shadow: none; }
 .canvasPanel .canvasTools button[aria-controls="pixel-ai-panel"]:focus-visible { outline-color: var(--pf-ai); }
+.modeTabs{margin:0 18px 14px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:4px;border:1px solid var(--pf-border);border-radius:14px;background:var(--pf-input)}
+.modeTabs button{min-height:40px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--pf-secondary);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:color .2s,background-color .2s,border-color .2s}
+.modeTabs button:hover{color:var(--pf-headline);background:var(--pf-elevated)}
+.modeTabs .modeActive{color:var(--pf-headline);border-color:var(--pf-selected-border);background:var(--pf-selected)}
+.modeTabs small{margin-left:5px;color:var(--pf-brand);font-size:9px;font-weight:600}
+.modeTabs button:focus-visible{outline:2px solid var(--pf-action);outline-offset:2px}
+.referenceButtons{display:flex;align-items:center;gap:6px}
+.changeReference{height:30px;padding:0 9px;border:1px solid var(--pf-border);border-radius:8px;background:var(--pf-elevated);color:var(--pf-primary);font-size:10px;cursor:pointer}
+.changeReference:hover{border-color:var(--pf-border-hover)}
+@media(prefers-reduced-motion:reduce){.modeTabs button{transition:none}}
 @media(prefers-reduced-motion:reduce){.pixelAiTrigger, .aiPrimaryAction, .aiSecondaryAction, .aiChatInput, .aiSendButton { transition: none; }.pixelAiTrigger:hover { transform: none; }}

@@ -25,6 +25,8 @@ interface ProductFormProps {
   showQuantity?: boolean
   highlightProduct?: boolean
   compact?: boolean
+  referenceOnly?: boolean
+  onUploadStateChange?: (uploading: boolean) => void
 }
 
 export default function ProductForm({
@@ -46,6 +48,8 @@ export default function ProductForm({
   showQuantity = true,
   highlightProduct = false,
   compact = false,
+  referenceOnly = false,
+  onUploadStateChange,
 }: ProductFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
@@ -61,7 +65,7 @@ export default function ProductForm({
     }
 
     // Validar tipo de archivo
-    if (!file.type.startsWith("image/")) {
+    if (referenceOnly ? !["image/jpeg", "image/png", "image/webp"].includes(file.type) : !file.type.startsWith("image/")) {
       toast.error("Formato inválido", {
         description: "Solo se permiten imágenes (PNG, JPG, WEBP)",
       })
@@ -69,6 +73,7 @@ export default function ProductForm({
     }
 
     setUploading(true)
+    onUploadStateChange?.(true)
     const formData = new FormData()
     formData.append("file", file)
 
@@ -113,6 +118,7 @@ export default function ProductForm({
       })
     } finally {
       setUploading(false)
+      onUploadStateChange?.(false)
       if (fileInputRef.current) {
         fileInputRef.current.value = ""
       }
@@ -137,6 +143,7 @@ export default function ProductForm({
     if (!nombreImagenReferencia) return
 
     setUploading(true)
+    onUploadStateChange?.(true)
     try {
       const {
         data: { session },
@@ -175,11 +182,13 @@ export default function ProductForm({
       })
     } finally {
       setUploading(false)
+      onUploadStateChange?.(false)
     }
   }
 
   return (
     <div className={styles.tabContent}>
+      {!referenceOnly && <>
       {/* Producto */}
       <section className={`${styles.formCard} ${styles.productFormCard}`}>
         <div className={styles.formHeading}>
@@ -262,19 +271,20 @@ export default function ProductForm({
           <QuantitySelector cantidad={cantidad} setCantidad={setCantidad} loading={loading} />
         </section>
       )}
+      </>}
 
       {/* Imagen de referencia */}
       <section className={`${styles.formCard} ${styles.productFormCard}`}>
         <div className={styles.formHeading}>
-          <span>04</span>
-          <div><h2>Imagen de referencia</h2><p>Opcional · Ayuda a respetar producto y marca.</p></div>
+          <span>{referenceOnly ? "01" : "04"}</span>
+          <div><h2>{referenceOnly ? "Referencia visual" : "Imagen de referencia"}</h2><p>{referenceOnly ? "La imagen que ayudará a PixelFM a mantener tu producto y estilo." : "Opcional · Ayuda a respetar producto y marca."}</p></div>
         </div>
 
         <input
           type="file"
           ref={fileInputRef}
           onChange={handleUpload}
-          accept="image/*"
+          accept={referenceOnly ? "image/jpeg,image/png,image/webp" : "image/*"}
           className={styles.hiddenFileInput}
         />
 
@@ -300,17 +310,20 @@ export default function ProductForm({
                 </svg>
                 <span>Imagen lista para usar</span>
               </div>
-              <button
-                type="button"
-                onClick={handleDelete}
-                className={styles.deleteReference}
-                title="Eliminar imagen"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Eliminar
-              </button>
+              <div className={styles.referenceButtons}>
+                {referenceOnly && <button type="button" className={styles.changeReference} onClick={() => fileInputRef.current?.click()}>Cambiar</button>}
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className={styles.deleteReference}
+                  title="Eliminar imagen"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Eliminar
+                </button>
+              </div>
             </div>
           </div>
         ) : (
