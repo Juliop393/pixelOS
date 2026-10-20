@@ -35,6 +35,7 @@ export default function DashboardPage() {
   const [simplePrompt, setSimplePrompt] = useState("")
   const [simpleApproach, setSimpleApproach] = useState<SimpleImageApproach>("auto")
   const [simpleFormat, setSimpleFormat] = useState("square")
+  const [simpleQuantity, setSimpleQuantity] = useState(1)
   const [simpleReferenceUrl, setSimpleReferenceUrl] = useState<string | null>(null)
   const [simpleReferenceName, setSimpleReferenceName] = useState<string | null>(null)
   const [simpleUploading, setSimpleUploading] = useState(false)
@@ -75,17 +76,18 @@ export default function DashboardPage() {
 
   const canGenerate =
     !!g.producto.trim() && !!g.selectedAngle && !g.loading && g.credits >= g.cantidad
-  const canGenerateSimple = !!simplePrompt.trim() && !simpleUploading && !g.loading && g.credits >= 1
+  const canGenerateSimple = !!simplePrompt.trim() && !simpleUploading && !g.loading && g.credits >= simpleQuantity
   const simpleMapping = SIMPLE_IMAGE_APPROACHES.find((item) => item.id === simpleApproach) ?? SIMPLE_IMAGE_APPROACHES[0]
   const displayFormat = editorMode === "simple" ? simpleFormat : g.aspectRatio
   const displayAngle = editorMode === "simple" ? simpleMapping.angle : g.selectedAngle
-  const displayQuantity = editorMode === "simple" ? 1 : g.cantidad
+  const displayQuantity = editorMode === "simple" ? simpleQuantity : g.cantidad
   const generateSimple = () => g.handleGenerate({
     producto: simplePrompt,
     angulo: simpleMapping.angle,
     formato: simpleFormat,
     estiloVisual: simpleMapping.style,
     imagenReferencia: simpleReferenceUrl,
+    cantidad: simpleQuantity,
   })
   const generateCurrent = () => editorMode === "simple" ? generateSimple() : g.handleGenerate()
   const openPro = () => {
@@ -154,6 +156,7 @@ export default function DashboardPage() {
           prompt={simplePrompt} onPromptChange={setSimplePrompt}
           approach={simpleApproach} onApproachChange={setSimpleApproach}
           format={simpleFormat} onFormatChange={setSimpleFormat}
+          quantity={simpleQuantity} onQuantityChange={setSimpleQuantity}
           onOpenPixelAi={() => setAdvisorOpen(true)}
           onGenerate={generateSimple} loading={g.loading} canGenerate={canGenerateSimple} credits={g.credits}
         />
@@ -163,7 +166,7 @@ export default function DashboardPage() {
             phase={g.phase} result={g.result} generatedImages={g.generatedImages}
             progress={g.progress} error={g.error} aspectRatio={simpleFormat}
             selectedAngle={simpleMapping.angle} sessionHistory={g.sessionHistory}
-            showGuides={false} credits={g.credits} cantidad={1} safeZoneMeta={false}
+            showGuides={false} credits={g.credits} cantidad={simpleQuantity} safeZoneMeta={false}
             onRetry={g.handleRetry} onDownload={g.handleDownload}
             onDownloadAll={g.handleDownloadAll}
             onSelectFromGenerated={g.handleSelectFromGenerated}

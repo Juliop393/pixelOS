@@ -16,6 +16,7 @@ export type SimpleImageInput = {
   formato: string
   estiloVisual: string
   imagenReferencia: string | null
+  cantidad: number
 }
 
 export function useCreativeGenerator() {
@@ -84,7 +85,7 @@ export function useCreativeGenerator() {
     const generationFormat = simpleInput?.formato ?? aspectRatio
     const generationStyle = simpleInput?.estiloVisual ?? visualStyle
     const generationReference = simpleInput ? simpleInput.imagenReferencia : imagenReferencia
-    const generationQuantity = simpleInput ? 1 : cantidad
+    const generationQuantity = simpleInput ? simpleInput.cantidad : cantidad
     if (!generationProducto.trim() || !generationAngle) {
       toast.error("Completa los campos requeridos", {
         description: "Ingresa tu producto y selecciona un ángulo",

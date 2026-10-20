@@ -1,7 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { BadgePercent, ImagePlus, Package, Sparkles, UsersRound } from "lucide-react"
+import { BadgePercent, ImagePlus, Minus, Package, Plus, Sparkles, UsersRound } from "lucide-react"
 import PixelAiIcon from "./PixelAiIcon"
 import workspace from "./GeneratorWorkspace.module.css"
 import s from "./ImageSimple.module.css"
@@ -23,7 +23,7 @@ const FORMATS = [
 
 export default function ImageSimple({
   referenceUploader, prompt, onPromptChange, approach, onApproachChange,
-  format, onFormatChange, onOpenPixelAi, onGenerate, loading, canGenerate, credits,
+  format, onFormatChange, quantity, onQuantityChange, onOpenPixelAi, onGenerate, loading, canGenerate, credits,
 }: {
   referenceUploader: ReactNode
   prompt: string
@@ -32,6 +32,8 @@ export default function ImageSimple({
   onApproachChange: (value: SimpleImageApproach) => void
   format: string
   onFormatChange: (value: string) => void
+  quantity: number
+  onQuantityChange: (value: number) => void
   onOpenPixelAi: () => void
   onGenerate: () => void
   loading: boolean
@@ -65,15 +67,25 @@ export default function ImageSimple({
 
     <section className={`${workspace.formCard} ${s.card} ${s.formatCard}`} aria-labelledby="simple-image-format-title">
       <div className={workspace.formHeading}><span>04</span><div><h2 id="simple-image-format-title">Formato</h2><p>Elige la proporción de tu imagen.</p></div></div>
-      <div className={s.formats}>
-        {FORMATS.map(({ id, label }) => <button key={id} type="button" className={format === id ? s.selected : ""} aria-pressed={format === id} onClick={() => onFormatChange(id)}>{label}</button>)}
+      <div className={s.formatControls}>
+        <div className={s.formats} aria-label="Formato de imagen">
+          {FORMATS.map(({ id, label }) => <button key={id} type="button" className={format === id ? s.selected : ""} aria-pressed={format === id} onClick={() => onFormatChange(id)}>{label}</button>)}
+        </div>
+        <div className={s.quantity} role="group" aria-label="Cantidad de imágenes">
+          <span>Cantidad</span>
+          <div className={s.quantityStepper}>
+            <button type="button" aria-label="Reducir cantidad de imágenes" onClick={() => onQuantityChange(Math.max(1, quantity - 1))} disabled={loading || quantity <= 1}><Minus aria-hidden="true" /></button>
+            <output aria-live="polite">{quantity}</output>
+            <button type="button" aria-label="Aumentar cantidad de imágenes" onClick={() => onQuantityChange(Math.min(10, quantity + 1))} disabled={loading || quantity >= 10}><Plus aria-hidden="true" /></button>
+          </div>
+        </div>
       </div>
     </section>
 
     <div className={s.createArea}>
-      <button type="button" className={workspace.generateButton} onClick={onGenerate} disabled={!canGenerate}><ImagePlus aria-hidden="true" />{loading ? "Generando imagen…" : "Generar imagen"}<b>→</b></button>
+      <button type="button" className={workspace.generateButton} onClick={onGenerate} disabled={!canGenerate}><ImagePlus aria-hidden="true" />{loading ? `Generando ${quantity} ${quantity === 1 ? "imagen" : "imágenes"}…` : `Generar ${quantity} ${quantity === 1 ? "imagen" : "imágenes"}`}<b>→</b></button>
       <p>PixelFM preparará la estrategia y composición a partir de tu idea.</p>
-      <small>1 crédito por imagen · {credits} disponible{credits === 1 ? "" : "s"}</small>
+      <small>{quantity} crédito{quantity === 1 ? "" : "s"} necesarios · {credits} disponible{credits === 1 ? "" : "s"}</small>
     </div>
       </div>
     </div>
