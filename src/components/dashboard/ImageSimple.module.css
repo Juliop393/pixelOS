@@ -28,7 +28,7 @@
 @media(prefers-reduced-motion:reduce){.approaches button,.formats button{transition:none}}
 
 /* Modo Simple has its own document-flow workspace, separate from the Pro split view. */
-.simpleWorkspace{width:min(100%,1320px);margin:18px auto 0;position:relative;z-index:2}
+.simpleWorkspace{width:min(100%,1600px);margin:18px auto 0;position:relative;z-index:2}
 .simple{width:100%;padding:clamp(24px,2.5vw,34px);border:1px solid var(--pf-border);border-radius:24px;background:radial-gradient(circle at 86% 0,rgba(199,93,57,.07),transparent 34%),linear-gradient(145deg,var(--pf-card),var(--pf-panel) 70%);box-shadow:0 28px 74px rgba(0,0,0,.3),var(--pf-highlight);color:var(--pf-primary)}
 .hero{margin-bottom:24px}
 .hero>span{color:var(--pf-brand);font:11px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.17em}
