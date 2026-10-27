@@ -1,7 +1,7 @@
 "use client"
 
-import type { ReactNode } from "react"
-import { BadgePercent, ImagePlus, Minus, Package, Plus, Sparkles, UsersRound } from "lucide-react"
+import { useEffect, useRef, type ReactNode } from "react"
+import { BadgePercent, Download, ImagePlus, Maximize2, Minus, Package, Plus, Sparkles, UsersRound } from "lucide-react"
 import PixelAiIcon from "./PixelAiIcon"
 import workspace from "./GeneratorWorkspace.module.css"
 import s from "./ImageSimple.module.css"
@@ -22,10 +22,21 @@ const FORMATS = [
 ] as const
 
 export default function ImageSimple({
-  referenceUploader, prompt, onPromptChange, approach, onApproachChange,
+  referenceUploader, phase, result, generatedImages, error, showReference,
+  onSelectResult, onDownload, onDownloadAll, onChangeReference,
+  prompt, onPromptChange, approach, onApproachChange,
   format, onFormatChange, quantity, onQuantityChange, onOpenPixelAi, onGenerate, loading, canGenerate, credits,
 }: {
   referenceUploader: ReactNode
+  phase: "select" | "loading" | "result" | "error"
+  result: { imageUrl: string; copy: string; angle: string } | null
+  generatedImages: Array<{ imageUrl: string; angle: string }>
+  error: string | null
+  showReference: boolean
+  onSelectResult: (image: { imageUrl: string; angle: string }) => void
+  onDownload: () => void
+  onDownloadAll: () => void
+  onChangeReference: () => void
   prompt: string
   onPromptChange: (value: string) => void
   approach: SimpleImageApproach
@@ -40,6 +51,15 @@ export default function ImageSimple({
   canGenerate: boolean
   credits: number
 }) {
+  const resultPanelRef = useRef<HTMLElement>(null)
+  const activeIndex = Math.max(0, generatedImages.findIndex((image) => image.imageUrl === result?.imageUrl))
+  const activeImage = generatedImages[activeIndex]
+  const showResultPanel = phase === "loading" || (!showReference && (phase === "error" || (phase === "result" && !!activeImage)))
+
+  useEffect(() => {
+    if (showResultPanel) resultPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+  }, [phase, showResultPanel])
+
   return <div className={s.simple}>
     <header className={s.hero}>
       <span>IMAGEN · MODO SIMPLE</span>
@@ -47,7 +67,30 @@ export default function ImageSimple({
       <p>Cuéntanos qué quieres crear y PixelFM preparará el resto.</p>
     </header>
     <div className={s.layout}>
-      <div className={s.referenceColumn}>{referenceUploader}</div>
+      <div className={s.referenceColumn}>{showResultPanel ?
+        <section ref={resultPanelRef} className={`${workspace.formCard} ${s.inlineResult}`} aria-label={phase === "result" ? "Resultado de imagen" : "Estado de generación"}>
+          <div className={workspace.formHeading}><span>01</span><div><h2>{phase === "result" ? "Tu imagen" : "Referencia visual"}</h2><p>{phase === "result" ? "Tu creativo está listo en este espacio." : "La imagen que ayudará a PixelFM a mantener tu producto y estilo."}</p></div></div>
+          <div className={s.inlineStage} aria-live={phase === "loading" ? "polite" : undefined}>
+            {phase === "loading" && <div className={s.inlineMessage} role="status"><span className={s.loadingIcon}><Sparkles aria-hidden="true" /></span><b>Generando tu creativo...</b><p>PixelFM está preparando tu imagen.</p></div>}
+            {phase === "error" && <div className={s.inlineMessage} role="alert"><span className={s.errorIcon}>!</span><b>No se pudo generar la imagen</b><p>{error || "Intenta de nuevo."}</p></div>}
+            {phase === "result" && activeImage && <img className={s.generatedImage} src={activeImage.imageUrl} alt={`Creativo generado ${activeIndex + 1}`} />}
+          </div>
+          {phase === "result" && activeImage && <>
+            {generatedImages.length > 1 && <div className={s.resultThumbnails} aria-label="Resultados generados">
+              {generatedImages.map((image, index) => <button key={`${image.imageUrl}-${index}`} type="button" className={index === activeIndex ? s.activeThumbnail : ""} aria-label={`Ver creativo ${index + 1}`} aria-pressed={index === activeIndex} onClick={() => onSelectResult(image)}><img src={image.imageUrl} alt="" /><span>{index + 1}</span></button>)}
+            </div>}
+            <div className={s.resultActions}>
+              <span>Resultado {activeIndex + 1} de {generatedImages.length}</span>
+              <div>
+                <a href={activeImage.imageUrl} target="_blank" rel="noreferrer"><Maximize2 aria-hidden="true" />Ampliar</a>
+                <button type="button" onClick={onDownload}><Download aria-hidden="true" />Descargar</button>
+                {generatedImages.length > 1 && <button type="button" onClick={onDownloadAll}>Descargar todas</button>}
+                <button type="button" onClick={onChangeReference}>Cambiar referencia</button>
+              </div>
+            </div>
+          </>}
+          {phase === "error" && <button type="button" className={s.changeAfterError} onClick={onChangeReference}>Cambiar referencia</button>}
+        </section> : referenceUploader}</div>
       <div className={s.decisions}>
 
     <section className={`${workspace.formCard} ${s.card}`} aria-labelledby="simple-image-prompt-title">

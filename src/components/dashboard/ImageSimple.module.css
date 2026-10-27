@@ -73,8 +73,27 @@
 .createArea button{min-height:52px;font-size:15px}
 .createArea button svg{width:19px;height:19px}
 .createArea p,.createArea small{font-size:12px}
-.simpleResult{margin-top:20px}
-.simpleWorkspace .simpleResult{min-height:0}
+.inlineResult{margin:0;min-height:405px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.inlineResult>div:first-child{margin:0}
+.inlineStage{height:clamp(300px,26vw,360px);min-height:300px;border:1px solid var(--pf-border);border-radius:14px;display:grid;place-items:center;overflow:hidden;background:var(--pf-panel)}
+.referenceColumn .generatedImage{display:block;width:100%;height:100%;object-fit:contain}
+.inlineMessage{padding:24px;text-align:center;color:var(--pf-primary)}
+.inlineMessage>b{display:block;margin-top:14px;color:var(--pf-headline);font-size:17px}
+.inlineMessage p{margin:7px 0 0;color:var(--pf-secondary);font-size:13px}
+.loadingIcon,.errorIcon{width:46px;height:46px;border:1px solid var(--pf-selected-border);border-radius:14px;display:grid;place-items:center;margin:auto;background:var(--pf-selected);color:var(--pf-brand);font-size:23px}
+.loadingIcon svg{width:23px;height:23px;animation:resultGlow 1.8s ease-in-out infinite}
+.resultThumbnails{display:flex;gap:8px;max-width:100%;overflow-x:auto;padding:2px 1px 5px}
+.resultThumbnails button{position:relative;width:62px;height:62px;flex:0 0 62px;padding:3px;border:1px solid var(--pf-border);border-radius:10px;overflow:hidden;background:var(--pf-elevated);cursor:pointer}
+.resultThumbnails button:hover,.resultThumbnails .activeThumbnail{border-color:var(--pf-selected-border);background:var(--pf-selected)}
+.referenceColumn .resultThumbnails img{width:100%;height:100%;border-radius:6px;object-fit:cover}
+.resultThumbnails span{position:absolute;right:4px;bottom:4px;min-width:18px;padding:2px 4px;border-radius:4px;background:rgba(10,8,7,.8);color:var(--pf-headline);font-size:10px}
+.resultActions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;color:var(--pf-secondary);font-size:12px}
+.resultActions>div{display:flex;flex-wrap:wrap;gap:6px}
+.resultActions a,.resultActions button,.changeAfterError{min-height:34px;padding:6px 9px;border:1px solid var(--pf-border);border-radius:9px;display:inline-flex;align-items:center;gap:5px;background:var(--pf-elevated);color:var(--pf-primary);font-family:inherit;font-size:11px;font-weight:600;line-height:1.2;text-decoration:none;cursor:pointer}
+.resultActions a:hover,.resultActions button:hover,.changeAfterError:hover{border-color:var(--pf-border-hover);color:var(--pf-headline)}
+.resultActions svg{width:13px;height:13px}
+.changeAfterError{align-self:flex-start}
+@keyframes resultGlow{50%{opacity:.45;transform:scale(.9)}}
 .headerActions{display:flex;align-items:center;gap:10px}
 .headerModes{min-height:40px;padding:4px;border:1px solid var(--pf-border);border-radius:12px;display:flex;align-items:center;gap:3px;background:var(--pf-panel)}
 .headerModes button{min-height:31px;padding:0 14px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--pf-secondary);font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;transition:color .2s,background-color .2s,border-color .2s}
@@ -88,4 +107,4 @@
 @media(max-width:1050px){.layout{grid-template-columns:1fr}.referenceColumn [role="button"]{min-height:280px}.referenceColumn img{height:min(40vh,360px)}.hero{margin-bottom:24px}}
 @media(max-width:680px){.headerActions{position:absolute;top:50px;left:0;right:0;justify-content:space-between;gap:6px}.headerModes button{padding-inline:10px}.simpleWorkspace{margin-top:62px}.simple{padding:20px;border-radius:20px}.hero h1{font-size:36px}.layout{gap:16px}.referenceColumn>div>section,.card{padding:18px}.formatCard{align-items:stretch;flex-direction:column;gap:13px}.formatControls{justify-content:space-between;flex-wrap:wrap}.formats{flex:1 1 180px}.approaches{gap:8px}.approaches button{padding:11px;gap:9px}.approaches button>svg{width:32px;height:32px;flex-basis:32px;padding:8px}.approaches button b{font-size:12px}.referenceColumn [role="button"]{min-height:240px}}
 @media(max-width:420px){.approaches{grid-template-columns:1fr}.approaches button{min-height:70px}.headerPixelAi{padding-inline:11px}}
-@media(prefers-reduced-motion:reduce){.approaches button,.formats button,.headerModes button,.headerPixelAi{transition:none}}
+@media(prefers-reduced-motion:reduce){.approaches button,.formats button,.headerModes button,.headerPixelAi{transition:none}.loadingIcon svg{animation:none}}

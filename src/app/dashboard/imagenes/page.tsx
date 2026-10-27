@@ -36,6 +36,7 @@ export default function DashboardPage() {
   const [simpleApproach, setSimpleApproach] = useState<SimpleImageApproach>("auto")
   const [simpleFormat, setSimpleFormat] = useState("square")
   const [simpleQuantity, setSimpleQuantity] = useState(1)
+  const [showSimpleReference, setShowSimpleReference] = useState(true)
   const [simpleReferenceUrl, setSimpleReferenceUrl] = useState<string | null>(null)
   const [simpleReferenceName, setSimpleReferenceName] = useState<string | null>(null)
   const [simpleUploading, setSimpleUploading] = useState(false)
@@ -81,14 +82,17 @@ export default function DashboardPage() {
   const displayFormat = editorMode === "simple" ? simpleFormat : g.aspectRatio
   const displayAngle = editorMode === "simple" ? simpleMapping.angle : g.selectedAngle
   const displayQuantity = editorMode === "simple" ? simpleQuantity : g.cantidad
-  const generateSimple = () => g.handleGenerate({
-    producto: simplePrompt,
-    angulo: simpleMapping.angle,
-    formato: simpleFormat,
-    estiloVisual: simpleMapping.style,
-    imagenReferencia: simpleReferenceUrl,
-    cantidad: simpleQuantity,
-  })
+  const generateSimple = () => {
+    setShowSimpleReference(false)
+    return g.handleGenerate({
+      producto: simplePrompt,
+      angulo: simpleMapping.angle,
+      formato: simpleFormat,
+      estiloVisual: simpleMapping.style,
+      imagenReferencia: simpleReferenceUrl,
+      cantidad: simpleQuantity,
+    })
+  }
   const generateCurrent = () => editorMode === "simple" ? generateSimple() : g.handleGenerate()
   const openPro = () => {
     if (!g.producto.trim() && simplePrompt.trim()) {
@@ -153,6 +157,11 @@ export default function DashboardPage() {
             nombreImagenReferencia={simpleReferenceName} setNombreImagenReferencia={setSimpleReferenceName}
             showQuantity={false} referenceOnly onUploadStateChange={setSimpleUploading}
           />}
+          phase={g.phase} result={g.result} generatedImages={g.generatedImages}
+          error={g.error} showReference={showSimpleReference}
+          onSelectResult={(image) => g.handleSelectFromGenerated(image, g.result?.copy ?? "")}
+          onDownload={g.handleDownload} onDownloadAll={g.handleDownloadAll}
+          onChangeReference={() => setShowSimpleReference(true)}
           prompt={simplePrompt} onPromptChange={setSimplePrompt}
           approach={simpleApproach} onApproachChange={setSimpleApproach}
           format={simpleFormat} onFormatChange={setSimpleFormat}
@@ -160,19 +169,6 @@ export default function DashboardPage() {
           onOpenPixelAi={() => setAdvisorOpen(true)}
           onGenerate={generateSimple} loading={g.loading} canGenerate={canGenerateSimple} credits={g.credits}
         />
-        {g.phase !== "select" && <section className={`${s.canvasPanel} ${simpleStyles.simpleResult}`} aria-label="Resultado de imagen" data-format={FORMAT_LABELS[simpleFormat] ?? simpleFormat}>
-          <div className={s.canvasHeader}><div><span className={s.liveDot} /><div><b>{g.phase === "loading" ? "Creando tu imagen" : "Tu imagen"}</b><small>{g.phase === "loading" ? "El resultado aparecerá aquí" : "Resultado de Modo Simple"}</small></div></div></div>
-          <ResultPanel
-            phase={g.phase} result={g.result} generatedImages={g.generatedImages}
-            progress={g.progress} error={g.error} aspectRatio={simpleFormat}
-            selectedAngle={simpleMapping.angle} sessionHistory={g.sessionHistory}
-            showGuides={false} credits={g.credits} cantidad={simpleQuantity} safeZoneMeta={false}
-            onRetry={g.handleRetry} onDownload={g.handleDownload}
-            onDownloadAll={g.handleDownloadAll}
-            onSelectFromGenerated={g.handleSelectFromGenerated}
-            onSelectFromHistory={g.handleSelectFromHistory}
-          />
-        </section>}
       </main>}
 
       {editorMode === "pro" && <section className={`${s.workspace} ${s.proWorkspace}`}>
