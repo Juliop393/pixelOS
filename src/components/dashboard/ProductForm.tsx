@@ -289,7 +289,7 @@ export default function ProductForm({
         />
 
         {uploading ? (
-          <div className={styles.uploadState}>
+          <div className={styles.uploadState} data-simple-reference-frame={referenceOnly ? "upload" : undefined}>
             <svg className="animate-spin h-8 w-8 text-[#D97757]" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -297,11 +297,12 @@ export default function ProductForm({
             <span>Subiendo imagen...</span>
           </div>
         ) : imagenReferencia ? (
-          <div className={styles.referencePreview}>
+          <div className={styles.referencePreview} data-simple-reference-frame={referenceOnly ? "preview" : undefined}>
             <img
               src={imagenReferencia}
               alt="Referencia"
               className={styles.referenceImage}
+              data-simple-reference-image={referenceOnly ? "" : undefined}
             />
             <div className={styles.referenceMeta}>
               <div>
@@ -344,6 +345,7 @@ export default function ProductForm({
             }}
             onDrop={handleDrop}
             className={`${styles.uploadDrop} ${dragActive ? styles.uploadDropActive : ""}`}
+            data-simple-reference-frame={referenceOnly ? "upload" : undefined}
           >
             <div className={styles.uploadIcon}>
               <svg className="w-6 h-6 text-[#D97757]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

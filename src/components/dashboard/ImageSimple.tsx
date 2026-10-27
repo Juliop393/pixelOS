@@ -67,7 +67,7 @@ export default function ImageSimple({
       <p>Cuéntanos qué quieres crear y PixelFM preparará el resto.</p>
     </header>
     <div className={s.layout}>
-      <div className={s.referenceColumn}>{showResultPanel ?
+      <div className={s.referenceColumn} data-format={format}>{showResultPanel ?
         <section ref={resultPanelRef} className={`${workspace.formCard} ${s.inlineResult}`} aria-label={phase === "result" ? "Resultado de imagen" : "Estado de generación"}>
           <div className={workspace.formHeading}><span>01</span><div><h2>{phase === "result" ? "Tu imagen" : "Referencia visual"}</h2><p>{phase === "result" ? "Tu creativo está listo en este espacio." : "La imagen que ayudará a PixelFM a mantener tu producto y estilo."}</p></div></div>
           <div className={s.inlineStage} aria-live={phase === "loading" ? "polite" : undefined}>

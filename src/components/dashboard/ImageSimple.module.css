@@ -36,12 +36,17 @@
 .hero p{margin:0;color:var(--pf-secondary);font-size:15px;line-height:1.55}
 .layout{display:grid;grid-template-columns:minmax(300px,.8fr) minmax(0,1.2fr);gap:clamp(18px,2vw,26px);align-items:start}
 .referenceColumn,.decisions{min-width:0}
+.referenceColumn{--simple-frame-width:440px;--simple-frame-ratio:1}
+.referenceColumn[data-format="4:5"]{--simple-frame-width:400px;--simple-frame-ratio:4 / 5}
+.referenceColumn[data-format="story"]{--simple-frame-width:300px;--simple-frame-ratio:9 / 16}
 .referenceColumn>div>section{margin:0;padding:20px;display:flex;flex-direction:column}
 .referenceColumn [role="button"]{min-height:300px;flex-direction:column;justify-content:center;gap:14px;padding:20px;text-align:center}
 .referenceColumn [role="button"]>div:last-child{text-align:center}
 .referenceColumn [role="button"] p{font-size:15px}
 .referenceColumn [role="button"] small{font-size:12px}
-.referenceColumn img{height:min(38vh,350px)}
+.referenceColumn [data-simple-reference-frame="upload"],.inlineStage{width:min(100%,var(--simple-frame-width));height:auto;min-height:0;aspect-ratio:var(--simple-frame-ratio);margin-inline:auto}
+.referenceColumn [data-simple-reference-frame="preview"]{width:min(100%,var(--simple-frame-width));margin-inline:auto}
+.referenceColumn [data-simple-reference-image]{width:100%;height:auto;aspect-ratio:var(--simple-frame-ratio);object-fit:contain}
 .decisions{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-content:start}
 .card{margin:0;padding:18px 20px}
 .card>div:first-child{margin-bottom:13px}
@@ -75,7 +80,7 @@
 .createArea p,.createArea small{font-size:12px}
 .inlineResult{margin:0;min-height:405px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .inlineResult>div:first-child{margin:0}
-.inlineStage{height:clamp(300px,26vw,360px);min-height:300px;border:1px solid var(--pf-border);border-radius:14px;display:grid;place-items:center;overflow:hidden;background:var(--pf-panel)}
+.inlineStage{border:1px solid var(--pf-border);border-radius:14px;display:grid;place-items:center;overflow:hidden;background:var(--pf-panel)}
 .referenceColumn .generatedImage{display:block;width:100%;height:100%;object-fit:contain}
 .inlineMessage{padding:24px;text-align:center;color:var(--pf-primary)}
 .inlineMessage>b{display:block;margin-top:14px;color:var(--pf-headline);font-size:17px}
@@ -104,7 +109,7 @@
 .headerPixelAi:hover,.headerPixelAi[aria-expanded="true"]{border-color:var(--pf-ai);background:var(--pf-ai-active-surface);box-shadow:var(--pf-highlight),var(--pf-ai-halo)}
 .simple button:focus-visible,.headerActions button:focus-visible{outline:2px solid var(--pf-action);outline-offset:3px}
 @media(max-width:1200px){.formatCard{align-items:stretch;flex-direction:column;gap:12px}.formatControls{justify-content:space-between}.formats{flex:1 1 180px}}
-@media(max-width:1050px){.layout{grid-template-columns:1fr}.referenceColumn [role="button"]{min-height:280px}.referenceColumn img{height:min(40vh,360px)}.hero{margin-bottom:24px}}
-@media(max-width:680px){.headerActions{position:absolute;top:50px;left:0;right:0;justify-content:space-between;gap:6px}.headerModes button{padding-inline:10px}.simpleWorkspace{margin-top:62px}.simple{padding:20px;border-radius:20px}.hero h1{font-size:36px}.layout{gap:16px}.referenceColumn>div>section,.card{padding:18px}.formatCard{align-items:stretch;flex-direction:column;gap:13px}.formatControls{justify-content:space-between;flex-wrap:wrap}.formats{flex:1 1 180px}.approaches{gap:8px}.approaches button{padding:11px;gap:9px}.approaches button>svg{width:32px;height:32px;flex-basis:32px;padding:8px}.approaches button b{font-size:12px}.referenceColumn [role="button"]{min-height:240px}}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}.hero{margin-bottom:24px}}
+@media(max-width:680px){.headerActions{position:absolute;top:50px;left:0;right:0;justify-content:space-between;gap:6px}.headerModes button{padding-inline:10px}.simpleWorkspace{margin-top:62px}.simple{padding:20px;border-radius:20px}.hero h1{font-size:36px}.layout{gap:16px}.referenceColumn>div>section,.card{padding:18px}.formatCard{align-items:stretch;flex-direction:column;gap:13px}.formatControls{justify-content:space-between;flex-wrap:wrap}.formats{flex:1 1 180px}.approaches{gap:8px}.approaches button{padding:11px;gap:9px}.approaches button>svg{width:32px;height:32px;flex-basis:32px;padding:8px}.approaches button b{font-size:12px}}
 @media(max-width:420px){.approaches{grid-template-columns:1fr}.approaches button{min-height:70px}.headerPixelAi{padding-inline:11px}}
 @media(prefers-reduced-motion:reduce){.approaches button,.formats button,.headerModes button,.headerPixelAi{transition:none}.loadingIcon svg{animation:none}}
