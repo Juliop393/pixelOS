@@ -94,6 +94,21 @@ function buildVideoPrompt(angle: string, hook: string, style: string): string {
   return parts.join(". ")
 }
 
+async function refundVideoCredits(userId: string): Promise<void> {
+  try {
+    const adminClient = createAdminClient()
+    const { data, error } = await adminClient.rpc("refund_credits", {
+      p_user_id: userId,
+      p_amount: VIDEO_CREDIT_COST,
+    })
+    if (error || typeof data !== "number") {
+      console.error("Video START refund_credits failed for user:", userId, error?.code ?? "unexpected result")
+    }
+  } catch {
+    console.error("Video START refund_credits exception for user:", userId)
+  }
+}
+
 export async function POST(req: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -174,6 +189,7 @@ export async function POST(req: NextRequest) {
   }
 
   let timeout: ReturnType<typeof setTimeout> | undefined
+  let startFailed = false
 
   try {
     const controller = new AbortController()
@@ -195,6 +211,7 @@ export async function POST(req: NextRequest) {
     const contentType = n8nResponse.headers.get("content-type")
 
     if (!contentType?.includes("application/json")) {
+      startFailed = true
       return NextResponse.json({ error: "Respuesta inesperada del servicio de video" }, { status: 502, headers: headersNoStore })
     }
 
@@ -224,6 +241,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    startFailed = true
     const errorMsg =
       typeof (n8nData as Record<string, unknown>)?.error === "string"
         ? (n8nData as Record<string, unknown>).error as string
@@ -233,10 +251,14 @@ export async function POST(req: NextRequest) {
 
   } catch (err: unknown) {
     if (timeout) clearTimeout(timeout)
+    startFailed = true
     const isAbort = err instanceof DOMException && err.name === "AbortError"
     return NextResponse.json(
       { success: false, error: isAbort ? "El servicio de video tardó demasiado" : "Error al conectar con el servicio de video" },
       { status: 502, headers: headersNoStore }
     )
+  } finally {
+    // Se ejecuta una sola vez y únicamente tras una reserva exitosa y un START fallido.
+    if (startFailed) await refundVideoCredits(user.id)
   }
 }
