@@ -414,7 +414,7 @@
     top: 14px;
   }
 
-  /* The two editors use a dedicated local header and the full application viewport. */
+  /* Editors keep their local navigation below the shared account topbar. */
   .shell:has(:global(#generator-root)),
   .shell:has(:global(#video-workspace)) {
     grid-template-columns: minmax(0, 1fr);
@@ -423,15 +423,19 @@
   }
 
   .shell:has(:global(#generator-root)) .sidebar,
-  .shell:has(:global(#generator-root)) .topbar,
-  .shell:has(:global(#video-workspace)) .sidebar,
-  .shell:has(:global(#video-workspace)) .topbar {
+  .shell:has(:global(#video-workspace)) .sidebar {
     display: none;
   }
 
   .shell:has(:global(#generator-root)) .shellBody,
   .shell:has(:global(#video-workspace)) .shellBody {
-    gap: 0;
+    gap: 10px;
+  }
+
+  .shell:has(:global(#generator-root)) .topbar,
+  .shell:has(:global(#video-workspace)) .topbar {
+    position: sticky;
+    top: 10px;
   }
 
   .desktopRoot:has(:global(#generator-root)) {
@@ -473,18 +477,13 @@
     color: #969089;
   }
 
-  /* Video focus mode: the editor and PixelAI become the only active surfaces. */
+  /* Video focus mode keeps the account topbar available beside PixelAI. */
   .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) .sidebar,
-  .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) .topbar {
+  .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) .sidebar {
     display: none;
-  }
-
-  .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) .shellBody {
-    gap: 0;
   }
 
   /* The video editor grows naturally and delegates vertical scrolling to the document. */

@@ -65,7 +65,8 @@ export default function Topbar() {
   const displayName = fullName || userEmail.split("@")[0] || "Usuario"
   const avatarLetter = (displayName[0] ?? "U").toUpperCase()
   const isHome = pathname === "/dashboard"
-  const usesCompactShell = isHome || pathname.startsWith("/dashboard/assets") || pathname.startsWith("/dashboard/configuracion")
+  const isEditor = pathname.startsWith("/dashboard/imagenes") || pathname.startsWith("/dashboard/videos")
+  const usesCompactShell = isHome || isEditor || pathname.startsWith("/dashboard/assets") || pathname.startsWith("/dashboard/configuracion")
   const activeSection = sectionDetails.find((section) =>
     section.path === "/dashboard" ? pathname === section.path : pathname.startsWith(section.path)
   ) ?? sectionDetails[sectionDetails.length - 1]
@@ -81,7 +82,7 @@ export default function Topbar() {
               <small>Tu espacio creativo</small>
             </span>
           </Link>
-          {!isHome && <>
+          {!isHome && !isEditor && <>
             <i className={styles.sectionDivider} aria-hidden="true" />
             <span className={styles.currentSection}>
               <b>{activeSection.title}</b>

@@ -511,6 +511,7 @@
 .completePreviewAction:disabled{border-color:var(--pf-border);background:var(--pf-elevated);color:var(--pf-tertiary);cursor:not-allowed}
 .completePreview a.completePreviewAction:hover{background:var(--pf-action);color:var(--pf-action-ink)}
 .timeline>.timelineSummary .timelineSummaryActions button:disabled{opacity:.55;cursor:not-allowed}
+.storyboardActions>small strong,.generateDock>small strong{display:inline-block;margin-bottom:4px;color:var(--pf-primary);font-size:11px;font-weight:600}
 @media(max-width:760px){.stageHeader{height:auto;min-height:72px;flex-basis:auto;padding-block:10px;gap:10px;flex-wrap:wrap}.stageHeader .previewHeaderActions{width:100%;justify-content:space-between}.completePreview{padding:24px 18px}}
 @media(max-width:680px){.completePreviewWithVideo{flex-direction:column;text-align:center}.completePreviewWithVideo>video{height:min(28dvh,210px)}.completePreviewWithVideo .completePreviewBody{align-items:center}}
 @media(max-width:420px){.previewViewSwitch button{padding-inline:7px;font-size:10px}.stageHeader .duration{padding-inline:8px}}

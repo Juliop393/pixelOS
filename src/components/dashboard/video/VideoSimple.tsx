@@ -120,6 +120,7 @@ export default function VideoSimple({
           <div className={s.createArea}>
             <p className={s.planExplainer}>Genera un solo clip a partir de tu imagen, objetivo y enfoque.</p>
             <button type="button" className={s.createButton} onClick={onCreate} disabled={!canContinue}><WandSparkles aria-hidden="true" />{generating ? "Generando tu video…" : "Crear video"}</button>
+            <p className={s.creditCost}>12 créditos por video de 6 s</p>
             <p>{generating ? "Puedes revisar tu configuración mientras se genera." : showVideo ? "Puedes crear otra versión sin perder tu configuración." : canContinue ? "El resultado aparecerá en la tarjeta izquierda." : "Añade una imagen y describe tu idea para continuar."}</p>
           </div>
         </div>

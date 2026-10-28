@@ -46,3 +46,4 @@
 .durationFixed{min-height:64px;padding:16px 20px;border:1px solid rgba(255,244,235,.085);border-radius:15px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(145deg,rgba(255,255,255,.036),rgba(255,255,255,.012))}
 .durationFixed span{color:#a99c92;font-size:13px}
 .durationFixed strong{color:#f3ebe4;font-size:16px;font-weight:630;white-space:nowrap}
+.createArea .creditCost{margin:10px 0 0;color:var(--pf-primary);font-size:12px;font-weight:600;text-align:center}
