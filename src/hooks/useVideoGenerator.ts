@@ -24,6 +24,7 @@ export function useVideoGenerator() {
   const [videoError, setVideoError] = useState<string | null>(null)
   const runIdRef = useRef(0)
   const inFlightRef = useRef(false)
+  const pendingStartRef = useRef<{ payload: string; key: string } | null>(null)
 
   useEffect(() => () => {
     runIdRef.current += 1
@@ -53,6 +54,14 @@ export function useVideoGenerator() {
     setVideoError(null)
     setVideoUrl(null)
 
+    const startPayload = { imageUrl, angle, hook, style, ...getVideoGenerationContext(context) }
+    const payloadSignature = JSON.stringify(startPayload)
+    const previousAttempt = pendingStartRef.current
+    const attempt = previousAttempt?.payload === payloadSignature
+      ? previousAttempt
+      : { payload: payloadSignature, key: crypto.randomUUID() }
+    pendingStartRef.current = attempt
+
     try {
       const {
         data: { session },
@@ -69,7 +78,7 @@ export function useVideoGenerator() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ imageUrl, angle, hook, style, ...getVideoGenerationContext(context) }),
+        body: JSON.stringify({ ...startPayload, idempotencyKey: attempt.key }),
       })
 
       const startData = await startResponse.json()
@@ -82,8 +91,12 @@ export function useVideoGenerator() {
         typeof startData.responseUrl === "string"
 
       if (!hasTrackingData) {
+        // Solo una respuesta que confirma que no hubo START permite abandonar la key.
+        if ([400, 401, 402, 409, 429].includes(startResponse.status)) pendingStartRef.current = null
         throw new Error(startData.error || "No se pudo iniciar la generación del video")
       }
+
+      pendingStartRef.current = null
 
       if (typeof startData.remainingCredits === "number" && Number.isFinite(startData.remainingCredits) && startData.remainingCredits >= 0) {
         setCredits(startData.remainingCredits)

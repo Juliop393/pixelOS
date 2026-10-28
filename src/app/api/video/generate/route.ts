@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { createHash } from "node:crypto"
 import { createClient } from "@supabase/supabase-js"
 import { createAdminClient } from "@/lib/supabase-admin"
 import { getVideoGenerationContext } from "@/lib/video-generation-payload"
@@ -113,6 +114,47 @@ async function refundVideoCredits(userId: string): Promise<void> {
   }
 }
 
+async function markVideoStartFailed(userId: string, idempotencyKey: string): Promise<void> {
+  try {
+    const { error } = await createAdminClient()
+      .from("video_start_requests")
+      .update({ status: "failed", updated_at: new Date().toISOString() })
+      .eq("user_id", userId)
+      .eq("idempotency_key", idempotencyKey)
+      .eq("status", "processing")
+    if (error) console.error("Video START idempotency failure update failed:", error.code)
+  } catch {
+    console.error("Video START idempotency failure update exception")
+  }
+}
+
+async function markVideoStartStarted(
+  userId: string,
+  idempotencyKey: string,
+  tracking: { requestId: string; statusUrl: string; responseUrl: string },
+  remainingCredits: number,
+): Promise<void> {
+  try {
+    const { error } = await createAdminClient()
+      .from("video_start_requests")
+      .update({
+        status: "started",
+        request_id: tracking.requestId,
+        status_url: tracking.statusUrl,
+        response_url: tracking.responseUrl,
+        remaining_credits: remainingCredits,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId)
+      .eq("idempotency_key", idempotencyKey)
+      .eq("status", "processing")
+    // START ya creó el job: un fallo al guardar el resultado jamás debe provocar otro Submit ni un refund.
+    if (error) console.error("Video START idempotency result update failed:", error.code)
+  } catch {
+    console.error("Video START idempotency result update exception")
+  }
+}
+
 export async function POST(req: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -131,36 +173,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Sesión inválida" }, { status: 401, headers: headersNoStore })
   }
 
-  // Limitar START de forma atómica antes de leer el payload, reservar créditos o llamar a n8n.
-  try {
-    const adminClient = createAdminClient()
-    const { data: rateStatus, error: rateError } = await adminClient.rpc("check_and_record_api_rate_limit", {
-      p_user_id: user.id,
-      p_endpoint: "video-generate",
-      p_short_limit: VIDEO_RATE_LIMIT_MAX,
-      p_short_window_seconds: VIDEO_RATE_LIMIT_WINDOW_MS / 1_000,
-      p_daily_limit: VIDEO_RATE_LIMIT_DAILY_MAX,
-    })
-
-    if (rateError) throw rateError
-
-    if (rateStatus === "short_limit" || rateStatus === "daily_limit") {
-      return NextResponse.json(
-        { success: false, error: "Demasiadas solicitudes. Intenta nuevamente en unos segundos." },
-        { status: 429, headers: rateStatus === "short_limit"
-          ? { ...headersNoStore, "Retry-After": String(VIDEO_RATE_LIMIT_WINDOW_MS / 1_000) }
-          : headersNoStore }
-      )
-    }
-
-    if (rateStatus !== "allowed") throw new Error("Unexpected rate limit result")
-  } catch {
-    return NextResponse.json(
-      { success: false, error: "No se pudo verificar el límite de solicitudes" },
-      { status: 500, headers: headersNoStore }
-    )
-  }
-
   let body: Record<string, unknown>
   try {
     body = await req.json()
@@ -170,6 +182,11 @@ export async function POST(req: NextRequest) {
 
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return NextResponse.json({ error: "Cuerpo de solicitud inválido" }, { status: 400, headers: headersNoStore })
+  }
+
+  const idempotencyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim().toLowerCase() : ""
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idempotencyKey)) {
+    return NextResponse.json({ success: false, error: "Clave de solicitud inválida" }, { status: 400, headers: headersNoStore })
   }
 
   const imageUrl = typeof body.imageUrl === "string" ? body.imageUrl.trim() : ""
@@ -201,6 +218,82 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Servicio de video no configurado" }, { status: 500, headers: headersNoStore })
   }
 
+  const startPayload = { imageUrl, prompt, angle, hook, style, ...context }
+  const payloadHash = createHash("sha256").update(JSON.stringify({ imageUrl, angle, hook, style, ...context })).digest("hex")
+  const adminClient = createAdminClient()
+  const { error: claimError } = await adminClient.from("video_start_requests").insert({
+    user_id: user.id,
+    idempotency_key: idempotencyKey,
+    payload_hash: payloadHash,
+    status: "processing",
+  })
+
+  if (claimError) {
+    if (claimError.code !== "23505") {
+      return NextResponse.json({ success: false, error: "No se pudo verificar esta solicitud" }, { status: 503, headers: headersNoStore })
+    }
+
+    const { data: existing, error: readError } = await adminClient
+      .from("video_start_requests")
+      .select("payload_hash,status,request_id,status_url,response_url,remaining_credits")
+      .eq("user_id", user.id)
+      .eq("idempotency_key", idempotencyKey)
+      .maybeSingle()
+
+    if (readError || !existing) {
+      return NextResponse.json({ success: false, error: "No se pudo consultar esta solicitud" }, { status: 503, headers: headersNoStore })
+    }
+    if (existing.payload_hash !== payloadHash) {
+      return NextResponse.json({ success: false, error: "La clave ya se utilizó para otra solicitud" }, { status: 409, headers: headersNoStore })
+    }
+    if (existing.status === "started" && existing.request_id && existing.status_url && existing.response_url) {
+      return NextResponse.json({
+        success: true,
+        status: "processing",
+        requestId: existing.request_id,
+        statusUrl: existing.status_url,
+        responseUrl: existing.response_url,
+        remainingCredits: existing.remaining_credits,
+        deduplicated: true,
+      }, { status: 200, headers: headersNoStore })
+    }
+    if (existing.status === "failed") {
+      return NextResponse.json({ success: false, status: "failed", error: "Esta solicitud ya falló. Inicia una nueva generación." }, { status: 409, headers: headersNoStore })
+    }
+    return NextResponse.json({ success: false, status: "processing", deduplicated: true, error: "Esta solicitud ya se está iniciando. Intenta consultarla de nuevo en unos segundos." }, { status: 202, headers: headersNoStore })
+  }
+
+  // Los duplicados salen arriba sin consumir una segunda cuota del límite.
+  try {
+    const { data: rateStatus, error: rateError } = await adminClient.rpc("check_and_record_api_rate_limit", {
+      p_user_id: user.id,
+      p_endpoint: "video-generate",
+      p_short_limit: VIDEO_RATE_LIMIT_MAX,
+      p_short_window_seconds: VIDEO_RATE_LIMIT_WINDOW_MS / 1_000,
+      p_daily_limit: VIDEO_RATE_LIMIT_DAILY_MAX,
+    })
+
+    if (rateError) throw rateError
+
+    if (rateStatus === "short_limit" || rateStatus === "daily_limit") {
+      await markVideoStartFailed(user.id, idempotencyKey)
+      return NextResponse.json(
+        { success: false, error: "Demasiadas solicitudes. Intenta nuevamente en unos segundos." },
+        { status: 429, headers: rateStatus === "short_limit"
+          ? { ...headersNoStore, "Retry-After": String(VIDEO_RATE_LIMIT_WINDOW_MS / 1_000) }
+          : headersNoStore }
+      )
+    }
+
+    if (rateStatus !== "allowed") throw new Error("Unexpected rate limit result")
+  } catch {
+    await markVideoStartFailed(user.id, idempotencyKey)
+    return NextResponse.json(
+      { success: false, error: "No se pudo verificar el límite de solicitudes" },
+      { status: 500, headers: headersNoStore }
+    )
+  }
+
   // Reservar antes del único START/Submit cobrable. El RPC valida el saldo de forma atómica.
   let remainingCredits: number
   try {
@@ -211,6 +304,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (reserveError || typeof reservedBalance !== "number") {
+      await markVideoStartFailed(user.id, idempotencyKey)
       return NextResponse.json(
         { success: false, error: "Créditos insuficientes", requiredCredits: VIDEO_CREDIT_COST },
         { status: 402, headers: headersNoStore }
@@ -218,6 +312,7 @@ export async function POST(req: NextRequest) {
     }
     remainingCredits = reservedBalance
   } catch {
+    await markVideoStartFailed(user.id, idempotencyKey)
     return NextResponse.json(
       { success: false, error: "Créditos insuficientes", requiredCredits: VIDEO_CREDIT_COST },
       { status: 402, headers: headersNoStore }
@@ -238,7 +333,7 @@ export async function POST(req: NextRequest) {
         "X-PixelFM-Secret": internalSecret,
       },
       // Keep the existing prompt/model behavior; Pro fields are metadata for the current START flow.
-      body: JSON.stringify({ imageUrl, prompt, angle, hook, style, ...context }),
+      body: JSON.stringify(startPayload),
       signal: controller.signal,
     })
 
@@ -265,6 +360,11 @@ export async function POST(req: NextRequest) {
 
     if (isProcessing) {
       const d = n8nData as Record<string, unknown>
+      await markVideoStartStarted(user.id, idempotencyKey, {
+        requestId: d.requestId as string,
+        statusUrl: d.statusUrl as string,
+        responseUrl: d.responseUrl as string,
+      }, remainingCredits)
       return NextResponse.json(
         {
           success: true,
@@ -296,6 +396,9 @@ export async function POST(req: NextRequest) {
     )
   } finally {
     // Se ejecuta una sola vez y únicamente tras una reserva exitosa y un START fallido.
-    if (startFailed) await refundVideoCredits(user.id)
+    if (startFailed) {
+      await refundVideoCredits(user.id)
+      await markVideoStartFailed(user.id, idempotencyKey)
+    }
   }
 }
