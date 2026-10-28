@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { createAdminClient } from "@/lib/supabase-admin"
 import { getVideoGenerationContext } from "@/lib/video-generation-payload"
 
 const ALLOWED_ANGLES = [
@@ -13,6 +14,7 @@ const ALLOWED_STYLES = [
 ]
 
 const MAX_HOOK_CHARS = 2000
+const VIDEO_CREDIT_COST = 12
 
 const N8N_VIDEO_TIMEOUT_MS = 360_000
 
@@ -148,6 +150,27 @@ export async function POST(req: NextRequest) {
   const internalSecret = (process.env.N8N_INTERNAL_SECRET ?? "").trim()
   if (!n8nVideoUrl || !internalSecret) {
     return NextResponse.json({ error: "Servicio de video no configurado" }, { status: 500, headers: headersNoStore })
+  }
+
+  // Reservar antes del único START/Submit cobrable. El RPC valida el saldo de forma atómica.
+  try {
+    const adminClient = createAdminClient()
+    const { data: remainingCredits, error: reserveError } = await adminClient.rpc("reserve_credits", {
+      p_user_id: user.id,
+      p_amount: VIDEO_CREDIT_COST,
+    })
+
+    if (reserveError || typeof remainingCredits !== "number") {
+      return NextResponse.json(
+        { success: false, error: "Créditos insuficientes", requiredCredits: VIDEO_CREDIT_COST },
+        { status: 402, headers: headersNoStore }
+      )
+    }
+  } catch {
+    return NextResponse.json(
+      { success: false, error: "Créditos insuficientes", requiredCredits: VIDEO_CREDIT_COST },
+      { status: 402, headers: headersNoStore }
+    )
   }
 
   let timeout: ReturnType<typeof setTimeout> | undefined
