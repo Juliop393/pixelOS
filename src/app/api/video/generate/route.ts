@@ -168,19 +168,21 @@ export async function POST(req: NextRequest) {
   }
 
   // Reservar antes del único START/Submit cobrable. El RPC valida el saldo de forma atómica.
+  let remainingCredits: number
   try {
     const adminClient = createAdminClient()
-    const { data: remainingCredits, error: reserveError } = await adminClient.rpc("reserve_credits", {
+    const { data: reservedBalance, error: reserveError } = await adminClient.rpc("reserve_credits", {
       p_user_id: user.id,
       p_amount: VIDEO_CREDIT_COST,
     })
 
-    if (reserveError || typeof remainingCredits !== "number") {
+    if (reserveError || typeof reservedBalance !== "number") {
       return NextResponse.json(
         { success: false, error: "Créditos insuficientes", requiredCredits: VIDEO_CREDIT_COST },
         { status: 402, headers: headersNoStore }
       )
     }
+    remainingCredits = reservedBalance
   } catch {
     return NextResponse.json(
       { success: false, error: "Créditos insuficientes", requiredCredits: VIDEO_CREDIT_COST },
@@ -236,6 +238,7 @@ export async function POST(req: NextRequest) {
           requestId: d.requestId as string,
           statusUrl: d.statusUrl as string,
           responseUrl: d.responseUrl as string,
+          remainingCredits,
         },
         { status: 200, headers: headersNoStore }
       )

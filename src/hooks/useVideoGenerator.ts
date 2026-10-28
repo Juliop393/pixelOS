@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
+import { useCredits } from "@/lib/credits-context"
 import { getVideoGenerationContext, type VideoGenerationContext } from "@/lib/video-generation-payload"
 
 export type VideoPhase = "idle" | "generating" | "generated" | "error"
@@ -17,6 +18,7 @@ const VIDEO_POLL_MAX_ATTEMPTS = 72
 const wait = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
 export function useVideoGenerator() {
+  const { setCredits } = useCredits()
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [videoPhase, setVideoPhase] = useState<VideoPhase>("idle")
   const [videoError, setVideoError] = useState<string | null>(null)
@@ -81,6 +83,10 @@ export function useVideoGenerator() {
 
       if (!hasTrackingData) {
         throw new Error(startData.error || "No se pudo iniciar la generación del video")
+      }
+
+      if (typeof startData.remainingCredits === "number" && Number.isFinite(startData.remainingCredits) && startData.remainingCredits >= 0) {
+        setCredits(startData.remainingCredits)
       }
 
       const trackingData = {
