@@ -15,6 +15,10 @@ const ALLOWED_STYLES = [
 
 const MAX_HOOK_CHARS = 2000
 const VIDEO_CREDIT_COST = 12
+const VIDEO_RATE_LIMIT_MAX = 3
+const VIDEO_RATE_LIMIT_WINDOW_MS = 60_000
+// El RPC compartido exige un límite diario; este valor evita añadir una regla diaria nueva.
+const VIDEO_RATE_LIMIT_DAILY_MAX = 2_147_483_647
 
 const N8N_VIDEO_TIMEOUT_MS = 360_000
 
@@ -125,6 +129,36 @@ export async function POST(req: NextRequest) {
   const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.slice(7))
   if (authError || !user) {
     return NextResponse.json({ error: "Sesión inválida" }, { status: 401, headers: headersNoStore })
+  }
+
+  // Limitar START de forma atómica antes de leer el payload, reservar créditos o llamar a n8n.
+  try {
+    const adminClient = createAdminClient()
+    const { data: rateStatus, error: rateError } = await adminClient.rpc("check_and_record_api_rate_limit", {
+      p_user_id: user.id,
+      p_endpoint: "video-generate",
+      p_short_limit: VIDEO_RATE_LIMIT_MAX,
+      p_short_window_seconds: VIDEO_RATE_LIMIT_WINDOW_MS / 1_000,
+      p_daily_limit: VIDEO_RATE_LIMIT_DAILY_MAX,
+    })
+
+    if (rateError) throw rateError
+
+    if (rateStatus === "short_limit" || rateStatus === "daily_limit") {
+      return NextResponse.json(
+        { success: false, error: "Demasiadas solicitudes. Intenta nuevamente en unos segundos." },
+        { status: 429, headers: rateStatus === "short_limit"
+          ? { ...headersNoStore, "Retry-After": String(VIDEO_RATE_LIMIT_WINDOW_MS / 1_000) }
+          : headersNoStore }
+      )
+    }
+
+    if (rateStatus !== "allowed") throw new Error("Unexpected rate limit result")
+  } catch {
+    return NextResponse.json(
+      { success: false, error: "No se pudo verificar el límite de solicitudes" },
+      { status: 500, headers: headersNoStore }
+    )
   }
 
   let body: Record<string, unknown>
