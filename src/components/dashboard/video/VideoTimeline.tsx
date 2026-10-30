@@ -4,11 +4,12 @@ import s from "./VideoWorkspace.module.css"
 
 const STATUS_LABEL = { pending: "Sin generar", configured: "Sin generar", generating: "Generando…", generated: "Lista", error: "Error" }
 
-export default function VideoTimeline({ chunks, pendingChanges, activeId, format, finalVideoUrl, onSelect, onAdd, onRemove, onMove, onMerge }: {
+export default function VideoTimeline({ chunks, pendingChanges, activeId, format, finalVideoUrl, canMerge, isMerging, mergeError, onSelect, onAdd, onRemove, onMove, onMerge }: {
   chunks: VideoChunk[]; pendingChanges: ReadonlySet<number>; activeId: number; format: string; finalVideoUrl: string | null
+  canMerge: boolean; isMerging: boolean; mergeError: string
   onSelect: (id: number) => void; onAdd: () => void; onRemove: (id: number) => void; onMove: (index: number, direction: -1 | 1) => void; onMerge: () => void
 }) {
-  const generatedCount = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl && !pendingChanges.has(chunk.id)).length
+  const generatedCount = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl?.startsWith("https://") && !pendingChanges.has(chunk.id)).length
   const overallStatus = chunks.some((chunk) => chunk.status === "generating")
     ? { label: "Generando", tone: "generating" }
     : chunks.some((chunk) => chunk.status === "error")
@@ -39,7 +40,7 @@ export default function VideoTimeline({ chunks, pendingChanges, activeId, format
     </div>
     <footer className={s.timelineSummary}>
       <div className={s.timelineSummaryFacts} data-status={overallStatus.tone} aria-label="Resumen de producción"><b>{getVideoDuration(chunks)} s</b><i /><span>{chunks.length} {chunks.length === 1 ? "escena" : "escenas"}</span><i /><span>{format}</span><i /><span>{overallStatus.label}</span></div>
-      {(generatedCount >= 2 || finalVideoUrl) && <div className={s.timelineSummaryActions}>{generatedCount >= 2 && <button disabled title="Disponible al conectar el ensamblado final" onClick={onMerge}><Link2 />Unir secuencia</button>}{finalVideoUrl && <a href={finalVideoUrl} download><Download />Descargar video</a>}</div>}
+      {(generatedCount >= 2 || finalVideoUrl || mergeError) && <div className={s.timelineSummaryActions}>{generatedCount >= 2 && !finalVideoUrl && <button type="button" disabled={!canMerge} onClick={onMerge}><Link2 />{isMerging ? "Uniendo..." : "Unir secuencia"}</button>}{finalVideoUrl && <a href={finalVideoUrl} download="pixelfm-final.mp4"><Download />Descargar video</a>}{mergeError && <small role="alert">{mergeError}</small>}</div>}
     </footer>
   </section>
 }

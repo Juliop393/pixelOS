@@ -81,6 +81,8 @@ export default function VideoWorkspace() {
   const generatingChunkId = useRef<number | null>(null)
   const batchRunning = useRef(false)
   const batchRunId = useRef(0)
+  const mergeRunning = useRef(false)
+  const mergeRunId = useRef(0)
   const { videoUrl, videoPhase, videoError, generateVideo } = useVideoGenerator()
   const [fileError, setFileError] = useState("")
   const [simpleFileError, setSimpleFileError] = useState("")
@@ -111,10 +113,31 @@ export default function VideoWorkspace() {
   const [strategyFeedback, setStrategyFeedback] = useState("")
   const [generateFeedback, setGenerateFeedback] = useState("")
   const [announcementProgress, setAnnouncementProgress] = useState<AnnouncementProgress | null>(null)
-  const [finalVideoUrl] = useState<string | null>(null)
+  const [finalVideoUrl, setFinalVideoUrl] = useState<string | null>(null)
+  const [finalVideoSceneSignature, setFinalVideoSceneSignature] = useState<string | null>(null)
+  const [isMerging, setIsMerging] = useState(false)
+  const [mergeError, setMergeError] = useState("")
   const [pixelAiOpen, setPixelAiOpen] = useState(false)
 
-  useEffect(() => () => { batchRunId.current += 1 }, [])
+  useEffect(() => () => { batchRunId.current += 1; mergeRunId.current += 1 }, [])
+  useEffect(() => {
+    if (!finalVideoUrl?.startsWith("blob:")) return
+    return () => URL.revokeObjectURL(finalVideoUrl)
+  }, [finalVideoUrl])
+
+  const currentFinalSceneSignature = JSON.stringify(chunks.map((chunk) => [chunk.id, chunk.videoUrl, chunk.generatedSceneSignature]))
+  const allScenesCurrent = chunks.every((chunk) => chunk.status === "generated" && hasCurrentVideo(chunk))
+  const currentFinalVideoUrl = chunks.length === 1
+    ? allScenesCurrent ? chunks[0].videoUrl ?? null : null
+    : allScenesCurrent && finalVideoSceneSignature === currentFinalSceneSignature ? finalVideoUrl : null
+  const canMerge = chunks.length > 1 && allScenesCurrent && !isMerging && !currentFinalVideoUrl
+
+  useEffect(() => {
+    if (finalVideoUrl && (!allScenesCurrent || finalVideoSceneSignature !== currentFinalSceneSignature)) {
+      setFinalVideoUrl(null)
+      setFinalVideoSceneSignature(null)
+    }
+  }, [allScenesCurrent, currentFinalSceneSignature, finalVideoSceneSignature, finalVideoUrl])
 
   const activeChunk = chunks.find((chunk) => chunk.id === activeId) ?? chunks[0]
   const activeIndex = chunks.findIndex((chunk) => chunk.id === activeId)
@@ -206,7 +229,6 @@ export default function VideoWorkspace() {
   const activeSceneConfigured = Boolean(activeSource === "upload" && activePreviewUrl?.startsWith("https://") && angle && hook && style && activeChunk && !uploading)
   const canGenerate = activeSceneConfigured && !generationInProgress && activeChunk.status !== "generating"
   const canGenerateAnnouncement = chunks.some((chunk) => !hasCurrentVideo(chunk)) && !generationInProgress
-  const generatedChunks = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl)
 
   useEffect(() => {
     setChunks((current) => current.map((chunk) => (
@@ -349,9 +371,61 @@ export default function VideoWorkspace() {
     })
   }
 
-  const mergeVideoChunks = () => {
-    if (generatedChunks.length < 2) return
-    // TODO: conectar aquí el endpoint productivo de unión de fragmentos.
+  const mergeVideoChunks = async () => {
+    if (mergeRunning.current) return
+    const scenes = chunksRef.current
+    if (scenes.length < 2 || !scenes.every((chunk) => chunk.status === "generated" && hasCurrentVideo(chunk))) {
+      setMergeError("Genera o actualiza todas las escenas antes de unir el anuncio.")
+      return
+    }
+
+    const sceneSignature = JSON.stringify(scenes.map((chunk) => [chunk.id, chunk.videoUrl, chunk.generatedSceneSignature]))
+    const urls = scenes.map((chunk) => chunk.videoUrl!)
+    const runId = ++mergeRunId.current
+    mergeRunning.current = true
+    setIsMerging(true)
+    setMergeError("")
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) throw new Error("Tu sesión expiró. Vuelve a iniciar sesión.")
+
+      const response = await fetch("/api/video/merge", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ urls }),
+      })
+      if (!response.ok) {
+        const errorData: unknown = await response.json().catch(() => null)
+        const message = typeof errorData === "object" && errorData !== null && "error" in errorData && typeof errorData.error === "string"
+          ? errorData.error : "No se pudo unir el anuncio. Inténtalo de nuevo."
+        throw new Error(message)
+      }
+
+      const blob = await response.blob()
+      if (blob.size === 0 || !blob.type.startsWith("video/mp4")) throw new Error("El servicio no devolvió un video válido.")
+      if (mergeRunId.current !== runId) return
+      const currentScenes = chunksRef.current
+      const currentSignature = JSON.stringify(currentScenes.map((chunk) => [chunk.id, chunk.videoUrl, chunk.generatedSceneSignature]))
+      if (currentSignature !== sceneSignature || !currentScenes.every((chunk) => chunk.status === "generated" && hasCurrentVideo(chunk))) {
+        setMergeError("El anuncio cambió durante la unión. Vuelve a unir las escenas vigentes.")
+        return
+      }
+
+      const objectUrl = URL.createObjectURL(blob)
+      setFinalVideoSceneSignature(sceneSignature)
+      setFinalVideoUrl(objectUrl)
+    } catch (error) {
+      if (mergeRunId.current === runId) setMergeError(error instanceof Error ? error.message : "No se pudo unir el anuncio.")
+    } finally {
+      if (mergeRunId.current === runId) {
+        mergeRunning.current = false
+        setIsMerging(false)
+      }
+    }
   }
 
   const editChunk = (id: number) => {
@@ -436,7 +510,7 @@ export default function VideoWorkspace() {
     /> : editorMode === "result" ? <VideoResult
       chunks={chunks}
       format={strategy.format}
-      finalVideoUrl={finalVideoUrl}
+      finalVideoUrl={currentFinalVideoUrl}
       pendingChanges={pendingChanges}
       onEdit={() => { setWorkspaceMode("storyboard"); setEditorMode("pro") }}
       onEditScene={(id) => { editChunk(id); setEditorMode("pro") }}
@@ -504,8 +578,8 @@ export default function VideoWorkspace() {
       <footer className={s.generateDock}><button className={activeChunk.videoUrl ? s.regenerateScene : undefined} disabled={!canGenerate} onClick={() => { void generateVideoChunk(activeChunk) }}>{activeChunk.videoUrl ? <RotateCcw /> : <WandSparkles />}{activeChunk.videoUrl ? "Regenerar escena" : "Generar escena"}</button><small><strong>12 créditos por escena de 6 s</strong><br />{activeChunk.status === "generating" ? "Generando esta escena…" : generationInProgress ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (canGenerate ? activeChunk.videoUrl ? "Puedes regenerar únicamente esta escena" : "Escena seleccionada lista para generar" : "Selecciona una fuente visual para continuar")}</small></footer>
     </aside>
     <main className={s.stagePanel}>
-      <VideoPreview previewUrl={activeSource === "upload" ? activePreviewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={getVideoDuration(chunks)} chunks={chunks} pendingChanges={pendingChanges} finalVideoUrl={finalVideoUrl} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} hasPendingChanges={pendingChanges.has(activeChunk.id)} canRegenerate={canGenerate} onRegenerate={() => { void generateVideoChunk(activeChunk) }} />
-      <VideoTimeline chunks={chunks} pendingChanges={pendingChanges} activeId={activeId} format={strategy.format} finalVideoUrl={finalVideoUrl} onSelect={selectChunk} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={mergeVideoChunks} />
+      <VideoPreview previewUrl={activeSource === "upload" ? activePreviewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={getVideoDuration(chunks)} chunks={chunks} pendingChanges={pendingChanges} finalVideoUrl={currentFinalVideoUrl} finalVideoSceneSignature={chunks.length === 1 ? currentFinalSceneSignature : finalVideoSceneSignature} isMerging={isMerging} mergeError={mergeError} onMerge={() => { void mergeVideoChunks() }} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} hasPendingChanges={pendingChanges.has(activeChunk.id)} canRegenerate={canGenerate} onRegenerate={() => { void generateVideoChunk(activeChunk) }} />
+      <VideoTimeline chunks={chunks} pendingChanges={pendingChanges} activeId={activeId} format={strategy.format} finalVideoUrl={currentFinalVideoUrl} canMerge={canMerge} isMerging={isMerging} mergeError={mergeError} onSelect={selectChunk} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={() => { void mergeVideoChunks() }} />
     </main>
     </>}
     <PixelAiDrawer open={pixelAiOpen} onOpenChange={setPixelAiOpen} focusMode videoContext />
