@@ -9,6 +9,7 @@ const N8N_MERGE_TIMEOUT_MS = 360_000
 const MAX_FINAL_VIDEO_BYTES = 100 * 1024 * 1024
 const SIGNED_URL_TTL_SECONDS = 24 * 60 * 60
 const VIDEO_BUCKET = "videos"
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const headersNoStore = { "Cache-Control": "no-store" }
 
 function isValidVideoUrl(value: unknown): value is string {
@@ -36,6 +37,15 @@ function getOwnedScenePath(value: string, supabaseOrigin: string, userId: string
   } catch {
     return null
   }
+}
+
+function getOwnedAssetPath(asset: { kind: string; storage_path: string }, userId: string): string | null {
+  if (asset.kind !== "scene" && asset.kind !== "final") return null
+  const folder = asset.kind === "scene" ? "scenes" : "finals"
+  const prefix = `${userId}/${folder}/`
+  if (!asset.storage_path.startsWith(prefix)) return null
+  const fileName = asset.storage_path.slice(prefix.length)
+  return /^[A-Za-z0-9_-]+\.mp4$/i.test(fileName) ? asset.storage_path : null
 }
 
 async function readLimitedMp4(response: Response): Promise<Buffer> {
@@ -90,14 +100,27 @@ export async function POST(req: NextRequest) {
   }
 
   if (typeof body !== "object" || body === null || Array.isArray(body) ||
-      Object.keys(body).length !== 1 || !("urls" in body)) {
+      Object.keys(body).length !== 1 || (!("urls" in body) && !("assetIds" in body))) {
     return NextResponse.json({ error: "Cuerpo de solicitud inválido" }, { status: 400, headers: headersNoStore })
   }
 
-  const { urls } = body
-  if (!Array.isArray(urls) || urls.length < MIN_MERGE_URLS || urls.length > MAX_MERGE_URLS ||
-      !urls.every(isValidVideoUrl)) {
-    return NextResponse.json({ error: "Se requieren entre 2 y 10 URLs HTTPS válidas" }, { status: 400, headers: headersNoStore })
+  let assetIds: string[] | null = null
+  let urls: string[] | null = null
+  if ("assetIds" in body) {
+    const ids = body.assetIds
+    if (!Array.isArray(ids) || ids.length < MIN_MERGE_URLS || ids.length > MAX_MERGE_URLS ||
+        !ids.every((id): id is string => typeof id === "string" && UUID_PATTERN.test(id)) ||
+        new Set(ids).size !== ids.length) {
+      return NextResponse.json({ error: "Selecciona entre 2 y 10 videos distintos" }, { status: 400, headers: headersNoStore })
+    }
+    assetIds = ids
+  } else {
+    const submittedUrls = body.urls
+    if (!Array.isArray(submittedUrls) || submittedUrls.length < MIN_MERGE_URLS || submittedUrls.length > MAX_MERGE_URLS ||
+        !submittedUrls.every(isValidVideoUrl)) {
+      return NextResponse.json({ error: "Se requieren entre 2 y 10 URLs HTTPS válidas" }, { status: 400, headers: headersNoStore })
+    }
+    urls = submittedUrls
   }
 
   const mergeWebhookUrl = process.env.N8N_VIDEO_MERGE_WEBHOOK_URL
@@ -110,25 +133,49 @@ export async function POST(req: NextRequest) {
   let mergeUrls: string[]
   try {
     admin = createAdminClient()
-    const supabaseOrigin = new URL(supabaseUrl).origin
-    const scenePaths = urls.map((url) => getOwnedScenePath(url, supabaseOrigin, user.id))
-    if (scenePaths.some((path) => path === null)) {
-      return NextResponse.json({ error: "Solo puedes unir escenas guardadas en tu biblioteca" }, { status: 403, headers: headersNoStore })
-    }
-    const ownedPaths = scenePaths as string[]
-    const uniquePaths = [...new Set(ownedPaths)]
-    const { data: ownedAssets, error: assetsError } = await admin.from("creative_assets")
-      .select("storage_path")
-      .eq("user_id", user.id)
-      .eq("media_type", "video")
-      .eq("kind", "scene")
-      .eq("bucket", VIDEO_BUCKET)
-      .in("storage_path", uniquePaths)
-    if (assetsError) {
-      return NextResponse.json({ error: "No se pudieron verificar las escenas" }, { status: 503, headers: headersNoStore })
-    }
-    if (ownedAssets?.length !== uniquePaths.length) {
-      return NextResponse.json({ error: "Una o más escenas no pertenecen a tu cuenta" }, { status: 403, headers: headersNoStore })
+    let ownedPaths: string[]
+    if (assetIds) {
+      const { data: ownedAssets, error: assetsError } = await admin.from("creative_assets")
+        .select("id,kind,storage_path")
+        .eq("user_id", user.id)
+        .eq("media_type", "video")
+        .eq("bucket", VIDEO_BUCKET)
+        .in("kind", ["scene", "final"])
+        .in("id", assetIds)
+      if (assetsError) {
+        return NextResponse.json({ error: "No se pudieron verificar los videos" }, { status: 503, headers: headersNoStore })
+      }
+      const assetsById = new Map((ownedAssets ?? []).map((asset) => [asset.id, asset]))
+      const orderedPaths = assetIds.map((id) => {
+        const asset = assetsById.get(id)
+        return asset ? getOwnedAssetPath(asset, user.id) : null
+      })
+      if (orderedPaths.some((path) => path === null)) {
+        return NextResponse.json({ error: "Uno o más videos no pertenecen a tu cuenta" }, { status: 403, headers: headersNoStore })
+      }
+      ownedPaths = orderedPaths as string[]
+    } else {
+      // Video Pro still sends signed scene URLs. Keep its existing ownership check intact.
+      const supabaseOrigin = new URL(supabaseUrl).origin
+      const scenePaths = urls!.map((url) => getOwnedScenePath(url, supabaseOrigin, user.id))
+      if (scenePaths.some((path) => path === null)) {
+        return NextResponse.json({ error: "Solo puedes unir escenas guardadas en tu biblioteca" }, { status: 403, headers: headersNoStore })
+      }
+      ownedPaths = scenePaths as string[]
+      const uniquePaths = [...new Set(ownedPaths)]
+      const { data: ownedAssets, error: assetsError } = await admin.from("creative_assets")
+        .select("storage_path")
+        .eq("user_id", user.id)
+        .eq("media_type", "video")
+        .eq("kind", "scene")
+        .eq("bucket", VIDEO_BUCKET)
+        .in("storage_path", uniquePaths)
+      if (assetsError) {
+        return NextResponse.json({ error: "No se pudieron verificar las escenas" }, { status: 503, headers: headersNoStore })
+      }
+      if (ownedAssets?.length !== uniquePaths.length) {
+        return NextResponse.json({ error: "Una o más escenas no pertenecen a tu cuenta" }, { status: 403, headers: headersNoStore })
+      }
     }
 
     // Do not forward client-provided signed URLs to n8n; mint fresh URLs for owned assets.
@@ -178,7 +225,7 @@ export async function POST(req: NextRequest) {
       bucket: VIDEO_BUCKET,
       storage_path: storagePath,
       public_url: null,
-      metadata: { sceneCount: urls.length },
+      metadata: { sceneCount: mergeUrls.length, ...(assetIds ? { sourceAssetIds: assetIds } : {}) },
     })
     if (insertError) {
       try {
