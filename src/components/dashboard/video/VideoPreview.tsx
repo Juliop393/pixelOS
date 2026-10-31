@@ -7,12 +7,12 @@ import s from "./VideoWorkspace.module.css"
 
 export default function VideoPreview(props: {
   previewUrl: string | null; activeChunk: VideoChunk; activeIndex: number; totalDuration: number; chunks: VideoChunk[]
-  pendingChanges: ReadonlySet<number>; finalVideoUrl: string | null; finalVideoSceneSignature?: string | null
+  pendingChanges: ReadonlySet<number>; finalVideoUrl: string | null; finalDownloadUrl: string | null; finalVideoSceneSignature?: string | null
   isMerging: boolean; mergeError: string; onMerge: () => void
   hookLabel?: string; angleLabel?: string; styleLabel?: string; strategyFeedback: string; onRecommend: () => void
   hasPendingChanges: boolean; canRegenerate: boolean; onRegenerate: () => void
 }) {
-  const { previewUrl, activeChunk, activeIndex, totalDuration, chunks, pendingChanges, finalVideoUrl, isMerging, mergeError, onMerge, styleLabel, hasPendingChanges, canRegenerate, onRegenerate } = props
+  const { previewUrl, activeChunk, activeIndex, totalDuration, chunks, pendingChanges, finalVideoUrl, finalDownloadUrl, isMerging, mergeError, onMerge, styleLabel, hasPendingChanges, canRegenerate, onRegenerate } = props
   const [view, setView] = useState<"scene" | "complete">("scene")
   const showComplete = view === "complete" && (chunks.length > 1 || Boolean(finalVideoUrl))
   const readyCount = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl?.startsWith("https://") && !pendingChanges.has(chunk.id)).length
@@ -48,7 +48,7 @@ export default function VideoPreview(props: {
           <p>{readyCount} de {chunks.length} escenas listas · {totalDuration} s</p>
           {validFinalVideoUrl ? <>
             {finalVideoOutdated && <small>Hay escenas nuevas o con cambios pendientes. El anuncio unido corresponde a una versión anterior.</small>}
-            {!finalVideoOutdated && <a className={s.completePreviewAction} href={validFinalVideoUrl} download="pixelfm-final.mp4"><Download />Descargar anuncio</a>}
+            {!finalVideoOutdated && finalDownloadUrl && <a className={s.completePreviewAction} href={finalDownloadUrl} download="pixelfm-final.mp4"><Download />Descargar anuncio</a>}
           </> : <>
             {pendingChanges.size > 0 ? <small>Actualiza las escenas con cambios pendientes antes de unir el anuncio.</small> : !allReady ? <small>Consulta la secuencia de abajo para ver cuáles faltan.</small> : <small>Todos los clips están vigentes.</small>}
             <button type="button" className={s.completePreviewAction} disabled={!allReady || isMerging || chunks.length < 2} onClick={onMerge}><Link2 />{isMerging ? "Uniendo..." : "Unir anuncio"}</button>

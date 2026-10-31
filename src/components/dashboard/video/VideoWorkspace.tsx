@@ -120,16 +120,15 @@ export default function VideoWorkspace() {
   const [pixelAiOpen, setPixelAiOpen] = useState(false)
 
   useEffect(() => () => { batchRunId.current += 1; mergeRunId.current += 1 }, [])
-  useEffect(() => {
-    if (!finalVideoUrl?.startsWith("blob:")) return
-    return () => URL.revokeObjectURL(finalVideoUrl)
-  }, [finalVideoUrl])
 
   const currentFinalSceneSignature = JSON.stringify(chunks.map((chunk) => [chunk.id, chunk.videoUrl, chunk.generatedSceneSignature]))
   const allScenesCurrent = chunks.every((chunk) => chunk.status === "generated" && hasCurrentVideo(chunk))
   const currentFinalVideoUrl = chunks.length === 1
     ? allScenesCurrent ? chunks[0].videoUrl ?? null : null
     : allScenesCurrent && finalVideoSceneSignature === currentFinalSceneSignature ? finalVideoUrl : null
+  const currentFinalDownloadUrl = currentFinalVideoUrl?.startsWith("https://")
+    ? (() => { const url = new URL(currentFinalVideoUrl); url.searchParams.set("download", "pixelfm-final.mp4"); return url.toString() })()
+    : currentFinalVideoUrl
   const canMerge = chunks.length > 1 && allScenesCurrent && !isMerging && !currentFinalVideoUrl
 
   useEffect(() => {
@@ -398,15 +397,17 @@ export default function VideoWorkspace() {
         },
         body: JSON.stringify({ urls }),
       })
+      const result: unknown = await response.json().catch(() => null)
       if (!response.ok) {
-        const errorData: unknown = await response.json().catch(() => null)
-        const message = typeof errorData === "object" && errorData !== null && "error" in errorData && typeof errorData.error === "string"
-          ? errorData.error : "No se pudo unir el anuncio. Inténtalo de nuevo."
+        const message = typeof result === "object" && result !== null && "error" in result && typeof result.error === "string"
+          ? result.error : "No se pudo unir el anuncio. Inténtalo de nuevo."
         throw new Error(message)
       }
-
-      const blob = await response.blob()
-      if (blob.size === 0 || !blob.type.startsWith("video/mp4")) throw new Error("El servicio no devolvió un video válido.")
+      if (typeof result !== "object" || result === null || !("success" in result) || result.success !== true ||
+          !("videoUrl" in result) || typeof result.videoUrl !== "string" || !result.videoUrl.startsWith("https://") ||
+          !("assetId" in result) || typeof result.assetId !== "string") {
+        throw new Error("El servicio no devolvió un video guardado válido.")
+      }
       if (mergeRunId.current !== runId) return
       const currentScenes = chunksRef.current
       const currentSignature = JSON.stringify(currentScenes.map((chunk) => [chunk.id, chunk.videoUrl, chunk.generatedSceneSignature]))
@@ -415,9 +416,8 @@ export default function VideoWorkspace() {
         return
       }
 
-      const objectUrl = URL.createObjectURL(blob)
       setFinalVideoSceneSignature(sceneSignature)
-      setFinalVideoUrl(objectUrl)
+      setFinalVideoUrl(result.videoUrl)
     } catch (error) {
       if (mergeRunId.current === runId) setMergeError(error instanceof Error ? error.message : "No se pudo unir el anuncio.")
     } finally {
@@ -511,6 +511,7 @@ export default function VideoWorkspace() {
       chunks={chunks}
       format={strategy.format}
       finalVideoUrl={currentFinalVideoUrl}
+      finalDownloadUrl={currentFinalDownloadUrl}
       pendingChanges={pendingChanges}
       onEdit={() => { setWorkspaceMode("storyboard"); setEditorMode("pro") }}
       onEditScene={(id) => { editChunk(id); setEditorMode("pro") }}
@@ -578,8 +579,8 @@ export default function VideoWorkspace() {
       <footer className={s.generateDock}><button className={activeChunk.videoUrl ? s.regenerateScene : undefined} disabled={!canGenerate} onClick={() => { void generateVideoChunk(activeChunk) }}>{activeChunk.videoUrl ? <RotateCcw /> : <WandSparkles />}{activeChunk.videoUrl ? "Regenerar escena" : "Generar escena"}</button><small><strong>12 créditos por escena de 6 s</strong><br />{activeChunk.status === "generating" ? "Generando esta escena…" : generationInProgress ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (canGenerate ? activeChunk.videoUrl ? "Puedes regenerar únicamente esta escena" : "Escena seleccionada lista para generar" : "Selecciona una fuente visual para continuar")}</small></footer>
     </aside>
     <main className={s.stagePanel}>
-      <VideoPreview previewUrl={activeSource === "upload" ? activePreviewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={getVideoDuration(chunks)} chunks={chunks} pendingChanges={pendingChanges} finalVideoUrl={currentFinalVideoUrl} finalVideoSceneSignature={chunks.length === 1 ? currentFinalSceneSignature : finalVideoSceneSignature} isMerging={isMerging} mergeError={mergeError} onMerge={() => { void mergeVideoChunks() }} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} hasPendingChanges={pendingChanges.has(activeChunk.id)} canRegenerate={canGenerate} onRegenerate={() => { void generateVideoChunk(activeChunk) }} />
-      <VideoTimeline chunks={chunks} pendingChanges={pendingChanges} activeId={activeId} format={strategy.format} finalVideoUrl={currentFinalVideoUrl} canMerge={canMerge} isMerging={isMerging} mergeError={mergeError} onSelect={selectChunk} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={() => { void mergeVideoChunks() }} />
+      <VideoPreview previewUrl={activeSource === "upload" ? activePreviewUrl : null} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={getVideoDuration(chunks)} chunks={chunks} pendingChanges={pendingChanges} finalVideoUrl={currentFinalVideoUrl} finalDownloadUrl={currentFinalDownloadUrl} finalVideoSceneSignature={chunks.length === 1 ? currentFinalSceneSignature : finalVideoSceneSignature} isMerging={isMerging} mergeError={mergeError} onMerge={() => { void mergeVideoChunks() }} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} hasPendingChanges={pendingChanges.has(activeChunk.id)} canRegenerate={canGenerate} onRegenerate={() => { void generateVideoChunk(activeChunk) }} />
+      <VideoTimeline chunks={chunks} pendingChanges={pendingChanges} activeId={activeId} format={strategy.format} finalVideoUrl={currentFinalVideoUrl} finalDownloadUrl={currentFinalDownloadUrl} canMerge={canMerge} isMerging={isMerging} mergeError={mergeError} onSelect={selectChunk} onAdd={addChunk} onRemove={removeChunk} onMove={moveChunk} onMerge={() => { void mergeVideoChunks() }} />
     </main>
     </>}
     <PixelAiDrawer open={pixelAiOpen} onOpenChange={setPixelAiOpen} focusMode videoContext />

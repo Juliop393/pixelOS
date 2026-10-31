@@ -22,10 +22,11 @@ const STATE_LABELS: Record<SceneState, string> = {
   changed: "Cambios pendientes",
 }
 
-export default function VideoResult({ chunks, format, finalVideoUrl, pendingChanges, onEdit, onEditScene }: {
+export default function VideoResult({ chunks, format, finalVideoUrl, finalDownloadUrl, pendingChanges, onEdit, onEditScene }: {
   chunks: VideoChunk[]
   format: string
   finalVideoUrl: string | null
+  finalDownloadUrl: string | null
   pendingChanges: ReadonlySet<number>
   onEdit: () => void
   onEditScene: (id: number) => void
@@ -39,7 +40,7 @@ export default function VideoResult({ chunks, format, finalVideoUrl, pendingChan
   const finalUrl = isVideoUrl(finalVideoUrl) ? finalVideoUrl : null
   const singleUrl = chunks.length === 1 && isVideoUrl(chunks[0].videoUrl) ? chunks[0].videoUrl : null
   const previewUrl = finalUrl ?? singleUrl
-  const downloadUrl = !hasChanges && (finalUrl ?? (allReady ? singleUrl : null))
+  const downloadUrl = !hasChanges && (finalUrl ? finalDownloadUrl : allReady ? singleUrl : null)
 
   const title = hasError ? "Una escena necesita atención"
     : generating ? "Tu anuncio se está generando"
@@ -95,7 +96,7 @@ export default function VideoResult({ chunks, format, finalVideoUrl, pendingChan
             <span><Check aria-hidden="true" />{readyCount}/{chunks.length} listas</span>
           </div>
           <div className={s.actions}>
-            {downloadUrl ? <a className={s.download} href={downloadUrl} download="pixelfm-video.mp4" target="_blank" rel="noopener noreferrer"><Download aria-hidden="true" />Descargar video</a> : <button type="button" className={s.download} disabled><Download aria-hidden="true" />Descargar video</button>}
+            {downloadUrl ? <a className={s.download} href={downloadUrl} download="pixelfm-final.mp4" target="_blank" rel="noopener noreferrer"><Download aria-hidden="true" />Descargar video</a> : <button type="button" className={s.download} disabled><Download aria-hidden="true" />Descargar video</button>}
             {!downloadUrl && <small>{downloadHelp}</small>}
             <button type="button" className={s.edit} onClick={onEdit}><ArrowLeft aria-hidden="true" />Editar anuncio</button>
           </div>
