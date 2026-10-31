@@ -1,4 +1,4 @@
-import { createVideoChunk, VIDEO_GENERATION_DURATION, type VideoChunk } from "./video-data"
+import { createVideoChunk, VIDEO_GENERATION_DURATION, type VideoChunk, type VideoReferenceSource } from "./video-data"
 
 export type SimpleDuration = "short" | "medium" | "long"
 
@@ -26,6 +26,7 @@ type PlanInput = {
   duration: SimpleDuration
   style: string
   referenceImageUrl: string
+  referenceSource: VideoReferenceSource
   referenceFileName: string
   firstId: number
 }
@@ -33,7 +34,7 @@ type PlanInput = {
 type SceneIdea = { purpose: string; action: string }
 
 /** Temporary local proposal. Replace this function's rules when a real planning service exists. */
-export function proposeVideoPlan({ goal, duration, style, referenceImageUrl, referenceFileName, firstId }: PlanInput): VideoChunk[] {
+export function proposeVideoPlan({ goal, duration, style, referenceImageUrl, referenceSource, referenceFileName, firstId }: PlanInput): VideoChunk[] {
   const cleanGoal = goal.trim().replace(/\s+/g, " ")
   const idea = (cleanGoal.length > 110 ? `${cleanGoal.slice(0, 107).trimEnd()}…` : cleanGoal).replace(/[.!?]+$/, "")
   const opening = style === "commercial"
@@ -75,7 +76,7 @@ export function proposeVideoPlan({ goal, duration, style, referenceImageUrl, ref
     ...createVideoChunk(firstId + index, purpose),
     duration: VIDEO_GENERATION_DURATION,
     status: "configured",
-    referenceSource: "upload",
+    referenceSource,
     referenceImageUrl,
     referenceFileName,
     action,

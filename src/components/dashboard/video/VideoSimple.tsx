@@ -15,13 +15,14 @@ export const SIMPLE_APPROACHES = [
 export type SimpleApproach = (typeof SIMPLE_APPROACHES)[number]["id"] | "custom"
 
 export default function VideoSimple({
-  referenceImageUrl, referenceFileName, fileError, uploading,
+  referenceImageUrl, referenceFileName, referenceSource, fileError, uploading,
   goal, onGoalChange, approach, styleLabel, onApproachChange,
-  onUpload, onClear, onIdea, onCreate,
+  onUpload, onChooseLibrary, onClear, onIdea, onCreate,
   generating, videoUrl, generationError,
 }: {
   referenceImageUrl: string | null
   referenceFileName: string
+  referenceSource: "library" | "upload"
   fileError: string
   uploading: boolean
   goal: string
@@ -30,6 +31,7 @@ export default function VideoSimple({
   styleLabel?: string
   onApproachChange: (approach: Exclude<SimpleApproach, "custom">) => void
   onUpload: (file?: File) => void
+  onChooseLibrary: () => void
   onClear: () => void
   onIdea: () => void
   onCreate: () => void
@@ -90,10 +92,11 @@ export default function VideoSimple({
           </label>}
           {(referenceImageUrl || showVideo) && <div className={s.referenceActions}>
             {showVideo && referenceImageUrl && <img className={s.referenceThumb} src={referenceImageUrl} alt="Referencia original" />}
-            <span title={referenceFileName}>{referenceImageUrl ? referenceFileName || "Imagen seleccionada" : "Sin referencia actual"}</span>
+            <span title={referenceFileName}>{referenceImageUrl ? referenceFileName || (referenceSource === "library" ? "Imagen de Mis creativos" : "Imagen seleccionada") : "Sin referencia actual"}</span>
             <label><input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(event) => { onUpload(event.target.files?.[0]); event.currentTarget.value = "" }} /><Upload aria-hidden="true" />{showVideo ? "Cambiar referencia" : "Cambiar imagen"}</label>
             {referenceImageUrl && <button type="button" onClick={onClear} aria-label="Quitar referencia visual"><Trash2 aria-hidden="true" /></button>}
           </div>}
+          <button type="button" className={s.libraryChoice} disabled={uploading || generating} onClick={onChooseLibrary}><ImagePlus aria-hidden="true" />{referenceImageUrl ? "Cambiar desde Mis creativos" : "Elegir de mi biblioteca"}</button>
           {referenceImageUrl && <p className={s.aspectHint}>El video conservará la proporción de tu imagen · Recomendado 9:16</p>}
           {fileError && <p className={s.error} role="alert">{fileError}</p>}
           {generationError && !referenceImageUrl && <p className={s.error} role="alert">{generationError}</p>}

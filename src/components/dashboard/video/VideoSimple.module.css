@@ -42,6 +42,7 @@
 .uploadZone.uploadZoneDragOver{border-color:rgba(240,156,123,.9);background-color:#201713}
 .aspectHint{margin:10px 0 0;color:#aa9d92;font-size:12px;line-height:1.5}
 .uploadZone .aspectHint{margin-top:3px;color:#aa9d92}
+.libraryChoice{width:100%;min-height:42px;margin-top:12px;padding:9px 14px;border:1px solid rgba(225,112,76,.28);border-radius:11px;display:flex;align-items:center;justify-content:center;gap:9px;background:#221c19;color:#e8dfd8;font:600 13px inherit;cursor:pointer;transition:border-color .2s,background-color .2s}.libraryChoice svg{width:17px;height:17px;color:#e58b69}.libraryChoice:hover:not(:disabled),.libraryChoice:focus-visible{border-color:#e58b69;background:#2b211c}.libraryChoice:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:620px){.videoPreview video{height:min(50vh,440px)}.referenceActions{flex-wrap:wrap}.referenceActions>span{flex-basis:calc(100% - 50px)}.referenceActions label{margin-left:auto}}
 .durationFixed{min-height:64px;padding:16px 20px;border:1px solid rgba(255,244,235,.085);border-radius:15px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(145deg,rgba(255,255,255,.036),rgba(255,255,255,.012))}
 .durationFixed span{color:#a99c92;font-size:13px}
