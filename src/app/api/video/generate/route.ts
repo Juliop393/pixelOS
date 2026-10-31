@@ -22,39 +22,51 @@ const VIDEO_RATE_LIMIT_WINDOW_MS = 60_000
 const VIDEO_RATE_LIMIT_DAILY_MAX = 2_147_483_647
 
 const N8N_VIDEO_TIMEOUT_MS = 360_000
+const VIDEO_REFERENCE_BUCKETS = new Set(["referencias", "creativos"])
 
 const headersNoStore = { "Cache-Control": "no-store" }
 
-function getSupabaseStorageDomain(): string | null {
+function getSupabaseStorageOrigin(): string | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   if (!url) return null
   try {
-    return new URL(url).hostname
+    const parsed = new URL(url)
+    return parsed.protocol === "https:" ? parsed.origin : null
   } catch {
     return null
   }
 }
 
-function isValidImageUrl(url: string): boolean {
-  if (!url || typeof url !== "string") return false
-  if (url.length > 2048) return false
+function getOwnedReferencePath(url: string, userId: string): { bucket: string; storagePath: string } | null {
+  if (!url || url.length > 2048) return null
 
   let parsed: URL
   try {
     parsed = new URL(url)
   } catch {
-    return false
+    return null
   }
 
-  if (parsed.protocol !== "https:") return false
-  if (["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(parsed.hostname)) return false
-  if (parsed.hostname.match(/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/)) return false
-  if (parsed.username || parsed.password) return false
+  if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.search || parsed.hash) return null
+  const storageOrigin = getSupabaseStorageOrigin()
+  if (!storageOrigin || parsed.origin !== storageOrigin) return null
 
-  const allowedDomain = getSupabaseStorageDomain()
-  if (allowedDomain && parsed.hostname !== allowedDomain) return false
+  let segments: string[]
+  try {
+    segments = parsed.pathname.split("/").slice(1).map((segment) => decodeURIComponent(segment))
+  } catch {
+    return null
+  }
+  if (segments.length < 7 || segments[0] !== "storage" || segments[1] !== "v1" || segments[2] !== "object" || segments[3] !== "public") return null
 
-  return true
+  const bucket = segments[4]
+  const storagePath = segments.slice(5).join("/")
+  const ownerId = segments[5]
+  const objectSegments = segments.slice(6)
+  if (!VIDEO_REFERENCE_BUCKETS.has(bucket) || ownerId !== userId) return null
+  if (objectSegments.some((segment) => !segment || segment === "." || segment === ".." || segment.includes("/") || segment.includes("\\") || segment.includes("%"))) return null
+
+  return { bucket, storagePath }
 }
 
 const ANGLE_MOTION_MAP: Record<string, string> = {
@@ -193,7 +205,7 @@ export async function POST(req: NextRequest) {
   if (!imageUrl) {
     return NextResponse.json({ error: "imageUrl es obligatorio" }, { status: 400, headers: headersNoStore })
   }
-  if (!isValidImageUrl(imageUrl)) {
+  if (!getOwnedReferencePath(imageUrl, user.id)) {
     return NextResponse.json({ error: "URL de imagen no permitida" }, { status: 400, headers: headersNoStore })
   }
 
