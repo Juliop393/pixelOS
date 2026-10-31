@@ -23,6 +23,7 @@ const N8N_TIMEOUT_MS = 90_000
 const headersNoStore = { "Cache-Control": "no-store" }
 const REFERENCE_BUCKETS = new Set(["referencias"])
 const BRAND_ASSET_BUCKETS = new Set(["brand-assets"])
+const GENERATED_IMAGE_BUCKETS = new Set(["creativos"])
 
 function getSupabaseStorageOrigin(): URL | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -83,6 +84,49 @@ function isValidStorageAssetUrl(
   }
 
   return true
+}
+
+function getGeneratedImageStoragePath(imageUrl: string, userId: string): string | null {
+  if (!isValidStorageAssetUrl(imageUrl, userId, GENERATED_IMAGE_BUCKETS)) return null
+  const parsed = new URL(imageUrl)
+  if (parsed.search || parsed.hash) return null
+  const segments = parsed.pathname.split("/").slice(1).map((segment) => decodeURIComponent(segment))
+  if (segments.length !== 7 || !segments[6].toLowerCase().endsWith(".jpg")) return null
+  return `${segments[5]}/${segments[6]}`
+}
+
+async function registerGeneratedImage(
+  userId: string,
+  imageUrl: string,
+  storagePath: string,
+  payload: Record<string, unknown>,
+): Promise<string> {
+  const admin = createAdminClient()
+  const { data, error } = await admin.from("creative_assets")
+    .insert({
+      user_id: userId,
+      media_type: "image",
+      kind: null,
+      bucket: "creativos",
+      storage_path: storagePath,
+      public_url: imageUrl,
+      title: typeof payload.producto === "string" ? payload.producto.slice(0, MAX_TITLE_CHARS) : null,
+      format: payload.formato,
+      metadata: { angle: payload.angulo, style: payload.estiloVisual },
+    })
+    .select("id")
+    .single()
+  if (!error && data) return data.id
+  if (error?.code === "23505") {
+    const { data: existing, error: readError } = await admin.from("creative_assets")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("bucket", "creativos")
+      .eq("storage_path", storagePath)
+      .maybeSingle()
+    if (!readError && existing) return existing.id
+  }
+  throw new Error(error?.code ?? "catalog_insert_failed")
 }
 
 function buildCleanPayload(body: Record<string, unknown>, userId: string): Record<string, unknown> | { error: string } {
@@ -316,12 +360,33 @@ export async function POST(req: NextRequest) {
 
     if (isSuccess) {
       const resultData = n8nData as Record<string, unknown>
+      const imageUrl = typeof resultData.imageUrl === "string" ? resultData.imageUrl : ""
+      const storagePath = imageUrl ? getGeneratedImageStoragePath(imageUrl, user.id) : null
+      if (!storagePath) {
+        return NextResponse.json(
+          { error: "El servicio no devolvió una imagen válida de tu cuenta", credits: newCredits },
+          { status: 502, headers: headersNoStore }
+        )
+      }
+
+      let assetId: string
+      try {
+        assetId = await registerGeneratedImage(user.id, imageUrl, storagePath, cleanPayload)
+      } catch (error) {
+        console.error("Image catalog registration failed:", error instanceof Error ? error.message : "unknown")
+        // n8n already generated and uploaded the image; never refund or rerun it here.
+        return NextResponse.json(
+          { error: "La imagen se generó, pero no se pudo registrar en Mis creativos", credits: newCredits },
+          { status: 502, headers: headersNoStore }
+        )
+      }
       return NextResponse.json(
         {
           success: true,
-          imageUrl: typeof resultData.imageUrl === "string" ? resultData.imageUrl : null,
+          imageUrl,
           copy: typeof resultData.copy === "string" ? resultData.copy : null,
           credits: newCredits,
+          assetId,
         },
         { status: 200, headers: headersNoStore }
       )
