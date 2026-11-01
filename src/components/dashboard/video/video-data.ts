@@ -1,11 +1,14 @@
 export type VideoOption = { id: string; label: string; description: string; icon: string; swatch?: string }
 export type VideoChunkStatus = "pending" | "configured" | "generating" | "generated" | "error"
 export type VideoReferenceSource = "library" | "upload"
+export type VideoClipSource = "generated" | "library"
 export type VideoChunk = {
   id: number
   purpose: string
   duration: number
   status: VideoChunkStatus
+  videoSource: VideoClipSource
+  assetId?: string
   referenceSource: VideoReferenceSource
   referenceImageUrl?: string
   referenceFileName: string
@@ -30,12 +33,12 @@ export const VIDEO_SCENE_ROLES = ["Hook / apertura", "Problema", "Producto / dem
 /** Preserve previous scene direction without keeping a second editable action field. */
 export function migrateVideoChunk(chunk: VideoChunk & { sceneDirection?: string }): VideoChunk {
   const { sceneDirection, ...scene } = chunk
-  return { ...scene, action: scene.action || sceneDirection || "" }
+  return { ...scene, videoSource: scene.videoSource ?? "generated", action: scene.action || sceneDirection || "" }
 }
 
 export function createVideoChunk(id: number, purpose = "Personalizada"): VideoChunk {
   return {
-    id, purpose, duration: VIDEO_GENERATION_DURATION, status: "pending",
+    id, purpose, duration: VIDEO_GENERATION_DURATION, status: "pending", videoSource: "generated",
     referenceSource: "library", referenceFileName: "", referenceDescription: "",
     action: "", camera: "", dialogue: "", sceneStyle: "",
   }
@@ -48,7 +51,9 @@ export const getVideoSceneSignature = (chunk: VideoChunk) => JSON.stringify([
   chunk.sceneStyle, chunk.duration,
 ])
 export const hasPendingVideoSceneChanges = (chunk: VideoChunk) =>
-  Boolean(chunk.videoUrl?.startsWith("https://") && chunk.generatedSceneSignature && chunk.generatedSceneSignature !== getVideoSceneSignature(chunk))
+  chunk.videoSource !== "library" && Boolean(chunk.videoUrl?.startsWith("https://") && chunk.generatedSceneSignature && chunk.generatedSceneSignature !== getVideoSceneSignature(chunk))
+export const isVideoChunkReady = (chunk: VideoChunk) =>
+  chunk.status === "generated" && Boolean(chunk.assetId && chunk.videoUrl?.startsWith("https://")) && !hasPendingVideoSceneChanges(chunk)
 export const getSceneDescription = (chunk: VideoChunk) =>
   [chunk.action, chunk.referenceDescription, chunk.dialogue, chunk.camera, chunk.sceneStyle].find((value) => value.trim()) || "Escena sin configurar"
 

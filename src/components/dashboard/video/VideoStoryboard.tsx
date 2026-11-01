@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ArrowRight, Clapperboard, Clock3, PencilLine, Plus, RotateCcw, SlidersHorizontal, Trash2, WandSparkles } from "lucide-react"
 import type { ReactNode } from "react"
-import { getSceneDescription, getVideoDuration, VIDEO_GENERATION_DURATION, VIDEO_MAX_SCENES, type VideoChunk } from "./video-data"
+import { getSceneDescription, getVideoDuration, isVideoChunkReady, VIDEO_GENERATION_DURATION, VIDEO_MAX_SCENES, type VideoChunk } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
 const STATUS_LABELS: Record<VideoChunk["status"], string> = {
@@ -29,6 +29,7 @@ type VideoStoryboardProps = {
   onSelect: (id: number) => void
   onEdit: (id: number) => void
   onAdd: () => void
+  onAddFromLibrary: () => void
   onRemove: (id: number) => void
   onMove: (index: number, direction: -1 | 1) => void
 }
@@ -49,13 +50,14 @@ export default function VideoStoryboard({
   onSelect,
   onEdit,
   onAdd,
+  onAddFromLibrary,
   onRemove,
   onMove,
 }: VideoStoryboardProps) {
   const totalDuration = getVideoDuration(chunks)
   const selectedChunk = chunks.find((chunk) => chunk.id === activeId)
   const anotherSceneGenerating = chunks.some((chunk) => chunk.id !== activeId && chunk.status === "generating")
-  const readyCount = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl?.startsWith("https://") && !pendingChanges.has(chunk.id)).length
+  const readyCount = chunks.filter(isVideoChunkReady).length
   const changedCount = chunks.filter((chunk) => pendingChanges.has(chunk.id) && chunk.status !== "generating").length
   const generatingCount = chunks.filter((chunk) => chunk.status === "generating").length
   const errorCount = chunks.filter((chunk) => chunk.status === "error" && !pendingChanges.has(chunk.id)).length
@@ -71,9 +73,9 @@ export default function VideoStoryboard({
         </div>
         <div className={s.storyboardActions}>
           <div className={s.storyboardDuration}><Clock3 /><span>Duración estimada</span><b>{totalDuration}s</b></div>
-          <button type="button" className={`${s.storyboardGenerate} ${selectedChunk?.videoUrl ? s.storyboardRegenerate : ""}`} disabled={!canGenerate} onClick={onGenerate}>{selectedChunk?.videoUrl ? <RotateCcw /> : <WandSparkles />}{selectedChunk?.videoUrl ? "Regenerar escena" : "Generar escena"}</button>
+          <button type="button" className={`${s.storyboardGenerate} ${selectedChunk?.videoUrl ? s.storyboardRegenerate : ""}`} disabled={!canGenerate} onClick={onGenerate}>{selectedChunk?.videoSource === "library" ? <Clapperboard /> : selectedChunk?.videoUrl ? <RotateCcw /> : <WandSparkles />}{selectedChunk?.videoSource === "library" ? "Clip de biblioteca" : selectedChunk?.videoUrl ? "Regenerar escena" : "Generar escena"}</button>
           <button type="button" className={s.storyboardAdjust} onClick={onAdjust}><SlidersHorizontal />Ajustar escenas</button>
-          <small><strong>12 créditos por escena de 6 s</strong><br />{selectedChunk?.status === "generating" ? "Generando esta escena…" : anotherSceneGenerating ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (sourceReady ? selectedChunk?.videoUrl ? "Solo se regenerará la escena seleccionada" : "Se generará la escena seleccionada" : "Añade una fuente visual a la escena seleccionada")}</small>
+          <small><strong>{selectedChunk?.videoSource === "library" ? "Video existente · sin nuevo cobro" : "12 créditos por escena de 6 s"}</strong><br />{selectedChunk?.videoSource === "library" ? "Este clip fijo ya está listo para unir." : selectedChunk?.status === "generating" ? "Generando esta escena…" : anotherSceneGenerating ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (sourceReady ? selectedChunk?.videoUrl ? "Solo se regenerará la escena seleccionada" : "Se generará la escena seleccionada" : "Añade una fuente visual a la escena seleccionada")}</small>
         </div>
       </header>
 
@@ -95,19 +97,22 @@ export default function VideoStoryboard({
               <div className={s.storyboardSceneMeta}><span>{String(index + 1).padStart(2, "0")}</span><b>{chunk.duration}s</b></div>
               <h3>{chunk.purpose}</h3>
               <p>{getSceneDescription(chunk)}</p>
-              <footer><i />{chunk.status !== "generating" && pendingChanges.has(chunk.id) ? "Cambios pendientes" : STATUS_LABELS[chunk.status]}</footer>
+              <footer><i />{chunk.videoSource === "library" ? "Biblioteca · lista" : chunk.status !== "generating" && pendingChanges.has(chunk.id) ? "Cambios pendientes" : STATUS_LABELS[chunk.status]}</footer>
             </button>
             <div className={s.storyboardSceneActions}>
-              <button type="button" className={s.storyboardEditScene} onClick={() => onEdit(chunk.id)}><PencilLine />Editar</button>
+              <button type="button" className={s.storyboardEditScene} disabled={chunk.videoSource === "library"} onClick={() => onEdit(chunk.id)}><PencilLine />{chunk.videoSource === "library" ? "Clip fijo" : "Editar"}</button>
               <span>
                 <button type="button" className={s.storyboardMovePrevious} disabled={index === 0} onClick={() => onMove(index, -1)} aria-label="Mover escena hacia el inicio"><ArrowLeft /></button>
                 <button type="button" className={s.storyboardMoveNext} disabled={index === chunks.length - 1} onClick={() => onMove(index, 1)} aria-label="Mover escena hacia el final"><ArrowRight /></button>
-                <button type="button" disabled={chunks.length === 1 || chunk.status === "generating"} onClick={() => onRemove(chunk.id)} aria-label="Eliminar escena"><Trash2 /></button>
+                <button type="button" disabled={(chunks.length === 1 && chunk.videoSource !== "library") || chunk.status === "generating"} onClick={() => onRemove(chunk.id)} aria-label="Eliminar escena"><Trash2 /></button>
               </span>
             </div>
           </article>)}
           <button type="button" className={s.storyboardAddScene} disabled={chunks.length >= VIDEO_MAX_SCENES} onClick={onAdd}>
             <i><Plus /></i><b>+ Añadir escena</b><small>{chunks.length >= VIDEO_MAX_SCENES ? `Máximo actual de ${VIDEO_MAX_SCENES} escenas alcanzado` : `Nueva escena · ${VIDEO_GENERATION_DURATION} segundos disponibles`}</small>
+          </button>
+          <button type="button" className={`${s.storyboardAddScene} ${s.storyboardAddLibrary}`} disabled={chunks.length >= VIDEO_MAX_SCENES} onClick={onAddFromLibrary}>
+            <i><Clapperboard /></i><b>Añadir desde biblioteca</b><small>Video existente · sin generar de nuevo</small>
           </button>
         </div>
       </section>

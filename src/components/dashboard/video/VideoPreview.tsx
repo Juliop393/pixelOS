@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Download, Film, Link2, RotateCcw } from "lucide-react"
-import type { VideoChunk } from "./video-data"
+import { isVideoChunkReady, type VideoChunk } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
 export default function VideoPreview(props: {
@@ -15,7 +15,7 @@ export default function VideoPreview(props: {
   const { previewUrl, activeChunk, activeIndex, totalDuration, chunks, pendingChanges, finalVideoUrl, finalDownloadUrl, isMerging, mergeError, onMerge, styleLabel, hasPendingChanges, canRegenerate, onRegenerate } = props
   const [view, setView] = useState<"scene" | "complete">("scene")
   const showComplete = view === "complete" && (chunks.length > 1 || Boolean(finalVideoUrl))
-  const readyCount = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl?.startsWith("https://") && !pendingChanges.has(chunk.id)).length
+  const readyCount = chunks.filter(isVideoChunkReady).length
   const allReady = readyCount === chunks.length && pendingChanges.size === 0
   const validFinalVideoUrl = finalVideoUrl && (finalVideoUrl.startsWith("https://") || finalVideoUrl.startsWith("blob:")) ? finalVideoUrl : null
   const currentSceneSignature = JSON.stringify(chunks.map((chunk) => [chunk.id, chunk.videoUrl, chunk.generatedSceneSignature]))

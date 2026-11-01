@@ -8,7 +8,7 @@ import { getVideoGenerationContext, type VideoGenerationContext } from "@/lib/vi
 
 export type VideoPhase = "idle" | "generating" | "generated" | "error"
 export type VideoGenerationOutcome =
-  | { status: "generated"; videoUrl: string }
+  | { status: "generated"; videoUrl: string; assetId: string }
   | { status: "error"; error: string }
   | { status: "busy" }
 
@@ -20,6 +20,7 @@ const wait = (milliseconds: number) => new Promise((resolve) => setTimeout(resol
 export function useVideoGenerator() {
   const { setCredits } = useCredits()
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [videoAssetId, setVideoAssetId] = useState<string | null>(null)
   const [videoPhase, setVideoPhase] = useState<VideoPhase>("idle")
   const [videoError, setVideoError] = useState<string | null>(null)
   const runIdRef = useRef(0)
@@ -53,6 +54,7 @@ export function useVideoGenerator() {
     setVideoPhase("generating")
     setVideoError(null)
     setVideoUrl(null)
+    setVideoAssetId(null)
 
     const startPayload = { imageUrl, angle, hook, style, ...getVideoGenerationContext(context) }
     const payloadSignature = JSON.stringify(startPayload)
@@ -128,13 +130,14 @@ export function useVideoGenerator() {
 
         if (statusData.status === "processing") continue
 
-        if (statusData.status === "completed" && typeof statusData.videoUrl === "string") {
+        if (statusData.status === "completed" && typeof statusData.videoUrl === "string" && typeof statusData.assetId === "string") {
           setVideoUrl(statusData.videoUrl)
+          setVideoAssetId(statusData.assetId)
           setVideoPhase("generated")
           toast.success("Video generado", {
             description: "Tu video está listo para descargar",
           })
-          return { status: "generated", videoUrl: statusData.videoUrl }
+          return { status: "generated", videoUrl: statusData.videoUrl, assetId: statusData.assetId }
         }
 
         if (statusData.status === "error") {
@@ -163,12 +166,14 @@ export function useVideoGenerator() {
     runIdRef.current += 1
     inFlightRef.current = false
     setVideoUrl(null)
+    setVideoAssetId(null)
     setVideoPhase("idle")
     setVideoError(null)
   }
 
   return {
     videoUrl,
+    videoAssetId,
     videoPhase,
     videoError,
     generateVideo,

@@ -1,15 +1,15 @@
 import { ArrowLeft, ArrowRight, Clapperboard, Download, Link2, Plus, Trash2 } from "lucide-react"
-import { getSceneDescription, getVideoDuration, VIDEO_GENERATION_DURATION, VIDEO_MAX_SCENES, type VideoChunk } from "./video-data"
+import { getSceneDescription, getVideoDuration, isVideoChunkReady, VIDEO_GENERATION_DURATION, VIDEO_MAX_SCENES, type VideoChunk } from "./video-data"
 import s from "./VideoWorkspace.module.css"
 
 const STATUS_LABEL = { pending: "Sin generar", configured: "Sin generar", generating: "Generando…", generated: "Lista", error: "Error" }
 
-export default function VideoTimeline({ chunks, pendingChanges, activeId, format, finalVideoUrl, finalDownloadUrl, canMerge, isMerging, mergeError, onSelect, onAdd, onRemove, onMove, onMerge }: {
+export default function VideoTimeline({ chunks, pendingChanges, activeId, format, finalVideoUrl, finalDownloadUrl, canMerge, isMerging, mergeError, onSelect, onAdd, onAddFromLibrary, onRemove, onMove, onMerge }: {
   chunks: VideoChunk[]; pendingChanges: ReadonlySet<number>; activeId: number; format: string; finalVideoUrl: string | null; finalDownloadUrl: string | null
   canMerge: boolean; isMerging: boolean; mergeError: string
-  onSelect: (id: number) => void; onAdd: () => void; onRemove: (id: number) => void; onMove: (index: number, direction: -1 | 1) => void; onMerge: () => void
+  onSelect: (id: number) => void; onAdd: () => void; onAddFromLibrary: () => void; onRemove: (id: number) => void; onMove: (index: number, direction: -1 | 1) => void; onMerge: () => void
 }) {
-  const generatedCount = chunks.filter((chunk) => chunk.status === "generated" && chunk.videoUrl?.startsWith("https://") && !pendingChanges.has(chunk.id)).length
+  const generatedCount = chunks.filter(isVideoChunkReady).length
   const overallStatus = chunks.some((chunk) => chunk.status === "generating")
     ? { label: "Generando", tone: "generating" }
     : chunks.some((chunk) => chunk.status === "error")
@@ -26,17 +26,18 @@ export default function VideoTimeline({ chunks, pendingChanges, activeId, format
     <div className={s.chunkTrack}>
       {chunks.map((chunk, index) => <div key={chunk.id} className={s.chunkItem}>
         <button className={`${s.chunkCard} ${activeId === chunk.id ? s.chunkActive : ""}`} data-status={chunk.status === "generating" ? "generating" : pendingChanges.has(chunk.id) ? "changed" : chunk.status} onClick={() => onSelect(chunk.id)}>
-          <span><i>Escena {String(index + 1).padStart(2, "0")}</i><small>{chunk.duration}s · {chunk.status !== "generating" && pendingChanges.has(chunk.id) ? "Cambios pendientes" : STATUS_LABEL[chunk.status]}</small></span>
+          <span><i>Escena {String(index + 1).padStart(2, "0")}</i><small>{chunk.duration}s · {chunk.videoSource === "library" ? "Biblioteca · lista" : chunk.status !== "generating" && pendingChanges.has(chunk.id) ? "Cambios pendientes" : STATUS_LABEL[chunk.status]}</small></span>
           <div><Clapperboard /><span><b>{chunk.purpose}</b><small>{getSceneDescription(chunk)}</small></span></div>
         </button>
         <div className={s.chunkActions}>
           <button onClick={() => onMove(index, -1)} disabled={index === 0} aria-label="Mover escena a la izquierda"><ArrowLeft /></button>
           <button onClick={() => onMove(index, 1)} disabled={index === chunks.length - 1} aria-label="Mover escena a la derecha"><ArrowRight /></button>
-          <button onClick={() => onRemove(chunk.id)} disabled={chunks.length === 1 || chunk.status === "generating"} aria-label="Eliminar escena"><Trash2 /></button>
+          <button onClick={() => onRemove(chunk.id)} disabled={(chunks.length === 1 && chunk.videoSource !== "library") || chunk.status === "generating"} aria-label="Eliminar escena"><Trash2 /></button>
         </div>
         {index < chunks.length - 1 && <span className={s.connector}>→</span>}
       </div>)}
       {chunks.length < VIDEO_MAX_SCENES && <button className={s.addChunk} onClick={onAdd}><Plus /><b>Añadir escena</b><small>+ {VIDEO_GENERATION_DURATION} s</small></button>}
+      {chunks.length < VIDEO_MAX_SCENES && <button className={`${s.addChunk} ${s.addLibraryChunk}`} onClick={onAddFromLibrary}><Clapperboard /><b>Desde biblioteca</b><small>Video ya generado</small></button>}
     </div>
     <footer className={s.timelineSummary}>
       <div className={s.timelineSummaryFacts} data-status={overallStatus.tone} aria-label="Resumen de producción"><b>{getVideoDuration(chunks)} s</b><i /><span>{chunks.length} {chunks.length === 1 ? "escena" : "escenas"}</span><i /><span>{format}</span><i /><span>{overallStatus.label}</span></div>
