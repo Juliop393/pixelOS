@@ -114,3 +114,19 @@
 @media(max-width:680px){.headerActions{position:absolute;top:50px;left:0;right:0;justify-content:space-between;gap:6px}.headerModes button{padding-inline:10px}.simpleWorkspace{margin-top:62px}.simple{padding:20px;border-radius:20px}.hero h1{font-size:36px}.layout{gap:16px}.referenceColumn>div>section,.card{padding:18px}.formatCard{align-items:stretch;flex-direction:column;gap:13px}.formatControls{justify-content:space-between;flex-wrap:wrap}.formats{flex:1 1 180px}.approaches{gap:8px}.approaches button{padding:11px;gap:9px}.approaches button>svg{width:32px;height:32px;flex-basis:32px;padding:8px}.approaches button b{font-size:12px}}
 @media(max-width:420px){.approaches{grid-template-columns:1fr}.approaches button{min-height:70px}.headerPixelAi{padding-inline:11px}}
 @media(prefers-reduced-motion:reduce){.approaches button,.formats button,.headerModes button,.headerPixelAi{transition:none}.loadingIcon svg{animation:none}}
+@media(max-width:767px){
+  .simpleWorkspace{width:100%;margin-top:10px}
+  .headerActions{position:static;width:100%;justify-content:flex-end}
+  .simple{padding:18px 14px;border-radius:18px}
+  .hero{margin-bottom:17px}
+  .hero h1{font-size:clamp(29px,8vw,36px)}
+  .layout{grid-template-columns:minmax(0,1fr);gap:14px}
+  .referenceColumn [role="button"]{min-height:230px;padding:16px}
+  .referenceColumn>div>section,.card{padding:16px}
+  .inlineResult{min-height:0;padding:15px}
+  .decisions{min-width:0}
+  .approaches{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .approaches button{min-height:80px;padding:10px}
+  .createArea>button{min-height:48px}
+}
+@media(max-width:390px){.approaches{grid-template-columns:1fr}.formatControls{gap:8px}.quantity{gap:5px}}

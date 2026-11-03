@@ -164,13 +164,13 @@ export default function VideoClipLibraryPicker({ open, excludedAssetIds, onClose
 
   if (!open) return null
 
-  return createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget && !selectingId) onClose() }}>
-    <section role="dialog" aria-modal="true" aria-labelledby="video-clip-library-title" className="flex max-h-[min(720px,90vh)] w-full max-w-[850px] flex-col overflow-hidden rounded-2xl border border-[#55443c] bg-[#181411] text-[#f3e9e0] shadow-[0_32px_100px_rgba(0,0,0,.7)]">
-      <header className="flex items-center justify-between gap-4 border-b border-[#ffffff17] px-6 py-5">
+  return createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-2 sm:p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget && !selectingId) onClose() }}>
+    <section role="dialog" aria-modal="true" aria-labelledby="video-clip-library-title" className="flex min-h-0 max-h-[calc(100dvh-16px)] w-full max-w-[850px] flex-col overflow-hidden rounded-2xl border border-[#55443c] bg-[#181411] text-[#f3e9e0] shadow-[0_32px_100px_rgba(0,0,0,.7)] sm:max-h-[min(720px,90dvh)]">
+      <header className="flex items-center justify-between gap-3 border-b border-[#ffffff17] px-4 py-3 sm:px-6 sm:py-5">
         <div><h2 id="video-clip-library-title" className="text-xl font-semibold">Añadir desde biblioteca</h2><p className="mt-1 text-sm text-[#aa9d92]">Elige un video guardado para incorporarlo a la secuencia.</p></div>
-        <button type="button" autoFocus disabled={Boolean(selectingId)} onClick={onClose} aria-label="Cerrar biblioteca" className="rounded-lg border border-[#ffffff24] p-2 text-[#d9cec5] transition hover:border-[#e58b69] hover:bg-[#2a211c] disabled:opacity-50"><X size={18} /></button>
+        <button type="button" autoFocus disabled={Boolean(selectingId)} onClick={onClose} aria-label="Cerrar biblioteca" className="shrink-0 rounded-lg border border-[#ffffff24] p-2 text-[#d9cec5] transition hover:border-[#e58b69] hover:bg-[#2a211c] disabled:opacity-50"><X size={18} /></button>
       </header>
-      <div className="min-h-48 overflow-y-auto px-6 py-6">
+      <div className="min-h-0 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
         {loading ? <p className="py-14 text-center text-sm text-[#b7aaa0]" role="status">Cargando tus videos...</p>
           : videos.length === 0 && !error ? <div className="flex flex-col items-center gap-3 py-14 text-center text-[#aa9d92]"><Film size={30} /><p>Aún no tienes videos guardados.</p></div>
             : <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">{videos.map((asset) => <button type="button" key={asset.id} disabled={Boolean(selectingId) || excludedAssetIds.has(asset.id)} onClick={() => { void chooseVideo(asset) }} className="group min-w-0 overflow-hidden rounded-xl border border-[#ffffff20] bg-[#211b18] text-left transition hover:border-[#e18862] hover:bg-[#2b211c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#e18862] disabled:cursor-not-allowed disabled:opacity-60">

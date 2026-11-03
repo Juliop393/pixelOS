@@ -531,3 +531,32 @@
 .settingsActive { color: var(--pf-action); border-color: var(--pf-selected-border); background: var(--pf-selected); }
 .navActive, .navActive:hover { background: var(--pf-action); color: var(--pf-action-ink); border-color: var(--pf-selected-border); box-shadow: var(--pf-highlight); }
 .accountArea :is(a, button):focus-visible { outline: 2px solid var(--pf-action); outline-offset: 3px; }
+
+.mobileNav { display: none; }
+
+@media (max-width: 767px) {
+  .desktopRoot { display: block; height: auto; min-height: 100dvh; overflow: visible; }
+  .shell { display: block; height: auto; min-height: 100dvh; padding: 8px; }
+  .sidebar { display: none; }
+  .shellBody { gap: 10px; overflow: visible; }
+  .content { flex: 0 0 auto; min-height: 0; overflow: visible; }
+  .topbar {
+    width: 100%; height: auto; min-height: 110px; flex: 0 0 auto;
+    padding: 9px 10px 8px; gap: 8px 4px; flex-wrap: wrap;
+    border-radius: 16px; position: sticky; top: 0;
+  }
+  .sectionContext { flex: 1 1 auto; }
+  .homeBrand { gap: 6px; }
+  .homeBrand img { width: 34px; height: 34px; flex-basis: 34px; }
+  .homeBrand b { font-size: 15px; }
+  .sectionContext small, .currentSection, .sectionDivider, .profile, .accountDivider { display: none; }
+  .accountArea { flex: 0 0 auto; gap: 5px; }
+  .credits { height: 35px; padding: 0 8px; gap: 3px; }
+  .credits b { font-size: 12px; }
+  .credits small, .recharge, .settingsLink span { display: none; }
+  .settingsLink { width: 35px; height: 35px; padding: 0; justify-content: center; }
+  .logout { padding: 7px 3px; font-size: 11px; }
+  .mobileNav { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; border-top: 1px solid var(--pf-border); padding-top: 7px; }
+  .mobileNav a { min-width: 0; min-height: 36px; padding: 4px 2px; border-radius: 8px; display: grid; place-items: center; color: var(--pf-secondary); font-size: 10px; font-weight: 600; line-height: 1.1; text-align: center; text-decoration: none; }
+  .mobileNav a:hover, .mobileNav a:focus-visible, .mobileNav .mobileNavActive { background: var(--pf-selected); color: var(--pf-headline); }
+}

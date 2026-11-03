@@ -671,3 +671,8 @@
 @media(max-width:1180px){.workspace.proWorkspace{grid-template-columns:390px minmax(0,1fr)}}
 @media(max-width:920px){.workspace.proWorkspace{display:flex}}
 @media(max-width:680px){.workspace.proWorkspace{margin-top:62px}.proWorkspace .stepTabs{margin-inline:12px;padding:4px;gap:4px}.proWorkspace .canvasPanel:not(.canvasFullscreen) .canvasStage{margin:8px;border-radius:16px}}
+
+@media(max-width:767px){
+  .generatorPage{height:auto;min-height:0;padding:8px 0 24px;overflow:visible;overscroll-behavior:auto}
+  .drawerPanel,.drawerFocusPanel{inset:8px;width:auto;max-width:none;border-radius:18px}
+}

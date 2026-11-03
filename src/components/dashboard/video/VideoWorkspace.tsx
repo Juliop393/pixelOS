@@ -7,6 +7,8 @@ import { useVideoGenerator, type VideoGenerationOutcome } from "@/hooks/useVideo
 import { supabase } from "@/lib/supabase"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
 import EditorHeader from "@/components/dashboard/EditorHeader"
+import MobileProNotice from "@/components/dashboard/MobileProNotice"
+import { useMobileViewport } from "@/hooks/useMobileViewport"
 import VideoPreview from "./VideoPreview"
 import VideoSceneField from "./VideoSceneField"
 import VideoSourcePicker from "./VideoSourcePicker"
@@ -79,6 +81,7 @@ function SectionTitle({ title, description }: { title: string; description: stri
 }
 
 export default function VideoWorkspace() {
+  const isMobile = useMobileViewport()
   const nextId = useRef(1)
   const generatingChunkId = useRef<number | null>(null)
   const batchRunning = useRef(false)
@@ -545,7 +548,7 @@ export default function VideoWorkspace() {
       aria-expanded={pixelAiOpen}
     ><PixelAiIcon /><span>PixelIA</span><i>{pixelAiOpen ? "Abierto" : "Asistente creativo"}</i></button></div>} />
     <section className={s.workspace}>
-    {editorMode === "simple" ? <VideoSimple
+    {isMobile && editorMode !== "simple" ? <MobileProNotice onBack={showSimpleMode} /> : editorMode === "simple" ? <VideoSimple
       referenceImageUrl={simpleReference.referenceImageUrl ?? null}
       referenceFileName={simpleReference.referenceFileName}
       referenceSource={simpleReference.referenceSource}

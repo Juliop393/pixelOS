@@ -1,5 +1,5 @@
 import { useRef, useState, type DragEvent } from "react"
-import { BadgePercent, Clapperboard, ImagePlus, PlaySquare, Sparkles, Trash2, Upload, UsersRound, WandSparkles } from "lucide-react"
+import { BadgePercent, Clapperboard, Download, ImagePlus, PlaySquare, Sparkles, Trash2, Upload, UsersRound, WandSparkles } from "lucide-react"
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import { VIDEO_GENERATION_DURATION } from "./video-data"
 import s from "./VideoSimple.module.css"
@@ -43,6 +43,11 @@ export default function VideoSimple({
   const [isDragOver, setIsDragOver] = useState(false)
   const canContinue = Boolean(referenceImageUrl?.startsWith("https://") && goal.trim() && !uploading && !generating)
   const showVideo = Boolean(videoUrl && !generating && !generationError)
+  const downloadUrl = showVideo && videoUrl?.startsWith("https://") ? (() => {
+    const url = new URL(videoUrl)
+    url.searchParams.set("download", "pixelfm-video.mp4")
+    return url.toString()
+  })() : null
   const handleDragEnter = (event: DragEvent<HTMLLabelElement>) => {
     event.preventDefault()
     if (uploading) return
@@ -90,6 +95,7 @@ export default function VideoSimple({
             <small>JPG, PNG o WEBP · máximo 5 MB</small>
             <small className={s.aspectHint}>El video conservará la proporción de tu imagen · Recomendado 9:16</small>
           </label>}
+          {downloadUrl && <a className={s.videoDownload} href={downloadUrl} download="pixelfm-video.mp4"><Download aria-hidden="true" />Descargar video</a>}
           {(referenceImageUrl || showVideo) && <div className={s.referenceActions}>
             {showVideo && referenceImageUrl && <img className={s.referenceThumb} src={referenceImageUrl} alt="Referencia original" />}
             <span title={referenceFileName}>{referenceImageUrl ? referenceFileName || (referenceSource === "library" ? "Imagen de Mis creativos" : "Imagen seleccionada") : "Sin referencia actual"}</span>

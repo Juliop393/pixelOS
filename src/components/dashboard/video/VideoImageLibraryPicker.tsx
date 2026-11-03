@@ -72,13 +72,13 @@ export default function VideoImageLibraryPicker({ open, onClose, onSelect }: {
 
   if (!open) return null
 
-  return createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
-    <section role="dialog" aria-modal="true" aria-labelledby="video-library-title" className="flex max-h-[min(720px,90vh)] w-full max-w-[850px] flex-col overflow-hidden rounded-2xl border border-[#55443c] bg-[#181411] text-[#f3e9e0] shadow-[0_32px_100px_rgba(0,0,0,.7)]">
-      <header className="flex items-center justify-between gap-4 border-b border-[#ffffff17] px-6 py-5">
+  return createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-2 sm:p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
+    <section role="dialog" aria-modal="true" aria-labelledby="video-library-title" className="flex min-h-0 max-h-[calc(100dvh-16px)] w-full max-w-[850px] flex-col overflow-hidden rounded-2xl border border-[#55443c] bg-[#181411] text-[#f3e9e0] shadow-[0_32px_100px_rgba(0,0,0,.7)] sm:max-h-[min(720px,90dvh)]">
+      <header className="flex items-center justify-between gap-3 border-b border-[#ffffff17] px-4 py-3 sm:px-6 sm:py-5">
         <div><h2 id="video-library-title" className="text-xl font-semibold">Elegir imagen</h2><p className="mt-1 text-sm text-[#aa9d92]">Tus imágenes de Mis creativos, listas para usar como referencia.</p></div>
-        <button type="button" autoFocus onClick={onClose} aria-label="Cerrar biblioteca" className="rounded-lg border border-[#ffffff24] p-2 text-[#d9cec5] transition hover:border-[#e58b69] hover:bg-[#2a211c]"><X size={18} /></button>
+        <button type="button" autoFocus onClick={onClose} aria-label="Cerrar biblioteca" className="shrink-0 rounded-lg border border-[#ffffff24] p-2 text-[#d9cec5] transition hover:border-[#e58b69] hover:bg-[#2a211c]"><X size={18} /></button>
       </header>
-      <div className="min-h-48 overflow-y-auto px-6 py-6">
+      <div className="min-h-0 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
         {loading ? <p className="py-14 text-center text-sm text-[#b7aaa0]" role="status">Cargando tus imágenes...</p>
           : error ? <div className="flex flex-col items-center gap-4 py-14 text-center"><p role="alert" className="text-sm text-[#e7a59d]">{error}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="inline-flex items-center gap-2 rounded-lg border border-[#a9694e] px-4 py-2 text-sm hover:bg-[#2a211c]"><RotateCw size={15} />Reintentar</button></div>
           : images.length === 0 ? <div className="flex flex-col items-center gap-3 py-14 text-center text-[#aa9d92]"><ImageIcon size={30} /><p>Aún no tienes imágenes en tu biblioteca.</p></div>

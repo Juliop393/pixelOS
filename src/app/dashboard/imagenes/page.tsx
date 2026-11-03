@@ -13,6 +13,8 @@ import ResultPanel from "@/components/dashboard/ResultPanel"
 import Accordion from "@/components/ui/Accordion"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
 import EditorHeader from "@/components/dashboard/EditorHeader"
+import MobileProNotice from "@/components/dashboard/MobileProNotice"
+import { useMobileViewport } from "@/hooks/useMobileViewport"
 import s from "@/components/dashboard/GeneratorWorkspace.module.css"
 import simpleStyles from "@/components/dashboard/ImageSimple.module.css"
 
@@ -31,6 +33,7 @@ type EditorMode = "simple" | "pro"
 
 export default function DashboardPage() {
   const g = useCreativeGenerator()
+  const isMobile = useMobileViewport()
   const [editorMode, setEditorMode] = useState<EditorMode>("simple")
   const [simplePrompt, setSimplePrompt] = useState("")
   const [simpleApproach, setSimpleApproach] = useState<SimpleImageApproach>("auto")
@@ -172,7 +175,8 @@ export default function DashboardPage() {
         />
       </main>}
 
-      {editorMode === "pro" && <section className={`${s.workspace} ${s.proWorkspace}`}>
+      {editorMode === "pro" && isMobile && <MobileProNotice onBack={() => setEditorMode("simple")} />}
+      {editorMode === "pro" && !isMobile && <section className={`${s.workspace} ${s.proWorkspace}`}>
       {/* ===== LEFT PANEL ===== */}
       <aside className={s.builderPanel}>
         <div className={s.panelIntro}>

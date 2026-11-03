@@ -520,3 +520,12 @@
 .libraryClipInfo{flex:1;min-height:150px;margin:16px 22px;padding:22px;border:1px solid var(--pf-border);border-radius:16px;background:var(--pf-elevated);color:var(--pf-primary)}.libraryClipInfo strong{font-size:15px}.libraryClipInfo p{max-width:38ch;margin:10px 0 0;color:var(--pf-secondary);font-size:12px;line-height:1.6}
 .previewMergeAction{min-height:38px;padding:0 12px;border:1px solid var(--pf-selected-border);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:7px;background:var(--pf-selected);color:var(--pf-headline);font:650 11px/1 inherit;white-space:nowrap;cursor:pointer}.previewMergeAction svg{width:15px;height:15px}.previewMergeAction:hover:not(:disabled){background:var(--pf-action);color:var(--pf-action-ink)}.previewMergeAction:disabled{border-color:var(--pf-border);background:var(--pf-elevated);color:var(--pf-tertiary);cursor:not-allowed}
 @media(min-width:761px) and (max-width:1450px){.stageHeader{height:auto;min-height:66px;flex-basis:auto;flex-wrap:wrap;gap:8px;padding-block:8px}.previewHeaderActions{flex-wrap:wrap;justify-content:flex-end}}
+
+@media(max-width:767px){
+  .page{height:auto;min-height:0;padding:8px 0 24px;overflow:visible;overscroll-behavior:auto}
+  .workspace,.page[data-workspace-mode="simple"] .workspace{width:100%;min-height:0;margin:10px auto 0;display:block}
+  .modeHeaderActions{gap:6px}
+  .pixelAiHeaderButton{min-height:39px;padding-inline:10px}
+  .pixelAiHeaderButton span{display:inline}
+  .pixelAiHeaderButton i{display:none}
+}

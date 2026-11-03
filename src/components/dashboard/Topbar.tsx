@@ -140,6 +140,17 @@ export default function Topbar() {
 
         <button onClick={handleSignOut} className={styles.logout}>Salir</button>
       </div>
+      <nav className={styles.mobileNav} aria-label="Navegación móvil">
+        {[
+          { href: "/dashboard", label: "Inicio" },
+          { href: "/dashboard/imagenes", label: "Imágenes" },
+          { href: "/dashboard/videos", label: "Video" },
+          { href: "/dashboard/assets", label: "Mis creativos" },
+        ].map(({ href, label }) => {
+          const active = href === "/dashboard" ? pathname === href : pathname.startsWith(href)
+          return <Link key={href} href={href} aria-current={active ? "page" : undefined} className={active ? styles.mobileNavActive : ""}>{label}</Link>
+        })}
+      </nav>
     </header>
   )
 }

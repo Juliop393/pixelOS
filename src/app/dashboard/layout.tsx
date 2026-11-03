@@ -1,6 +1,5 @@
 import Topbar from "@/components/dashboard/Topbar"
 import DashboardNavigation from "@/components/dashboard/DashboardNavigation"
-import MobileBlock from "@/components/dashboard/MobileBlock"
 import DashboardParticles from "@/components/dashboard/DashboardParticles"
 import { AuthGuard } from "@/components/dashboard/AuthGuard"
 import { CreditsProvider } from "@/lib/credits-context"
@@ -15,7 +14,6 @@ export default function DashboardLayout({
 }) {
   return (
     <CreditsProvider initialCredits={0}>
-      {/* Desktop */}
       <div className={styles.desktopRoot}>
         {/* Glow principal — claro cálido/champagne para luminosidad premium */}
         <div
@@ -75,8 +73,6 @@ export default function DashboardLayout({
         </AuthGuard>
       </div>
 
-      {/* Móvil */}
-      <MobileBlock />
     </CreditsProvider>
   )
 }
