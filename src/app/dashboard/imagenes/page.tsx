@@ -166,6 +166,7 @@ export default function DashboardPage() {
           approach={simpleApproach} onApproachChange={setSimpleApproach}
           format={simpleFormat} onFormatChange={setSimpleFormat}
           quantity={simpleQuantity} onQuantityChange={setSimpleQuantity}
+          applyBrandIdentity={g.applyBrandIdentity} onApplyBrandIdentityChange={g.setApplyBrandIdentity}
           onOpenPixelAi={() => setAdvisorOpen(true)}
           onGenerate={generateSimple} loading={g.loading} canGenerate={canGenerateSimple} credits={g.credits}
         />
@@ -261,7 +262,11 @@ export default function DashboardPage() {
                   <span>05</span>
                   <div><h2>Ajustes</h2><p>Configuración adicional.</p></div>
                 </div>
-                <Accordion title="Color de marca">
+                <label className="mb-3 flex cursor-pointer items-center gap-3 rounded-xl border border-[#3A3833] bg-[#1E1C1A] px-3 py-3 text-sm text-[#F5F0E8]">
+                  <input type="checkbox" checked={g.applyBrandIdentity} disabled={g.loading} onChange={(event) => g.setApplyBrandIdentity(event.target.checked)} className="h-4 w-4 accent-[#D97757]" />
+                  <span><strong className="block text-xs">Usar identidad guardada</strong><small className="block text-[11px] text-[#B7AAA0]">Aplica logo y colores del Brand Kit solo cuando esté activado.</small></span>
+                </label>
+                <Accordion title={g.brandColor.trim() ? "Color de marca · activo" : "Color de marca"}>
                   <label className="block text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider mb-2">
                     Color de Marca (Opcional)
                   </label>
@@ -272,6 +277,7 @@ export default function DashboardPage() {
                     placeholder="Ej: #D97757"
                     className="w-full bg-[#1E1C1A] border border-[#3A3833] px-3 py-2 rounded-lg text-sm text-[#F5F0E8] placeholder:text-[#9CA3AF]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
                   />
+                  {g.brandColor.trim() && <button type="button" onClick={() => g.setBrandColor("")} className="mt-2 text-xs text-[#B7AAA0] hover:text-[#F5F0E8]">Quitar color</button>}
                 </Accordion>
               </section>
             </div>

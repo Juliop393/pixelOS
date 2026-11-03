@@ -25,7 +25,7 @@ export default function ImageSimple({
   referenceUploader, phase, result, generatedImages, error, showReference,
   onSelectResult, onDownload, onDownloadAll, onChangeReference,
   prompt, onPromptChange, approach, onApproachChange,
-  format, onFormatChange, quantity, onQuantityChange, onOpenPixelAi, onGenerate, loading, canGenerate, credits,
+  format, onFormatChange, quantity, onQuantityChange, applyBrandIdentity, onApplyBrandIdentityChange, onOpenPixelAi, onGenerate, loading, canGenerate, credits,
 }: {
   referenceUploader: ReactNode
   phase: "select" | "loading" | "result" | "error"
@@ -45,6 +45,8 @@ export default function ImageSimple({
   onFormatChange: (value: string) => void
   quantity: number
   onQuantityChange: (value: number) => void
+  applyBrandIdentity: boolean
+  onApplyBrandIdentityChange: (value: boolean) => void
   onOpenPixelAi: () => void
   onGenerate: () => void
   loading: boolean
@@ -126,6 +128,10 @@ export default function ImageSimple({
     </section>
 
     <div className={s.createArea}>
+      <label className={s.brandIdentityOption} data-active={applyBrandIdentity}>
+        <input type="checkbox" checked={applyBrandIdentity} disabled={loading} onChange={(event) => onApplyBrandIdentityChange(event.target.checked)} />
+        <span><b>Usar identidad guardada</b><small>Aplica logo y colores del Brand Kit solo cuando esté activado.</small></span>
+      </label>
       <button type="button" className={workspace.generateButton} onClick={onGenerate} disabled={!canGenerate}><ImagePlus aria-hidden="true" />{loading ? `Generando ${quantity} ${quantity === 1 ? "imagen" : "imágenes"}…` : `Generar ${quantity} ${quantity === 1 ? "imagen" : "imágenes"}`}<b>→</b></button>
       <p>PixelFM preparará la estrategia y composición a partir de tu idea.</p>
       <small>{quantity} crédito{quantity === 1 ? "" : "s"} necesarios · {credits} disponible{credits === 1 ? "" : "s"}</small>

@@ -29,6 +29,7 @@ export function useCreativeGenerator() {
   const [aspectRatio, setAspectRatio] = useState("square")
   const [visualStyle, setVisualStyle] = useState("white-bg")
   const [brandColor, setBrandColor] = useState("")
+  const [applyBrandIdentity, setApplyBrandIdentity] = useState(false)
   const [selectedAngle, setSelectedAngle] = useState<string | null>(null)
   const [imagenReferencia, setImagenReferencia] = useState<string | null>(null)
   const [nombreImagenReferencia, setNombreImagenReferencia] = useState<string | null>(null)
@@ -108,7 +109,7 @@ export function useCreativeGenerator() {
     setResult(null)
 
     let brandIdentity = null
-    if (userId) {
+    if (applyBrandIdentity && userId) {
       const { data: brand } = await supabase
         .from("brand_identity")
         .select("*")
@@ -140,7 +141,7 @@ export function useCreativeGenerator() {
       estiloVisual: generationStyle,
       brandColor: simpleInput ? null : brandColor || null,
       imagenReferencia: generationReference || null,
-      brandIdentity,
+      ...(brandIdentity ? { brandIdentity } : {}),
       safeZoneMeta: simpleInput ? false : safeZoneMeta,
     }
 
@@ -348,6 +349,7 @@ export function useCreativeGenerator() {
     aspectRatio, setAspectRatio,
     visualStyle, setVisualStyle,
     brandColor, setBrandColor,
+    applyBrandIdentity, setApplyBrandIdentity,
     selectedAngle, setSelectedAngle,
     cantidad, setCantidad,
     loading, setLoading,

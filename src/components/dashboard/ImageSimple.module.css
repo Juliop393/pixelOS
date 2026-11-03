@@ -75,6 +75,7 @@
 .quantityStepper svg{width:15px;height:15px}
 .quantityStepper output{min-width:23px;text-align:center;color:var(--pf-headline);font-size:14px;font-variant-numeric:tabular-nums}
 .createArea{padding:5px 2px 0}
+.brandIdentityOption{display:flex;align-items:center;gap:11px;margin-bottom:4px;padding:11px 13px;border:1px solid var(--pf-border);border-radius:12px;background:var(--pf-elevated);cursor:pointer}.brandIdentityOption[data-active="true"]{border-color:var(--pf-selected-border);background:var(--pf-selected)}.brandIdentityOption input{width:16px;height:16px;flex:none;accent-color:var(--pf-action);cursor:pointer}.brandIdentityOption input:disabled{cursor:not-allowed}.brandIdentityOption span{display:flex;flex-direction:column;gap:3px}.brandIdentityOption b{color:var(--pf-primary);font-size:12px}.brandIdentityOption small{color:var(--pf-secondary);font-size:11px;line-height:1.35;text-align:left}
 .createArea button{min-height:52px;font-size:15px}
 .createArea button svg{width:19px;height:19px}
 .createArea p,.createArea small{font-size:12px}
