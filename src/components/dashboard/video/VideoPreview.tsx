@@ -7,7 +7,7 @@ import s from "./VideoWorkspace.module.css"
 
 export default function VideoPreview(props: {
   previewUrl: string | null; activeChunk: VideoChunk; activeIndex: number; totalDuration: number; chunks: VideoChunk[]
-  pendingChanges: ReadonlySet<number>; finalVideoUrl: string | null; finalDownloadUrl: string | null; finalVideoSceneSignature?: string | null
+  pendingChanges: ReadonlySet<number>; finalVideoUrl: string | null; finalDownloadUrl: string | null; finalVideoSceneSignature?: string | null; completePreviewRequest: number
   isMerging: boolean; mergeError: string; onMerge: () => void
   hookLabel?: string; angleLabel?: string; styleLabel?: string; strategyFeedback: string; onRecommend: () => void
   hasPendingChanges: boolean; canRegenerate: boolean; onRegenerate: () => void
@@ -22,6 +22,7 @@ export default function VideoPreview(props: {
   const finalVideoOutdated = Boolean(validFinalVideoUrl && (!allReady || (props.finalVideoSceneSignature !== undefined && props.finalVideoSceneSignature !== currentSceneSignature)))
 
   useEffect(() => { if (chunks.length < 2 && !validFinalVideoUrl) setView("scene") }, [chunks.length, validFinalVideoUrl])
+  useEffect(() => { if (props.completePreviewRequest > 0) setView("complete") }, [props.completePreviewRequest])
 
   return <>
     <header className={s.stageHeader}>

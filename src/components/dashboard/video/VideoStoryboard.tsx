@@ -26,6 +26,12 @@ type VideoStoryboardProps = {
   onAdjust: () => void
   onGenerate: () => void
   onGenerateAnnouncement: () => void
+  canMerge: boolean
+  isMerging: boolean
+  mergeError: string
+  finalVideoUrl: string | null
+  onMerge: () => void
+  onReviewComplete: () => void
   onSelect: (id: number) => void
   onEdit: (id: number) => void
   onAdd: () => void
@@ -47,6 +53,12 @@ export default function VideoStoryboard({
   onAdjust,
   onGenerate,
   onGenerateAnnouncement,
+  canMerge,
+  isMerging,
+  mergeError,
+  finalVideoUrl,
+  onMerge,
+  onReviewComplete,
   onSelect,
   onEdit,
   onAdd,
@@ -62,6 +74,7 @@ export default function VideoStoryboard({
   const generatingCount = chunks.filter((chunk) => chunk.status === "generating").length
   const errorCount = chunks.filter((chunk) => chunk.status === "error" && !pendingChanges.has(chunk.id)).length
   const pendingCount = chunks.length - readyCount - changedCount - generatingCount - errorCount
+  const scenesToGenerate = chunks.some((chunk) => chunk.videoSource !== "library" && !isVideoChunkReady(chunk))
 
   return <main className={s.storyboardOverview}>
     <div className={s.storyboardInner}>
@@ -86,11 +99,15 @@ export default function VideoStoryboard({
           <div><span>ESCENAS</span><h2>Secuencia del anuncio</h2></div>
           <div className={s.storyboardSectionActions}>
             <p><Clapperboard />{chunks.length} {chunks.length === 1 ? "escena" : "escenas"} · {readyCount} listas{changedCount > 0 ? ` · ${changedCount} con cambios pendientes` : ""} · {generatingCount} generando · {pendingCount} sin generar{errorCount > 0 ? ` · ${errorCount} error` : ""}</p>
-            <button type="button" disabled={!canGenerateAnnouncement} onClick={onGenerateAnnouncement}><WandSparkles />Generar anuncio</button>
+            {(scenesToGenerate || announcementProgress?.phase === "running") && <button type="button" disabled={!canGenerateAnnouncement} onClick={onGenerateAnnouncement}><WandSparkles />Generar anuncio</button>}
+            {chunks.length >= 2 && (finalVideoUrl
+              ? <button type="button" onClick={onReviewComplete}><Clapperboard />Anuncio completo</button>
+              : <button type="button" disabled={!canMerge} onClick={onMerge}><Clapperboard />{isMerging ? "Uniendo..." : "Unir anuncio"}</button>)}
           </div>
         </header>
         {announcementProgress?.phase === "running" && <p className={s.storyboardBatchProgress} role="status">Generando anuncio · {announcementProgress.current} de {announcementProgress.total} escenas · {announcementProgress.completed} listas en esta tanda</p>}
         {announcementProgress?.phase === "error" && <p className={s.storyboardBatchError} role="alert">{announcementProgress.error} Los clips listos se conservaron. Puedes reintentar la escena o volver a generar el anuncio.</p>}
+        {mergeError && <p className={s.storyboardBatchError} role="alert">{mergeError}</p>}
         <div className={s.storyboardTrack}>
           {chunks.map((chunk, index) => <article key={chunk.id} className={`${s.storyboardScene} ${activeId === chunk.id ? s.storyboardSceneActive : ""}`} data-status={chunk.status === "generating" ? "generating" : pendingChanges.has(chunk.id) ? "changed" : chunk.status}>
             <button type="button" className={s.storyboardSceneSelect} aria-pressed={activeId === chunk.id} onClick={() => onSelect(chunk.id)}>

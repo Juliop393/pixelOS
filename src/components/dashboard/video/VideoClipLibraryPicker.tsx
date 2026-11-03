@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { Film, Loader2, RotateCw, X } from "lucide-react"
 import { supabase } from "@/lib/supabase"
@@ -47,6 +47,45 @@ function readVideoDuration(url: string, fallback: number): Promise<number> {
     media.src = url
   })
 }
+
+function VideoClipPreview({ assetId }: { assetId: string }) {
+  const container = useRef<HTMLDivElement>(null)
+  const [url, setUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    const target = container.current
+    if (!target) return
+    const controller = new AbortController()
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      void (async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (!session?.access_token || controller.signal.aborted) return
+          const response = await fetch(`/api/assets/video-url?assetId=${encodeURIComponent(assetId)}`, {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+            cache: "no-store",
+            signal: controller.signal,
+          })
+          if (!response.ok) return
+          const result: unknown = await response.json()
+          if (!controller.signal.aborted && typeof result === "object" && result !== null && "videoUrl" in result &&
+              typeof result.videoUrl === "string" && result.videoUrl.startsWith("https://")) setUrl(result.videoUrl)
+        } catch { /* An unavailable preview keeps the existing icon; selection still retries securely. */ }
+      })()
+    }, { rootMargin: "100px" })
+    observer.observe(target)
+    return () => { observer.disconnect(); controller.abort() }
+  }, [assetId])
+
+  return <div ref={container} className="relative flex aspect-video items-center justify-center overflow-hidden bg-[#0e0c0b]">
+    {url ? <video src={url} muted playsInline preload="metadata" className="h-full w-full object-contain pointer-events-none" onLoadedMetadata={(event) => { if (event.currentTarget.duration > 0.2) event.currentTarget.currentTime = 0.15 }} />
+      : <Film className="h-9 w-9 text-[#d97757]" aria-hidden="true" />}
+  </div>
+}
+
+const videoDateTime = new Intl.DateTimeFormat("es-PE", { dateStyle: "medium", timeStyle: "short" })
 
 export default function VideoClipLibraryPicker({ open, excludedAssetIds, onClose, onSelect }: {
   open: boolean
@@ -134,9 +173,9 @@ export default function VideoClipLibraryPicker({ open, excludedAssetIds, onClose
       <div className="min-h-48 overflow-y-auto px-6 py-6">
         {loading ? <p className="py-14 text-center text-sm text-[#b7aaa0]" role="status">Cargando tus videos...</p>
           : videos.length === 0 && !error ? <div className="flex flex-col items-center gap-3 py-14 text-center text-[#aa9d92]"><Film size={30} /><p>Aún no tienes videos guardados.</p></div>
-            : <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">{videos.map((asset) => <button type="button" key={asset.id} disabled={Boolean(selectingId) || excludedAssetIds.has(asset.id)} onClick={() => { void chooseVideo(asset) }} className="group min-w-0 overflow-hidden rounded-xl border border-[#ffffff20] bg-[#211b18] text-left transition hover:border-[#e18862] hover:bg-[#2b211c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#e18862] disabled:cursor-not-allowed disabled:opacity-50">
-              <div className="flex aspect-video items-center justify-center bg-[#0e0c0b]"><Film className="h-9 w-9 text-[#d97757]" aria-hidden="true" /></div>
-              <div className="p-3"><span className="text-xs font-semibold text-[#e49a7d]">{asset.kind === "final" ? "Video final" : "Escena"}</span><p className="mt-1 truncate text-sm font-medium text-[#eee5de]">{asset.title || (asset.kind === "final" ? "Anuncio final" : "Clip de escena")}</p><p className="mt-1 text-xs text-[#aa9d92]">{excludedAssetIds.has(asset.id) ? "Ya está en la secuencia" : selectingId === asset.id ? "Preparando video..." : asset.format || new Date(asset.created_at).toLocaleDateString("es-PE")}</p></div>
+            : <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">{videos.map((asset) => <button type="button" key={asset.id} disabled={Boolean(selectingId) || excludedAssetIds.has(asset.id)} onClick={() => { void chooseVideo(asset) }} className="group min-w-0 overflow-hidden rounded-xl border border-[#ffffff20] bg-[#211b18] text-left transition hover:border-[#e18862] hover:bg-[#2b211c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#e18862] disabled:cursor-not-allowed disabled:opacity-60">
+              <div className="relative"><VideoClipPreview assetId={asset.id} />{excludedAssetIds.has(asset.id) && <span className="absolute inset-x-2 bottom-2 rounded-md border border-[#e18862]/50 bg-[#19120f]/95 px-2 py-1 text-center text-xs font-semibold text-[#f0b49b]">Ya está en la secuencia</span>}</div>
+              <div className="p-3"><span className="text-xs font-semibold text-[#e49a7d]">{asset.kind === "final" ? "Video final" : "Escena"}</span><p className="mt-1 truncate text-sm font-medium text-[#eee5de]">{asset.title || (asset.kind === "final" ? "Anuncio final" : "Clip de escena")}</p><p className="mt-1 text-xs text-[#aa9d92]">{videoDateTime.format(new Date(asset.created_at))}</p>{asset.format && <p className="mt-1 text-xs text-[#aa9d92]">{asset.format}</p>}{selectingId === asset.id && <p className="mt-1 text-xs text-[#e49a7d]">Preparando video...</p>}</div>
             </button>)}</div>}
         {error && <div className="mt-4 flex flex-col items-center gap-3 text-center"><p role="alert" className="text-sm text-[#e7a59d]">{error}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="inline-flex items-center gap-2 rounded-lg border border-[#a9694e] px-4 py-2 text-sm hover:bg-[#2a211c]"><RotateCw size={15} />Reintentar</button></div>}
         {selectingId && <p className="mt-4 flex items-center justify-center gap-2 text-sm text-[#b7aaa0]" role="status"><Loader2 className="h-4 w-4 animate-spin" />Preparando vista previa...</p>}

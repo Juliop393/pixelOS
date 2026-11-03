@@ -26,7 +26,7 @@ import s from "./VideoWorkspace.module.css"
 type VideoTab = "reference" | "action" | "dialogue" | "more"
 type VideoWorkspaceMode = "storyboard" | "advanced"
 type VideoEditorMode = "simple" | "plan" | "pro" | "result"
-type AnnouncementProgress = { phase: "running" | "error" | "done"; total: number; completed: number; current: number; error?: string }
+type AnnouncementProgress = { phase: "running" | "error" | "done"; total: number; completed: number; current: number; error?: string; failedChunkId?: number }
 
 const hasValidVideo = (chunk: VideoChunk) => Boolean(chunk.videoUrl?.startsWith("https://"))
 const hasCurrentVideo = isVideoChunkReady
@@ -121,6 +121,7 @@ export default function VideoWorkspace() {
   const [finalVideoSceneSignature, setFinalVideoSceneSignature] = useState<string | null>(null)
   const [isMerging, setIsMerging] = useState(false)
   const [mergeError, setMergeError] = useState("")
+  const [completePreviewRequest, setCompletePreviewRequest] = useState(0)
   const [pixelAiOpen, setPixelAiOpen] = useState(false)
 
   useEffect(() => () => { batchRunId.current += 1; mergeRunId.current += 1 }, [])
@@ -134,6 +135,9 @@ export default function VideoWorkspace() {
     ? (() => { const url = new URL(currentFinalVideoUrl); url.searchParams.set("download", "pixelfm-final.mp4"); return url.toString() })()
     : currentFinalVideoUrl
   const canMerge = chunks.length > 1 && allScenesCurrent && !isMerging && !currentFinalVideoUrl
+  const visibleAnnouncementProgress = announcementProgress?.phase === "error" &&
+    !chunks.some((chunk) => chunk.id === announcementProgress.failedChunkId && chunk.videoSource !== "library" && !hasCurrentVideo(chunk))
+    ? null : announcementProgress
 
   useEffect(() => {
     if (finalVideoUrl && (!allScenesCurrent || finalVideoSceneSignature !== currentFinalSceneSignature)) {
@@ -155,6 +159,7 @@ export default function VideoWorkspace() {
   const updateActiveChunk = (patch: Partial<VideoChunk>) => {
     if (generatingChunkId.current === activeId || chunksRef.current.some((chunk) => chunk.id === activeId && chunk.status === "generating")) return
     planEdited.current = true
+    setAnnouncementProgress((current) => current?.phase === "error" && current.failedChunkId === activeId ? null : current)
     updateChunk(activeId, patch)
   }
   const selectChunk = (id: number) => { setActiveId(id); setFileError(""); setGenerateFeedback("") }
@@ -184,6 +189,7 @@ export default function VideoWorkspace() {
     } else {
       if (generatingChunkId.current === targetId || chunksRef.current.some((chunk) => chunk.id === targetId && chunk.status === "generating")) return
       planEdited.current = true
+      setAnnouncementProgress((current) => current?.phase === "error" && current.failedChunkId === targetId ? null : current)
       setChunks((current) => current.map((chunk) => chunk.id === targetId
         ? { ...migrateVideoChunk(chunk), referenceSource: "library", referenceImageUrl: image.public_url, referenceFileName: image.title || "Imagen de Mis creativos", status: hasValidVideo(chunk) ? chunk.status : "configured" }
         : chunk))
@@ -206,6 +212,7 @@ export default function VideoWorkspace() {
     if (file.size > 5 * 1024 * 1024) { setTargetError("La imagen debe pesar menos de 5 MB."); return }
     if (!isSimple) {
       if (editorMode === "pro") planEdited.current = true
+      setAnnouncementProgress((current) => current?.phase === "error" && current.failedChunkId === targetChunkId ? null : current)
     }
 
     updateTarget({ referenceSource: "upload", referenceImageUrl: undefined, referenceFileName: file.name, status: "pending" })
@@ -240,10 +247,11 @@ export default function VideoWorkspace() {
       setUploading(false)
     }
   }
-  const addChunk = () => { if (chunks.length >= VIDEO_MAX_SCENES) return; planEdited.current = true; const chunk = createVideoChunk(nextId.current++); setChunks((current) => [...current, chunk]); selectChunk(chunk.id) }
+  const addChunk = () => { if (chunks.length >= VIDEO_MAX_SCENES) return; planEdited.current = true; setAnnouncementProgress(null); const chunk = createVideoChunk(nextId.current++); setChunks((current) => [...current, chunk]); selectChunk(chunk.id) }
   const addLibraryChunk = (clip: VideoLibraryClip) => {
     if (chunksRef.current.length >= VIDEO_MAX_SCENES || chunksRef.current.some((chunk) => chunk.assetId === clip.assetId)) return
     planEdited.current = true
+    setAnnouncementProgress(null)
     const chunk: VideoChunk = {
       ...createVideoChunk(nextId.current++, clip.kind === "final" ? "Video final" : "Clip de biblioteca"),
       duration: clip.duration,
@@ -259,6 +267,7 @@ export default function VideoWorkspace() {
   }
   const removeChunk = (id: number) => {
     if (generatingChunkId.current === id || chunks.some((chunk) => chunk.id === id && chunk.status === "generating")) return
+    setAnnouncementProgress(null)
     if (chunks.length === 1) {
       if (chunks[0].id !== id || chunks[0].videoSource !== "library") return
       const blank = createVideoChunk(nextId.current++)
@@ -273,7 +282,7 @@ export default function VideoWorkspace() {
     setChunks(next)
     if (activeId === id) setActiveId(next[Math.min(removedIndex, next.length - 1)].id)
   }
-  const moveChunk = (index: number, direction: -1 | 1) => { planEdited.current = true; setChunks((current) => moveVideoChunk(current, index, direction)) }
+  const moveChunk = (index: number, direction: -1 | 1) => { planEdited.current = true; setAnnouncementProgress(null); setChunks((current) => moveVideoChunk(current, index, direction)) }
 
   const angleLabel = VIDEO_ANGLES.find((item) => item.id === angle)?.label
   const hookLabel = VIDEO_HOOKS.find((item) => item.id === hook)?.label
@@ -352,6 +361,7 @@ export default function VideoWorkspace() {
     }
     if (outcome.status === "generated") {
       setChunks((current) => current.map((item) => item.id === chunkId ? { ...item, status: "generated", videoUrl: outcome.videoUrl, assetId: outcome.assetId, generatedSceneSignature: submittedSceneSignature } : item))
+      setAnnouncementProgress((current) => current?.phase === "error" && current.failedChunkId === chunkId ? null : current)
       setGenerateFeedback(activeIdRef.current === chunkId ? "Escena generada correctamente" : "")
     } else if (outcome.status === "error") {
       setChunks((current) => current.map((item) => item.id === chunkId ? { ...item, status: "error" } : item))
@@ -378,7 +388,7 @@ export default function VideoWorkspace() {
         if (batchRunId.current !== runId) return
         const chunk = chunksRef.current.find((item) => item.id === chunkId)
         if (!chunk) {
-          setAnnouncementProgress({ phase: "error", total: pendingIds.length, completed, current: index + 1, error: "Una escena de la secuencia fue eliminada. Revisa el anuncio y vuelve a intentarlo." })
+          setAnnouncementProgress({ phase: "error", total: pendingIds.length, completed, current: index + 1, failedChunkId: chunkId, error: "Una escena de la secuencia fue eliminada. Revisa el anuncio y vuelve a intentarlo." })
           return
         }
         if (chunk.videoSource === "library" || hasCurrentVideo(chunk)) {
@@ -387,14 +397,14 @@ export default function VideoWorkspace() {
         }
         const sceneNumber = chunksRef.current.findIndex((item) => item.id === chunkId) + 1
         if (!hasValidReference(chunk)) {
-          setAnnouncementProgress({ phase: "error", total: pendingIds.length, completed, current: index + 1, error: `La escena ${sceneNumber} necesita una referencia visual antes de generar.` })
+          setAnnouncementProgress({ phase: "error", total: pendingIds.length, completed, current: index + 1, failedChunkId: chunkId, error: `La escena ${sceneNumber} necesita una referencia visual antes de generar.` })
           return
         }
         setAnnouncementProgress({ phase: "running", total: pendingIds.length, completed, current: index + 1 })
         const outcome = await generateVideoChunk(chunk)
         if (batchRunId.current !== runId) return
         if (outcome.status !== "generated") {
-          setAnnouncementProgress({ phase: "error", total: pendingIds.length, completed, current: index + 1, error: `Falló la escena ${sceneNumber}: ${outcome.status === "error" ? outcome.error : "ya hay una generación en curso"}` })
+          setAnnouncementProgress({ phase: "error", total: pendingIds.length, completed, current: index + 1, failedChunkId: chunkId, error: `Falló la escena ${sceneNumber}: ${outcome.status === "error" ? outcome.error : "ya hay una generación en curso"}` })
           return
         }
         completed += 1
@@ -486,6 +496,7 @@ export default function VideoWorkspace() {
   const editChunk = (id: number) => {
     selectChunk(id)
     setActiveTab("action")
+    setCompletePreviewRequest(0)
     setWorkspaceMode("advanced")
   }
 
@@ -579,12 +590,18 @@ export default function VideoWorkspace() {
       sourceReady={hasCurrentVideo(activeChunk) || hasValidReference(activeChunk)}
       canGenerate={canGenerate}
       canGenerateAnnouncement={canGenerateAnnouncement}
-      announcementProgress={announcementProgress}
+      announcementProgress={visibleAnnouncementProgress}
       generateFeedback={generateFeedback}
       activeId={activeId}
-      onAdjust={() => setWorkspaceMode("advanced")}
+      onAdjust={() => { setCompletePreviewRequest(0); setWorkspaceMode("advanced") }}
       onGenerate={() => { void generateVideoChunk(activeChunk) }}
       onGenerateAnnouncement={() => { void generateAnnouncement() }}
+      canMerge={canMerge}
+      isMerging={isMerging}
+      mergeError={mergeError}
+      finalVideoUrl={currentFinalVideoUrl}
+      onMerge={() => { void mergeVideoChunks() }}
+      onReviewComplete={() => { setCompletePreviewRequest((request) => request + 1); setWorkspaceMode("advanced") }}
       onSelect={selectChunk}
       onEdit={editChunk}
       onAdd={addChunk}
@@ -637,7 +654,7 @@ export default function VideoWorkspace() {
       <footer className={s.generateDock}>{activeChunk.videoSource === "library" ? <small><strong>Clip listo para unir</strong><br />No consume créditos adicionales.</small> : <><button className={activeChunk.videoUrl ? s.regenerateScene : undefined} disabled={!canGenerate} onClick={() => { void generateVideoChunk(activeChunk) }}>{activeChunk.videoUrl ? <RotateCcw /> : <WandSparkles />}{activeChunk.videoUrl ? "Regenerar escena" : "Generar escena"}</button><small><strong>12 créditos por escena de 6 s</strong><br />{activeChunk.status === "generating" ? "Generando esta escena…" : generationInProgress ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (canGenerate ? activeChunk.videoUrl ? "Puedes regenerar únicamente esta escena" : "Escena seleccionada lista para generar" : "Selecciona una fuente visual para continuar")}</small></>}</footer>
     </aside>
     <main className={s.stagePanel}>
-      <VideoPreview previewUrl={activePreviewUrl} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={getVideoDuration(chunks)} chunks={chunks} pendingChanges={pendingChanges} finalVideoUrl={currentFinalVideoUrl} finalDownloadUrl={currentFinalDownloadUrl} finalVideoSceneSignature={chunks.length === 1 ? currentFinalSceneSignature : finalVideoSceneSignature} isMerging={isMerging} mergeError={mergeError} onMerge={() => { void mergeVideoChunks() }} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} hasPendingChanges={pendingChanges.has(activeChunk.id)} canRegenerate={canGenerate} onRegenerate={() => { void generateVideoChunk(activeChunk) }} />
+      <VideoPreview previewUrl={activePreviewUrl} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={getVideoDuration(chunks)} chunks={chunks} pendingChanges={pendingChanges} finalVideoUrl={currentFinalVideoUrl} finalDownloadUrl={currentFinalDownloadUrl} finalVideoSceneSignature={chunks.length === 1 ? currentFinalSceneSignature : finalVideoSceneSignature} completePreviewRequest={completePreviewRequest} isMerging={isMerging} mergeError={mergeError} onMerge={() => { void mergeVideoChunks() }} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} hasPendingChanges={pendingChanges.has(activeChunk.id)} canRegenerate={canGenerate} onRegenerate={() => { void generateVideoChunk(activeChunk) }} />
       <VideoTimeline chunks={chunks} pendingChanges={pendingChanges} activeId={activeId} format={strategy.format} finalVideoUrl={currentFinalVideoUrl} finalDownloadUrl={currentFinalDownloadUrl} canMerge={canMerge} isMerging={isMerging} mergeError={mergeError} onSelect={selectChunk} onAdd={addChunk} onAddFromLibrary={() => setClipLibraryOpen(true)} onRemove={removeChunk} onMove={moveChunk} onMerge={() => { void mergeVideoChunks() }} />
     </main>
     </>}
