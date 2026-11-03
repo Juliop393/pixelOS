@@ -8,11 +8,11 @@ import s from "./VideoWorkspace.module.css"
 export default function VideoPreview(props: {
   previewUrl: string | null; activeChunk: VideoChunk; activeIndex: number; totalDuration: number; chunks: VideoChunk[]
   pendingChanges: ReadonlySet<number>; finalVideoUrl: string | null; finalDownloadUrl: string | null; finalVideoSceneSignature?: string | null; completePreviewRequest: number
-  isMerging: boolean; mergeError: string; onMerge: () => void
+  canMerge: boolean; isMerging: boolean; mergeError: string; onMerge: () => void
   hookLabel?: string; angleLabel?: string; styleLabel?: string; strategyFeedback: string; onRecommend: () => void
   hasPendingChanges: boolean; canRegenerate: boolean; onRegenerate: () => void
 }) {
-  const { previewUrl, activeChunk, activeIndex, totalDuration, chunks, pendingChanges, finalVideoUrl, finalDownloadUrl, isMerging, mergeError, onMerge, styleLabel, hasPendingChanges, canRegenerate, onRegenerate } = props
+  const { previewUrl, activeChunk, activeIndex, totalDuration, chunks, pendingChanges, finalVideoUrl, finalDownloadUrl, canMerge, isMerging, mergeError, onMerge, styleLabel, hasPendingChanges, canRegenerate, onRegenerate } = props
   const [view, setView] = useState<"scene" | "complete">("scene")
   const showComplete = view === "complete" && (chunks.length > 1 || Boolean(finalVideoUrl))
   const readyCount = chunks.filter(isVideoChunkReady).length
@@ -32,6 +32,7 @@ export default function VideoPreview(props: {
           <button type="button" aria-pressed={!showComplete} className={!showComplete ? s.previewViewActive : ""} onClick={() => setView("scene")}>Escena</button>
           <button type="button" aria-pressed={showComplete} className={showComplete ? s.previewViewActive : ""} onClick={() => setView("complete")}>Anuncio completo</button>
         </div>}
+        {!showComplete && chunks.length >= 2 && <button type="button" className={s.previewMergeAction} disabled={!validFinalVideoUrl && !canMerge} onClick={validFinalVideoUrl ? () => setView("complete") : onMerge}><Link2 />{validFinalVideoUrl ? "Anuncio completo" : isMerging ? "Uniendo..." : "Unir anuncio"}</button>}
         {!showComplete && activeChunk.videoUrl && <a className={s.downloadChunk} href={activeChunk.videoUrl} download><Download />Descargar escena</a>}
         <div className={s.duration}><small>Duración estimada</small><b>{totalDuration}s</b></div>
       </div>

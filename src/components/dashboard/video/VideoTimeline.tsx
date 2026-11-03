@@ -16,7 +16,7 @@ export default function VideoTimeline({ chunks, pendingChanges, activeId, format
       ? { label: "Requiere revisión", tone: "error" }
       : pendingChanges.size > 0
         ? { label: "Cambios pendientes", tone: "changed" }
-      : generatedCount === chunks.length
+      : chunks.length > 0 && generatedCount === chunks.length
         ? { label: "Escenas listas", tone: "generated" }
         : chunks.some((chunk) => chunk.status === "configured")
           ? { label: "Listo para generar", tone: "configured" }
@@ -32,7 +32,7 @@ export default function VideoTimeline({ chunks, pendingChanges, activeId, format
         <div className={s.chunkActions}>
           <button onClick={() => onMove(index, -1)} disabled={index === 0} aria-label="Mover escena a la izquierda"><ArrowLeft /></button>
           <button onClick={() => onMove(index, 1)} disabled={index === chunks.length - 1} aria-label="Mover escena a la derecha"><ArrowRight /></button>
-          <button onClick={() => onRemove(chunk.id)} disabled={(chunks.length === 1 && chunk.videoSource !== "library") || chunk.status === "generating"} aria-label="Eliminar escena"><Trash2 /></button>
+          <button onClick={() => onRemove(chunk.id)} disabled={chunk.status === "generating"} aria-label="Eliminar escena"><Trash2 /></button>
         </div>
         {index < chunks.length - 1 && <span className={s.connector}>→</span>}
       </div>)}

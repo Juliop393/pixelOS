@@ -86,9 +86,9 @@ export default function VideoStoryboard({
         </div>
         <div className={s.storyboardActions}>
           <div className={s.storyboardDuration}><Clock3 /><span>Duración estimada</span><b>{totalDuration}s</b></div>
-          <button type="button" className={`${s.storyboardGenerate} ${selectedChunk?.videoUrl ? s.storyboardRegenerate : ""}`} disabled={!canGenerate} onClick={onGenerate}>{selectedChunk?.videoSource === "library" ? <Clapperboard /> : selectedChunk?.videoUrl ? <RotateCcw /> : <WandSparkles />}{selectedChunk?.videoSource === "library" ? "Clip de biblioteca" : selectedChunk?.videoUrl ? "Regenerar escena" : "Generar escena"}</button>
+          {selectedChunk && <><button type="button" className={`${s.storyboardGenerate} ${selectedChunk.videoUrl ? s.storyboardRegenerate : ""}`} disabled={!canGenerate} onClick={onGenerate}>{selectedChunk.videoSource === "library" ? <Clapperboard /> : selectedChunk.videoUrl ? <RotateCcw /> : <WandSparkles />}{selectedChunk.videoSource === "library" ? "Clip de biblioteca" : selectedChunk.videoUrl ? "Regenerar escena" : "Generar escena"}</button>
           <button type="button" className={s.storyboardAdjust} onClick={onAdjust}><SlidersHorizontal />Ajustar escenas</button>
-          <small><strong>{selectedChunk?.videoSource === "library" ? "Video existente · sin nuevo cobro" : "12 créditos por escena de 6 s"}</strong><br />{selectedChunk?.videoSource === "library" ? "Este clip fijo ya está listo para unir." : selectedChunk?.status === "generating" ? "Generando esta escena…" : anotherSceneGenerating ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (sourceReady ? selectedChunk?.videoUrl ? "Solo se regenerará la escena seleccionada" : "Se generará la escena seleccionada" : "Añade una fuente visual a la escena seleccionada")}</small>
+          <small><strong>{selectedChunk.videoSource === "library" ? "Video existente · sin nuevo cobro" : "12 créditos por escena de 6 s"}</strong><br />{selectedChunk.videoSource === "library" ? "Este clip fijo ya está listo para unir." : selectedChunk.status === "generating" ? "Generando esta escena…" : anotherSceneGenerating ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (sourceReady ? selectedChunk.videoUrl ? "Solo se regenerará la escena seleccionada" : "Se generará la escena seleccionada" : "Añade una fuente visual a la escena seleccionada")}</small></>}
         </div>
       </header>
 
@@ -121,7 +121,7 @@ export default function VideoStoryboard({
               <span>
                 <button type="button" className={s.storyboardMovePrevious} disabled={index === 0} onClick={() => onMove(index, -1)} aria-label="Mover escena hacia el inicio"><ArrowLeft /></button>
                 <button type="button" className={s.storyboardMoveNext} disabled={index === chunks.length - 1} onClick={() => onMove(index, 1)} aria-label="Mover escena hacia el final"><ArrowRight /></button>
-                <button type="button" disabled={(chunks.length === 1 && chunk.videoSource !== "library") || chunk.status === "generating"} onClick={() => onRemove(chunk.id)} aria-label="Eliminar escena"><Trash2 /></button>
+                <button type="button" disabled={chunk.status === "generating"} onClick={() => onRemove(chunk.id)} aria-label="Eliminar escena"><Trash2 /></button>
               </span>
             </div>
           </article>)}

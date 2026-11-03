@@ -499,8 +499,8 @@
 .completePreviewIcon svg{width:21px;height:21px}
 .completePreview>video{width:auto;max-width:100%;height:min(29dvh,230px);margin-bottom:10px;border-radius:13px;aspect-ratio:9/16;object-fit:contain;background:var(--pf-canvas)}
 .completePreviewBody{min-width:0;display:flex;flex-direction:column;align-items:center}
-.completePreviewWithVideo{width:min(100%,620px);padding:14px 18px;flex-direction:row;gap:20px;text-align:left}
-.completePreviewWithVideo>video{flex:none;margin:0}
+.completePreviewWithVideo{width:min(100%,720px);padding:18px 22px;flex-direction:row;gap:24px;text-align:left}
+.completePreviewWithVideo>video{flex:none;height:min(48dvh,385px);max-width:45%;margin:0}
 .completePreviewWithVideo .completePreviewBody{align-items:flex-start}
 .completePreviewEyebrow{color:var(--pf-brand);font:10px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em}
 .completePreview h2{margin:6px 0 4px;color:var(--pf-headline);font-size:clamp(21px,2vw,27px);font-weight:620;letter-spacing:-.035em;line-height:1.15}
@@ -513,8 +513,10 @@
 .timeline>.timelineSummary .timelineSummaryActions button:disabled{opacity:.55;cursor:not-allowed}
 .storyboardActions>small strong,.generateDock>small strong{display:inline-block;margin-bottom:4px;color:var(--pf-primary);font-size:11px;font-weight:600}
 @media(max-width:760px){.stageHeader{height:auto;min-height:72px;flex-basis:auto;padding-block:10px;gap:10px;flex-wrap:wrap}.stageHeader .previewHeaderActions{width:100%;justify-content:space-between}.completePreview{padding:24px 18px}}
-@media(max-width:680px){.completePreviewWithVideo{flex-direction:column;text-align:center}.completePreviewWithVideo>video{height:min(28dvh,210px)}.completePreviewWithVideo .completePreviewBody{align-items:center}}
+@media(max-width:680px){.completePreviewWithVideo{flex-direction:column;text-align:center}.completePreviewWithVideo>video{height:min(38dvh,280px);max-width:100%}.completePreviewWithVideo .completePreviewBody{align-items:center}}
 @media(max-width:420px){.previewViewSwitch button{padding-inline:7px;font-size:10px}.stageHeader .duration{padding-inline:8px}}
 .libraryEmpty{width:100%;color:inherit;font-family:inherit;cursor:pointer}.libraryEmpty:hover:not(:disabled),.libraryEmpty:focus-visible{border-color:rgba(225,112,76,.65);background:rgba(225,112,76,.07)}.libraryEmpty:disabled{opacity:.55;cursor:not-allowed}.uploadPreview>div span{min-width:0;flex:1}.uploadPreview>div button{flex:none}
 .storyboardAddLibrary{background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(255,255,255,.015));box-shadow:inset 0 0 0 1px var(--pf-border)}.storyboardAddLibrary>i{background:rgba(255,255,255,.06);color:var(--pf-primary);box-shadow:inset 0 0 0 1px var(--pf-border)}.addLibraryChunk{background:rgba(255,255,255,.035);box-shadow:inset 0 0 0 1px var(--pf-border)}.addLibraryChunk svg{color:var(--pf-primary)}.storyboardEditScene:disabled{opacity:.55!important;color:var(--pf-secondary)!important;cursor:not-allowed}.storyboardEditScene:disabled:hover{background:rgba(225,112,76,.075)!important}
 .libraryClipInfo{flex:1;min-height:150px;margin:16px 22px;padding:22px;border:1px solid var(--pf-border);border-radius:16px;background:var(--pf-elevated);color:var(--pf-primary)}.libraryClipInfo strong{font-size:15px}.libraryClipInfo p{max-width:38ch;margin:10px 0 0;color:var(--pf-secondary);font-size:12px;line-height:1.6}
+.previewMergeAction{min-height:38px;padding:0 12px;border:1px solid var(--pf-selected-border);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:7px;background:var(--pf-selected);color:var(--pf-headline);font:650 11px/1 inherit;white-space:nowrap;cursor:pointer}.previewMergeAction svg{width:15px;height:15px}.previewMergeAction:hover:not(:disabled){background:var(--pf-action);color:var(--pf-action-ink)}.previewMergeAction:disabled{border-color:var(--pf-border);background:var(--pf-elevated);color:var(--pf-tertiary);cursor:not-allowed}
+@media(min-width:761px) and (max-width:1450px){.stageHeader{height:auto;min-height:66px;flex-basis:auto;flex-wrap:wrap;gap:8px;padding-block:8px}.previewHeaderActions{flex-wrap:wrap;justify-content:flex-end}}
