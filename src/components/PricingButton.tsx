@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { createBrowserClient } from "@supabase/ssr"
 import { getPaddle } from "@/components/PaddleProvider"
+import styles from "@/components/PricingPlans.module.css"
 
 interface PricingButtonProps {
   priceId: string
@@ -55,13 +56,12 @@ export default function PricingButton({ priceId, planName, highlighted }: Pricin
     <button
       type="button"
       onClick={handleClick}
-      className={`block w-full text-center text-sm font-semibold px-4 py-3.5 rounded-xl transition-all duration-200 ${
-        highlighted
-          ? "bg-[#D97757] text-white hover:bg-[#C26547] shadow-lg shadow-[#D97757]/20"
-          : "bg-[#1E1C1A]/60 backdrop-blur-sm text-[#E8E6E1] hover:bg-[#D97757] hover:text-white border border-[#3A3833]/50"
-      }`}
+      className={`${styles.cta} ${highlighted ? styles.ctaFeatured : ""}`}
     >
-      Elegir {planName}
+      <span>Elegir {planName}</span>
+      <svg width={15} height={15} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14m-5-5 5 5-5 5" />
+      </svg>
     </button>
   )
 }

@@ -1,44 +1,49 @@
 import PricingButton from "@/components/PricingButton"
 import { pricingPlans } from "@/lib/pricing-plans"
+import styles from "@/components/PricingPlans.module.css"
 
 export default function PricingPlans() {
   return (
-    <div className="pricingGrid !gap-8">
+    <div className={styles.grid}>
       {pricingPlans.map((plan) => (
         <article
           key={plan.name}
-          className={`priceCard ${plan.highlighted ? "featured" : ""}`}
+          className={`${styles.card} ${plan.highlighted ? styles.featured : ""}`}
         >
+          <span className={styles.cardLight} aria-hidden="true" />
+
           {plan.highlighted && (
-            <span className="popular">Más popular</span>
+            <span className={styles.popular}><i aria-hidden="true" />Más popular</span>
           )}
 
-          <div>
+          <header className={styles.cardHead}>
             <h3>{plan.name}</h3>
-          </div>
+            <span className={styles.mvp}>Precio MVP</span>
+          </header>
 
-          <div className="price">
-            <span className="priceOld">{plan.originalPrice}</span>
+          <div className={styles.price}>
             <strong>{plan.price}</strong>
-            <span>USD<br />/ mes</span>
-          </div>
-
-          <div className="flex items-center gap-2 mt-2 mb-4">
-            <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#D97757]/20 text-[#D97757] border border-[#D97757]/30">
-              Precio MVP
+            <span className={styles.priceMeta}>
+              <s className={styles.priceOld}>{plan.originalPrice}</s>
+              <span>USD / mes</span>
             </span>
           </div>
 
-          <p className="text-[#D97757] text-xs font-semibold mb-1">{plan.credits}</p>
+          <p className={styles.credits}>
+            <span className={styles.creditToken} aria-hidden="true"><i /><i /><i /><i /></span>
+            {plan.credits}
+          </p>
 
-          <div className="priceDivider" />
+          <div className={styles.divider} />
 
-          <ul>
+          <ul className={styles.features}>
             {plan.features.map((feature) => (
               <li key={feature}>
-                <svg className="w-4 h-4 text-[#D97757] flex-shrink-0" width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                <span className={styles.check} aria-hidden="true">
+                  <svg width={12} height={12} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
                 {feature}
               </li>
             ))}

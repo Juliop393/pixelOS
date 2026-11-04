@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Clapperboard, Lightbulb, ListVideo, Target, Zap } from "lucide-react"
+import { Clapperboard, FileText, Lightbulb, ListVideo, Megaphone, Target, Users, Zap } from "lucide-react"
 import PixelAiIcon from "./PixelAiIcon"
 import styles from "./GeneratorWorkspace.module.css"
+import ui from "./PixelAdvisor.module.css"
 
 export type Recommendation = {
   angleId: string
@@ -74,6 +75,13 @@ const VIDEO_STARTERS = [
   { label: "Arma un storyboard rápido", prompt: "Arma un storyboard breve para un anuncio de video. Dame un ejemplo adaptable por escenas de seis segundos.", Icon: ListVideo },
   { label: "Estructura mi video", prompt: "Ayúdame a estructurar un anuncio de video: apertura, demostración, beneficio y cierre.", Icon: Clapperboard },
   { label: "Algo simple y directo", prompt: "Quiero un anuncio de video simple y directo. Dame un enfoque fácil de ejecutar.", Icon: Lightbulb },
+]
+
+const GENERAL_STARTERS = [
+  { label: "Quiero crear un anuncio para Meta Ads", prompt: "Quiero crear un anuncio para Meta Ads. ¿Qué necesitas saber de mi producto para empezar?", Icon: Megaphone },
+  { label: "Ayúdame a elegir un ángulo de venta", prompt: "Ayúdame a elegir un ángulo de venta para mi producto. Pregúntame lo que necesites.", Icon: Target },
+  { label: "Dame una idea UGC", prompt: "Dame una idea de anuncio UGC que se sienta auténtica para mi producto.", Icon: Users },
+  { label: "Convierte mi producto en un brief creativo", prompt: "Quiero convertir mi producto en un brief creativo. Guíame con las preguntas necesarias.", Icon: FileText },
 ]
 
 export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideBubble, inline = false, open, onOpenChange, initialRequest, focusMode = false, videoContext = false }: PixelAdvisorProps) {
@@ -277,143 +285,125 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
     setAppliedDetails(rec)
   }
 
+  const showWelcome = messages.length === 1
+  const welcome = videoContext
+    ? {
+        Icon: Clapperboard,
+        kicker: "IDEAS PARA TU VIDEO",
+        title: "Del primer hook a la última escena.",
+        text: VIDEO_INITIAL_MESSAGE.content,
+        starters: VIDEO_STARTERS,
+        note: "Ideas para revisar en el chat; tus escenas no cambian automáticamente.",
+      }
+    : {
+        Icon: null,
+        kicker: "PIXELIA · ESTRATEGA CREATIVO",
+        title: "Pensemos tu próximo anuncio.",
+        text: INITIAL_MESSAGE.content,
+        starters: GENERAL_STARTERS,
+        note: "Elige un punto de partida o escribe tu idea con tus palabras.",
+      }
+
+  const assistantAvatar = (
+    <span className={ui.avatar} aria-hidden="true">
+      <PixelAiIcon strokeWidth={1.6} />
+    </span>
+  )
+
   return (
     <>
       {/* Burbuja flotante */}
       {!hideBubble && (
       <button
         onClick={() => setIsOpen(true)}
-        title="Abrir Pixel IA"
-        className={`${styles.pixelAiTrigger} fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 ${
-          isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
-        }`}
-        style={{
-          background: "var(--pf-ai-surface)",
-          border: "1px solid transparent",
-        }}
+        title="Abrir PixelIA"
+        className={`${styles.pixelAiTrigger} ${ui.trigger} ${isOpen ? ui.triggerHidden : ""}`}
       >
         <PixelAiIcon className="w-5 h-5" strokeWidth={1.5} />
-        <span className="text-sm font-semibold text-[var(--pf-primary)]">Pixel IA</span>
+        <span>PixelIA</span>
       </button>
       )}
 
       {/* Panel de conversación: inline para compatibilidad o drawer lateral reutilizable. */}
       {isOpen && <div
         id="pixel-ai-panel"
-        aria-label="Panel de Pixel IA"
+        aria-label="Panel de PixelIA"
         role="dialog"
-        className={inline ? styles.aiPanel : `${styles.drawerPanel} ${focusMode ? styles.drawerFocusPanel : ""} ${videoContext ? styles.videoAssistantPanel : ""}`}
-        style={{
-          background: "var(--pf-ai-panel-surface)",
-          backdropFilter: "blur(16px) saturate(115%)",
-          WebkitBackdropFilter: "blur(16px) saturate(115%)",
-          border: "1px solid transparent",
-          boxShadow: "var(--pf-ai-panel-shadow)",
-        }}
+        className={`${inline ? styles.aiPanel : `${styles.drawerPanel} ${focusMode ? styles.drawerFocusPanel : ""} ${videoContext ? styles.videoAssistantPanel : ""} ${ui.drawer}`} ${ui.panel}`}
       >
-        {/* Reflejo superior */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-[30%] rounded-[28px] pointer-events-none"
-          style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)" }}
-        />
+        <span className={ui.panelSheen} aria-hidden="true" />
 
         {/* Cabecera */}
-        <div
-          className={`${styles.pixelAiHeader} flex-shrink-0 px-5 py-3.5 flex items-center justify-between relative z-10 ${videoContext ? styles.videoAssistantHeader : ""}`}
-          style={{ borderBottom: "1px solid var(--pf-border)" }}
-        >
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{
-                background: "var(--pf-ai-surface)",
-                border: "1px solid transparent",
-              }}
-            >
-              <PixelAiIcon className="w-4 h-4" strokeWidth={1.5} />
-            </div>
-            <div className={videoContext ? styles.videoAssistantTitle : undefined}>
-              <span className="text-sm font-bold text-[var(--pf-headline)]">Pixel IA</span>
-              <span className={videoContext ? "" : "text-[10px] text-[var(--pf-secondary)] ml-2 hidden sm:inline"}>
-                {videoContext ? "Copiloto creativo de Video" : "Estrategia creativa para tus anuncios."}
-              </span>
-            </div>
+        <header className={ui.header}>
+          <span className={ui.mark} aria-hidden="true">
+            <PixelAiIcon strokeWidth={1.5} />
+          </span>
+          <div className={ui.titleBlock}>
+            <b>PixelIA</b>
+            <small>{videoContext ? "Copiloto creativo de Video" : "Estrategia creativa para tus anuncios"}</small>
           </div>
-          <div className="flex items-center gap-1">
-            <button onClick={() => setIsOpen(false)} className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--pf-secondary)] hover:text-[var(--pf-primary)] hover:bg-[var(--pf-elevated)] transition-colors" title="Minimizar">
-              <svg className="w-3.5 h-3.5" width={14} height={14} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className={ui.headerActions}>
+            <button type="button" onClick={() => setIsOpen(false)} className={ui.iconButton} title="Minimizar" aria-label="Minimizar PixelIA">
+              <svg width={14} height={14} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
               </svg>
             </button>
-            <button onClick={handleClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--pf-secondary)] hover:text-[var(--pf-primary)] hover:bg-[var(--pf-elevated)] transition-colors" title="Cerrar">
-              <svg className="w-3.5 h-3.5" width={14} height={14} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="button" onClick={handleClose} className={ui.iconButton} title="Cerrar" aria-label="Cerrar PixelIA">
+              <svg width={14} height={14} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
-        </div>
+        </header>
 
         {/* Área de conversación */}
-        <div ref={scrollRef} className={`flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4 relative z-10 ${videoContext ? styles.videoAssistantConversation : ""}`}>
-          {videoContext && messages.length === 1 && <section className={styles.videoAssistantWelcome}>
-            <div className={styles.videoAssistantWelcomeIcon}><Clapperboard /></div>
-            <span>IDEAS PARA TU VIDEO</span>
-            <h2>Del primer hook a la última escena.</h2>
-            <p>{VIDEO_INITIAL_MESSAGE.content}</p>
-            <div className={styles.videoAssistantStarters}>
-              {VIDEO_STARTERS.map(({ label, prompt, Icon }) => <button type="button" key={label} disabled={isLoading} onClick={() => { void submitMessage(prompt) }}><Icon /><span>{label}</span></button>)}
+        <div ref={scrollRef} className={ui.conversation}>
+          {showWelcome && <section className={ui.welcome}>
+            <span className={ui.welcomeMark} aria-hidden="true">
+              {welcome.Icon ? <welcome.Icon /> : <PixelAiIcon strokeWidth={1.5} />}
+            </span>
+            <span className={ui.welcomeKicker}>{welcome.kicker}</span>
+            <h2>{welcome.title}</h2>
+            <p>{welcome.text}</p>
+            <div className={ui.starters} data-count={welcome.starters.length}>
+              {welcome.starters.map(({ label, prompt, Icon }) => (
+                <button type="button" key={label} disabled={isLoading} onClick={() => { void submitMessage(prompt) }}>
+                  <span className={ui.starterIcon} aria-hidden="true"><Icon /></span>
+                  <span>{label}</span>
+                  <svg className={ui.starterArrow} width={12} height={12} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17 17 7M9 7h8v8" />
+                  </svg>
+                </button>
+              ))}
             </div>
-            <small>Ideas para revisar en el chat; tus escenas no cambian automáticamente.</small>
+            <small>{welcome.note}</small>
           </section>}
+
           {messages.map((msg, idx) => {
-            if (videoContext && idx === 0) return null
+            if (idx === 0 && (videoContext || showWelcome)) return null
             const isUser = msg.role === "user"
             return (
-              <div key={idx} className={`flex items-start gap-2 ${isUser ? "justify-end" : ""}`}>
-                {!isUser && (
-                  <div
-                    className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center"
-                    style={{
-                      background: "var(--pf-ai-tint)",
-                      border: "1px solid var(--pf-ai-border)",
-                    }}
-                  >
-                    <PixelAiIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
-                  </div>
-                )}
-                <div
-                  className={`rounded-2xl px-3.5 py-2.5 max-w-[85%] ${
-                    isUser ? "rounded-tr-md" : "rounded-tl-md"
-                  }`}
-                  style={
-                    isUser
-                      ? {
-                          background: "linear-gradient(135deg, var(--pf-elevated), var(--pf-card))",
-                          border: "1px solid var(--pf-ai-border)",
-                        }
-                      : {
-                          background: "var(--pf-elevated)",
-                          border: "1px solid var(--pf-border)",
-                        }
-                  }
-                >
-                  <p className="text-sm text-[var(--pf-primary)] leading-relaxed">{msg.content}</p>
+              <div key={idx} className={`${ui.row} ${isUser ? ui.rowUser : ""}`}>
+                {!isUser && assistantAvatar}
+                <div className={`${ui.bubble} ${isUser ? ui.bubbleUser : ui.bubbleAssistant}`}>
+                  <p>{msg.content}</p>
 
                   {/* Botones de confirmación en el último mensaje del asistente */}
                   {convState === "confirming" && !isUser && idx === messages.length - 1 && (
-                    <div className="flex gap-2 mt-3">
+                    <div className={ui.confirmActions}>
                       <button
+                        type="button"
                         onClick={handleConfirm}
                         disabled={isLoading}
-                        className={`${styles.aiPrimaryAction} flex-1 py-2 px-3 rounded-lg text-xs font-semibold active:scale-[0.98] transition-all duration-200 disabled:opacity-50`}
+                        className={ui.primaryAction}
                       >
                         {isLoading ? "..." : "Sí, recomendar ángulos"}
                       </button>
                       <button
+                        type="button"
                         onClick={handleCorrect}
                         disabled={isLoading}
-                        className={`${styles.aiSecondaryAction} flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[var(--pf-secondary)] border border-[var(--pf-border)] hover:text-[var(--pf-primary)] transition-colors disabled:opacity-50`}
+                        className={ui.secondaryAction}
                       >
                         Corregir
                       </button>
@@ -426,88 +416,45 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
 
           {/* Loading */}
           {isLoading && convState !== "confirming" && (
-            <div className="flex items-start gap-2">
-              <div
-                className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center"
-                style={{
-                  background: "var(--pf-ai-tint)",
-                  border: "1px solid var(--pf-ai-border)",
-                }}
-              >
-                <PixelAiIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
-              </div>
-              <div
-                className="rounded-2xl rounded-tl-md px-4 py-3"
-                style={{ background: "var(--pf-elevated)", border: "1px solid var(--pf-border)" }}
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[var(--pf-ai)] animate-pulse" style={{ animationDelay: "0ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-[var(--pf-ai)] animate-pulse" style={{ animationDelay: "200ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-[var(--pf-ai)] animate-pulse" style={{ animationDelay: "400ms" }} />
-                </div>
+            <div className={ui.row} role="status" aria-label="PixelIA está pensando">
+              {assistantAvatar}
+              <div className={`${ui.bubble} ${ui.bubbleAssistant} ${ui.typing}`}>
+                <i /><i /><i />
               </div>
             </div>
           )}
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2">
-              <div
-                className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center"
-                style={{
-                  background: "var(--pf-ai-tint)",
-                  border: "1px solid var(--pf-ai-border)",
-                }}
-              >
-                <PixelAiIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
-              </div>
-              <div className="max-w-[85%] space-y-2">
-                <div className="rounded-2xl rounded-tl-md px-3.5 py-2.5" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}>
-                  <p className="text-sm text-[var(--pf-primary)]">{error}</p>
-                </div>
+            <div className={ui.row} role="alert">
+              {assistantAvatar}
+              <div className={`${ui.bubble} ${ui.bubbleError}`}>
+                <p>{error}</p>
               </div>
             </div>
           )}
 
           {/* Recomendaciones */}
           {recommendations.length > 0 && (
-            <div className="flex items-start gap-2">
-              <div
-                className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center"
-                style={{
-                  background: "var(--pf-ai-tint)",
-                  border: "1px solid var(--pf-ai-border)",
-                }}
-              >
-                <PixelAiIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
-              </div>
-              <div className="max-w-[90%] space-y-2.5">
-                {summary && <p className="text-xs text-[var(--pf-secondary)] ml-1">{summary}</p>}
+            <div className={ui.row}>
+              {assistantAvatar}
+              <div className={ui.recommendations}>
+                {summary && <p className={ui.summary}>{summary}</p>}
 
                 {recommendations.map((rec, idx) => (
-                  <div key={idx} className="rounded-xl p-3" style={{ background: "var(--pf-elevated)", border: "1px solid var(--pf-border)" }}>
-                    <p className="text-sm font-bold text-[var(--pf-primary)] mb-1">{rec.angleName}</p>
-                    <p className="text-xs text-[var(--pf-secondary)] mb-2 leading-relaxed">{rec.reason}</p>
-                    <div className="flex gap-1.5 mb-2.5 flex-wrap">
-                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold text-[var(--pf-secondary)] bg-[var(--pf-panel)] border border-[var(--pf-border)]">
-                        {formatLabels[rec.format] ?? rec.format}
-                      </span>
-                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold text-[var(--pf-secondary)] bg-[var(--pf-panel)] border border-[var(--pf-border)]">
-                        {rec.styleName}
-                      </span>
-                      {rec.safeZoneMeta && (
-                        <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold text-[var(--pf-ai)] bg-[var(--pf-ai-tint)] border border-[var(--pf-ai-border)]">
-                          Zona segura
-                        </span>
-                      )}
+                  <div key={idx} className={ui.recCard}>
+                    <span className={ui.recIndex}>0{idx + 1}</span>
+                    <p className={ui.recTitle}>{rec.angleName}</p>
+                    <p className={ui.recReason}>{rec.reason}</p>
+                    <div className={ui.recTags}>
+                      <span>{formatLabels[rec.format] ?? rec.format}</span>
+                      <span>{rec.styleName}</span>
+                      {rec.safeZoneMeta && <span className={ui.recTagAccent}>Zona segura</span>}
                     </div>
                     {onApplyRecommendation && <button
+                      type="button"
                       onClick={() => handleApply(rec, idx)}
-                      className={`${styles.aiRecommendationAction} w-full py-2 rounded-lg text-xs font-semibold transition-colors ${
-                        appliedIndex === idx
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : "text-[var(--pf-ai)] border border-[var(--pf-ai-border)] hover:bg-[var(--pf-ai-tint)]"
-                      }`}
+                      className={`${ui.applyButton} ${appliedIndex === idx ? ui.applyButtonDone : ""}`}
                     >
                       {appliedIndex === idx ? "✓ Aplicado" : "Aplicar recomendación"}
                     </button>}
@@ -515,22 +462,22 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                 ))}
 
                 {onApplyRecommendation && appliedDetails && (
-                  <div className="rounded-xl p-3 mt-2" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)" }}>
-                    <p className="text-xs font-semibold text-emerald-400 mb-2">✓ Recomendación aplicada al generador</p>
-                    <div className="text-xs text-[var(--pf-primary)] space-y-0.5">
+                  <div className={ui.appliedCard}>
+                    <p className={ui.appliedTitle}>✓ Recomendación aplicada al generador</p>
+                    <dl>
                       {appliedDetails.productDescription && (
-                        <p><span className="text-[var(--pf-secondary)]">Producto:</span> {appliedDetails.productDescription}</p>
+                        <div><dt>Producto</dt><dd>{appliedDetails.productDescription}</dd></div>
                       )}
-                      <p><span className="text-[var(--pf-secondary)]">Ángulo:</span> {appliedDetails.angleName}</p>
-                      <p><span className="text-[var(--pf-secondary)]">Estilo:</span> {appliedDetails.styleName}</p>
-                      <p><span className="text-[var(--pf-secondary)]">Formato:</span> {formatLabels[appliedDetails.format] ?? appliedDetails.format}</p>
-                      <p><span className="text-[var(--pf-secondary)]">Zona Segura Meta:</span> {appliedDetails.safeZoneMeta ? "Activada" : "Desactivada"}</p>
-                    </div>
+                      <div><dt>Ángulo</dt><dd>{appliedDetails.angleName}</dd></div>
+                      <div><dt>Estilo</dt><dd>{appliedDetails.styleName}</dd></div>
+                      <div><dt>Formato</dt><dd>{formatLabels[appliedDetails.format] ?? appliedDetails.format}</dd></div>
+                      <div><dt>Zona Segura Meta</dt><dd>{appliedDetails.safeZoneMeta ? "Activada" : "Desactivada"}</dd></div>
+                    </dl>
                   </div>
                 )}
 
-                <button onClick={handleReset} className="text-xs font-medium text-[var(--pf-secondary)] hover:text-[var(--pf-primary)] transition-colors flex items-center gap-1 ml-1">
-                  <svg className="w-3 h-3" width={12} height={12} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="button" onClick={handleReset} className={ui.resetButton}>
+                  <svg width={12} height={12} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                   Nueva consulta
@@ -542,17 +489,15 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
 
         {/* Zona de entrada (solo en collecting y confirming) */}
         {(convState === "collecting" || convState === "confirming") && (
-          <div
-            className={`flex-shrink-0 p-3 relative z-10 ${videoContext ? styles.videoAssistantComposer : ""}`}
-            style={{ borderTop: "1px solid var(--pf-border)" }}
-          >
-            <div className="flex items-end gap-2">
+          <div className={ui.composer}>
+            <div className={ui.inputShell}>
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 rows={2}
-                placeholder={videoContext ? "Describe tu video o pide una idea para avanzar..." : "Escribe tu respuesta..."}
-                className={`${styles.aiChatInput} flex-1 resize-none border px-3.5 py-2.5 rounded-xl text-sm text-[var(--pf-primary)] placeholder:text-[var(--pf-tertiary)] focus:outline-none transition-colors`}
+                aria-label="Mensaje para PixelIA"
+                placeholder={videoContext ? "Describe tu video o pide una idea para avanzar..." : "Cuéntale qué vendes, a quién y qué quieres lograr…"}
+                className={ui.textarea}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey && !isLoading) {
                     e.preventDefault()
@@ -560,16 +505,21 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                   }
                 }}
               />
-              <button
-                onClick={handleRecommend}
-                disabled={isLoading || !input.trim()}
-                className={`${styles.aiSendButton} w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center active:scale-[0.95] transition-all duration-200 disabled:cursor-not-allowed`}
-                title="Enviar"
-              >
-                <svg className="w-4 h-4" width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              </button>
+              <div className={ui.inputFooter}>
+                <small><kbd>Enter</kbd> enviar · <kbd>Shift</kbd> + <kbd>Enter</kbd> nueva línea</small>
+                <button
+                  type="button"
+                  onClick={handleRecommend}
+                  disabled={isLoading || !input.trim()}
+                  className={ui.sendButton}
+                  title="Enviar"
+                  aria-label="Enviar mensaje"
+                >
+                  <svg width={16} height={16} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M12 19V5m0 0-6 6m6-6 6 6" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         )}
