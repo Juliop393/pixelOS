@@ -140,3 +140,27 @@
 
 @media(max-width:767px){.simple .reference,.simple .goalSection,.simple .styleSection,.simple .durationFixed{border-radius:16px}.hero h1{font-size:clamp(30px,8.4vw,38px)}.simple .createButton{min-height:52px}}
 @media(prefers-reduced-motion:reduce){.simple .reference,.simple .goalSection,.simple .styleSection,.simple .uploadZone,.simple .pixelAiHelp,.simple .referenceActions label,.simple .referenceActions button,.simple .libraryChoice,.simple .videoDownload,.simple .createButton{transition:none}.simple .createButton:hover:not(:disabled){transform:none}}
+
+/* ── Layout parity with Imagen Simple ───────────────────────────────
+   Same container usage, padding, column ratio, gaps and card rhythm,
+   so both Simple editors read as siblings. */
+.inner{width:100%;max-width:none;padding:clamp(24px,2.5vw,34px)}
+.hero{margin-bottom:24px}
+.layout{grid-template-columns:minmax(300px,.8fr) minmax(0,1.2fr);gap:clamp(18px,2vw,26px);align-items:start}
+.decisions{gap:12px}
+.simple .reference{padding:20px;min-height:0}
+.simple .goalSection,.simple .styleSection{padding:18px 20px}
+.simple .sectionHeading{margin-bottom:14px}
+.simple .sectionHeading h2,.simple .goalSection .sectionHeading h2{font-size:18px;letter-spacing:-.025em}
+.simple .sectionHeading p{font-size:13px}
+.simple .goalSection textarea{min-height:132px;padding:14px 15px}
+.simple .uploadZone,.simple .preview{min-height:380px;max-height:620px}
+.simple .preview img{max-height:620px}
+.styleGrid{gap:10px}
+.simple .styleGrid button{min-height:76px;padding:12px;gap:10px}
+.simple .styleGrid button:first-child{min-height:70px}
+.simple .styleGrid button>svg{width:34px;height:34px;flex-basis:34px;padding:9px}
+.simple .durationFixed{min-height:58px;padding:13px 16px 13px 20px}
+.createArea{padding:4px 2px 0}
+@media(max-width:1050px){.layout{grid-template-columns:minmax(0,1fr)}.simple .uploadZone,.simple .preview{min-height:300px;max-height:460px}.simple .preview img{max-height:460px}}
+@media(max-width:767px){.inner{padding:18px 14px 22px}.simple .reference,.simple .goalSection,.simple .styleSection{padding:16px}.simple .uploadZone,.simple .preview{min-height:255px;max-height:none}.simple .styleGrid button{min-height:80px;padding:10px;gap:8px}.simple .styleGrid button>svg{width:31px;height:31px;flex-basis:31px;padding:7px}}

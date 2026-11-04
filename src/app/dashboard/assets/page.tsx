@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { ArrowDown, ArrowUp, Check, Download, Film, Image as ImageIcon, Loader2, Play } from "lucide-react"
+import { ArrowDown, ArrowUp, Check, Download, Film, Image as ImageIcon, Layers, Loader2, Play } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import l from "@/components/dashboard/Library.module.css"
 
 type Asset = {
   id: string
@@ -51,6 +52,48 @@ function VideoCard({ asset, selectionMode, selectionOrder, selectionDisabled, on
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const isFinal = asset.kind === "final"
+  // Visual-only preview: a muted frame loaded lazily from the same signed-URL endpoint.
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const previewRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const target = stageRef.current
+    if (!target || typeof IntersectionObserver === "undefined") return
+    const controller = new AbortController()
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      void (async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (!session?.access_token || controller.signal.aborted) return
+          const response = await fetch(`/api/assets/video-url?assetId=${encodeURIComponent(asset.id)}`, {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+            cache: "no-store",
+            signal: controller.signal,
+          })
+          if (!response.ok) return
+          const result: unknown = await response.json()
+          if (!controller.signal.aborted && typeof result === "object" && result !== null && "videoUrl" in result &&
+              typeof result.videoUrl === "string" && result.videoUrl.startsWith("https://")) setPreviewUrl(result.videoUrl)
+        } catch { /* Without a preview the card keeps its placeholder; "Ver video" still works. */ }
+      })()
+    }, { rootMargin: "120px" })
+    observer.observe(target)
+    return () => { observer.disconnect(); controller.abort() }
+  }, [asset.id])
+
+  const startHoverPreview = () => {
+    if (!window.matchMedia("(hover: hover) and (prefers-reduced-motion: no-preference)").matches) return
+    void previewRef.current?.play().catch(() => {})
+  }
+  const stopHoverPreview = () => {
+    const media = previewRef.current
+    if (!media) return
+    media.pause()
+    if (media.duration > 0.2) media.currentTime = 0.15
+  }
 
   const openVideo = async () => {
     if (loading) return
@@ -80,28 +123,31 @@ function VideoCard({ asset, selectionMode, selectionOrder, selectionDisabled, on
     }
   }
 
-  return <article className={`bg-[#2A2826] rounded-2xl border overflow-hidden ${selectionOrder ? "border-[#D97757]" : "border-[#3A3833]"}`}>
-    <div className="aspect-square bg-[#11100F] relative flex items-center justify-center">
-      {selectionMode && <button type="button" onClick={onToggle} disabled={selectionDisabled} aria-pressed={selectionOrder > 0} aria-label={selectionOrder ? `Quitar video ${selectionOrder} de la selección` : "Seleccionar video"} className={`absolute right-3 top-3 z-10 flex min-h-10 items-center gap-2 rounded-xl border px-3 text-xs font-semibold shadow-lg transition-colors ${selectionOrder ? "border-[#D97757] bg-[#D97757] text-white" : "border-[#6A625C] bg-[#1E1C1A] text-[#E8E6E1] hover:border-[#D97757]"} disabled:opacity-50`}>{selectionOrder ? <><Check className="h-4 w-4" />#{selectionOrder}</> : "Seleccionar"}</button>}
-      {videoUrl ? <video className="w-full h-full object-contain" src={videoUrl} controls playsInline preload="metadata" aria-label={isFinal ? "Video final" : "Video de escena"} onError={() => { setVideoUrl(null); setDownloadUrl(null); setError("No se pudo reproducir el video. Actualiza el enlace e inténtalo de nuevo.") }} /> : <>
-        <Film className="w-10 h-10 text-[#D97757]/60" aria-hidden="true" />
-        <button type="button" onClick={() => { void openVideo() }} disabled={loading} className="absolute bottom-4 left-4 right-4 min-h-10 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] disabled:opacity-60 transition-colors inline-flex items-center justify-center gap-2">
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+  const title = asset.title || (isFinal ? "Anuncio final" : "Clip de escena")
+
+  return <article className={`${l.card} ${selectionOrder ? l.cardSelected : ""}`} onMouseEnter={startHoverPreview} onMouseLeave={stopHoverPreview}>
+    <div ref={stageRef} className={l.stage}>
+      <span className={`${l.mediaChip} ${isFinal ? l.mediaChipFinal : ""}`}>{isFinal ? <Layers aria-hidden="true" /> : <Film aria-hidden="true" />}{isFinal ? "Video final" : "Escena"}</span>
+      {selectionMode && <button type="button" onClick={onToggle} disabled={selectionDisabled} aria-pressed={selectionOrder > 0} aria-label={selectionOrder ? `Quitar video ${selectionOrder} de la selección` : "Seleccionar video"} className={`${l.selectToggle} ${selectionOrder ? l.selectToggleOn : ""}`}>{selectionOrder ? <><Check aria-hidden="true" />#{selectionOrder}</> : "Seleccionar"}</button>}
+      {videoUrl ? <video src={videoUrl} controls playsInline preload="metadata" aria-label={isFinal ? "Video final" : "Video de escena"} onError={() => { setVideoUrl(null); setDownloadUrl(null); setError("No se pudo reproducir el video. Actualiza el enlace e inténtalo de nuevo.") }} /> : <>
+        {previewUrl ? <video ref={previewRef} className={l.previewMedia} src={previewUrl} muted loop playsInline preload="metadata" aria-hidden="true" tabIndex={-1} onLoadedMetadata={(event) => { if (event.currentTarget.duration > 0.2) event.currentTarget.currentTime = 0.15 }} onError={() => setPreviewUrl(null)} />
+          : <span className={l.placeholder} aria-hidden="true"><span><Film /></span></span>}
+        <span className={l.stageShade} aria-hidden="true" />
+        <span className={l.playBadge} aria-hidden="true"><Play /></span>
+        <button type="button" onClick={() => { void openVideo() }} disabled={loading} className={l.stageCta}>
+          {loading ? <Loader2 className={l.spin} aria-hidden="true" /> : <Play aria-hidden="true" />}
           {loading ? "Preparando video…" : "Ver video"}
         </button>
       </>}
     </div>
-    <div className="p-4 space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <span className="inline-block px-2 py-1 rounded-md text-[11px] font-semibold bg-[#D97757]/15 text-[#E49A7D] border border-[#D97757]/25">
-          {isFinal ? "Video final" : "Escena"}
-        </span>
-        <span className="text-xs text-[#9A9893]">{formatDate(asset.created_at)}</span>
+    <div className={l.body}>
+      <div className={l.bodyTop}>
+        <p className={l.title} title={title}>{title}</p>
+        <span className={l.date}>{formatDate(asset.created_at)}</span>
       </div>
-      <p className="text-sm font-semibold text-[#E8E6E1] truncate">{asset.title || (isFinal ? "Anuncio final" : "Clip de escena")}</p>
-      {asset.format && <p className="text-xs text-[#9A9893]">{FORMAT_NAMES[asset.format] || asset.format}</p>}
-      {downloadUrl && <div className="flex items-center justify-between gap-3"><a href={downloadUrl} download={isFinal ? "pixelfm-final.mp4" : "pixelfm-escena.mp4"} className="text-sm text-[#E49A7D] hover:text-[#F4B297] inline-flex items-center gap-2"><Download className="w-4 h-4" />Descargar</a><button type="button" onClick={() => { void openVideo() }} disabled={loading} className="text-xs text-[#9A9893] hover:text-[#E8E6E1]">Actualizar enlace</button></div>}
-      {error && <p role="alert" className="text-xs text-[#E7A59D]">{error}</p>}
+      {asset.format && <div className={l.tags}><span>{FORMAT_NAMES[asset.format] || asset.format}</span></div>}
+      {downloadUrl && <div className={l.bodyActions}><a href={downloadUrl} download={isFinal ? "pixelfm-final.mp4" : "pixelfm-escena.mp4"} className={l.linkAction}><Download aria-hidden="true" />Descargar</a><button type="button" onClick={() => { void openVideo() }} disabled={loading} className={l.mutedAction}>Actualizar enlace</button></div>}
+      {error && <p role="alert" className={l.cardError}>{error}</p>}
     </div>
   </article>
 }
@@ -203,39 +249,64 @@ export default function MisCreativosPage() {
     document.body.removeChild(link)
   }
 
-  return <div id="dashboard-assets" className="mx-auto w-full min-w-0 max-w-6xl pb-10">
-    <div className="mb-7">
-      <h1 className="text-3xl font-bold tracking-tight mb-2">Mis creativos</h1>
-      <p className="text-[#9A9893]">Tus imágenes y videos, reunidos en un solo lugar.</p>
-    </div>
+  return <div id="dashboard-assets" className={l.page}>
+    <header className={l.header}>
+      <div>
+        <span className={l.kicker}>TU BIBLIOTECA</span>
+        <h1>Mis creativos</h1>
+        <p>Tus imágenes y videos, reunidos en un solo lugar.</p>
+      </div>
 
-    <div role="group" aria-label="Tipo de creativo" className="mb-8 inline-flex gap-1 rounded-xl border border-[#3A3833] bg-[#1E1C1A] p-1">
-      <button type="button" aria-pressed={tab === "image"} disabled={merging} onClick={() => { setTab("image"); setSelectionMode(false); setSelectedVideoIds([]); setMergeError("") }} className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${tab === "image" ? "bg-[#D97757] text-white" : "text-[#AFA9A1] hover:text-[#E8E6E1] hover:bg-[#2A2826]"}`}>Imágenes <span className="opacity-70">{imageCount}</span></button>
-      <button type="button" aria-pressed={tab === "video"} disabled={merging} onClick={() => setTab("video")} className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${tab === "video" ? "bg-[#D97757] text-white" : "text-[#AFA9A1] hover:text-[#E8E6E1] hover:bg-[#2A2826]"}`}>Videos <span className="opacity-70">{videoCount}</span></button>
-    </div>
+      <div role="group" aria-label="Tipo de creativo" className={l.tabs}>
+        <button type="button" aria-pressed={tab === "image"} disabled={merging} onClick={() => { setTab("image"); setSelectionMode(false); setSelectedVideoIds([]); setMergeError("") }} className={tab === "image" ? l.tabActive : ""}><ImageIcon aria-hidden="true" />Imágenes <b>{imageCount}</b></button>
+        <button type="button" aria-pressed={tab === "video"} disabled={merging} onClick={() => setTab("video")} className={tab === "video" ? l.tabActive : ""}><Film aria-hidden="true" />Videos <b>{videoCount}</b></button>
+      </div>
+    </header>
 
-    {tab === "video" && !loading && !error && <div className="mb-6 rounded-2xl border border-[#3A3833] bg-[#1E1C1A] p-4">
-      {!selectionMode ? <button type="button" disabled={videoCount === 0} onClick={() => { setSelectionMode(true); setMergeError("") }} className="rounded-xl border border-[#66534A] px-4 py-2 text-sm font-semibold text-[#E8E6E1] transition-colors hover:border-[#D97757] disabled:opacity-50">Seleccionar</button> : <>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p aria-live="polite" className="text-sm font-semibold text-[#E8E6E1]">{selectedVideoIds.length} {selectedVideoIds.length === 1 ? "seleccionado" : "seleccionados"} <span className="font-normal text-[#9A9893]">· máximo 10</span></p>
-          <div className="flex flex-wrap gap-2"><button type="button" disabled={merging} onClick={() => { setSelectionMode(false); setSelectedVideoIds([]); setMergeError("") }} className="rounded-xl border border-[#4A4540] px-4 py-2 text-sm text-[#B7AAA0] hover:text-[#E8E6E1] disabled:opacity-50">Cancelar</button><button type="button" disabled={merging || selectedVideoIds.length < 2} onClick={() => { void combineVideos() }} className="inline-flex items-center gap-2 rounded-xl bg-[#D97757] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#C26547] disabled:opacity-50">{merging && <Loader2 className="h-4 w-4 animate-spin" />}{merging ? "Combinando..." : "Combinar videos"}</button></div>
+    {tab === "video" && !loading && !error && <div className={l.toolbar}>
+      {!selectionMode ? <div className={l.toolbarRow}>
+        <div className={l.toolbarIntro}>
+          <span className={l.toolbarIcon} aria-hidden="true"><Layers /></span>
+          <div><b>Combina tus clips en un anuncio final</b><small>Selecciona escenas en el orden en que quieras unirlas <em>· de 2 a 10 videos</em></small></div>
         </div>
-        {selectedVideos.length > 0 && <ol aria-label="Orden de combinación" className="mt-4 flex flex-col gap-2">{selectedVideos.map((asset, index) => <li key={asset.id} className="flex min-w-0 items-center gap-3 rounded-xl border border-[#3A3833] bg-[#25211E] px-3 py-2"><span className="grid h-8 w-8 flex-none place-items-center rounded-lg bg-[#D97757]/20 text-xs font-bold text-[#E49A7D]">{index + 1}</span><span className="min-w-0 flex-1 truncate text-sm text-[#E8E6E1]">{asset.title || (asset.kind === "final" ? "Anuncio final" : "Clip de escena")}</span><span className="hidden text-xs text-[#9A9893] sm:inline">{asset.kind === "final" ? "Final" : "Escena"}</span><button type="button" disabled={merging || index === 0} onClick={() => moveVideo(index, -1)} aria-label={`Subir video ${index + 1}`} className="rounded-lg border border-[#4A4540] p-2 text-[#B7AAA0] hover:text-[#E8E6E1] disabled:opacity-30"><ArrowUp className="h-4 w-4" /></button><button type="button" disabled={merging || index === selectedVideos.length - 1} onClick={() => moveVideo(index, 1)} aria-label={`Bajar video ${index + 1}`} className="rounded-lg border border-[#4A4540] p-2 text-[#B7AAA0] hover:text-[#E8E6E1] disabled:opacity-30"><ArrowDown className="h-4 w-4" /></button></li>)}</ol>}
-        {mergeError && <p role="alert" className="mt-3 text-sm text-[#E7A59D]">{mergeError}</p>}
+        <div className={l.toolbarActions}>
+          <button type="button" disabled={videoCount === 0} onClick={() => { setSelectionMode(true); setMergeError("") }} className={l.ghostButton}><Check aria-hidden="true" />Seleccionar</button>
+        </div>
+      </div> : <>
+        <div className={l.toolbarRow}>
+          <div className={l.toolbarIntro}>
+            <span className={l.toolbarIcon} aria-hidden="true"><Layers /></span>
+            <div><b aria-live="polite">{selectedVideoIds.length} {selectedVideoIds.length === 1 ? "seleccionado" : "seleccionados"}</b><small>Ordena los clips antes de combinarlos <em>· máximo 10</em></small></div>
+          </div>
+          <div className={l.toolbarActions}>
+            <button type="button" disabled={merging} onClick={() => { setSelectionMode(false); setSelectedVideoIds([]); setMergeError("") }} className={l.ghostButton}>Cancelar</button>
+            <button type="button" disabled={merging || selectedVideoIds.length < 2} onClick={() => { void combineVideos() }} className={l.primaryButton}>{merging ? <Loader2 className={l.spin} aria-hidden="true" /> : <Layers aria-hidden="true" />}{merging ? "Combinando..." : "Combinar videos"}</button>
+          </div>
+        </div>
+        {selectedVideos.length > 0 && <ol aria-label="Orden de combinación" className={l.order}>{selectedVideos.map((asset, index) => <li key={asset.id}><span className={l.orderIndex}>{index + 1}</span><span className={l.orderTitle}>{asset.title || (asset.kind === "final" ? "Anuncio final" : "Clip de escena")}</span><span className={l.orderKind}>{asset.kind === "final" ? "Final" : "Escena"}</span><button type="button" disabled={merging || index === 0} onClick={() => moveVideo(index, -1)} aria-label={`Subir video ${index + 1}`}><ArrowUp aria-hidden="true" /></button><button type="button" disabled={merging || index === selectedVideos.length - 1} onClick={() => moveVideo(index, 1)} aria-label={`Bajar video ${index + 1}`}><ArrowDown aria-hidden="true" /></button></li>)}</ol>}
+        {mergeError && <p role="alert" className={l.alert}>{mergeError}</p>}
       </>}
     </div>}
 
     <section id="assets-panel" aria-live="polite" aria-busy={loading}>
-      {loading ? <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-12 flex items-center justify-center gap-3 text-[#B7AAA0]"><Loader2 className="w-5 h-5 animate-spin" />Cargando tus creativos…</div>
-        : error ? <div role="alert" className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-12 text-center"><p className="text-[#E8E6E1] mb-4">{error}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="rounded-xl bg-[#D97757] px-4 py-2 text-sm font-semibold text-white hover:bg-[#C26547]">Reintentar</button></div>
-          : visibleAssets.length === 0 ? <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-12 flex flex-col items-center justify-center text-center"><div className="w-16 h-16 rounded-2xl bg-[#1E1C1A] border border-[#3A3833] flex items-center justify-center mb-5">{tab === "image" ? <ImageIcon className="w-8 h-8 text-[#9A9893]" /> : <Film className="w-8 h-8 text-[#9A9893]" />}</div><p className="text-[#B7AAA0] font-medium">{tab === "image" ? "Tus imágenes generadas aparecerán aquí." : "Tus clips y anuncios finales aparecerán aquí."}</p></div>
-            : <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-              {visibleAssets.map((asset) => asset.media_type === "video" ? <VideoCard key={asset.id} asset={asset} selectionMode={selectionMode} selectionOrder={selectedVideoIds.indexOf(asset.id) + 1} selectionDisabled={merging || (selectedVideoIds.length >= 10 && !selectedVideoIds.includes(asset.id))} onToggle={() => toggleVideo(asset.id)} /> : <article key={asset.id} className="bg-[#2A2826] rounded-2xl border border-[#3A3833] overflow-hidden group">
-                <div className="aspect-square bg-[#1E1C1A] relative overflow-hidden">
-                  {asset.public_url ? <img src={asset.public_url} alt={asset.title ? `Creativo para ${asset.title}` : "Creativo generado"} className="w-full h-full object-contain" /> : <ImageIcon className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-[#9A9893]" />}
-                  {asset.public_url && <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-center justify-center"><button type="button" onClick={() => handleImageDownload(asset.public_url!, asset.id)} className="px-4 py-2 rounded-xl bg-[#D97757] text-white font-semibold text-sm hover:bg-[#C26547] transition-colors inline-flex items-center gap-2"><Download className="w-4 h-4" />Descargar</button></div>}
+      {loading ? <div className={l.stateCard}><span className={l.stateIcon}><Loader2 className={l.spin} aria-hidden="true" /></span><p>Cargando tus creativos…</p></div>
+        : error ? <div role="alert" className={l.stateCard}><p>{error}</p><button type="button" onClick={() => setReload((value) => value + 1)} className={l.primaryButton}>Reintentar</button></div>
+          : visibleAssets.length === 0 ? <div className={l.stateCard}><span className={l.stateIcon}>{tab === "image" ? <ImageIcon aria-hidden="true" /> : <Film aria-hidden="true" />}</span><p>{tab === "image" ? "Tus imágenes generadas aparecerán aquí." : "Tus clips y anuncios finales aparecerán aquí."}</p></div>
+            : <div className={l.grid}>
+              {visibleAssets.map((asset) => asset.media_type === "video" ? <VideoCard key={asset.id} asset={asset} selectionMode={selectionMode} selectionOrder={selectedVideoIds.indexOf(asset.id) + 1} selectionDisabled={merging || (selectedVideoIds.length >= 10 && !selectedVideoIds.includes(asset.id))} onToggle={() => toggleVideo(asset.id)} /> : <article key={asset.id} className={l.card}>
+                <div className={l.stage}>
+                  {asset.format && <span className={l.mediaChip}>{FORMAT_NAMES[asset.format] || asset.format}</span>}
+                  {asset.public_url ? <img src={asset.public_url} alt={asset.title ? `Creativo para ${asset.title}` : "Creativo generado"} loading="lazy" /> : <span className={l.placeholder} aria-hidden="true"><span><ImageIcon /></span></span>}
+                  {asset.public_url && <div className={l.hoverOverlay}><button type="button" onClick={() => handleImageDownload(asset.public_url!, asset.id)} className={l.primaryButton}><Download aria-hidden="true" />Descargar</button></div>}
                 </div>
-                <div className="p-4 space-y-2"><p className="text-sm font-semibold text-[#E8E6E1] truncate">{asset.title || "Imagen generada"}</p><div className="flex items-center gap-2 flex-wrap">{typeof asset.metadata?.angle === "string" && <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#D97757]/20 text-[#D97757] border border-[#D97757]/30">{ANGLE_NAMES[asset.metadata.angle] || asset.metadata.angle}</span>}{asset.format && <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#3A3833] text-[#9A9893]">{FORMAT_NAMES[asset.format] || asset.format}</span>}</div><p className="text-xs text-[#9A9893]">{formatDate(asset.created_at)}</p>{asset.public_url && <button type="button" onClick={() => handleImageDownload(asset.public_url!, asset.id)} className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#66534A] px-4 text-sm font-semibold text-[#E49A7D] md:hidden"><Download className="h-4 w-4" />Descargar</button>}</div>
+                <div className={l.body}>
+                  <div className={l.bodyTop}>
+                    <p className={l.title} title={asset.title || "Imagen generada"}>{asset.title || "Imagen generada"}</p>
+                    <span className={l.date}>{formatDate(asset.created_at)}</span>
+                  </div>
+                  {typeof asset.metadata?.angle === "string" && <div className={l.tags}><span className={l.tagAccent}>{ANGLE_NAMES[asset.metadata.angle] || asset.metadata.angle}</span></div>}
+                  {asset.public_url && <button type="button" onClick={() => handleImageDownload(asset.public_url!, asset.id)} className={`${l.ghostButton} ${l.mobileDownload}`}><Download aria-hidden="true" />Descargar</button>}
+                </div>
               </article>)}
             </div>}
     </section>
