@@ -529,3 +529,10 @@
   .pixelAiHeaderButton span{display:inline}
   .pixelAiHeaderButton i{display:none}
 }
+
+/* Editor sub-nav in the topbar's glass material — matches Imagen. */
+.modeSwitch{border-color:rgba(243,234,220,.1);background:linear-gradient(180deg,rgba(50,44,39,.5),rgba(20,17,15,.4));-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);box-shadow:0 10px 24px -14px rgba(0,0,0,.6),inset 0 1px rgba(255,255,255,.07)}
+.modeSwitch .modeSelected{border-color:rgba(255,255,255,.14);background:linear-gradient(180deg,#e17b56,#c95d3a);color:#fff6ef;box-shadow:0 6px 16px rgba(215,107,69,.24),inset 0 1px rgba(255,255,255,.22)}
+.pixelAiHeaderButton{border:1px solid rgba(243,234,220,.11);border-radius:12px;background:linear-gradient(180deg,rgba(50,44,39,.5),rgba(20,17,15,.4));-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);box-shadow:0 10px 24px -14px rgba(0,0,0,.6),inset 0 1px rgba(255,255,255,.07)}
+.pixelAiHeaderButton:hover,.pixelAiHeaderButtonActive{border-color:rgba(243,234,220,.2);background:rgba(255,255,255,.06);box-shadow:0 10px 24px -14px rgba(0,0,0,.6),inset 0 1px rgba(255,255,255,.08)}
+.pixelAiHeaderButton i{background:rgba(8,7,6,.35)}

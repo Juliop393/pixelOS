@@ -75,7 +75,7 @@ export default function VideoSimple({
     <div className={s.inner}>
       <header className={s.hero}>
         <span>VIDEO · MODO SIMPLE</span>
-        <h1 id="video-simple-title">Tu video empieza con una idea.</h1>
+        <h1 id="video-simple-title">Tu video empieza con <em>una idea.</em></h1>
         <p>Elige una imagen, cuenta qué quieres lograr y deja que PixelFM prepare el enfoque.</p>
       </header>
 

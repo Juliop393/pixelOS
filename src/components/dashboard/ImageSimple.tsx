@@ -65,7 +65,7 @@ export default function ImageSimple({
   return <div className={s.simple}>
     <header className={s.hero}>
       <span>IMAGEN · MODO SIMPLE</span>
-      <h1>Tu imagen empieza con una idea.</h1>
+      <h1>Tu imagen empieza con <em>una idea.</em></h1>
       <p>Cuéntanos qué quieres crear y PixelFM preparará el resto.</p>
     </header>
     <div className={s.layout}>

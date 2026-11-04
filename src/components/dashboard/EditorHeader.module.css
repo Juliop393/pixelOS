@@ -72,14 +72,24 @@
   .backButton { transition: none; }
 }
 
-.backButton, .toolName { background: var(--pf-card); border-color: var(--pf-border); color: var(--pf-primary); box-shadow: var(--pf-highlight); }
-.backButton:hover { background: var(--pf-elevated); border-color: var(--pf-border-hover); color: var(--pf-headline); }
+/* Glass chips in the same material as the topbar. */
+.backButton, .toolName {
+  border-color: rgba(243, 234, 220, .1);
+  color: var(--pf-primary);
+  background: linear-gradient(180deg, rgba(50, 44, 39, .5), rgba(20, 17, 15, .4));
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, .6), inset 0 1px rgba(255, 255, 255, .07);
+}
+.toolName { color: var(--pf-headline); border-color: rgba(223, 118, 81, .22); background: linear-gradient(180deg, rgba(217, 119, 87, .12), rgba(217, 119, 87, .04)); }
+.backButton:hover { background: rgba(255, 255, 255, .06); border-color: rgba(243, 234, 220, .18); color: var(--pf-headline); }
 .backButton svg, .toolName svg { color: var(--pf-brand); }
 .backButton:focus-visible { outline-color: var(--pf-action); }
 .divider { background: var(--pf-border); }
 
 @media (max-width: 767px) {
-  .editorHeader { height: auto; min-height: 42px; flex-wrap: wrap; padding: 0 2px; }
+  /* flex-basis auto: inside the Video flex column a fixed 42px basis let the wrapped row overlap the workspace. */
+  .editorHeader { height: auto; min-height: 42px; flex: 0 0 auto; flex-wrap: wrap; row-gap: 10px; padding: 0 2px; }
   .actionSlot { width: 100%; margin-left: 0; justify-content: flex-end; }
   .backButton, .toolName { min-height: 40px; }
 }

@@ -130,3 +130,95 @@
   .createArea>button{min-height:48px}
 }
 @media(max-width:390px){.approaches{grid-template-columns:1fr}.formatControls{gap:8px}.quantity{gap:5px}}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Premium layer — same material as the dashboard home, topbar, PixelIA
+   and pricing: warm dark glass, specular top edges, cream type and
+   terracotta reserved for choices and the generate moment.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Editor sub-nav: mode switch + PixelIA */
+.headerModes{border-color:rgba(243,234,220,.1);background:linear-gradient(180deg,rgba(50,44,39,.5),rgba(20,17,15,.4));-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);box-shadow:0 10px 24px -14px rgba(0,0,0,.6),inset 0 1px rgba(255,255,255,.07)}
+.headerModes .headerModeActive{border-color:rgba(255,255,255,.14);background:linear-gradient(180deg,#e17b56,#c95d3a);color:#fff6ef;box-shadow:0 6px 16px rgba(215,107,69,.24),inset 0 1px rgba(255,255,255,.22)}
+.headerPixelAi{border-color:rgba(243,234,220,.11);background:linear-gradient(180deg,rgba(50,44,39,.5),rgba(20,17,15,.4));-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);box-shadow:0 10px 24px -14px rgba(0,0,0,.6),inset 0 1px rgba(255,255,255,.07)}
+.headerPixelAi:hover,.headerPixelAi[aria-expanded="true"]{border-color:rgba(243,234,220,.2);background:rgba(255,255,255,.06);box-shadow:0 10px 24px -14px rgba(0,0,0,.6),inset 0 1px rgba(255,255,255,.08)}
+
+/* Workspace shell */
+.simple{position:relative;isolation:isolate;overflow:hidden;border-color:rgba(243,234,220,.1);border-top-color:rgba(255,246,236,.16);background:radial-gradient(70% 46% at 92% 0,rgba(217,119,87,.11),transparent 62%),radial-gradient(50% 40% at 0 100%,rgba(243,234,220,.03),transparent 64%),linear-gradient(165deg,rgba(40,35,31,.86),rgba(17,15,14,.92) 58%);box-shadow:0 34px 80px -28px rgba(0,0,0,.72),0 12px 32px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.07)}
+.simple::before{content:"";position:absolute;top:0;left:8%;right:8%;height:1px;z-index:1;background:linear-gradient(90deg,transparent,rgba(255,238,226,.28) 28%,rgba(229,132,96,.45) 52%,rgba(255,238,226,.2) 76%,transparent);pointer-events:none}
+
+/* Hero */
+.hero>span{padding:6px 11px;border:1px solid rgba(215,107,69,.26);border-radius:99px;display:inline-flex;align-items:center;gap:8px;background:rgba(215,107,69,.07);color:#e5a184;font-size:10px;letter-spacing:.16em}
+.hero>span::before{content:"";width:6px;height:6px;border-radius:2px;background:#df7651;box-shadow:0 0 0 3px rgba(223,118,81,.16)}
+.hero h1{margin:16px 0 10px;font-size:clamp(36px,3.4vw,50px);font-weight:570;letter-spacing:-.052em}
+.hero h1 em{color:#e07a55;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;letter-spacing:-.03em}
+.hero p{color:#b3a99e}
+
+/* Cards */
+.simple .card,.simple .referenceColumn>div>section,.simple .inlineResult{border:1px solid rgba(243,234,220,.085);border-radius:20px;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.014));box-shadow:0 18px 40px -26px rgba(0,0,0,.6),inset 0 1px rgba(255,255,255,.055);transition:border-color .25s ease,box-shadow .25s ease}
+.simple .card:focus-within,.simple .referenceColumn>div>section:focus-within{border-color:rgba(243,234,220,.15)}
+.simple .card>div:first-child>span,.simple .referenceColumn>div>section>div:first-of-type>span,.simple .inlineResult>div:first-child>span{width:30px;height:30px;flex-basis:30px;border-color:rgba(223,118,81,.26);border-radius:10px;background:linear-gradient(160deg,rgba(217,119,87,.16),rgba(217,119,87,.05));color:#f0a081;box-shadow:inset 0 1px rgba(255,236,222,.08)}
+.simple .card>div:first-child h2,.simple .referenceColumn>div>section>div:first-of-type h2{color:var(--pf-headline);font-size:18px;font-weight:630}
+.simple .card>div:first-child p,.simple .referenceColumn>div>section>div:first-of-type p{color:var(--pf-secondary)}
+
+/* Reference upload */
+.simple .referenceColumn [data-simple-reference-frame="upload"]{border:1px dashed rgba(229,132,96,.36);border-radius:16px;background:radial-gradient(circle at 50% 40%,rgba(217,119,87,.1),transparent 58%),rgba(8,7,6,.42);transition:border-color .25s ease,background-color .25s ease,box-shadow .25s ease}
+.simple .referenceColumn [role="button"][data-simple-reference-frame="upload"]:hover,.simple .referenceColumn [role="button"][data-simple-reference-frame="upload"]:focus-visible{border-color:rgba(240,156,123,.7);box-shadow:inset 0 0 0 4px rgba(217,119,87,.05);outline:none}
+.simple .referenceColumn [role="button"] > div:first-child{width:58px;height:58px;flex-basis:58px;border-radius:17px;background:linear-gradient(160deg,rgba(217,119,87,.18),rgba(217,119,87,.06));box-shadow:inset 0 0 0 1px rgba(217,119,87,.22),0 10px 24px rgba(0,0,0,.2)}
+.simple .referenceColumn [role="button"] p{color:var(--pf-headline);font-weight:620}
+.simple .referenceColumn [role="button"] small{color:var(--pf-secondary)}
+.simple .referenceColumn [data-simple-reference-frame="preview"]{border-color:rgba(243,234,220,.12);border-radius:16px;box-shadow:0 18px 40px -22px rgba(0,0,0,.6)}
+
+/* Prompt */
+.simple .card .prompt{border:1px solid rgba(243,234,220,.11);border-radius:15px;background:rgba(8,7,6,.5);color:var(--pf-headline);box-shadow:inset 0 1px 2px rgba(0,0,0,.24);transition:border-color .22s ease,box-shadow .22s ease,background-color .22s ease}
+.simple .card .prompt::placeholder{color:var(--pf-tertiary)}
+.simple .card .prompt:hover{border-color:rgba(243,234,220,.17)}
+.simple .card .prompt:focus{border-color:rgba(223,118,81,.5);background:rgba(8,7,6,.6);box-shadow:0 0 0 4px rgba(217,119,87,.08),inset 0 1px 2px rgba(0,0,0,.24)}
+.simple .pixelAiHelp{padding:0 12px;border:1px solid rgba(243,234,220,.09);border-radius:11px;background:rgba(255,255,255,.025);transition:color .2s ease,border-color .2s ease,background-color .2s ease}
+.simple .pixelAiHelp:hover{border-color:rgba(243,234,220,.17);background:rgba(255,255,255,.05)}
+
+/* Approaches */
+.simple .approaches button{border-color:rgba(243,234,220,.08);border-radius:15px;background:rgba(8,7,6,.3);box-shadow:inset 0 1px rgba(255,255,255,.03)}
+.simple .approaches button:hover{border-color:rgba(223,118,81,.3);background:rgba(217,119,87,.06)}
+.simple .approaches button>svg{border-radius:11px;background:rgba(217,119,87,.1);box-shadow:inset 0 0 0 1px rgba(217,119,87,.18);color:#ec9675}
+.simple .approaches .selected{border-color:transparent;background:linear-gradient(150deg,rgba(217,119,87,.18),rgba(217,119,87,.05)) padding-box,linear-gradient(150deg,rgba(240,150,115,.7),rgba(217,119,87,.22) 60%,rgba(243,234,220,.1)) border-box;box-shadow:0 12px 26px -16px rgba(217,119,87,.5),inset 0 1px rgba(255,236,222,.08)}
+.simple .approaches .selected>svg{color:#fff4ec;background:linear-gradient(180deg,#df7651,#c45a37);box-shadow:inset 0 1px rgba(255,255,255,.2)}
+.simple .approaches button em{padding:2px 7px;border:1px solid rgba(223,118,81,.32);border-radius:99px;color:#eea080;background:rgba(217,119,87,.08)}
+
+/* Format + quantity */
+.simple .formats{padding:4px;gap:3px;border:1px solid rgba(243,234,220,.09);border-radius:13px;background:rgba(8,7,6,.38)}
+.simple .formats button{height:36px;border-color:transparent;border-radius:10px;background:transparent;color:var(--pf-secondary)}
+.simple .formats button:hover{color:var(--pf-headline);background:rgba(255,255,255,.04)}
+.simple .formats .selected{border-color:rgba(255,255,255,.14);background:linear-gradient(180deg,#e17b56,#c95d3a);color:#fff6ef;box-shadow:0 6px 16px rgba(215,107,69,.24),inset 0 1px rgba(255,255,255,.22)}
+.simple .quantityStepper{height:44px;border-color:rgba(243,234,220,.09);border-radius:13px;background:rgba(8,7,6,.38)}
+.simple .quantityStepper button{width:34px;height:34px;border-radius:10px}
+.simple .quantityStepper button:hover:not(:disabled){background:rgba(217,119,87,.14)}
+.simple .quantityStepper output{min-width:30px;font-size:16px;font-weight:650}
+
+/* Brand identity: custom check */
+.simple .brandIdentityOption{padding:13px 15px;border-color:rgba(243,234,220,.09);border-radius:15px;background:rgba(255,255,255,.025);transition:border-color .2s ease,background-color .2s ease}
+.simple .brandIdentityOption:hover{border-color:rgba(243,234,220,.16)}
+.simple .brandIdentityOption[data-active="true"]{border-color:rgba(223,118,81,.34);background:rgba(217,119,87,.08)}
+.simple .brandIdentityOption input{appearance:none;-webkit-appearance:none;width:20px;height:20px;margin:0;border:1px solid rgba(243,234,220,.24);border-radius:6px;display:grid;place-items:center;background:rgba(8,7,6,.5);transition:background-color .2s ease,border-color .2s ease}
+.simple .brandIdentityOption input::after{content:"";width:9px;height:5px;border-left:2px solid #fff6ef;border-bottom:2px solid #fff6ef;transform:translateY(-1px) rotate(-45deg) scale(0);transition:transform .18s ease}
+.simple .brandIdentityOption input:checked{border-color:transparent;background:linear-gradient(180deg,#e17b56,#c95d3a)}
+.simple .brandIdentityOption input:checked::after{transform:translateY(-1px) rotate(-45deg) scale(1)}
+.simple .brandIdentityOption input:focus-visible{outline:2px solid var(--pf-action);outline-offset:3px}
+.simple .brandIdentityOption b{color:var(--pf-headline);font-size:13px}
+
+/* Generate */
+.simple .createArea>button{min-height:56px;border:1px solid rgba(255,255,255,.16);border-radius:16px;background:linear-gradient(180deg,#e27c57,#c95d3a);color:#fff6ef;box-shadow:0 16px 34px -10px rgba(215,107,69,.45),inset 0 1px rgba(255,255,255,.24);font-weight:680;transition:transform .22s ease,filter .22s ease,box-shadow .22s ease}
+.simple .createArea>button:hover:not(:disabled){filter:brightness(1.05);transform:translateY(-1px);box-shadow:0 20px 40px -10px rgba(215,107,69,.52),inset 0 1px rgba(255,255,255,.26)}
+.simple .createArea>button:active:not(:disabled){transform:scale(.99)}
+.simple .createArea>button:disabled{border-color:rgba(243,234,220,.08);background:rgba(255,255,255,.05);color:var(--pf-tertiary);box-shadow:none;opacity:1}
+.simple .createArea>button b{transition:transform .22s ease}
+.simple .createArea>button:hover:not(:disabled) b{transform:translateX(3px)}
+
+/* Result */
+.simple .inlineStage{border-color:rgba(243,234,220,.1);border-radius:16px;background:radial-gradient(circle at 50% 40%,rgba(217,119,87,.08),transparent 58%),rgba(8,7,6,.5)}
+.simple .resultActions a,.simple .resultActions button,.simple .changeAfterError{border-color:rgba(243,234,220,.11);border-radius:10px;background:rgba(255,255,255,.035);transition:border-color .2s ease,background-color .2s ease,color .2s ease}
+.simple .resultActions a:hover,.simple .resultActions button:hover,.simple .changeAfterError:hover{border-color:rgba(223,118,81,.4);background:rgba(217,119,87,.08)}
+.simple .resultThumbnails .activeThumbnail{border-color:rgba(223,118,81,.6);box-shadow:0 0 0 2px rgba(217,119,87,.16)}
+
+@media(max-width:767px){.simple .card,.simple .referenceColumn>div>section,.simple .inlineResult{border-radius:16px}.hero h1{font-size:clamp(30px,8.4vw,38px)}.simple .createArea>button{min-height:52px}}
+@media(prefers-reduced-motion:reduce){.simple .card,.simple .referenceColumn [data-simple-reference-frame="upload"],.simple .card .prompt,.simple .pixelAiHelp,.simple .brandIdentityOption,.simple .brandIdentityOption input,.simple .brandIdentityOption input::after,.simple .createArea>button,.simple .createArea>button b,.simple .resultActions a,.simple .resultActions button{transition:none}.simple .createArea>button:hover:not(:disabled){transform:none}}

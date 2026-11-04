@@ -67,3 +67,76 @@
   .createButton{min-height:50px}
 }
 @media(max-width:390px){.styleGrid{grid-template-columns:1fr}.styleGrid button:first-child{grid-column:auto}}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Premium layer — aligned with Imagen Simple, the dashboard home,
+   the topbar, PixelIA and pricing.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Workspace shell */
+.simple{position:relative;isolation:isolate;overflow:hidden;border-color:rgba(243,234,220,.1);border-top-color:rgba(255,246,236,.16);background:radial-gradient(70% 46% at 92% 0,rgba(217,119,87,.11),transparent 62%),radial-gradient(50% 40% at 0 100%,rgba(243,234,220,.03),transparent 64%),linear-gradient(165deg,rgba(40,35,31,.86),rgba(17,15,14,.92) 58%);box-shadow:0 34px 80px -28px rgba(0,0,0,.72),0 12px 32px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.07)}
+.simple::before{content:"";position:absolute;top:0;left:8%;right:8%;height:1px;z-index:1;background:linear-gradient(90deg,transparent,rgba(255,238,226,.28) 28%,rgba(229,132,96,.45) 52%,rgba(255,238,226,.2) 76%,transparent);pointer-events:none}
+
+/* Hero */
+.hero>span{padding:6px 11px;border:1px solid rgba(215,107,69,.26);border-radius:99px;display:inline-flex;align-items:center;gap:8px;background:rgba(215,107,69,.07);color:#e5a184;font-size:10px;letter-spacing:.16em}
+.hero>span::before{content:"";width:6px;height:6px;border-radius:2px;background:#df7651;box-shadow:0 0 0 3px rgba(223,118,81,.16)}
+.hero h1{margin:16px 0 10px;font-size:clamp(36px,3.4vw,50px);letter-spacing:-.052em}
+.hero h1 em{color:#e07a55;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;letter-spacing:-.03em}
+.hero p{color:#b3a99e}
+
+/* Cards */
+.simple .reference,.simple .goalSection,.simple .styleSection,.simple .durationFixed{border:1px solid rgba(243,234,220,.085);border-radius:20px;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.014));box-shadow:0 18px 40px -26px rgba(0,0,0,.6),inset 0 1px rgba(255,255,255,.055);transition:border-color .25s ease}
+.simple .goalSection{border-color:rgba(223,118,81,.2);background:radial-gradient(80% 60% at 100% 0,rgba(217,119,87,.1),transparent 62%),linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.016))}
+.simple .reference:focus-within,.simple .styleSection:focus-within{border-color:rgba(243,234,220,.15)}
+.simple .goalSection:focus-within{border-color:rgba(223,118,81,.32)}
+.simple .sectionHeading>span{width:30px;height:30px;flex-basis:30px;border-color:rgba(223,118,81,.26);border-radius:10px;background:linear-gradient(160deg,rgba(217,119,87,.16),rgba(217,119,87,.05));color:#f0a081;box-shadow:inset 0 1px rgba(255,236,222,.08)}
+.simple .sectionHeading h2{color:var(--pf-headline);font-size:19px}
+.simple .sectionHeading p{color:var(--pf-secondary)}
+
+/* Upload + preview */
+.simple .uploadZone{border-color:rgba(229,132,96,.36);border-radius:16px;background:radial-gradient(circle at 50% 40%,rgba(217,119,87,.1),transparent 58%),rgba(8,7,6,.42);transition:border-color .25s ease,box-shadow .25s ease,background-color .25s ease}
+.simple .uploadZone:hover,.simple .uploadZone:focus-within{border-color:rgba(240,156,123,.7);background-color:rgba(8,7,6,.42);box-shadow:inset 0 0 0 4px rgba(217,119,87,.05)}
+.simple .uploadZone.uploadZoneDragOver{border-color:rgba(240,156,123,.95);background-color:rgba(217,119,87,.08)}
+.simple .uploadZone>span{border-radius:17px;background:linear-gradient(160deg,rgba(217,119,87,.18),rgba(217,119,87,.06));box-shadow:inset 0 0 0 1px rgba(217,119,87,.22),0 10px 24px rgba(0,0,0,.2)}
+.simple .uploadZone b{color:var(--pf-headline)}
+.simple .preview{border-color:rgba(243,234,220,.1);border-radius:16px;background:radial-gradient(circle at 50% 40%,rgba(217,119,87,.08),transparent 58%),rgba(8,7,6,.5);box-shadow:0 18px 40px -22px rgba(0,0,0,.6)}
+.simple .videoPreview video{border-radius:12px;box-shadow:0 20px 44px -18px rgba(0,0,0,.7)}
+.simple .statusOverlay{background:linear-gradient(180deg,rgba(10,8,7,.18),rgba(10,8,7,.62));-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+
+/* Secondary actions */
+.simple .referenceActions label,.simple .referenceActions button,.simple .libraryChoice,.simple .videoDownload{border-color:rgba(243,234,220,.11);border-radius:11px;background:rgba(255,255,255,.035);color:var(--pf-primary);transition:border-color .2s ease,background-color .2s ease,color .2s ease}
+.simple .referenceActions label:hover,.simple .referenceActions button:hover,.simple .libraryChoice:hover:not(:disabled),.simple .libraryChoice:focus-visible,.simple .videoDownload:hover{border-color:rgba(223,118,81,.42);background:rgba(217,119,87,.08);color:var(--pf-headline)}
+.simple .referenceActions button{color:#e3a597}
+.simple .videoDownload{border-color:rgba(223,118,81,.34)}
+
+/* Goal */
+.simple .goalSection textarea{border-color:rgba(243,234,220,.11);border-radius:15px;background:rgba(8,7,6,.5);color:var(--pf-headline);box-shadow:inset 0 1px 2px rgba(0,0,0,.24)}
+.simple .goalSection textarea::placeholder{color:var(--pf-tertiary)}
+.simple .goalSection textarea:hover{border-color:rgba(243,234,220,.17)}
+.simple .goalSection textarea:focus{border-color:rgba(223,118,81,.5);background:rgba(8,7,6,.6);box-shadow:0 0 0 4px rgba(217,119,87,.08),inset 0 1px 2px rgba(0,0,0,.24)}
+.simple .pixelAiHelp{padding:0 12px;border:1px solid rgba(243,234,220,.09);border-radius:11px;background:rgba(255,255,255,.025);color:var(--pf-secondary);transition:color .2s ease,border-color .2s ease,background-color .2s ease}
+.simple .pixelAiHelp:hover{border-color:rgba(243,234,220,.17);background:rgba(255,255,255,.05);color:var(--pf-headline)}
+
+/* Approaches */
+.simple .styleGrid button{border-color:rgba(243,234,220,.08);border-radius:15px;background:rgba(8,7,6,.3);color:var(--pf-primary);box-shadow:inset 0 1px rgba(255,255,255,.03)}
+.simple .styleGrid button:hover{border-color:rgba(223,118,81,.3);background:rgba(217,119,87,.06)}
+.simple .styleGrid button>svg{background:rgba(217,119,87,.1);box-shadow:inset 0 0 0 1px rgba(217,119,87,.18);color:#ec9675}
+.simple .styleGrid button.selected{border-color:transparent;background:linear-gradient(150deg,rgba(217,119,87,.18),rgba(217,119,87,.05)) padding-box,linear-gradient(150deg,rgba(240,150,115,.7),rgba(217,119,87,.22) 60%,rgba(243,234,220,.1)) border-box;box-shadow:0 12px 26px -16px rgba(217,119,87,.5),inset 0 1px rgba(255,236,222,.08)}
+.simple .styleGrid button.selected>svg{color:#fff4ec;background:linear-gradient(180deg,#df7651,#c45a37);box-shadow:inset 0 1px rgba(255,255,255,.2)}
+.simple .styleGrid small{color:var(--pf-secondary)}
+.simple .styleGrid em{background:rgba(217,119,87,.08)}
+
+/* Duration */
+.simple .durationFixed{border-radius:16px}
+.simple .durationFixed strong{padding:6px 12px;border:1px solid rgba(243,234,220,.1);border-radius:10px;background:rgba(8,7,6,.38);font-size:14px;font-variant-numeric:tabular-nums}
+
+/* Create */
+.simple .createButton{min-height:58px;border:1px solid rgba(255,255,255,.16);border-radius:16px;background:linear-gradient(180deg,#e27c57,#c95d3a);box-shadow:0 16px 34px -10px rgba(215,107,69,.45),inset 0 1px rgba(255,255,255,.24);transition:transform .22s ease,filter .22s ease,box-shadow .22s ease}
+.simple .createButton:hover:not(:disabled){filter:brightness(1.05);transform:translateY(-1px);box-shadow:0 20px 40px -10px rgba(215,107,69,.52),inset 0 1px rgba(255,255,255,.26)}
+.simple .createButton:active:not(:disabled){transform:scale(.99)}
+.simple .createButton:disabled{border-color:rgba(243,234,220,.08);background:rgba(255,255,255,.05);color:var(--pf-tertiary);box-shadow:none}
+.simple .createButton:focus-visible,.simple button:focus-visible,.simple .uploadZone:focus-within{outline:2px solid var(--pf-action);outline-offset:3px}
+.simple .uploadZone:focus-within{outline-offset:-2px}
+
+@media(max-width:767px){.simple .reference,.simple .goalSection,.simple .styleSection,.simple .durationFixed{border-radius:16px}.hero h1{font-size:clamp(30px,8.4vw,38px)}.simple .createButton{min-height:52px}}
+@media(prefers-reduced-motion:reduce){.simple .reference,.simple .goalSection,.simple .styleSection,.simple .uploadZone,.simple .pixelAiHelp,.simple .referenceActions label,.simple .referenceActions button,.simple .libraryChoice,.simple .videoDownload,.simple .createButton{transition:none}.simple .createButton:hover:not(:disabled){transform:none}}
