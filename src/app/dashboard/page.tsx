@@ -6,6 +6,7 @@ import { ArrowUpRight, FolderOpen, Image as ImageIcon, Video } from "lucide-reac
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
 import type { PixelAiInitialRequest } from "@/components/dashboard/PixelAdvisor"
+import IdeaPreview, { type IdeaPreviewKind } from "@/components/dashboard/home/IdeaPreview"
 import styles from "@/components/dashboard/DashboardHome.module.css"
 
 interface Creative {
@@ -38,26 +39,30 @@ const creationActions = [
   },
 ]
 
-const inspirations = [
+const inspirations: { title: string; description: string; label: string; preview: IdeaPreviewKind }[] = [
   {
     title: "Anuncio UGC para redes",
     description: "Una idea cercana que se sienta creada por una persona real.",
     label: "Autenticidad",
+    preview: "ugc",
   },
   {
     title: "Story 9:16 de producto",
     description: "Una pieza vertical rápida para captar atención desde el primer segundo.",
     label: "Formato",
+    preview: "story",
   },
   {
     title: "Comparación contra una alternativa",
     description: "Haz evidente por qué tu propuesta es la elección más conveniente.",
     label: "Ángulo",
+    preview: "compare",
   },
   {
     title: "Demostración visual del producto",
     description: "Muestra el resultado, el uso y el beneficio dentro de una sola escena.",
     label: "Producto",
+    preview: "demo",
   },
 ]
 
@@ -131,6 +136,8 @@ export default function DashboardHomePage() {
 
   return (
     <div id="dashboard-home" className={styles.homePage}>
+      <span className={styles.ambient} aria-hidden="true" />
+
       <main className={styles.homeContent}>
         <section className={styles.hero} aria-labelledby="home-title">
           <span className={styles.heroGlow} aria-hidden="true" />
@@ -147,7 +154,7 @@ export default function DashboardHomePage() {
             </p>
 
             <div className={styles.heroLinks}>
-              <span><PixelAiIcon aria-hidden="true" /> Pixel IA piensa la estrategia antes de generar.</span>
+              <span><PixelAiIcon aria-hidden="true" /> PixelIA piensa la estrategia antes de generar.</span>
               <Link href="/dashboard/assets">
                 <FolderOpen aria-hidden="true" />
                 Mis creativos
@@ -159,9 +166,12 @@ export default function DashboardHomePage() {
           <div className={styles.creationGrid} aria-label="Herramientas de creación">
             {creationActions.map(({ title, description, href, icon: Icon, eyebrow, cta, tone }) => (
               <Link key={href} href={href} className={styles.creationCard} data-tone={tone}>
+                <span className={styles.cardLight} aria-hidden="true" />
                 <div className={styles.creationCopy}>
-                  <span className={styles.creationIcon} aria-hidden="true"><Icon /></span>
-                  <span className={styles.actionMeta}>{eyebrow}</span>
+                  <div className={styles.creationHead}>
+                    <span className={styles.creationIcon} aria-hidden="true"><Icon /></span>
+                    <span className={styles.actionMeta}>{eyebrow}</span>
+                  </div>
                   <h2>{title}</h2>
                   <p>{description}</p>
                   <span className={styles.actionLink}>
@@ -171,11 +181,15 @@ export default function DashboardHomePage() {
                 </div>
 
                 {tone === "image" ? (
-                  <span className={styles.imageCanvas} aria-hidden="true">
-                    <i />
-                    <i />
-                    <i />
-                    <b>1:1</b>
+                  <span className={styles.imageStage} aria-hidden="true">
+                    <span className={`${styles.formatGhost} ${styles.ghostStory}`} />
+                    <span className={`${styles.formatGhost} ${styles.ghostPortrait}`} />
+                    <span className={styles.imageCanvas}>
+                      <i />
+                      <i />
+                      <i />
+                      <b>1:1</b>
+                    </span>
                   </span>
                 ) : (
                   <span className={styles.videoCanvas} aria-hidden="true">
@@ -196,38 +210,6 @@ export default function DashboardHomePage() {
           </div>
         </section>
 
-        <section className={styles.pixelAiCard} aria-labelledby="pixel-ai-home-title">
-          <span className={styles.pixelAiAura} aria-hidden="true" />
-          <div className={styles.pixelAiIntro}>
-            <span className={styles.pixelAiMark} aria-hidden="true"><PixelAiIcon /></span>
-            <div className={styles.pixelAiCopy}>
-              <span>PIXEL IA · BRIEF RÁPIDO</span>
-              <h2 id="pixel-ai-home-title">Cuéntame qué quieres anunciar</h2>
-              <p>Describe tu producto, la idea o el objetivo. Pixel IA te ayudará a ordenar el punto de partida.</p>
-            </div>
-          </div>
-
-          <form
-            className={styles.pixelAiPrompt}
-            onSubmit={(event) => {
-              event.preventDefault()
-              openPixelAi()
-            }}
-          >
-            <textarea
-              rows={2}
-              value={pixelAiInput}
-              onChange={(event) => setPixelAiInput(event.target.value)}
-              aria-label="Brief para Pixel IA"
-              placeholder="Ej. Quiero anunciar una crema facial para mujeres de 30 a 45 años y destacar su efecto hidratante…"
-            />
-            <button type="submit" aria-label="Abrir Pixel IA con este brief">
-              <PixelAiIcon aria-hidden="true" />
-              Pensar con Pixel IA
-            </button>
-          </form>
-        </section>
-
         <section className={styles.recentSection} aria-labelledby="recent-title">
           <header className={styles.sectionHeader}>
             <div>
@@ -235,18 +217,18 @@ export default function DashboardHomePage() {
               <h2 id="recent-title">Creativos recientes</h2>
               <p>Retoma tus últimas piezas o entra a la biblioteca completa.</p>
             </div>
-            <Link href="/dashboard/assets">
+            <Link href="/dashboard/assets" className={styles.viewAll}>
               Ver todos
               <ArrowUpRight aria-hidden="true" />
             </Link>
           </header>
 
           {!creativesLoaded ? (
-            <div className={styles.recentGrid} aria-label="Cargando creativos recientes">
+            <div className={styles.recentGrid} data-count={4} aria-label="Cargando creativos recientes">
               {[0, 1, 2, 3].map((item) => <span key={item} className={styles.creativeSkeleton} />)}
             </div>
           ) : recentCreatives.length > 0 ? (
-            <div className={styles.recentGrid}>
+            <div className={styles.recentGrid} data-count={recentCreatives.length}>
               {recentCreatives.map((creative) => (
                 <Link
                   key={creative.id}
@@ -254,15 +236,14 @@ export default function DashboardHomePage() {
                   className={styles.creativeCard}
                   aria-label={"Ver creativo " + (creative.producto || "sin título")}
                 >
-                  <span className={styles.creativeImage}>
-                    <img src={creative.imageUrl} alt="" />
-                    <b>{formatNames[creative.formato] || creative.formato}</b>
-                  </span>
+                  <img src={creative.imageUrl} alt="" loading="lazy" />
+                  <b className={styles.creativeFormat}>{formatNames[creative.formato] || creative.formato}</b>
                   <span className={styles.creativeDetails}>
+                    <small>{formatCreativeDate(creative.fecha)}</small>
                     <strong>{creative.producto || "Creativo sin título"}</strong>
                     <span>{angleNames[creative.angulo] || creative.angulo}</span>
-                    <small>{formatCreativeDate(creative.fecha)}</small>
                   </span>
+                  <span className={styles.creativeOpen} aria-hidden="true"><ArrowUpRight /></span>
                 </Link>
               ))}
             </div>
@@ -292,15 +273,62 @@ export default function DashboardHomePage() {
 
           <div className={styles.inspirationGrid}>
             {inspirations.map((idea, index) => (
-              <article key={idea.title} className={styles.ideaCard}>
-                <span className={styles.ideaIndex}>0{index + 1}</span>
-                <span className={styles.ideaLabel}>{idea.label}</span>
-                <h3>{idea.title}</h3>
-                <p>{idea.description}</p>
+              <article key={idea.title} className={styles.ideaCard} data-kind={idea.preview}>
+                <IdeaPreview kind={idea.preview} />
+                <div className={styles.ideaBody}>
+                  <div className={styles.ideaMeta}>
+                    <span className={styles.ideaIndex}>0{index + 1}</span>
+                    <span className={styles.ideaLabel}>{idea.label}</span>
+                  </div>
+                  <h3>{idea.title}</h3>
+                  <p>{idea.description}</p>
+                </div>
               </article>
             ))}
           </div>
         </section>
+
+        <section className={styles.pixelAiCard} aria-labelledby="pixel-ai-home-title">
+          <span className={styles.pixelAiAura} aria-hidden="true" />
+          <span className={styles.pixelAiAuraWarm} aria-hidden="true" />
+          <div className={styles.pixelAiIntro}>
+            <span className={styles.pixelAiMark} aria-hidden="true"><PixelAiIcon /></span>
+            <div className={styles.pixelAiCopy}>
+              <span>PIXELIA · BRIEF RÁPIDO</span>
+              <h2 id="pixel-ai-home-title">¿No sabes por dónde empezar? <em>Habla con PixelIA.</em></h2>
+              <p>Cuéntale qué quieres anunciar: tu producto, la idea o el objetivo. PixelIA te ayuda a ordenar el punto de partida.</p>
+            </div>
+          </div>
+
+          <form
+            className={styles.pixelAiPrompt}
+            onSubmit={(event) => {
+              event.preventDefault()
+              openPixelAi()
+            }}
+          >
+            <textarea
+              rows={2}
+              value={pixelAiInput}
+              onChange={(event) => setPixelAiInput(event.target.value)}
+              aria-label="Brief para PixelIA"
+              placeholder="Ej. Quiero anunciar una crema facial para mujeres de 30 a 45 años y destacar su efecto hidratante…"
+            />
+            <div className={styles.pixelAiActions}>
+              <small>PixelIA se abre a un lado, sin salir de tu estudio.</small>
+              <button type="submit" aria-label="Abrir PixelIA con este brief">
+                <PixelAiIcon aria-hidden="true" />
+                Pensar con PixelIA
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <footer className={styles.homeClosing}>
+          <i aria-hidden="true" />
+          <span>PixelFM · Tu estudio creativo</span>
+          <i aria-hidden="true" />
+        </footer>
       </main>
 
       <PixelAiDrawer

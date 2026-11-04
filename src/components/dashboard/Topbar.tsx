@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { toast } from "sonner"
+import { LogOut } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
 import styles from "./DashboardShell.module.css"
@@ -103,14 +104,17 @@ export default function Topbar() {
       </div>
 
       <div className={styles.accountArea}>
-        <Link href="/pricing" aria-label="Ver planes y comprar créditos" className={styles.credits}>
-          <span>ϟ</span>
-          <b>{credits.toLocaleString()}</b>
-          <small>créditos</small>
-        </Link>
+        <div className={styles.wallet}>
+          <Link href="/pricing" aria-label="Ver planes y comprar créditos" className={styles.credits}>
+            <span aria-hidden="true">ϟ</span>
+            <b>{credits.toLocaleString()}</b>
+            <small>créditos</small>
+          </Link>
 
-        <Link href="/pricing" className={styles.recharge}>Recargar</Link>
+          <Link href="/pricing" className={styles.recharge}>Recargar</Link>
+        </div>
 
+        <div className={styles.accountCluster}>
         {usesCompactShell && <Link
           href="/dashboard/configuracion"
           className={`${styles.settingsLink} ${pathname.startsWith("/dashboard/configuracion") ? styles.settingsActive : ""}`}
@@ -138,7 +142,11 @@ export default function Topbar() {
           </span>
         </Link>
 
-        <button onClick={handleSignOut} className={styles.logout}>Salir</button>
+        <button onClick={handleSignOut} className={styles.logout}>
+          <LogOut aria-hidden="true" />
+          <span>Salir</span>
+        </button>
+        </div>
       </div>
       <nav className={styles.mobileNav} aria-label="Navegación móvil">
         {[

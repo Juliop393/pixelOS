@@ -516,7 +516,7 @@
   color: var(--pf-primary);
   background: radial-gradient(ellipse at 18% 0, rgba(217, 119, 87, .035), transparent 40%), var(--pf-canvas);
 }
-.sidebar, .topbar {
+.sidebar {
   background: linear-gradient(145deg, var(--pf-card), var(--pf-panel));
   border-color: var(--pf-border);
   box-shadow: var(--pf-shadow), var(--pf-highlight);
@@ -531,6 +531,162 @@
 .settingsActive { color: var(--pf-action); border-color: var(--pf-selected-border); background: var(--pf-selected); }
 .navActive, .navActive:hover { background: var(--pf-action); color: var(--pf-action-ink); border-color: var(--pf-selected-border); box-shadow: var(--pf-highlight); }
 .accountArea :is(a, button):focus-visible { outline: 2px solid var(--pf-action); outline-offset: 3px; }
+
+/* ── Liquid glass topbar ─────────────────────────────────────────────
+   Same material as the public landing navbar: warm translucent glass,
+   saturated blur, a soft inner highlight and two grouped clusters. */
+.topbar {
+  isolation: isolate;
+  border-color: rgba(243, 234, 220, .15);
+  background: linear-gradient(135deg, rgba(51, 45, 40, .62), rgba(22, 19, 17, .5));
+  box-shadow:
+    0 22px 58px rgba(0, 0, 0, .34),
+    0 7px 24px rgba(40, 24, 17, .18),
+    inset 0 1px rgba(255, 255, 255, .09);
+  -webkit-backdrop-filter: blur(28px) saturate(142%);
+  backdrop-filter: blur(28px) saturate(142%);
+}
+
+.topbar::before {
+  inset: 0;
+  height: auto;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .07), transparent 30%),
+    linear-gradient(105deg, rgba(215, 107, 69, .05), transparent 34%, transparent 72%, rgba(243, 234, 220, .03));
+  z-index: -1;
+}
+
+.homeBrand { border-radius: 14px; transition: opacity .22s ease; }
+.homeBrand:hover { opacity: .9; }
+.homeBrand img {
+  width: 46px;
+  height: 46px;
+  flex-basis: 46px;
+  box-shadow: 0 0 0 1px rgba(243, 234, 220, .1), 0 8px 24px rgba(170, 69, 42, .26);
+}
+.homeBrand b { font-size: 18px; }
+.homeBrand small { letter-spacing: .02em; }
+
+.accountArea { gap: 10px; }
+
+/* Credits + recharge read as one wallet pill. */
+.wallet,
+.accountCluster {
+  height: 46px;
+  padding: 4px;
+  border: 1px solid rgba(243, 234, 220, .1);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(10, 8, 7, .32);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .04), 0 1px rgba(255, 255, 255, .02);
+}
+
+.wallet .credits {
+  height: 36px;
+  padding: 0 12px 0 6px;
+  border: 0;
+  border-radius: 11px;
+  gap: 8px;
+  background: transparent;
+  color: var(--pf-headline);
+}
+
+.wallet .credits > span {
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: #ffd9c6;
+  background: linear-gradient(145deg, rgba(223, 118, 81, .5), rgba(170, 72, 42, .38));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .18), 0 4px 14px rgba(170, 72, 42, .28);
+  font-size: 13px;
+}
+
+.wallet .credits b { font-size: 15px; font-weight: 680; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.wallet .credits small { color: var(--pf-tertiary); }
+.wallet .credits:hover { background: rgba(255, 255, 255, .045); border-color: transparent; }
+
+.wallet .recharge {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  color: #fff4ec;
+  background: linear-gradient(145deg, #df7651, #c95d3a);
+  box-shadow: 0 8px 20px rgba(215, 107, 69, .22), inset 0 1px rgba(255, 255, 255, .2);
+  font-size: 12px;
+  font-weight: 650;
+  transition: transform .22s ease, filter .22s ease, box-shadow .22s ease;
+}
+
+.wallet .recharge:hover {
+  color: #fff;
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 11px 24px rgba(215, 107, 69, .3), inset 0 1px rgba(255, 255, 255, .22);
+}
+
+/* Settings, identity and sign-out share one cluster. */
+.accountCluster { padding-right: 6px; }
+
+.accountCluster .settingsLink {
+  height: 36px;
+  border-color: transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--pf-secondary);
+  font-size: 12px;
+}
+
+.accountCluster .settingsLink:hover { background: rgba(255, 255, 255, .05); border-color: transparent; color: var(--pf-headline); }
+.accountCluster .settingsActive { background: var(--pf-selected); border-color: transparent; color: var(--pf-action); }
+.accountCluster .accountDivider { height: 22px; margin-inline: 2px; background: rgba(243, 234, 220, .1); }
+
+.accountCluster .profile { height: 36px; padding: 0 8px 0 3px; border-radius: 11px; }
+.accountCluster .profile:hover { background: rgba(255, 255, 255, .05); }
+.accountCluster .avatar {
+  width: 30px;
+  height: 30px;
+  flex-basis: 30px;
+  box-shadow: 0 0 0 2px rgba(10, 8, 7, .6), 0 0 0 3px rgba(223, 118, 81, .35);
+  font-size: 12px;
+  font-weight: 650;
+}
+.accountCluster .profileText b { font-size: 12px; }
+.accountCluster .profileText small { font-size: 10px; }
+
+.logout {
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pf-tertiary);
+  transition: color .22s ease, background-color .22s ease;
+}
+.logout svg { width: 14px; height: 14px; }
+.logout:hover { color: var(--pf-headline); background: rgba(255, 255, 255, .05); }
+
+@media (max-width: 1180px) {
+  .accountCluster .accountDivider { display: none; }
+}
+
+@media (max-width: 920px) {
+  .wallet .recharge { display: none; }
+  .wallet .credits { padding-right: 10px; }
+  .logout span { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallet .recharge, .homeBrand, .settingsLink { transition: none; }
+}
 
 .mobileNav { display: none; }
 
@@ -559,4 +715,18 @@
   .mobileNav { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; border-top: 1px solid var(--pf-border); padding-top: 7px; }
   .mobileNav a { min-width: 0; min-height: 36px; padding: 4px 2px; border-radius: 8px; display: grid; place-items: center; color: var(--pf-secondary); font-size: 10px; font-weight: 600; line-height: 1.1; text-align: center; text-decoration: none; }
   .mobileNav a:hover, .mobileNav a:focus-visible, .mobileNav .mobileNavActive { background: var(--pf-selected); color: var(--pf-headline); }
+}
+
+@media (max-width: 767px) {
+  .topbar { border-radius: 18px; }
+  .homeBrand img { width: 34px; height: 34px; flex-basis: 34px; }
+  .homeBrand b { font-size: 15px; }
+  .wallet, .accountCluster { height: 40px; padding: 3px; border-radius: 13px; gap: 2px; }
+  .wallet .credits { height: 32px; padding: 0 8px 0 3px; gap: 5px; }
+  .wallet .credits > span { width: 24px; height: 24px; border-radius: 8px; font-size: 12px; }
+  .wallet .credits b { font-size: 13px; }
+  .accountCluster { padding-right: 3px; }
+  .accountCluster .settingsLink { width: 32px; height: 32px; }
+  .logout { width: 32px; height: 32px; padding: 0; justify-content: center; }
+  .logout span { display: none; }
 }
