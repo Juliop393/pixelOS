@@ -378,7 +378,9 @@
   .desktopRoot:has(:global(#dashboard-settings)) {
     height: auto;
     min-height: 100vh;
-    overflow: visible;
+    /* clip (not hidden): keeps the sticky topbar working while the layout's
+       decorative glows can no longer extend the document below the canvas. */
+    overflow: clip;
   }
 
   .shell:has(:global(#dashboard-home)) .shellBody,
@@ -533,93 +535,136 @@
 .accountArea :is(a, button):focus-visible { outline: 2px solid var(--pf-action); outline-offset: 3px; }
 
 /* ── Liquid glass topbar ─────────────────────────────────────────────
-   Same material as the public landing navbar: warm translucent glass,
-   saturated blur, a soft inner highlight and two grouped clusters. */
+   A floating sheet of dark glass in the language of the landing nav:
+   translucent warm tint, saturated blur, a specular top edge with a
+   faint terracotta glint, and one coherent account group on the right. */
 .topbar {
   isolation: isolate;
-  border-color: rgba(243, 234, 220, .15);
-  background: linear-gradient(135deg, rgba(51, 45, 40, .62), rgba(22, 19, 17, .5));
+  border: 1px solid rgba(243, 234, 220, .1);
+  border-top-color: rgba(255, 246, 236, .17);
+  background:
+    radial-gradient(120% 160% at 0% 0%, rgba(255, 226, 206, .065), transparent 46%),
+    radial-gradient(70% 180% at 100% 110%, rgba(217, 119, 87, .075), transparent 58%),
+    linear-gradient(180deg, rgba(50, 44, 39, .44), rgba(20, 17, 15, .34));
   box-shadow:
-    0 22px 58px rgba(0, 0, 0, .34),
-    0 7px 24px rgba(40, 24, 17, .18),
-    inset 0 1px rgba(255, 255, 255, .09);
-  -webkit-backdrop-filter: blur(28px) saturate(142%);
-  backdrop-filter: blur(28px) saturate(142%);
+    0 30px 64px -20px rgba(0, 0, 0, .7),
+    0 10px 28px rgba(0, 0, 0, .22),
+    inset 0 1px 0 rgba(255, 255, 255, .09),
+    inset 0 -1px 0 rgba(255, 255, 255, .02);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
 }
 
+/* Soft interior sheen on the upper half of the glass. */
 .topbar::before {
   inset: 0;
   height: auto;
   border-radius: inherit;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .07), transparent 30%),
-    linear-gradient(105deg, rgba(215, 107, 69, .05), transparent 34%, transparent 72%, rgba(243, 234, 220, .03));
+  background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .012) 42%, transparent 64%);
   z-index: -1;
+}
+
+/* Specular top edge with a discreet terracotta glint. */
+.topbar::after {
+  content: "";
+  height: 1px;
+  position: absolute;
+  top: -1px;
+  left: 7%;
+  right: 7%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 238, 226, .32) 26%,
+    rgba(229, 132, 96, .5) 50%,
+    rgba(255, 238, 226, .26) 74%,
+    transparent);
+  pointer-events: none;
 }
 
 .homeBrand { border-radius: 14px; transition: opacity .22s ease; }
 .homeBrand:hover { opacity: .9; }
 .homeBrand img {
-  width: 46px;
-  height: 46px;
-  flex-basis: 46px;
-  box-shadow: 0 0 0 1px rgba(243, 234, 220, .1), 0 8px 24px rgba(170, 69, 42, .26);
+  width: 42px;
+  height: 42px;
+  flex-basis: 42px;
+  box-shadow: 0 0 0 1px rgba(243, 234, 220, .1), 0 8px 22px rgba(170, 69, 42, .24);
 }
-.homeBrand b { font-size: 18px; }
+.homeBrand b { font-size: 17px; }
 .homeBrand small { letter-spacing: .02em; }
 
-.accountArea { gap: 10px; }
+/* One account group: wallet │ settings · profile · sign-out. */
+.accountArea {
+  height: 48px;
+  padding: 4px;
+  border: 1px solid rgba(243, 234, 220, .085);
+  border-radius: 16px;
+  gap: 4px;
+  background: linear-gradient(180deg, rgba(8, 7, 6, .3), rgba(8, 7, 6, .18));
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, .22), 0 1px 0 rgba(255, 255, 255, .035);
+}
 
-/* Credits + recharge read as one wallet pill. */
 .wallet,
 .accountCluster {
-  height: 46px;
-  padding: 4px;
-  border: 1px solid rgba(243, 234, 220, .1);
-  border-radius: 15px;
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(10, 8, 7, .32);
-  box-shadow: inset 0 1px rgba(255, 255, 255, .04), 0 1px rgba(255, 255, 255, .02);
+  gap: 2px;
+}
+
+.accountCluster {
+  margin-left: 4px;
+  padding: 0 2px 0 8px;
+  border-left: 1px solid rgba(243, 234, 220, .08);
 }
 
 .wallet .credits {
-  height: 36px;
-  padding: 0 12px 0 6px;
+  height: 38px;
+  padding: 0 12px 0 11px;
   border: 0;
-  border-radius: 11px;
-  gap: 8px;
+  border-radius: 12px;
+  gap: 9px;
   background: transparent;
   color: var(--pf-headline);
 }
 
-.wallet .credits > span {
-  width: 26px;
-  height: 26px;
-  border-radius: 9px;
+/* PixelFM credit token: a tiny pixel cluster with one live terracotta pixel. */
+.creditToken {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
   display: grid;
-  place-items: center;
-  color: #ffd9c6;
-  background: linear-gradient(145deg, rgba(223, 118, 81, .5), rgba(170, 72, 42, .38));
-  box-shadow: inset 0 1px rgba(255, 255, 255, .18), 0 4px 14px rgba(170, 72, 42, .28);
-  font-size: 13px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
 }
 
-.wallet .credits b { font-size: 15px; font-weight: 680; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
-.wallet .credits small { color: var(--pf-tertiary); }
+.creditToken i { border-radius: 2px; display: block; background: rgba(243, 234, 220, .3); }
+.creditToken i:nth-child(1) { background: rgba(243, 234, 220, .5); }
+.creditToken i:nth-child(4) { background: rgba(243, 234, 220, .16); }
+.creditToken i:nth-child(2) {
+  background: #e3825e;
+  box-shadow: 0 0 7px rgba(227, 130, 94, .6);
+  animation: creditPixel 3.6s ease-in-out infinite;
+}
+
+@keyframes creditPixel {
+  0%, 100% { opacity: 1; box-shadow: 0 0 7px rgba(227, 130, 94, .6); }
+  50% { opacity: .72; box-shadow: 0 0 3px rgba(227, 130, 94, .25); }
+}
+
+.wallet .credits b { font-size: 16px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.wallet .credits small { margin-left: -3px; color: var(--pf-tertiary); font-size: 11px; }
 .wallet .credits:hover { background: rgba(255, 255, 255, .045); border-color: transparent; }
 
 .wallet .recharge {
-  height: 36px;
+  height: 34px;
   padding: 0 14px;
-  border: 1px solid rgba(255, 255, 255, .13);
+  border: 1px solid rgba(255, 255, 255, .14);
   border-radius: 11px;
   display: inline-flex;
   align-items: center;
   color: #fff4ec;
-  background: linear-gradient(145deg, #df7651, #c95d3a);
-  box-shadow: 0 8px 20px rgba(215, 107, 69, .22), inset 0 1px rgba(255, 255, 255, .2);
+  background: linear-gradient(180deg, #e17b56, #c95d3a);
+  box-shadow: 0 6px 18px rgba(215, 107, 69, .24), inset 0 1px rgba(255, 255, 255, .22);
   font-size: 12px;
   font-weight: 650;
   transition: transform .22s ease, filter .22s ease, box-shadow .22s ease;
@@ -629,11 +674,8 @@
   color: #fff;
   filter: brightness(1.06);
   transform: translateY(-1px);
-  box-shadow: 0 11px 24px rgba(215, 107, 69, .3), inset 0 1px rgba(255, 255, 255, .22);
+  box-shadow: 0 10px 22px rgba(215, 107, 69, .3), inset 0 1px rgba(255, 255, 255, .24);
 }
-
-/* Settings, identity and sign-out share one cluster. */
-.accountCluster { padding-right: 6px; }
 
 .accountCluster .settingsLink {
   height: 36px;
@@ -646,15 +688,15 @@
 
 .accountCluster .settingsLink:hover { background: rgba(255, 255, 255, .05); border-color: transparent; color: var(--pf-headline); }
 .accountCluster .settingsActive { background: var(--pf-selected); border-color: transparent; color: var(--pf-action); }
-.accountCluster .accountDivider { height: 22px; margin-inline: 2px; background: rgba(243, 234, 220, .1); }
+.accountCluster .accountDivider { height: 20px; margin-inline: 2px; background: rgba(243, 234, 220, .08); }
 
-.accountCluster .profile { height: 36px; padding: 0 8px 0 3px; border-radius: 11px; }
+.accountCluster .profile { height: 38px; padding: 0 8px 0 4px; border-radius: 12px; }
 .accountCluster .profile:hover { background: rgba(255, 255, 255, .05); }
 .accountCluster .avatar {
   width: 30px;
   height: 30px;
   flex-basis: 30px;
-  box-shadow: 0 0 0 2px rgba(10, 8, 7, .6), 0 0 0 3px rgba(223, 118, 81, .35);
+  box-shadow: 0 0 0 2px rgba(10, 8, 7, .6), 0 0 0 3px rgba(223, 118, 81, .32);
   font-size: 12px;
   font-weight: 650;
 }
@@ -662,8 +704,8 @@
 .accountCluster .profileText small { font-size: 10px; }
 
 .logout {
-  height: 32px;
-  padding: 0 8px;
+  height: 34px;
+  padding: 0 9px;
   border-radius: 10px;
   display: inline-flex;
   align-items: center;
@@ -673,6 +715,16 @@
 }
 .logout svg { width: 14px; height: 14px; }
 .logout:hover { color: var(--pf-headline); background: rgba(255, 255, 255, .05); }
+
+@media (min-width: 768px) {
+  .shell:has(:global(#dashboard-home)) .topbar,
+  .shell:has(:global(#dashboard-assets)) .topbar,
+  .shell:has(:global(#dashboard-settings)) .topbar {
+    height: 72px;
+    flex-basis: 72px;
+    padding-inline: 16px 12px;
+  }
+}
 
 @media (max-width: 1180px) {
   .accountCluster .accountDivider { display: none; }
@@ -686,12 +738,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .wallet .recharge, .homeBrand, .settingsLink { transition: none; }
+  .creditToken i:nth-child(2) { animation: none; }
 }
 
 .mobileNav { display: none; }
 
 @media (max-width: 767px) {
-  .desktopRoot { display: block; height: auto; min-height: 100dvh; overflow: visible; }
+  .desktopRoot { display: block; height: auto; min-height: 100dvh; overflow: clip; }
   .shell { display: block; height: auto; min-height: 100dvh; padding: 8px; }
   .sidebar { display: none; }
   .shellBody { gap: 10px; overflow: visible; }
@@ -721,11 +774,12 @@
   .topbar { border-radius: 18px; }
   .homeBrand img { width: 34px; height: 34px; flex-basis: 34px; }
   .homeBrand b { font-size: 15px; }
-  .wallet, .accountCluster { height: 40px; padding: 3px; border-radius: 13px; gap: 2px; }
-  .wallet .credits { height: 32px; padding: 0 8px 0 3px; gap: 5px; }
-  .wallet .credits > span { width: 24px; height: 24px; border-radius: 8px; font-size: 12px; }
-  .wallet .credits b { font-size: 13px; }
-  .accountCluster { padding-right: 3px; }
+  .accountArea { height: 40px; padding: 3px; border-radius: 13px; gap: 2px; }
+  .wallet, .accountCluster { gap: 2px; }
+  .accountCluster { margin-left: 2px; padding: 0 0 0 4px; }
+  .wallet .credits { height: 32px; padding: 0 9px 0 8px; gap: 6px; }
+  .creditToken { width: 12px; height: 12px; flex-basis: 12px; gap: 1.5px; }
+  .wallet .credits b { font-size: 14px; }
   .accountCluster .settingsLink { width: 32px; height: 32px; }
   .logout { width: 32px; height: 32px; padding: 0; justify-content: center; }
   .logout span { display: none; }

@@ -6,6 +6,7 @@ import { ArrowUpRight, FolderOpen, Image as ImageIcon, Video } from "lucide-reac
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
 import type { PixelAiInitialRequest } from "@/components/dashboard/PixelAdvisor"
+import { ImageCreationVisual, VideoCreationVisual } from "@/components/dashboard/home/CreationVisuals"
 import IdeaPreview, { type IdeaPreviewKind } from "@/components/dashboard/home/IdeaPreview"
 import styles from "@/components/dashboard/DashboardHome.module.css"
 
@@ -180,31 +181,7 @@ export default function DashboardHomePage() {
                   </span>
                 </div>
 
-                {tone === "image" ? (
-                  <span className={styles.imageStage} aria-hidden="true">
-                    <span className={`${styles.formatGhost} ${styles.ghostStory}`} />
-                    <span className={`${styles.formatGhost} ${styles.ghostPortrait}`} />
-                    <span className={styles.imageCanvas}>
-                      <i />
-                      <i />
-                      <i />
-                      <b>1:1</b>
-                    </span>
-                  </span>
-                ) : (
-                  <span className={styles.videoCanvas} aria-hidden="true">
-                    <i className={styles.videoFrame}>
-                      <b />
-                      <b />
-                      <b />
-                    </i>
-                    <i className={styles.videoTrack}>
-                      <b />
-                      <b />
-                      <b />
-                    </i>
-                  </span>
-                )}
+                {tone === "image" ? <ImageCreationVisual /> : <VideoCreationVisual />}
               </Link>
             ))}
           </div>

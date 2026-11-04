@@ -106,7 +106,7 @@ export default function Topbar() {
       <div className={styles.accountArea}>
         <div className={styles.wallet}>
           <Link href="/pricing" aria-label="Ver planes y comprar créditos" className={styles.credits}>
-            <span aria-hidden="true">ϟ</span>
+            <span className={styles.creditToken} aria-hidden="true"><i /><i /><i /><i /></span>
             <b>{credits.toLocaleString()}</b>
             <small>créditos</small>
           </Link>
