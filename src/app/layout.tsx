@@ -11,8 +11,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "PixelFM - Generador de Creativos con IA",
-  description: "Rompe la ceguera del scroll. Escala tu ROAS. Genera ángulos de venta, copy persuasivo y creativos de alto contraste en 10 minutos.",
+  title: "PixelFM - Imágenes y videos publicitarios con IA",
+  description: "PixelFM es una plataforma para crear imágenes y videos publicitarios con IA y dirección creativa incluida, listos para llevar a Meta Ads.",
 }
 
 export default function RootLayout({
