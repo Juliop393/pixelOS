@@ -179,6 +179,20 @@
 }
 
 /* A planet-rim of light the outputs rise from. */
+/* Ribbons of light: dimmed behind the copy so the headline always wins. */
+.heroField {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  -webkit-mask-image: radial-gradient(ellipse 44% 40% at 50% 30%, rgba(0, 0, 0, .14) 45%, #000 100%);
+  mask-image: radial-gradient(ellipse 44% 40% at 50% 30%, rgba(0, 0, 0, .14) 45%, #000 100%);
+  transition: opacity 1.8s ease;
+}
+
+.heroField[data-ready] { opacity: 1; }
+
 .heroHorizon {
   width: max(1500px, 130vw);
   aspect-ratio: 1;
@@ -1278,6 +1292,10 @@
   .heroActions { width: 100%; flex-direction: column; align-items: stretch; }
   .heroActions a { justify-content: center; }
   .heroGrid { background-size: 48px 48px; }
+  .heroField {
+    -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .12) 42%, #000 70%);
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, .12) 42%, #000 70%);
+  }
   .heroHorizon { width: 1000px; bottom: -760px; }
   .heroStage { height: 106vw; max-height: 520px; margin-top: 26px; }
   .heroCard[data-slot="outer"] { display: none; }
@@ -1352,6 +1370,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .heroCopy, .heroCard, .heroGlow, .heroSweep, .storyTag { animation: none; }
+  .heroField { transition: none; }
   .heroSweep { display: none; }
   .heroCard, .ctaPrimary, .ctaGhostSolid, .ctaGhost, .tile, .tile img, .tile video { transition: none; }
   .ctaPrimary:hover, .ctaGhostSolid:hover { transform: none; }

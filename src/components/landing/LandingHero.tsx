@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useRef, useState, type CSSProperties } from "react"
 import { ArrowUpRight, Check, Play } from "lucide-react"
+import HeroField from "./HeroField"
 import LandingVideo from "./LandingVideo"
 import { MEDIA, posterOf, type MediaKey } from "./landing-data"
 import s from "./Landing.module.css"
@@ -76,6 +77,7 @@ export default function LandingHero() {
         <i className={s.heroGrid} />
         <i className={s.heroGlow} />
         <i className={s.heroGlowCool} />
+        <HeroField />
         <i className={s.heroHorizon} />
         <i className={s.heroSweep} />
       </div>
