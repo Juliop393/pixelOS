@@ -37,8 +37,10 @@ export default function LandingStory() {
       const travel = Math.max(1, box.height - window.innerHeight)
       const progress = Math.min(1, Math.max(0, -box.top / travel))
       target.style.setProperty("--p", progress.toFixed(4))
+      // The packshot rests until the visitor really starts to scroll, then eases open.
       // The framing finishes before the last beat so the final ad gets to rest.
-      target.style.setProperty("--f", Math.min(1, progress / 0.68).toFixed(4))
+      const open = Math.min(1, Math.max(0, (progress - 0.07) / 0.61))
+      target.style.setProperty("--f", (open * open * (3 - 2 * open)).toFixed(4))
       setStep(progress < 0.3 ? 0 : progress < 0.66 ? 1 : 2)
     }
     const schedule = () => { if (!frame) frame = requestAnimationFrame(paint) }
@@ -83,7 +85,7 @@ export default function LandingStory() {
 
           <div className={s.storyFrame}>
             <div className={s.storyClip}>
-              <Image className={s.storyImage} src={MEDIA.perro.image} alt={MEDIA.perro.alt} fill sizes="(max-width: 760px) 70vw, 420px" />
+              <Image className={s.storyImage} src={MEDIA.perro.image} alt={MEDIA.perro.alt} fill unoptimized />
               <LandingVideo className={s.storyVideo} src={MEDIA.perro.video} poster={posterOf("perro")} label="El mismo anuncio convertido en video" active={step === 2} />
               <i className={s.storyGuides} aria-hidden="true" />
             </div>

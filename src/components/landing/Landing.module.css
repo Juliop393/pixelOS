@@ -179,15 +179,13 @@
 }
 
 /* A planet-rim of light the outputs rise from. */
-/* Ribbons of light: dimmed behind the copy so the headline always wins. */
+/* The creative current. The shader keeps its own calm pocket behind the headline. */
 .heroField {
   width: 100%;
   height: 100%;
   position: absolute;
   inset: 0;
   opacity: 0;
-  -webkit-mask-image: radial-gradient(ellipse 44% 40% at 50% 30%, rgba(0, 0, 0, .14) 45%, #000 100%);
-  mask-image: radial-gradient(ellipse 44% 40% at 50% 30%, rgba(0, 0, 0, .14) 45%, #000 100%);
   transition: opacity 1.8s ease;
 }
 
@@ -453,17 +451,15 @@
   inset: 0;
   overflow: hidden;
   background: #17120f;
-  /* Starts as a tight product crop and opens into the full 9:16 ad. */
-  clip-path: inset(calc((1 - var(--f)) * 24%) calc((1 - var(--f)) * 8%) round 26px);
+  /* Starts as a clean packshot card and opens into the full 9:16 ad. */
+  clip-path: inset(calc((1 - var(--f)) * 26.9%) calc((1 - var(--f)) * 6.7%) round 26px);
 }
 
 .storyImage {
   object-fit: cover;
-  /* Centres the product pack in the crop, then eases back to the full ad. */
-  transform: translate(calc((1 - var(--f)) * -33%), calc((1 - var(--f)) * -22%)) scale(calc(2.6 - var(--f) * 1.6));
-  transform-origin: 83% 72%;
-  filter: saturate(calc(.55 + var(--f) * .45));
-  will-change: transform;
+  /* Pack and bowl centred at about 1:1 with the source pixels, so frame 1 stays crisp. */
+  transform: translate(calc((1 - var(--f)) * -25.65%), calc((1 - var(--f)) * -22.47%)) scale(calc(1.9 - var(--f) * .9));
+  transform-origin: 75.65% 72.47%;
 }
 
 .storyVideo {
@@ -494,7 +490,7 @@
   border: 1px solid rgba(255, 255, 255, .18);
   border-radius: 99px;
   position: absolute;
-  bottom: calc(14px + (1 - var(--f)) * 24%);
+  bottom: calc(14px + (1 - var(--f)) * 26.9%);
   left: 50%;
   color: #fff6ef;
   background: rgba(16, 12, 10, .6);
@@ -1292,10 +1288,6 @@
   .heroActions { width: 100%; flex-direction: column; align-items: stretch; }
   .heroActions a { justify-content: center; }
   .heroGrid { background-size: 48px 48px; }
-  .heroField {
-    -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .12) 42%, #000 70%);
-    mask-image: linear-gradient(180deg, rgba(0, 0, 0, .12) 42%, #000 70%);
-  }
   .heroHorizon { width: 1000px; bottom: -760px; }
   .heroStage { height: 106vw; max-height: 520px; margin-top: 26px; }
   .heroCard[data-slot="outer"] { display: none; }

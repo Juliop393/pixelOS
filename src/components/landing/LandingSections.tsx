@@ -1,8 +1,9 @@
 import Image from "next/image"
 import Link from "next/link"
 import type { CSSProperties } from "react"
-import { ArrowRight, ArrowUpRight, Check, Clapperboard, ImageIcon, Plus, SlidersHorizontal, Sparkles, Zap } from "lucide-react"
+import { ArrowRight, Check, Clapperboard, ImageIcon, Plus, SlidersHorizontal, Sparkles, Zap } from "lucide-react"
 import LandingVideo from "./LandingVideo"
+import SessionCta from "./SessionCta"
 import { Logo } from "./LandingNav"
 import { ANGLES, FAQS, MEDIA, PLANS, posterOf, type MediaKey } from "./landing-data"
 import s from "./Landing.module.css"
@@ -275,8 +276,7 @@ export function FinalSection() {
       </figure>
       <div className={s.finalCopy} data-reveal>
         <h2 id="final-title">Tu próxima campaña puede empezar con <em>una sola idea.</em></h2>
-        <Link className={s.ctaPrimary} href="/register">Crear mi primer creativo <ArrowUpRight aria-hidden="true" /></Link>
-        <small>5 créditos gratis · Sin tarjeta</small>
+        <SessionCta />
       </div>
     </section>
   )

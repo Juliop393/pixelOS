@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react"
 import { ArrowUpRight, Check, Play } from "lucide-react"
 import HeroField from "./HeroField"
 import LandingVideo from "./LandingVideo"
+import { useHasSession } from "./useHasSession"
 import { MEDIA, posterOf, type MediaKey } from "./landing-data"
 import s from "./Landing.module.css"
 
@@ -28,6 +29,7 @@ const CARDS: { key: MediaKey; x: string; y: string; r: string; w: string; k: num
 
 export default function LandingHero() {
   const stage = useRef<HTMLDivElement>(null)
+  const signedIn = useHasSession()
   const [googleLoading, setGoogleLoading] = useState(false)
   const [googleError, setGoogleError] = useState("")
 
@@ -87,15 +89,19 @@ export default function LandingHero() {
         <h1 id="hero-title">De tu producto a<br /> <em>anuncios listos</em> para probar.</h1>
         <p>Crea imágenes y videos publicitarios con dirección creativa incluida. PixelFM convierte una idea o referencia en creativos listos para llevar a Meta Ads.</p>
         <div className={s.heroActions}>
-          <Link className={s.ctaPrimary} href="/register">Crear mi anuncio <ArrowUpRight aria-hidden="true" /></Link>
+          <Link className={s.ctaPrimary} href={signedIn ? "/dashboard" : "/register"}>{signedIn ? "Ir al dashboard" : "Crear mi anuncio"} <ArrowUpRight aria-hidden="true" /></Link>
           <a className={s.ctaGhost} href="#como-funciona"><span aria-hidden="true"><Play /></span>Ver cómo funciona</a>
         </div>
         <div className={s.heroQuick}>
-          <button type="button" onClick={handleGoogleAuth} disabled={googleLoading}>
-            <GoogleMark />
-            {googleLoading ? "Conectando..." : "Continuar con Google"}
-          </button>
-          <small><Check aria-hidden="true" />5 créditos gratis · Sin tarjeta</small>
+          {signedIn
+            ? <small><Check aria-hidden="true" />Tu sesión está activa</small>
+            : <>
+              <button type="button" onClick={handleGoogleAuth} disabled={googleLoading}>
+                <GoogleMark />
+                {googleLoading ? "Conectando..." : "Continuar con Google"}
+              </button>
+              <small><Check aria-hidden="true" />5 créditos gratis · Sin tarjeta</small>
+            </>}
         </div>
         {googleError && <p className={s.heroError} role="alert">{googleError}</p>}
       </div>

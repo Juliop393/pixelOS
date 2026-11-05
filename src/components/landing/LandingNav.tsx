@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import type { MouseEvent } from "react"
+import { useHasSession } from "./useHasSession"
 
 const LINKS = [
   { href: "#producto", label: "Producto" },
@@ -22,6 +23,8 @@ export function Logo() {
 const closeMenu = (event: MouseEvent<HTMLElement>) => event.currentTarget.closest("details")?.removeAttribute("open")
 
 export default function LandingNav() {
+  const signedIn = useHasSession()
+
   return (
     <header className="navShell">
       <nav className="nav glass" aria-label="Navegación principal">
@@ -30,15 +33,23 @@ export default function LandingNav() {
           {LINKS.map(({ href, label }) => <a href={href} key={href}>{label}</a>)}
         </div>
         <div className="navCtas">
-          <Link className="login" href="/login">Iniciar sesión</Link>
-          <Link className="button small" href="/register">Probar gratis</Link>
+          {signedIn
+            ? <Link className="button small" href="/dashboard">Ir al dashboard</Link>
+            : <>
+              <Link className="login" href="/login">Iniciar sesión</Link>
+              <Link className="button small" href="/register">Probar gratis</Link>
+            </>}
         </div>
         <details className="mobileMenu">
           <summary aria-label="Abrir menú"><span /><span /></summary>
           <div>
             {LINKS.map(({ href, label }) => <a href={href} key={href} onClick={closeMenu}>{label}</a>)}
-            <Link href="/login">Iniciar sesión</Link>
-            <Link href="/register">Probar gratis</Link>
+            {signedIn
+              ? <Link href="/dashboard">Ir al dashboard</Link>
+              : <>
+                <Link href="/login">Iniciar sesión</Link>
+                <Link href="/register">Probar gratis</Link>
+              </>}
           </div>
         </details>
       </nav>
