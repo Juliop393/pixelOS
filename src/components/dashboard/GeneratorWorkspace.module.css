@@ -240,11 +240,6 @@
 
 /* === FINAL CODEX WORKSPACE V3 === */
 .generatorPage{--line:rgba(255,242,232,.09);--accent:#d76b45;--accent-2:#ef9472;--muted:#aaa097;width:100%;height:100%;min-height:0;padding:14px 4px 40px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;position:relative;scrollbar-width:thin;scrollbar-color:#4d443d transparent}
-.ambient{position:fixed;inset:0;pointer-events:none;overflow:hidden;opacity:.42}
-.ambient:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:64px 64px;mask-image:linear-gradient(to bottom,#000,transparent 86%)}
-.ambient i{position:absolute;width:420px;height:420px;border-radius:50%;filter:blur(110px);opacity:.1;background:#c45f3d}
-.ambient i:first-child{top:-270px;left:30%}
-.ambient i:last-child{right:-250px;bottom:-280px}
 .workspace{width:min(100%,1600px);height:auto;min-height:0;margin:0 auto;display:grid;grid-template-columns:410px minmax(0,1fr);grid-template-rows:auto auto;align-items:stretch;column-gap:20px;row-gap:16px;position:relative;z-index:2}
 .builderPanel{grid-column:1;grid-row:1;height:auto;min-height:0;contain:size;position:relative;top:auto;border-radius:22px}
 .previewColumn{grid-column:2;grid-row:1;min-width:0;display:grid;gap:16px;align-content:start}
@@ -299,7 +294,7 @@
 @media(min-width:921px) and (max-width:1120px){.canvasTools .previewNavButton{width:34px;padding:0}.previewNavButton span{display:none}}
 @media(max-width:920px){.generatorPage{overflow-y:auto}.workspace{display:flex;flex-direction:column;gap:12px}.builderPanel{order:1;height:760px;min-height:680px;contain:none}.previewColumn{order:2;grid-column:auto;grid-row:auto}.builderAiCard{order:3}.aiPanel{order:4;grid-column:auto;grid-row:auto;width:100%;height:540px}}
 @media(max-width:640px){.generatorPage{padding:8px 0 28px}.builderPanel{height:710px;min-height:650px}.canvasPanel{min-height:650px}.canvasStage{min-height:580px}.previewArea{min-height:540px;padding:22px 14px 18px}.canvasPanel[data-format="4:5"] .canvasStage,.canvasPanel[data-format="9:16"] .canvasStage{min-height:680px}.canvasPanel[data-format="4:5"] .previewArea,.canvasPanel[data-format="9:16"] .previewArea{min-height:620px}.resultViewport,.canvasPanel[data-format="4:5"] .resultViewport,.canvasPanel[data-format="9:16"] .resultViewport{height:520px;flex-basis:520px;padding:10px}.resultFrame[data-format="1:1"],.resultFrame[data-format="4:5"],.resultFrame[data-format="9:16"]{max-width:calc(100% - 4px);max-height:calc(100% - 4px)}.resultsStrip{display:block;margin:0 12px 12px;padding:14px}.resultsStrip .railLabel{margin-bottom:12px}.contextRail{display:block;padding:13px}.railLabel{width:auto;margin-bottom:11px}.summaryGrid{grid-template-columns:1fr 1fr}.summaryStatus{grid-column:1/-1}.resultActions{align-items:flex-start;flex-direction:column}.resultActions>div{justify-content:flex-start}.aiPanel{min-height:520px}}
-@media(prefers-reduced-motion:reduce){.aiPanel{animation:none}.ambient i{display:none}}
+@media(prefers-reduced-motion:reduce){.aiPanel{animation:none}}
 
 /* === LEFT PANEL — FINAL V3 VISUAL SYSTEM === */
 .panelIntro{padding:24px 24px 17px}

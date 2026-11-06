@@ -410,8 +410,6 @@
   .shell:has(:global(#dashboard-settings)) .topbar {
     height: 78px;
     flex-basis: 78px;
-    padding-inline: 17px 19px;
-    border-radius: 22px;
     position: sticky;
     top: 14px;
   }
@@ -438,7 +436,6 @@
   .shell:has(:global(#video-workspace)) .topbar {
     position: sticky;
     top: 10px;
-    padding-inline: 16px 12px;
   }
 
   .desktopRoot:has(:global(#generator-root)) {
@@ -726,7 +723,6 @@
   .shell:has(:global(#dashboard-settings)) .topbar {
     height: 72px;
     flex-basis: 72px;
-    padding-inline: 16px 12px;
   }
 }
 
@@ -744,6 +740,120 @@
   .wallet .recharge, .homeBrand, .settingsLink { transition: none; }
   .creditToken i:nth-child(2) { animation: none; }
 }
+
+/* ── One continuous canvas ───────────────────────────────────────────
+   Pinned to the viewport, so it never scrolls, ends or cuts. A fine grain
+   keeps the long dark gradients from banding into visible steps. */
+.desktopRoot,
+.desktopRoot:has(:global(#generator-root)) { background: #130e0c; }
+
+.desktopRoot::before,
+.desktopRoot::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.desktopRoot::before {
+  background:
+    radial-gradient(75% 62% at 8% 4%, rgba(176, 88, 54, .3), transparent 70%),
+    radial-gradient(68% 60% at 96% 12%, rgba(112, 60, 104, .26), transparent 70%),
+    radial-gradient(72% 60% at 90% 98%, rgba(166, 98, 44, .22), transparent 70%),
+    radial-gradient(70% 58% at 6% 96%, rgba(134, 56, 66, .24), transparent 70%),
+    linear-gradient(180deg, #1b1411, #140f0c 52%, #171009);
+}
+
+.backdrop {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.desktopRoot::after {
+  opacity: .06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .86 0 0 0 0 .76 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Floating pill navbar ────────────────────────────────────────────
+   Sized by its content instead of the page, in terracotta-tinted cocoa
+   glass rather than a white sheen. */
+.topbar {
+  width: fit-content;
+  min-width: min(100%, 680px);
+  max-width: 100%;
+  gap: 40px;
+  padding-inline: 14px 12px;
+  border-radius: 999px;
+  border-color: rgba(236, 150, 112, .11);
+  border-top-color: rgba(244, 178, 146, .17);
+  background:
+    radial-gradient(46% 170% at 4% 0%, rgba(226, 124, 86, .1), transparent 66%),
+    linear-gradient(180deg, rgba(31, 24, 21, .84), rgba(19, 15, 13, .84));
+  box-shadow:
+    0 24px 50px -24px rgba(0, 0, 0, .72),
+    inset 0 1px 0 rgba(244, 200, 176, .05);
+}
+
+.topbar::before {
+  background: linear-gradient(180deg, rgba(240, 160, 124, .03), transparent 58%);
+}
+
+.topbar::after {
+  left: 16%;
+  right: 16%;
+  background: linear-gradient(90deg, transparent, rgba(240, 160, 124, .3) 50%, transparent);
+}
+
+.homeBrand b,
+.profileText b,
+.wallet .credits { color: #f6e4d4; }
+
+.homeBrand small,
+.accountCluster .profileText small { color: #b59c8a; }
+
+.accountCluster .profileText small { display: none; }
+
+.accountArea {
+  border-color: rgba(236, 150, 112, .09);
+  border-radius: 999px;
+  background: rgba(10, 8, 7, .46);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .28);
+}
+
+.accountCluster { border-left-color: rgba(236, 150, 112, .1); }
+.accountCluster .accountDivider { background: rgba(236, 150, 112, .1); }
+
+.wallet .credits,
+.wallet .recharge,
+.accountCluster .profile,
+.logout { border-radius: 999px; }
+
+.wallet .credits:hover,
+.accountCluster .profile:hover,
+.accountCluster .settingsLink:hover,
+.logout:hover { background: rgba(236, 140, 102, .13); }
+
+.logout,
+.accountCluster .settingsLink { color: #c2a895; }
+.logout:hover,
+.accountCluster .settingsLink:hover { color: #f6e4d4; }
+
+.accountCluster .settingsLink {
+  width: 36px;
+  padding: 0;
+  border-radius: 50%;
+  justify-content: center;
+}
+.accountCluster .settingsLink span { display: none; }
+
+.creditToken i { background: rgba(244, 190, 160, .34); }
+.creditToken i:nth-child(1) { background: rgba(244, 190, 160, .56); }
+.creditToken i:nth-child(4) { background: rgba(244, 190, 160, .18); }
 
 .mobileNav { display: none; }
 
@@ -770,15 +880,15 @@
   .settingsLink { width: 35px; height: 35px; padding: 0; justify-content: center; }
   .logout { padding: 7px 3px; font-size: 11px; }
   .mobileNav { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; border-top: 1px solid var(--pf-border); padding-top: 7px; }
-  .mobileNav a { min-width: 0; min-height: 36px; padding: 4px 2px; border-radius: 8px; display: grid; place-items: center; color: var(--pf-secondary); font-size: 10px; font-weight: 600; line-height: 1.1; text-align: center; text-decoration: none; }
+  .mobileNav a { min-width: 0; min-height: 36px; padding: 4px 2px; border-radius: 999px; display: grid; place-items: center; color: var(--pf-secondary); font-size: 10px; font-weight: 600; line-height: 1.1; text-align: center; text-decoration: none; }
   .mobileNav a:hover, .mobileNav a:focus-visible, .mobileNav .mobileNavActive { background: var(--pf-selected); color: var(--pf-headline); }
 }
 
 @media (max-width: 767px) {
-  .topbar { border-radius: 18px; }
+  .topbar { min-width: 0; gap: 8px 4px; padding: 9px 10px 8px; border-radius: 28px; }
   .homeBrand img { width: 34px; height: 34px; flex-basis: 34px; }
   .homeBrand b { font-size: 15px; }
-  .accountArea { height: 40px; padding: 3px; border-radius: 13px; gap: 2px; }
+  .accountArea { height: 40px; padding: 3px; gap: 2px; }
   .wallet, .accountCluster { gap: 2px; }
   .accountCluster { margin-left: 2px; padding: 0 0 0 4px; }
   .wallet .credits { height: 32px; padding: 0 9px 0 8px; gap: 6px; }

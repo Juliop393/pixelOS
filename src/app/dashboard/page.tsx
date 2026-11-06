@@ -140,7 +140,6 @@ export default function DashboardHomePage() {
 
   return (
     <div id="dashboard-home" className={`${styles.homePage} ${display.variable}`}>
-      <span className={styles.ambient} aria-hidden="true" />
 
       <main className={styles.homeContent}>
         <section className={styles.hero} aria-labelledby="home-title">

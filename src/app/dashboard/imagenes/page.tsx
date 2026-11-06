@@ -138,7 +138,6 @@ export default function DashboardPage() {
 
   return (
     <div id="generator-root" className={s.generatorPage}>
-      <div className={s.ambient} aria-hidden="true"><i /><i /></div>
       <EditorHeader tool="images" action={<div className={simpleStyles.headerActions}>
         <div className={simpleStyles.headerModes} role="tablist" aria-label="Modo del generador de imágenes">
           <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? simpleStyles.headerModeActive : ""} onClick={() => setEditorMode("simple")}>Simple</button>

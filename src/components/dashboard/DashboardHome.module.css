@@ -11,20 +11,6 @@
   color: var(--pf-primary);
 }
 
-/* Ambient light that ties the sections together instead of boxing them. */
-.ambient {
-  position: absolute;
-  inset: 0 -14px;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 42% 26% at 82% 4%, rgba(215, 107, 69, .075), transparent 70%),
-    radial-gradient(ellipse 38% 22% at 8% 46%, rgba(190, 150, 120, .045), transparent 70%),
-    radial-gradient(ellipse 46% 20% at 70% 86%, rgba(215, 107, 69, .06), transparent 72%),
-    radial-gradient(ellipse 36% 18% at 30% 94%, rgba(126, 118, 186, .045), transparent 72%);
-}
-
 .homeContent {
   width: min(100%, 1540px);
   margin: 0 auto;
@@ -64,22 +50,6 @@
     0 40px 90px rgba(0, 0, 0, .32),
     0 1px 0 rgba(255, 255, 255, .02),
     inset 0 1px rgba(255, 255, 255, .06);
-}
-
-.hero::after {
-  content: "";
-  width: 520px;
-  height: 520px;
-  border: 1px solid rgba(255, 255, 255, .03);
-  border-radius: 50%;
-  position: absolute;
-  top: -320px;
-  right: -120px;
-  z-index: -1;
-  box-shadow:
-    inset 0 0 0 60px rgba(255, 255, 255, .008),
-    inset 0 0 0 120px rgba(255, 255, 255, .006);
-  pointer-events: none;
 }
 
 .heroGlow {
@@ -1642,15 +1612,6 @@
    for the headings, so home speaks the same language as the landing.
    ══════════════════════════════════════════════════════════════════════ */
 
-.ambient {
-  background:
-    radial-gradient(ellipse 52% 26% at 86% 2%, rgba(226, 118, 78, .11), transparent 70%),
-    radial-gradient(ellipse 50% 17% at 2% 44%, rgba(226, 118, 78, .1), transparent 72%),
-    radial-gradient(ellipse 54% 18% at 100% 62%, rgba(226, 118, 78, .09), transparent 72%),
-    radial-gradient(ellipse 60% 18% at 16% 92%, rgba(232, 128, 88, .11), transparent 72%),
-    linear-gradient(180deg, rgba(70, 40, 28, .07), rgba(74, 42, 29, .13) 55%, rgba(70, 40, 28, .09));
-}
-
 /* Hero: warm brown glass with light pooling in two corners. */
 .hero {
   border-color: rgba(233, 150, 112, .14);
@@ -1658,7 +1619,7 @@
     radial-gradient(ellipse 58% 72% at 96% -8%, rgba(236, 132, 92, .21), transparent 64%),
     radial-gradient(ellipse 46% 60% at -4% 108%, rgba(205, 96, 60, .12), transparent 66%),
     radial-gradient(ellipse 34% 40% at 58% 44%, rgba(243, 214, 190, .035), transparent 70%),
-    linear-gradient(150deg, #261c17, #1a1411 62%, #171210);
+    linear-gradient(150deg, rgba(38, 28, 23, .8), rgba(26, 20, 17, .84) 62%, rgba(23, 18, 16, .86));
   box-shadow:
     0 44px 100px -18px rgba(0, 0, 0, .55),
     0 0 110px -40px rgba(226, 118, 78, .2),
@@ -1677,13 +1638,6 @@
   pointer-events: none;
 }
 
-.hero::after {
-  border-color: rgba(240, 160, 124, .1);
-  box-shadow:
-    inset 0 0 0 60px rgba(236, 132, 92, .024),
-    inset 0 0 0 120px rgba(236, 132, 92, .018);
-}
-
 .heroGlow { background: rgba(232, 124, 84, .11); }
 
 /* Headings */
@@ -1699,7 +1653,7 @@
 
 .intro h1 {
   margin: 18px 0 16px;
-  color: #fbf3ea;
+  color: #f7e8da;
   font-size: clamp(44px, 4.6vw, 72px);
   font-weight: 420;
   line-height: 1.02;
@@ -1811,6 +1765,13 @@
 }
 
 .emptyLibrary p { color: #c4b6a9; }
+
+.creationCard,
+.ideaCard,
+.emptyLibrary,
+.pixelAiCard { border-radius: 30px; }
+
+.ideaPreview { border-radius: 22px; }
 
 .homeClosing { color: #a8988a; opacity: .85; }
 
