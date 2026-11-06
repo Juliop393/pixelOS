@@ -80,7 +80,6 @@ export default function LandingHero() {
         <i className={s.heroGlow} />
         <i className={s.heroGlowCool} />
         <HeroField />
-        <i className={s.heroHorizon} />
         <i className={s.heroSweep} />
       </div>
 

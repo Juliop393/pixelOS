@@ -178,8 +178,7 @@
   background: radial-gradient(ellipse at center, rgba(243, 234, 220, .05), transparent 68%);
 }
 
-/* A planet-rim of light the outputs rise from. */
-/* The creative current. The shader keeps its own calm pocket behind the headline. */
+/* The ribbon: a single 3D asset that lives behind the copy. */
 .heroField {
   width: 100%;
   height: 100%;
@@ -190,21 +189,6 @@
 }
 
 .heroField[data-ready] { opacity: 1; }
-
-.heroHorizon {
-  width: max(1500px, 130vw);
-  aspect-ratio: 1;
-  left: 50%;
-  bottom: calc(max(1500px, 130vw) * -1 + 300px);
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, #0c0b0a 68%, #17100c 70.4%);
-  box-shadow:
-    0 -2px 0 rgba(255, 196, 165, .5),
-    0 -6px 26px rgba(232, 146, 111, .5),
-    0 -40px 120px rgba(215, 107, 69, .3),
-    0 -120px 260px rgba(168, 71, 45, .2);
-  transform: translateX(-50%);
-}
 
 .heroSweep {
   width: 34%;
@@ -1288,7 +1272,6 @@
   .heroActions { width: 100%; flex-direction: column; align-items: stretch; }
   .heroActions a { justify-content: center; }
   .heroGrid { background-size: 48px 48px; }
-  .heroHorizon { width: 1000px; bottom: -760px; }
   .heroStage { height: 106vw; max-height: 520px; margin-top: 26px; }
   .heroCard[data-slot="outer"] { display: none; }
   .heroCard[data-slot="inner"] { --w: 42% !important; }
