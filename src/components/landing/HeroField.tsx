@@ -4,11 +4,12 @@ import { useEffect, useRef } from "react"
 import s from "./Landing.module.css"
 
 /**
- * Hero backdrop: a single line of type drifting through a pixel-shaped lens.
+ * Hero backdrop: a single line of type drifting through a round glass lens.
  *
  * Outside the lens the letters are out of focus, cut into horizontal slices and
  * almost monochrome. Crossing the lens they snap into focus, enlarged and bent by
- * the glass: an idea coming into focus. Everything else stays black.
+ * the glass: an idea coming into focus. When the pointer gets close to the line the
+ * lens slides towards it, always staying on the line. Everything else stays black.
  *
  * Plain WebGL with one text texture, no libraries. Capped frame rate, rendered below
  * display resolution, paused off screen. Reduced motion and Data Saver get one frame.
@@ -28,8 +29,8 @@ precision mediump float;
 uniform sampler2D uType;
 uniform vec2 uRes;
 uniform float uTime;
-uniform vec2 uPointer;
 uniform float uLite;
+uniform float uLensX;
 
 const vec3 CREAM = vec3(0.96, 0.90, 0.83);
 const vec3 TERRA = vec3(0.88, 0.47, 0.30);
@@ -49,14 +50,11 @@ void main() {
   float height = mix(0.152, 0.07, uLite);
   float travel = t * mix(0.0105, 0.0075, uLite);
 
-  // The lens is a pixel: a rounded square that floats very slightly on its own.
+  // A round lens that only ever travels along the line of type.
   float size = mix(0.088, 0.036, uLite);
-  vec2 lens = vec2(aspect * mix(0.302, 0.235, uLite), line)
-    + vec2(0.006 * sin(t * 0.17), 0.005 * cos(t * 0.13)) + uPointer * 0.008;
+  vec2 lens = vec2(uLensX + 0.006 * sin(t * 0.17), line);
   vec2 local = p - lens;
-  vec2 a = abs(local) / size;
-  float shape = pow(a.x * a.x * a.x * a.x + a.y * a.y * a.y * a.y, 0.25);
-  float inside = 1.0 - smoothstep(0.985, 1.0, shape);
+  float shape = length(local) / size;
 
   // Outside: the type is out of focus, cut into drifting horizontal slices.
   float rowHeight = mix(6.0, 4.0, uLite);
@@ -84,28 +82,29 @@ void main() {
   vec3 color = vec3(0.70, 0.66, 0.61) * outside;
   float alpha = outside;
 
-  // Inside: the same letters snap into focus, enlarged and bent by the glass.
-  float bend = 0.74 + 0.20 * shape * shape;
+  // Inside: liquid glass. The letters surface softly, bent and only half lit;
+  // there is no fill and no hard edge, so the lens melts into the dark.
+  float inside = 1.0 - smoothstep(0.70, 1.06, shape);
+  float bend = 0.80 + 0.16 * shape * shape;
   vec2 seen = lens + local * bend;
   float v2 = (seen.y - line) / height + 0.5;
   float u2 = seen.x / (STRIP * height) + travel;
-  float sharp = texture2D(uType, vec2(u2, v2), 0.0).a * step(0.0, v2) * step(v2, 1.0);
-  float fringe = texture2D(uType, vec2(u2 + 0.0016, v2), 0.0).a * step(0.0, v2) * step(v2, 1.0);
+  float clear = step(0.0, v2) * step(v2, 1.0);
+  float sharp = texture2D(uType, vec2(u2, v2), 0.7).a * clear;
+  float fringe = texture2D(uType, vec2(u2 + 0.0018, v2), 1.2).a * clear;
 
-  vec3 glass = CREAM * 0.78 * sharp + TERRA * max(fringe - sharp, 0.0) * 0.6;
-  glass *= 0.86 + 0.14 * (1.0 - shape);
+  vec3 glass = CREAM * 0.40 * sharp + TERRA * max(fringe - sharp, 0.0) * 0.22;
   color = mix(color, glass, inside);
-  alpha = mix(alpha, 0.94, inside);
+  alpha = mix(alpha, max(sharp * 0.42, 0.05), inside);
 
-  // One thin edge of light on a single side: everything else stays black.
+  // A faint sheen and a soft meniscus are all that give the glass away.
   vec2 dir = normalize(local + 0.0001);
-  float catchLight = smoothstep(-0.15, 0.95, dot(dir, normalize(vec2(0.86, -0.5))));
-  float edge = exp(-pow((shape - 1.0) / 0.012, 2.0)) * catchLight;
-  float hairline = exp(-pow((shape - 1.0) / 0.006, 2.0)) * 0.13;
-  float glow = exp(-max(shape - 1.0, 0.0) * 15.0) * catchLight * (1.0 - inside) * 0.13;
-  vec3 light = mix(TERRA, CREAM, 0.72) * edge * 0.95 + CREAM * hairline + TERRA * glow;
+  float catchLight = smoothstep(-0.2, 1.0, dot(dir, normalize(vec2(0.7, -0.7))));
+  float meniscus = exp(-pow((shape - 0.96) / 0.09, 2.0));
+  float sheen = exp(-dot(local / size - vec2(0.3, -0.45), local / size - vec2(0.3, -0.45)) * 2.2);
+  vec3 light = CREAM * (meniscus * (0.015 + 0.075 * catchLight) + sheen * 0.022 * inside);
   color += light;
-  alpha = max(alpha, clamp(max(light.r, light.g), 0.0, 1.0));
+  alpha = max(alpha, clamp(max(light.r, light.g) * 1.2, 0.0, 1.0));
 
   gl_FragColor = vec4(color, alpha);
 }
@@ -182,8 +181,8 @@ export default function HeroField() {
 
     const uRes = gl.getUniformLocation(program, "uRes")
     const uTime = gl.getUniformLocation(program, "uTime")
-    const uPointer = gl.getUniformLocation(program, "uPointer")
     const uLite = gl.getUniformLocation(program, "uLite")
+    const uLensX = gl.getUniformLocation(program, "uLensX")
 
     const lite = window.matchMedia("(max-width: 760px)").matches
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
@@ -192,12 +191,16 @@ export default function HeroField() {
     gl.uniform1f(uLite, lite ? 1 : 0)
 
     let quality = lite ? 0.7 : 0.85
-    let pointerX = 0
-    let pointerY = 0
-    let driftX = 0
-    let driftY = 0
+    let lensTarget: number | null = null
+    let lensX = 0
     let ready = false
     let disposed = false
+
+    // Where the lens rests, and the line it lives on (fractions of the hero).
+    let aspect = 1
+    const restX = () => aspect * (lite ? 0.235 : 0.302)
+    const LINE = 0.43
+    const REACH = 170
 
     const resize = () => {
       const ratio = Math.min(window.devicePixelRatio || 1, 1.5) * quality
@@ -205,12 +208,14 @@ export default function HeroField() {
       canvas.height = Math.max(1, Math.round(canvas.clientHeight * ratio))
       gl.viewport(0, 0, canvas.width, canvas.height)
       gl.uniform2f(uRes, canvas.width, canvas.height)
+      aspect = canvas.width / canvas.height
+      if (lensTarget === null) lensX = restX()
     }
 
     const draw = (seconds: number) => {
       if (!ready) return
       gl.uniform1f(uTime, seconds)
-      gl.uniform2f(uPointer, driftX, driftY)
+      gl.uniform1f(uLensX, lensX)
       gl.drawArrays(gl.TRIANGLES, 0, 3)
     }
 
@@ -231,8 +236,7 @@ export default function HeroField() {
         resize()
       }
       last = now
-      driftX += (pointerX - driftX) * 0.05
-      driftY += (pointerY - driftY) * 0.05
+      lensX += ((lensTarget ?? restX()) - lensX) * 0.07
       draw(60 + now / 1000)
     }
 
@@ -285,10 +289,17 @@ export default function HeroField() {
     document.addEventListener("visibilitychange", sync)
 
     const onPointer = (event: PointerEvent) => {
-      pointerX = event.clientX / window.innerWidth - 0.5
-      pointerY = event.clientY / window.innerHeight - 0.5
+      // Close to the line, the lens goes to the pointer's x. It never leaves the line.
+      const box = canvas.getBoundingClientRect()
+      const close = Math.abs(event.clientY - (box.top + box.height * LINE)) < REACH
+      const x = ((event.clientX - box.left) / box.width - 0.5) * aspect
+      lensTarget = close ? Math.max(-aspect * 0.44, Math.min(aspect * 0.44, x)) : null
     }
-    if (animated && !lite) window.addEventListener("pointermove", onPointer, { passive: true })
+    const onPointerGone = () => { lensTarget = null }
+    if (animated && !lite) {
+      window.addEventListener("pointermove", onPointer, { passive: true })
+      document.documentElement.addEventListener("mouseleave", onPointerGone)
+    }
 
     const onLost = () => cancelAnimationFrame(frame)
     canvas.addEventListener("webglcontextlost", onLost)
@@ -301,6 +312,7 @@ export default function HeroField() {
       document.removeEventListener("visibilitychange", sync)
       window.removeEventListener("resize", onResize)
       window.removeEventListener("pointermove", onPointer)
+      document.documentElement.removeEventListener("mouseleave", onPointerGone)
       canvas.removeEventListener("webglcontextlost", onLost)
     }
   }, [])

@@ -1,5 +1,6 @@
 "use client"
 
+import { Fraunces } from "next/font/google"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useRef, useState, type CSSProperties } from "react"
@@ -9,6 +10,8 @@ import LandingVideo from "./LandingVideo"
 import { useHasSession } from "./useHasSession"
 import { MEDIA, posterOf, type MediaKey } from "./landing-data"
 import s from "./Landing.module.css"
+
+const display = Fraunces({ subsets: ["latin"], weight: "variable", axes: ["SOFT", "WONK", "opsz"], display: "swap" })
 
 const GoogleMark = () => (
   <svg width={16} height={16} viewBox="0 0 18 18" aria-hidden="true">
@@ -85,7 +88,7 @@ export default function LandingHero() {
 
       <div className={s.heroCopy}>
         <span className={s.pill}><i aria-hidden="true" />Imagen + Video para Meta Ads</span>
-        <h1 id="hero-title">De tu producto a<br /> <em>anuncios listos</em> para probar.</h1>
+        <h1 id="hero-title" className={display.className}>De tu producto a<br /> <span className={s.heroAccent}>anuncios listos</span> para probar<span className={s.heroPixel}>.</span></h1>
         <p>Crea imágenes y videos publicitarios con dirección creativa incluida. PixelFM convierte una idea o referencia en creativos listos para llevar a Meta Ads.</p>
         <div className={s.heroActions}>
           <Link className={s.ctaPrimary} href={signedIn ? "/dashboard" : "/register"}>{signedIn ? "Ir al dashboard" : "Crear mi anuncio"} <ArrowUpRight aria-hidden="true" /></Link>
