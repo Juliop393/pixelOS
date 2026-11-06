@@ -1636,3 +1636,185 @@
   .creationCard:hover .vidScenes > span { animation: none; }
   .adRig, .vidWindow { transform: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Warm layer: terracotta light across the workspace and a display voice
+   for the headings, so home speaks the same language as the landing.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.ambient {
+  background:
+    radial-gradient(ellipse 52% 26% at 86% 2%, rgba(226, 118, 78, .11), transparent 70%),
+    radial-gradient(ellipse 50% 17% at 2% 44%, rgba(226, 118, 78, .1), transparent 72%),
+    radial-gradient(ellipse 54% 18% at 100% 62%, rgba(226, 118, 78, .09), transparent 72%),
+    radial-gradient(ellipse 60% 18% at 16% 92%, rgba(232, 128, 88, .11), transparent 72%),
+    linear-gradient(180deg, rgba(70, 40, 28, .07), rgba(74, 42, 29, .13) 55%, rgba(70, 40, 28, .09));
+}
+
+/* Hero: warm brown glass with light pooling in two corners. */
+.hero {
+  border-color: rgba(233, 150, 112, .14);
+  background:
+    radial-gradient(ellipse 58% 72% at 96% -8%, rgba(236, 132, 92, .21), transparent 64%),
+    radial-gradient(ellipse 46% 60% at -4% 108%, rgba(205, 96, 60, .12), transparent 66%),
+    radial-gradient(ellipse 34% 40% at 58% 44%, rgba(243, 214, 190, .035), transparent 70%),
+    linear-gradient(150deg, #261c17, #1a1411 62%, #171210);
+  box-shadow:
+    0 44px 100px -18px rgba(0, 0, 0, .55),
+    0 0 110px -40px rgba(226, 118, 78, .2),
+    inset 0 1px rgba(255, 228, 208, .1);
+}
+
+/* Specular top edge, shared with the topbar and the landing panels. */
+.hero::before {
+  content: "";
+  height: 1px;
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  background: linear-gradient(90deg, transparent, rgba(255, 238, 226, .3) 30%, rgba(236, 140, 102, .38) 62%, rgba(255, 238, 226, .22) 82%, transparent);
+  pointer-events: none;
+}
+
+.hero::after {
+  border-color: rgba(240, 160, 124, .1);
+  box-shadow:
+    inset 0 0 0 60px rgba(236, 132, 92, .024),
+    inset 0 0 0 120px rgba(236, 132, 92, .018);
+}
+
+.heroGlow { background: rgba(232, 124, 84, .11); }
+
+/* Headings */
+.intro h1,
+.creationCard h2,
+.sectionHeader h2,
+.pixelAiCopy h2,
+.ideaCard h3,
+.emptyLibrary h3 {
+  font-family: var(--font-display), Georgia, serif;
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
+}
+
+.intro h1 {
+  margin: 18px 0 16px;
+  color: #fbf3ea;
+  font-size: clamp(44px, 4.6vw, 72px);
+  font-weight: 420;
+  line-height: 1.02;
+  letter-spacing: -.03em;
+}
+
+.accent {
+  background: linear-gradient(100deg, #f8dcc7 0%, #f0a07a 48%, #e0764f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.intro p { color: #cdbfb2; font-size: 15.5px; }
+
+.eyebrow { color: #f0a483; }
+.heroLinks > span { color: #bdaea1; }
+
+.creationCard h2 {
+  color: #faf1e8;
+  font-size: clamp(27px, 2.2vw, 36px);
+  font-weight: 440;
+  letter-spacing: -.022em;
+}
+
+.creationCard p { color: #c4b6a9; }
+
+.sectionHeader h2 {
+  color: #faf1e8;
+  font-size: clamp(28px, 2.5vw, 40px);
+  font-weight: 430;
+  letter-spacing: -.024em;
+}
+
+.sectionHeader p { color: #bdaea1; }
+.sectionHeader > div > span { color: #f0a483; }
+
+.ideaCard h3 {
+  color: #f8eee4;
+  font-size: 19px;
+  font-weight: 460;
+  letter-spacing: -.012em;
+}
+
+.ideaCard p { color: #bdaea1; }
+.ideaLabel { color: #f0a483; }
+.ideaIndex { color: rgba(236, 140, 102, .5); }
+
+.pixelAiCopy h2 {
+  color: #faf1e8;
+  font-size: clamp(30px, 2.9vw, 46px);
+  font-weight: 430;
+  letter-spacing: -.026em;
+}
+
+.pixelAiCopy h2 em {
+  background: linear-gradient(100deg, #f8dcc7 0%, #f0a07a 52%, #e0764f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.pixelAiCopy p { color: #c4b6a9; }
+
+/* Creation cards: each one carries its own warm source of light. */
+.creationCard {
+  border-color: rgba(233, 150, 112, .12);
+  background:
+    radial-gradient(ellipse 70% 80% at 100% 100%, rgba(226, 118, 78, .12), transparent 66%),
+    linear-gradient(150deg, rgba(54, 43, 36, .8), rgba(29, 23, 20, .93) 62%);
+}
+
+.creationCard[data-tone="video"] {
+  background:
+    radial-gradient(ellipse 60% 80% at 0% 100%, rgba(226, 118, 78, .08), transparent 66%),
+    radial-gradient(ellipse 60% 60% at 100% 0%, rgba(243, 214, 190, .04), transparent 66%),
+    linear-gradient(150deg, rgba(50, 41, 35, .82), rgba(27, 22, 19, .94) 62%);
+}
+
+.cardLight { opacity: .6; }
+
+.ideaCard {
+  border-color: rgba(233, 150, 112, .1);
+  background:
+    radial-gradient(ellipse 80% 42% at 50% 0%, rgba(226, 118, 78, .06), transparent 72%),
+    linear-gradient(165deg, rgba(45, 36, 31, .8), rgba(23, 19, 16, .92) 62%);
+}
+
+.pixelAiCard {
+  background:
+    radial-gradient(ellipse 50% 90% at 0% 0%, rgba(226, 118, 78, .11), transparent 66%) padding-box,
+    linear-gradient(150deg, rgba(47, 38, 33, .86), rgba(24, 19, 17, .92) 66%) padding-box,
+    linear-gradient(135deg, rgba(236, 132, 92, .4), rgba(243, 234, 220, .1) 36%, rgba(243, 234, 220, .06) 64%, rgba(236, 132, 92, .3)) border-box;
+}
+
+.ideaPreview {
+  border-color: rgba(240, 170, 136, .12);
+  background:
+    radial-gradient(ellipse 76% 84% at 50% 112%, rgba(232, 124, 84, .2), transparent 72%),
+    linear-gradient(160deg, rgba(255, 226, 204, .06), rgba(60, 34, 24, .22));
+}
+
+.emptyLibrary {
+  border-color: rgba(236, 140, 102, .28);
+  background:
+    radial-gradient(ellipse 40% 120% at 0% 50%, rgba(232, 124, 84, .12), transparent 72%),
+    radial-gradient(ellipse 34% 110% at 100% 50%, rgba(232, 124, 84, .06), transparent 72%),
+    linear-gradient(150deg, rgba(46, 37, 32, .7), rgba(26, 21, 18, .8));
+}
+
+.emptyLibrary p { color: #c4b6a9; }
+
+.homeClosing { color: #a8988a; opacity: .85; }
+
+@media (max-width: 760px) {
+  .intro h1 { font-size: clamp(36px, 10.4vw, 44px); }
+  .pixelAiCopy h2 { font-size: 29px; }
+}

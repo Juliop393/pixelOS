@@ -1,5 +1,6 @@
 "use client"
 
+import { Fraunces } from "next/font/google"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { ArrowUpRight, FolderOpen, Image as ImageIcon, Video } from "lucide-react"
@@ -9,6 +10,8 @@ import type { PixelAiInitialRequest } from "@/components/dashboard/PixelAdvisor"
 import { ImageCreationVisual, VideoCreationVisual } from "@/components/dashboard/home/CreationVisuals"
 import IdeaPreview, { type IdeaPreviewKind } from "@/components/dashboard/home/IdeaPreview"
 import styles from "@/components/dashboard/DashboardHome.module.css"
+
+const display = Fraunces({ subsets: ["latin"], weight: "variable", axes: ["SOFT", "WONK", "opsz"], display: "swap", variable: "--font-display" })
 
 interface Creative {
   id: number
@@ -136,7 +139,7 @@ export default function DashboardHomePage() {
   }
 
   return (
-    <div id="dashboard-home" className={styles.homePage}>
+    <div id="dashboard-home" className={`${styles.homePage} ${display.variable}`}>
       <span className={styles.ambient} aria-hidden="true" />
 
       <main className={styles.homeContent}>
@@ -148,7 +151,7 @@ export default function DashboardHomePage() {
               <i aria-hidden="true" />
               ESPACIO CREATIVO
             </span>
-            <h1 id="home-title">¿Qué quieres crear hoy?</h1>
+            <h1 id="home-title">¿Qué quieres <span className={styles.accent}>crear hoy?</span></h1>
             <p>
               Empieza con una imagen que venda una idea o construye una secuencia en movimiento.
               PixelFM te acompaña desde el enfoque hasta la pieza final.
