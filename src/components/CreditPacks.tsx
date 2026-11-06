@@ -1,3 +1,5 @@
+"use client"
+
 import { CREDIT_PACKS, CREDIT_PACK_RULES, CREDIT_RATES, formatPrice, videosFor, type CreditPack } from "@/lib/pricing-plans"
 import styles from "@/components/PricingPlans.module.css"
 
