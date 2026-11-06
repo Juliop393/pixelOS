@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { FormEvent, useEffect, useState } from "react"
-import { CreditCard, KeyRound, Mail, TriangleAlert, User } from "lucide-react"
+import { CreditCard, KeyRound, Mail, Palette, TriangleAlert, User } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
 type StatusMessage = {
@@ -251,6 +251,23 @@ export default function ConfiguracionPage() {
             >
               Gestionar suscripción
             </button>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-[var(--pf-border)] bg-[var(--pf-card)] shadow-[var(--pf-highlight)] p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--pf-border)] bg-[var(--pf-panel)] text-[#D97757]">
+                <Palette className="h-5 w-5" strokeWidth={1.5} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-[var(--pf-headline)]">Identidad de marca</h2>
+                <p className="text-sm text-[var(--pf-secondary)]">Tu logo, colores y recursos para los creativos.</p>
+              </div>
+            </div>
+            <Link href="/dashboard/campanas" className="flex items-center justify-center gap-2 rounded-xl border border-[var(--pf-border-hover)] bg-[var(--pf-panel)] px-4 py-3 text-sm font-semibold text-[var(--pf-primary)] transition-colors hover:border-[#D97757]/45 hover:text-white">
+              Editar identidad
+            </Link>
           </div>
         </section>
 

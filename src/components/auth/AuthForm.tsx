@@ -6,6 +6,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "sonner"
+import { FREE_SIGNUP_CREDITS } from "@/lib/pricing-plans"
 import { supabase } from "@/lib/supabase"
 import s from "./Auth.module.css"
 
@@ -179,7 +180,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </h2>
           <p>
             {isRegister
-              ? "5 créditos gratis para crear imágenes y videos publicitarios. Sin tarjeta."
+              ? `${FREE_SIGNUP_CREDITS} créditos gratis para crear imágenes y videos publicitarios. Sin tarjeta.`
               : "Tus imágenes, videos e ideas te esperan justo donde los dejaste."}
           </p>
         </div>

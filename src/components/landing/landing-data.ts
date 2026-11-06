@@ -1,3 +1,5 @@
+import { CREDIT_COST } from "@/lib/pricing-plans"
+
 /** Real outputs generated with PixelFM, served from public/landing. */
 export const MEDIA = {
   audifonos: { image: "/landing/audifonos-imagen.jpg", video: "/landing/audifonos-video.mp4", category: "Audio", alt: "Anuncio de audífonos premium" },
@@ -14,16 +16,10 @@ export const posterOf = (key: MediaKey) => `/_next/image?url=${encodeURIComponen
 
 export const ANGLES = ["Problema y solución", "Beneficio principal", "Comparación", "Prueba social", "Demostración", "Oferta y conveniencia", "Mecanismo único"]
 
-export const PLANS = [
-  { name: "Starter", oldPrice: "$9.99", price: "$5.99", text: "Para probar ideas y lanzar rápido.", features: ["40 créditos al mes", "1 crédito = 1 creativo", "Formatos 1:1, 4:5 y 9:16", "Ángulos y estilos publicitarios", "PixelIA incluido"], cta: "Empezar con Starter" },
-  { name: "Pro", oldPrice: "$24.99", price: "$19.99", text: "Para marcas que crean cada semana.", features: ["150 créditos al mes", "Todo lo de Starter", "Zona Segura Meta", "Historial de proyectos", "Soporte prioritario"], cta: "Elegir Pro", featured: true },
-  { name: "Business", oldPrice: "$59.99", price: "$49.99", text: "Para marcas que necesitan más volumen.", features: ["500 créditos al mes", "Todo lo de Pro", "Mayor volumen de generación", "Uso comercial", "Soporte prioritario"], cta: "Elegir Business" },
-]
-
 export const FAQS = [
   { q: "¿Necesito saber diseñar?", a: "No. Describes lo que quieres lograr y PixelFM prepara la composición. Si quieres decidir más, Modo Pro te deja elegir ángulo, estilo y formato." },
   { q: "¿PixelFM crea imágenes y videos?", a: "Sí. Crea imágenes publicitarias en 1:1, 4:5 y 9:16, y clips de video de 6 segundos a partir de una imagen. En Modo Pro puedes construir un video por escenas." },
-  { q: "¿Qué son los créditos?", a: "Son la unidad de uso de PixelFM: cada imagen usa 1 crédito y cada escena de video de 6 segundos usa 12. Tu plan incluye créditos que se renuevan cada mes." },
+  { q: "¿Qué son los créditos?", a: `Son la unidad de uso de PixelFM: cada imagen usa ${CREDIT_COST.image} crédito y cada video de 6 segundos usa ${CREDIT_COST.video}. Es un solo saldo para ambos, y puedes añadir packs si necesitas más.` },
   { q: "¿Puedo usar mis propias imágenes?", a: "Sí. Puedes subir una referencia en JPG, PNG o WEBP de hasta 5 MB para que PixelFM mantenga tu producto y tu estilo." },
   { q: "¿Puedo usar los resultados para publicidad?", a: "Sí. Según nuestros términos, los creativos generados son tuyos. Revisa cada pieza antes de publicar: los resultados se generan con IA y pueden variar." },
 ]

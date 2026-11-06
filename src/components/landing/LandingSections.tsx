@@ -5,7 +5,8 @@ import { ArrowRight, Check, Clapperboard, ImageIcon, Plus, SlidersHorizontal, Sp
 import LandingVideo from "./LandingVideo"
 import SessionCta from "./SessionCta"
 import { Logo } from "./LandingNav"
-import { ANGLES, FAQS, MEDIA, PLANS, posterOf, type MediaKey } from "./landing-data"
+import { CREDIT_RATES, SUBSCRIPTION_PLANS, formatPrice, planOutcome } from "@/lib/pricing-plans"
+import { ANGLES, FAQS, MEDIA, posterOf, type MediaKey } from "./landing-data"
 import s from "./Landing.module.css"
 
 const delay = (ms: number) => ({ "--rd": `${ms}ms` }) as CSSProperties
@@ -222,25 +223,27 @@ export function PricingSection() {
       <header className={s.intro} data-reveal>
         <span className={s.kicker}>PRECIOS SIMPLES</span>
         <h2 id="pricing-title">Empieza pequeño. <em>Crece cuando quieras.</em></h2>
-        <p>Todos los planes incluyen acceso a PixelIA y formatos para Meta Ads.</p>
+        <p>Todos los planes incluyen Modo Simple, Modo Pro, PixelIA, imagen y video. Cambia cuánto produces, no lo que puedes hacer.</p>
       </header>
 
       <div className={s.plans}>
-        {PLANS.map((plan, index) => (
-          <article key={plan.name} className={`${s.plan} ${plan.featured ? s.planFeatured : ""}`} data-reveal style={delay(index * 80)}>
-            {plan.featured && <span className={s.planBadge}>Más popular</span>}
+        {SUBSCRIPTION_PLANS.map((plan, index) => (
+          <article key={plan.id} className={`${s.plan} ${plan.recommended ? s.planFeatured : ""}`} data-reveal style={delay(index * 80)}>
+            {plan.recommended && <span className={s.planBadge}>Recomendado</span>}
             <h3>{plan.name}</h3>
-            <p>{plan.text}</p>
+            <p>{plan.audience}</p>
             <div className={s.planPrice}>
-              <strong>{plan.price}</strong>
-              <span><s>{plan.oldPrice}</s>USD / mes</span>
+              <strong>{formatPrice(plan.monthlyPrice)}</strong>
+              <span>USD / mes</span>
             </div>
-            <ul>{plan.features.map((feature) => <li key={feature}><i aria-hidden="true"><Check /></i>{feature}</li>)}</ul>
-            <Link href="/pricing" className={plan.featured ? s.ctaPrimary : s.ctaGhostSolid}>{plan.cta} <ArrowRight aria-hidden="true" /></Link>
+            {plan.note && <small className={s.planEdge}>{plan.note}</small>}
+            <ul>{[`${plan.monthlyCredits} créditos al mes`, planOutcome(plan), ...plan.highlights].map((feature) => <li key={feature}><i aria-hidden="true"><Check /></i>{feature}</li>)}</ul>
+            <Link href="/pricing" className={plan.recommended ? s.ctaPrimary : s.ctaGhostSolid}>{plan.landingCta} <ArrowRight aria-hidden="true" /></Link>
           </article>
         ))}
       </div>
-      <p className={s.planNote}>Cancela cuando quieras · Los créditos se renuevan cada mes</p>
+      <p className={s.planNote}>Un solo saldo para imágenes y videos · {CREDIT_RATES.join(" · ")}</p>
+      <p className={s.planExtra}><b>¿Necesitas más créditos?</b> Puedes añadir packs a tu saldo sin cambiar de plan. Disponibles para suscriptores.</p>
     </section>
   )
 }

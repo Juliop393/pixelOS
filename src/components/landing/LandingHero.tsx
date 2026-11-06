@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useRef, useState, type CSSProperties } from "react"
 import { ArrowUpRight, Check, Play } from "lucide-react"
+import { FREE_CREDITS_COPY } from "@/lib/pricing-plans"
 import HeroField from "./HeroField"
 import LandingVideo from "./LandingVideo"
 import { useHasSession } from "./useHasSession"
@@ -102,7 +103,7 @@ export default function LandingHero() {
                 <GoogleMark />
                 {googleLoading ? "Conectando..." : "Continuar con Google"}
               </button>
-              <small><Check aria-hidden="true" />5 créditos gratis · Sin tarjeta</small>
+              <small><Check aria-hidden="true" />{FREE_CREDITS_COPY}</small>
             </>}
         </div>
         {googleError && <p className={s.heroError} role="alert">{googleError}</p>}

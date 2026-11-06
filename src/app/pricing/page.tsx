@@ -25,7 +25,7 @@ export default function PricingPage() {
         <div className={styles.hero}>
           <span className={styles.kicker}><i aria-hidden="true" />PRECIOS</span>
           <h2>Planes <em>simples</em></h2>
-          <p>Precios de lanzamiento. Sin contratos. Cancela cuando quieras.</p>
+          <p>Todas las funciones en todos los planes. Solo eliges cuánto quieres producir.</p>
         </div>
 
         <PricingPlans />
@@ -33,7 +33,7 @@ export default function PricingPage() {
         <p className={styles.note}>
           <span><Check aria-hidden="true" />Cancela cuando quieras</span>
           <i aria-hidden="true" />
-          <span>Los créditos se renuevan cada mes</span>
+          <span>¿Necesitas más? Añade packs a tu saldo sin cambiar de plan</span>
         </p>
       </section>
     </main>

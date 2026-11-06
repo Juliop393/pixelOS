@@ -17,7 +17,7 @@
   min-height: 0;
   padding: 14px;
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   position: relative;
   z-index: 10;
@@ -40,7 +40,6 @@
   z-index: 1;
 }
 
-.sidebar,
 .topbar {
   border: 1px solid rgba(255, 242, 232, 0.09);
   background: linear-gradient(145deg, rgba(31, 28, 25, 0.93), rgba(18, 17, 15, 0.94));
@@ -48,109 +47,6 @@
   -webkit-backdrop-filter: blur(24px) saturate(135%);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px rgba(255, 255, 255, 0.04);
 }
-
-.sidebar {
-  height: 100%;
-  min-height: 0;
-  padding: 12px 10px;
-  border-radius: 22px;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.brand {
-  height: 58px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-radius: 15px;
-  color: #f2e9e0;
-  text-decoration: none;
-}
-
-.brand img {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
-  border-radius: 50%;
-  object-fit: contain;
-}
-
-.brand span {
-  display: none;
-  font-size: 15px;
-  font-weight: 680;
-  letter-spacing: -0.02em;
-}
-
-.brand b { color: #ef9472; }
-
-.sidebarDivider {
-  width: calc(100% - 14px);
-  height: 1px;
-  margin: 12px auto 16px;
-  background: rgba(255, 242, 232, 0.08);
-}
-
-.sideNav {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.navLink {
-  height: 52px;
-  padding: 0 12px;
-  border: 1px solid transparent;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  position: relative;
-  color: #928b84;
-  text-decoration: none;
-  transition: color 260ms ease, background-color 260ms ease, border-color 260ms ease, transform 260ms ease;
-}
-
-.navLink svg { width: 20px; height: 20px; flex: 0 0 20px; }
-.navLink > span { display: none; font-size: 13px; font-weight: 620; white-space: nowrap; }
-.navLink:hover { color: #d8cec5; border-color: rgba(255, 255, 255, 0.06); background: rgba(255, 255, 255, 0.035); transform: translateY(-1px); }
-
-.navActive {
-  color: #fff4eb;
-  border-color: rgba(239, 148, 114, 0.3);
-  background: linear-gradient(135deg, #e27b57, #cd6340);
-  box-shadow: 0 10px 26px rgba(150, 65, 40, 0.26), inset 0 1px rgba(255, 255, 255, 0.2);
-}
-
-.navActive:hover { color: #fff; background: linear-gradient(135deg, #e7815e, #d26946); }
-
-.navLink::after {
-  content: attr(data-label);
-  position: absolute;
-  left: calc(100% + 14px);
-  top: 50%;
-  padding: 8px 10px;
-  border: 1px solid rgba(255, 242, 232, 0.1);
-  border-radius: 9px;
-  background: rgba(18, 16, 14, 0.96);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
-  color: #e8ddd3;
-  font-size: 12px;
-  line-height: 1;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-5px, -50%);
-  transition: opacity 180ms ease, transform 180ms ease;
-  z-index: 50;
-}
-
-.navLink:hover::after,
-.navLink:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
 
 .topbar {
   width: min(100%, 1600px);
@@ -185,18 +81,6 @@
   gap: 11px;
   position: relative;
   z-index: 1;
-}
-
-.contextMark {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
-  border: 1px solid rgba(215, 107, 69, 0.2);
-  border-radius: 11px;
-  display: grid;
-  place-items: center;
-  color: #ef9472;
-  background: rgba(215, 107, 69, 0.08);
 }
 
 .sectionContext > span { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -320,28 +204,8 @@
 
 @media (min-width: 768px) { .desktopRoot { display: block; } }
 
-@media (min-width: 768px) and (max-width: 1849px) {
-  .sidebar {
-    position: relative;
-    z-index: 20;
-    overflow: visible;
-  }
-}
-
-@media (min-width: 1850px) {
-  .shell { grid-template-columns: 208px minmax(0, 1fr); }
-  .sidebar { padding-inline: 12px; }
-  .brand { justify-content: flex-start; padding: 0 12px; }
-  .brand span, .navLink > span { display: inline; }
-  .navLink { justify-content: flex-start; }
-  .navLink::after { display: none; }
-}
-
 @media (max-width: 1180px) {
-  .shell { grid-template-columns: 72px minmax(0, 1fr); gap: 10px; padding: 10px; }
-  .sidebar { padding-inline: 7px; border-radius: 19px; }
-  .brand img { width: 38px; height: 38px; flex-basis: 38px; }
-  .navLink { height: 48px; padding-inline: 8px; }
+  .shell { gap: 10px; padding: 10px; }
   .sectionContext small, .credits small, .profileText { display: none; }
   .topbar { height: 66px; flex-basis: 66px; padding-inline: 14px; border-radius: 19px; }
 }
@@ -354,8 +218,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .navLink,
-  .navLink::after,
   .credits,
   .profile,
   .logout { transition: none; }
@@ -366,6 +228,7 @@
   /* General product pages share one clean topbar without legacy side navigation. */
   .shell:has(:global(#dashboard-home)),
   .shell:has(:global(#dashboard-assets)),
+  .shell:has(:global(#dashboard-pricing)),
   .shell:has(:global(#dashboard-settings)) {
     height: auto;
     min-height: 100vh;
@@ -375,6 +238,7 @@
 
   .desktopRoot:has(:global(#dashboard-home)),
   .desktopRoot:has(:global(#dashboard-assets)),
+  .desktopRoot:has(:global(#dashboard-pricing)),
   .desktopRoot:has(:global(#dashboard-settings)) {
     height: auto;
     min-height: 100vh;
@@ -385,9 +249,11 @@
 
   .shell:has(:global(#dashboard-home)) .shellBody,
   .shell:has(:global(#dashboard-assets)) .shellBody,
+  .shell:has(:global(#dashboard-pricing)) .shellBody,
   .shell:has(:global(#dashboard-settings)) .shellBody,
   .shell:has(:global(#dashboard-home)) .content,
   .shell:has(:global(#dashboard-assets)) .content,
+  .shell:has(:global(#dashboard-pricing)) .content,
   .shell:has(:global(#dashboard-settings)) .content {
     min-height: 0;
     overflow: visible;
@@ -395,18 +261,14 @@
 
   .shell:has(:global(#dashboard-home)) .content,
   .shell:has(:global(#dashboard-assets)) .content,
+  .shell:has(:global(#dashboard-pricing)) .content,
   .shell:has(:global(#dashboard-settings)) .content {
     flex: 0 0 auto;
   }
 
-  .shell:has(:global(#dashboard-home)) .sidebar,
-  .shell:has(:global(#dashboard-assets)) .sidebar,
-  .shell:has(:global(#dashboard-settings)) .sidebar {
-    display: none;
-  }
-
   .shell:has(:global(#dashboard-home)) .topbar,
   .shell:has(:global(#dashboard-assets)) .topbar,
+  .shell:has(:global(#dashboard-pricing)) .topbar,
   .shell:has(:global(#dashboard-settings)) .topbar {
     height: 78px;
     flex-basis: 78px;
@@ -420,11 +282,6 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
     padding: 10px;
-  }
-
-  .shell:has(:global(#generator-root)) .sidebar,
-  .shell:has(:global(#video-workspace)) .sidebar {
-    display: none;
   }
 
   .shell:has(:global(#generator-root)) .shellBody,
@@ -446,25 +303,8 @@
   }
 
   /* The topbar keeps the shared liquid glass material in the editors too. */
-  .shell:has(:global(#generator-root)) .sidebar {
-    border-color: rgba(244, 239, 233, 0.12);
-    background: linear-gradient(145deg, rgba(29, 30, 30, 0.96), rgba(19, 20, 20, 0.97));
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34), inset 0 1px rgba(255, 255, 255, 0.055);
-  }
-
-  .shell:has(:global(#generator-root)) .sidebarDivider,
   .shell:has(:global(#generator-root)) .accountDivider {
     background: rgba(244, 239, 233, 0.11);
-  }
-
-  .shell:has(:global(#generator-root)) .navLink:not(.navActive) {
-    color: #a29d97;
-  }
-
-  .shell:has(:global(#generator-root)) .navLink:not(.navActive):hover {
-    color: #e3ded8;
-    border-color: rgba(255, 255, 255, 0.085);
-    background: rgba(255, 255, 255, 0.05);
   }
 
   .shell:has(:global(#generator-root)) .sectionContext b,
@@ -480,10 +320,6 @@
   /* Video focus mode keeps the account topbar available beside PixelAI. */
   .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .shell:has(:global(#video-workspace[data-pixel-ai-open="true"])) .sidebar {
-    display: none;
   }
 
   /* The video editor grows naturally and delegates vertical scrolling to the document. */
@@ -518,20 +354,14 @@
   color: var(--pf-primary);
   background: radial-gradient(ellipse at 18% 0, rgba(217, 119, 87, .035), transparent 40%), var(--pf-canvas);
 }
-.sidebar {
-  background: linear-gradient(145deg, var(--pf-card), var(--pf-panel));
-  border-color: var(--pf-border);
-  box-shadow: var(--pf-shadow), var(--pf-highlight);
-}
-.brand, .homeBrand, .homeBrand b, .sectionContext b, .profileText b { color: var(--pf-headline); }
+.homeBrand, .homeBrand b, .sectionContext b, .profileText b { color: var(--pf-headline); }
 .currentSection b, .credits, .profile { color: var(--pf-primary); }
 .sectionContext small, .homeBrand small, .currentSection small, .credits small, .profileText small, .logout { color: var(--pf-secondary); }
-.brand b, .homeBrand strong, .contextMark, .settingsLink svg, .recharge { color: var(--pf-brand); }
+.homeBrand strong, .settingsLink svg, .recharge { color: var(--pf-brand); }
 .credits, .settingsLink { background: var(--pf-panel); border-color: var(--pf-border); }
-.settingsLink, .navLink { color: var(--pf-secondary); }
-.settingsLink:hover, .credits:hover, .navLink:not(.navActive):hover { background: var(--pf-elevated); border-color: var(--pf-border-hover); color: var(--pf-headline); }
+.settingsLink { color: var(--pf-secondary); }
+.settingsLink:hover, .credits:hover { background: var(--pf-elevated); border-color: var(--pf-border-hover); color: var(--pf-headline); }
 .settingsActive { color: var(--pf-action); border-color: var(--pf-selected-border); background: var(--pf-selected); }
-.navActive, .navActive:hover { background: var(--pf-action); color: var(--pf-action-ink); border-color: var(--pf-selected-border); box-shadow: var(--pf-highlight); }
 .accountArea :is(a, button):focus-visible { outline: 2px solid var(--pf-action); outline-offset: 3px; }
 
 /* ── Liquid glass topbar ─────────────────────────────────────────────
@@ -720,6 +550,7 @@
 @media (min-width: 768px) {
   .shell:has(:global(#dashboard-home)) .topbar,
   .shell:has(:global(#dashboard-assets)) .topbar,
+  .shell:has(:global(#dashboard-pricing)) .topbar,
   .shell:has(:global(#dashboard-settings)) .topbar {
     height: 72px;
     flex-basis: 72px;
@@ -833,6 +664,9 @@
 .accountCluster .profile,
 .logout { border-radius: 999px; }
 
+.wallet .credits,
+.wallet .recharge { cursor: pointer; }
+
 .wallet .credits:hover,
 .accountCluster .profile:hover,
 .accountCluster .settingsLink:hover,
@@ -860,7 +694,6 @@
 @media (max-width: 767px) {
   .desktopRoot { display: block; height: auto; min-height: 100dvh; overflow: clip; }
   .shell { display: block; height: auto; min-height: 100dvh; padding: 8px; }
-  .sidebar { display: none; }
   .shellBody { gap: 10px; overflow: visible; }
   .content { flex: 0 0 auto; min-height: 0; overflow: visible; }
   .topbar {

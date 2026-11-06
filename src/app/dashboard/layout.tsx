@@ -1,5 +1,4 @@
 import Topbar from "@/components/dashboard/Topbar"
-import DashboardNavigation from "@/components/dashboard/DashboardNavigation"
 import DashboardBackdrop from "@/components/dashboard/DashboardBackdrop"
 import { AuthGuard } from "@/components/dashboard/AuthGuard"
 import { CreditsProvider } from "@/lib/credits-context"
@@ -19,7 +18,6 @@ export default function DashboardLayout({
 
         <AuthGuard>
           <div className={styles.shell}>
-            <DashboardNavigation />
             <div className={styles.shellBody}>
               <Topbar />
               <main className={styles.content}>{children}</main>

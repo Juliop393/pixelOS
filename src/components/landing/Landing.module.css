@@ -1129,6 +1129,9 @@
 .plan a { width: 100%; margin-top: auto; justify-content: space-between; }
 
 .planNote { margin: 34px 0 0; color: var(--soft); font-size: 14px; text-align: center; }
+.planExtra { margin: 10px 0 0; color: var(--soft); font-size: 14px; line-height: 1.5; text-align: center; }
+.planExtra b { color: #f7f0e7; font-weight: 620; }
+.planEdge { margin-top: 12px; display: block; color: #ec9f7f; font-size: 12.5px; font-weight: 600; line-height: 1.4; }
 
 /* ── FAQ ──────────────────────────────────────────────────────────── */
 
