@@ -1,13 +1,15 @@
 import "server-only"
 
-export const STRIPE_PLANS = ["starter", "pro", "business"] as const
+import { SUBSCRIPTION_PLANS, type PlanId } from "@/lib/pricing-plans"
 
-export type StripePlan = (typeof STRIPE_PLANS)[number]
+export type StripePlan = PlanId
+
+const STRIPE_PLANS: StripePlan[] = SUBSCRIPTION_PLANS.map((plan) => plan.id)
 
 const priceIds = (): Record<StripePlan, string> => ({
   starter: process.env.STRIPE_PRICE_STARTER?.trim() ?? "",
+  growth: process.env.STRIPE_PRICE_GROWTH?.trim() ?? "",
   pro: process.env.STRIPE_PRICE_PRO?.trim() ?? "",
-  business: process.env.STRIPE_PRICE_BUSINESS?.trim() ?? "",
 })
 
 export function isStripePlan(value: unknown): value is StripePlan {
