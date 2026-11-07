@@ -9,6 +9,16 @@ export const runtime = "nodejs"
 const LIVE_STATUSES = ["trialing", "active", "past_due", "unpaid", "paused"]
 const DOUBLE_SUBMIT_WINDOW_MS = 60_000
 
+/*
+ * TEMPORARY: while Stripe is validated in test mode, only one account may open
+ * Checkout, and only with a test key. Remove this guard when plans go public.
+ */
+function isStripeTestCheckoutAllowed(userId: string): boolean {
+  const allowedUserId = process.env.STRIPE_TEST_ALLOWED_USER_ID?.trim()
+  const secretKey = process.env.STRIPE_SECRET_KEY?.trim() ?? ""
+  return Boolean(allowedUserId) && userId === allowedUserId && secretKey.startsWith("sk_test_")
+}
+
 async function getOrCreateCustomer(userId: string, email: string | undefined): Promise<string> {
   const admin = createAdminClient()
   const { data, error } = await admin
@@ -37,6 +47,10 @@ async function getOrCreateCustomer(userId: string, email: string | undefined): P
 export async function POST(req: NextRequest) {
   const user = await getRequestUser(req)
   if (!user) return stripeJson({ error: "No autorizado" }, 401)
+
+  if (!isStripeTestCheckoutAllowed(user.id)) {
+    return stripeJson({ error: "El pago todavía no está disponible para esta cuenta" }, 403)
+  }
 
   let plan: unknown
   try {
