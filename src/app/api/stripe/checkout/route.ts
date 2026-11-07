@@ -69,31 +69,26 @@ export async function POST(req: NextRequest) {
       return stripeJson({ error: "Demasiados intentos. Espera un momento." }, 429)
     }
 
-    const admin = createAdminClient()
-    const [{ data: stripeSubscription, error: stripeError }, { data: credits, error: creditsError }] = await Promise.all([
-      admin
-        .from("stripe_subscriptions")
-        .select("stripe_subscription_id")
-        .eq("user_id", user.id)
-        .in("status", LIVE_STATUSES)
-        .limit(1)
-        .maybeSingle(),
-      // Read only: a live Paddle plan must not end up billed twice.
-      admin
-        .from("user_credits")
-        .select("subscription_status, paddle_subscription_id")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-    ])
+    /*
+     * TEMPORARY (test mode only): the legacy Paddle check on user_credits is
+     * intentionally skipped here, because the guard above limits Checkout to
+     * one account using an sk_test_ key, so no real charge can happen.
+     * BEFORE ENABLING STRIPE LIVE: confirm there are no real Paddle
+     * subscriptions left (or that they were migrated), and restore a
+     * duplicate-billing check, or users could be charged by both processors.
+     */
+    const { data: stripeSubscription, error: stripeError } = await createAdminClient()
+      .from("stripe_subscriptions")
+      .select("stripe_subscription_id")
+      .eq("user_id", user.id)
+      .in("status", LIVE_STATUSES)
+      .limit(1)
+      .maybeSingle()
 
-    if (stripeError || creditsError) throw new Error("subscription_read_failed")
+    if (stripeError) throw new Error("subscription_read_failed")
 
     if (stripeSubscription) {
       return stripeJson({ error: "Ya tienes una suscripción activa", code: "subscription_exists" }, 409)
-    }
-
-    if (credits?.subscription_status === "active" && credits.paddle_subscription_id) {
-      return stripeJson({ error: "Ya tienes una suscripción activa", code: "legacy_subscription_exists" }, 409)
     }
 
     const customer = await getOrCreateCustomer(user.id, user.email)
