@@ -7,10 +7,13 @@ import { createAdminClient } from "@/lib/supabase-admin"
 export const runtime = "nodejs"
 
 /*
- * This layer only mirrors Stripe state into the stripe_* tables.
- * It must never read or write user_credits: granting subscription credits is
- * a separate step, built on top of this one.
+ * Mirrors Stripe state into the stripe_* tables. The only path that may change
+ * a balance is invoice.paid, through grant_stripe_invoice_credits (migration
+ * 009): once per invoice, Starter only, and TEST invoices are only simulated.
  */
+
+// Only invoices that open or renew a period earn monthly credits.
+const GRANT_BILLING_REASONS = new Set(["subscription_create", "subscription_cycle"])
 
 const STALE_CLAIM_MS = 5 * 60 * 1000
 
@@ -116,6 +119,54 @@ async function syncSubscription(admin: Admin, subscriptionId: string, userHint?:
   if (error) throw new Error("subscription_write_failed")
 }
 
+/** Skips (returns) invoices that do not qualify; throws when a grant should be retried. */
+async function grantInvoiceCredits(admin: Admin, invoiceId: string, livemode: boolean) {
+  // The key decides which Stripe account answers; a mismatch must never grant.
+  const liveKey = (process.env.STRIPE_SECRET_KEY?.trim() ?? "").startsWith("sk_live_")
+  if (liveKey !== livemode) throw new Error("livemode_mismatch")
+
+  const invoice = await getStripe().invoices.retrieve(invoiceId)
+  const skip = (reason: string) => console.warn("Stripe invoice without credits:", reason)
+
+  if (invoice.livemode !== livemode) throw new Error("livemode_mismatch")
+  if (invoice.status !== "paid") return skip("not_paid")
+  if (!GRANT_BILLING_REASONS.has(invoice.billing_reason ?? "")) return skip("billing_reason")
+
+  const subscriptionId = idOf(invoice.parent?.subscription_details?.subscription)
+  const customerId = idOf(invoice.customer)
+  if (!subscriptionId || !customerId) return skip("no_subscription")
+  if (invoice.lines.has_more) return skip("too_many_lines")
+
+  const lines = invoice.lines.data.filter((line) => line.parent?.type === "subscription_item_details")
+  const line = lines[0]
+  if (lines.length !== 1 || line.parent?.subscription_item_details?.proration || line.quantity !== 1) {
+    return skip("unexpected_lines")
+  }
+
+  const plan = getStripePlanByPrice(idOf(line.pricing?.price_details?.price))
+  if (plan !== "starter") return skip("plan_not_supported")
+
+  const { data: customer, error: customerError } = await admin
+    .from("stripe_customers")
+    .select("user_id")
+    .eq("stripe_customer_id", customerId)
+    .maybeSingle()
+
+  if (customerError) throw new Error("customer_read_failed")
+  if (!customer) throw new Error("invoice_without_user")
+
+  const { data: result, error } = await admin.rpc("grant_stripe_invoice_credits", {
+    p_invoice_id: invoice.id,
+    p_user_id: customer.user_id,
+    p_subscription_id: subscriptionId,
+    p_plan: plan,
+    p_livemode: livemode,
+  })
+
+  if (error) throw new Error(`credit_grant_failed: ${error.message.slice(0, 120)}`)
+  if (!["applied", "simulated", "duplicate"].includes(result as string)) throw new Error("credit_grant_unexpected")
+}
+
 /** Returns false when the event carries nothing this layer tracks. */
 async function handleEvent(admin: Admin, event: Stripe.Event): Promise<boolean> {
   switch (event.type) {
@@ -137,6 +188,9 @@ async function handleEvent(admin: Admin, event: Stripe.Event): Promise<boolean> 
       const subscriptionId = idOf(event.data.object.parent?.subscription_details?.subscription)
       if (!subscriptionId) return false
       await syncSubscription(admin, subscriptionId)
+      if (event.type === "invoice.paid" && event.data.object.id) {
+        await grantInvoiceCredits(admin, event.data.object.id, event.livemode)
+      }
       return true
     }
     default:
