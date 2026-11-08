@@ -8,8 +8,9 @@ export const runtime = "nodejs"
 
 /*
  * Mirrors Stripe state into the stripe_* tables. The only path that may change
- * a balance is invoice.paid, through grant_stripe_invoice_credits (migration
- * 009): once per invoice, Starter only, and TEST invoices are only simulated.
+ * a balance is invoice.paid, through grant_stripe_invoice_credits_v2 (migration
+ * 012): once per invoice and per billing period, Starter only, monthly credits
+ * only (legacy and pack credits are kept), and TEST invoices are only simulated.
  */
 
 // Only invoices that open or renew a period earn monthly credits.
@@ -146,6 +147,14 @@ async function grantInvoiceCredits(admin: Admin, invoiceId: string, livemode: bo
   const plan = getStripePlanByPrice(idOf(line.pricing?.price_details?.price))
   if (plan !== "starter") return skip("plan_not_supported")
 
+  // The billed period comes from the validated subscription line. An eligible
+  // invoice without one fails, so Stripe retries instead of the event closing.
+  const periodStart = line.period?.start
+  const periodEnd = line.period?.end
+  if (!Number.isSafeInteger(periodStart) || !Number.isSafeInteger(periodEnd) || periodEnd <= periodStart || periodStart <= 0) {
+    throw new Error("invoice_period_invalid")
+  }
+
   const { data: customer, error: customerError } = await admin
     .from("stripe_customers")
     .select("user_id")
@@ -155,16 +164,21 @@ async function grantInvoiceCredits(admin: Admin, invoiceId: string, livemode: bo
   if (customerError) throw new Error("customer_read_failed")
   if (!customer) throw new Error("invoice_without_user")
 
-  const { data: result, error } = await admin.rpc("grant_stripe_invoice_credits", {
+  const { data: result, error } = await admin.rpc("grant_stripe_invoice_credits_v2", {
     p_invoice_id: invoice.id,
     p_user_id: customer.user_id,
     p_subscription_id: subscriptionId,
     p_plan: plan,
     p_livemode: livemode,
+    p_period_start: new Date(periodStart * 1000).toISOString(),
+    p_period_end: new Date(periodEnd * 1000).toISOString(),
   })
 
   if (error) throw new Error(`credit_grant_failed: ${error.message.slice(0, 120)}`)
-  if (!["applied", "simulated", "duplicate"].includes(result as string)) throw new Error("credit_grant_unexpected")
+  // stale: the period already ended or a newer one was granted; nothing to add.
+  if (!["applied", "simulated", "duplicate", "stale"].includes(result as string)) {
+    throw new Error(`credit_grant_unexpected: ${String(result).slice(0, 40)}`)
+  }
 }
 
 /** Returns false when the event carries nothing this layer tracks. */
