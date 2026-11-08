@@ -2,14 +2,14 @@ import { LegalPage } from "@/components/LegalPage"
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Política de Privacidad de PixelFM" updatedAt="30 de junio de 2026">
+    <LegalPage title="Política de Privacidad de PixelFM" updatedAt="8 de noviembre de 2026">
       <section>
         <h2>1. DATOS QUE RECOPILAMOS</h2>
         <ul>
           <li>Email y contraseña (para tu cuenta).</li>
           <li>Imágenes que subes como referencia.</li>
           <li>Creativos generados con tu cuenta.</li>
-          <li>Datos de pago (procesados por Paddle, no los almacenamos nosotros).</li>
+          <li>Datos de pago, cuando estén disponibles: los procesa Stripe y nosotros no almacenamos los datos de tu tarjeta.</li>
         </ul>
       </section>
 
@@ -31,7 +31,7 @@ export default function PrivacyPage() {
         <h2>4. COMPARTIR DATOS</h2>
         <p>No vendemos ni compartimos tus datos con terceros, excepto:</p>
         <ul>
-          <li>Paddle (procesamiento de pagos).</li>
+          <li>Stripe (procesamiento de pagos).</li>
           <li>Supabase (almacenamiento).</li>
           <li>OpenAI (generación de prompts).</li>
           <li>fal.ai (generación de imágenes).</li>

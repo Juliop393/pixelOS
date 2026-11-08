@@ -13,8 +13,6 @@ type UserData = {
   credits: number
   plan: string
   subscriptionStatus: string
-  paddleCustomerId: string | null
-  paddleSubscriptionId: string | null
   creditsUpdatedAt: string | null
 }
 
@@ -169,28 +167,6 @@ export default function AdminUsersPage() {
               <Row label="Créditos" value={String(userData.credits)} />
               <Row label="Plan" value={planLabel} />
               <Row label="Estado" value={statusLabel} />
-              <div className="flex items-center justify-between py-2 border-b border-[#3A3833]">
-                <span className="text-sm text-[#9A9893]">Paddle Customer ID</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#E8E6E1] font-mono text-xs max-w-[200px] truncate">{userData.paddleCustomerId || "No disponible"}</span>
-                  {userData.paddleCustomerId && (
-                    <button onClick={() => copyToClipboard(userData.paddleCustomerId, "pcid")} className="text-[#9A9893] hover:text-[#F5F0E8] transition-colors">
-                      {copied === "pcid" ? <Check className="w-4 h-4 text-emerald-400" strokeWidth={1.5} /> : <Copy className="w-4 h-4" strokeWidth={1.5} />}
-                    </button>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center justify-between py-2 border-b border-[#3A3833]">
-                <span className="text-sm text-[#9A9893]">Paddle Subscription ID</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#E8E6E1] font-mono text-xs max-w-[200px] truncate">{userData.paddleSubscriptionId || "No disponible"}</span>
-                  {userData.paddleSubscriptionId && (
-                    <button onClick={() => copyToClipboard(userData.paddleSubscriptionId, "psid")} className="text-[#9A9893] hover:text-[#F5F0E8] transition-colors">
-                      {copied === "psid" ? <Check className="w-4 h-4 text-emerald-400" strokeWidth={1.5} /> : <Copy className="w-4 h-4" strokeWidth={1.5} />}
-                    </button>
-                  )}
-                </div>
-              </div>
               <Row label="Creado" value={userData.createdAt ? new Date(userData.createdAt).toLocaleString("es-PE") : "No disponible"} />
               <Row label="Actualizado" value={userData.creditsUpdatedAt ? new Date(userData.creditsUpdatedAt).toLocaleString("es-PE") : "No disponible"} />
             </div>

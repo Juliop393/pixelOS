@@ -98,8 +98,6 @@ export async function POST(req: NextRequest) {
         credits: (credits as Record<string, unknown> | null)?.credits ?? 0,
         plan: (credits as Record<string, unknown> | null)?.plan ?? "Gratis",
         subscriptionStatus: (credits as Record<string, unknown> | null)?.subscription_status ?? "Sin suscripción",
-        paddleCustomerId: (credits as Record<string, unknown> | null)?.paddle_customer_id ?? null,
-        paddleSubscriptionId: (credits as Record<string, unknown> | null)?.paddle_subscription_id ?? null,
         creditsUpdatedAt: (credits as Record<string, unknown> | null)?.updated_at ?? null,
       },
     },

@@ -88,37 +88,6 @@ export default function ConfiguracionPage() {
     setSaving(false)
   }
 
-  const openBillingPortal = async () => {
-    setMessage(null)
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-
-    if (!session?.access_token) {
-      setMessage({ type: "error", text: "Tu sesión expiró. Vuelve a iniciar sesión." })
-      return
-    }
-
-    try {
-      const response = await fetch("/api/paddle/portal", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + session.access_token,
-        },
-      })
-      const data = await response.json()
-
-      if (data.success && data.portalUrl) {
-        window.open(data.portalUrl, "_blank", "noopener,noreferrer")
-      } else {
-        setMessage({ type: "error", text: data.error || "No se pudo abrir el portal." })
-      }
-    } catch {
-      setMessage({ type: "error", text: "Error al conectar con el portal." })
-    }
-  }
-
   const planLabel = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : "Cargando..."
 
   return (
@@ -244,12 +213,15 @@ export default function ConfiguracionPage() {
             >
               Ver planes
             </Link>
+            {/* Billing management returns with Stripe LIVE. */}
             <button
               type="button"
-              onClick={openBillingPortal}
-              className="flex flex-1 items-center justify-center rounded-xl bg-[var(--pf-action)] px-4 py-3 text-sm font-semibold text-[var(--pf-action-ink)] shadow-lg shadow-[#FF8A4C]/10 transition-all hover:bg-[var(--pf-action-hover)] active:scale-[0.98]"
+              disabled
+              aria-disabled="true"
+              title="Disponible muy pronto"
+              className="flex flex-1 cursor-not-allowed items-center justify-center rounded-xl bg-[var(--pf-action)] px-4 py-3 text-sm font-semibold text-[var(--pf-action-ink)] opacity-50"
             >
-              Gestionar suscripción
+              Gestionar suscripción · Muy pronto
             </button>
           </div>
         </section>

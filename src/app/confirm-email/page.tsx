@@ -1,12 +1,21 @@
 "use client"
 
+import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 
-export default function ConfirmEmailPage() {
-  const searchParams = useSearchParams()
-  const email = searchParams.get("email")
+// Reads ?email= on the client; Suspense lets the rest of the page prerender.
+function SentTo() {
+  const email = useSearchParams().get("email")
+  if (!email) return null
+  return (
+    <p className="text-sm text-[#D97757] font-medium mb-4 bg-[#D97757]/5 py-2 px-4 rounded-lg inline-block">
+      Enviado a: {email}
+    </p>
+  )
+}
 
+export default function ConfirmEmailPage() {
   return (
     <main className="min-h-screen flex items-center justify-center px-6 bg-[#1E1C1A]">
       <div className="w-full max-w-md">
@@ -35,11 +44,9 @@ export default function ConfirmEmailPage() {
             Te enviamos un enlace de confirmación para activar tu cuenta de PixelFM.
           </p>
 
-          {email && (
-            <p className="text-sm text-[#D97757] font-medium mb-4 bg-[#D97757]/5 py-2 px-4 rounded-lg inline-block">
-              Enviado a: {email}
-            </p>
-          )}
+          <Suspense fallback={null}>
+            <SentTo />
+          </Suspense>
 
           <p className="text-xs text-[#9A9893]/70 mb-8 leading-relaxed">
             Revisa tu bandeja de entrada y también la carpeta de spam.
