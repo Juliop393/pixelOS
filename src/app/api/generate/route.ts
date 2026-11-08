@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto"
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { createAdminClient } from "@/lib/supabase-admin"
@@ -197,25 +198,78 @@ function buildCleanPayload(body: Record<string, unknown>, userId: string): Recor
   }
 }
 
-async function refundCredit(userId: string): Promise<boolean> {
+const IMAGE_CREDIT_COST = 1
+
+type ReserveResult = { ok: true; balance: number } | { ok: false; status: 402 | 503 }
+
+const isBalance = (value: unknown): value is number =>
+  typeof value === "number" && Number.isInteger(value) && value >= 0
+
+const rpcResult = (data: unknown): Record<string, unknown> | null =>
+  typeof data === "object" && data !== null && !Array.isArray(data) ? (data as Record<string, unknown>) : null
+
+/*
+ * Charges one image to the credit engine v2 under this request's key.
+ * The key identifies this execution only: a client retry sends a new request
+ * with a new key, so retries are not deduplicated here.
+ */
+async function reserveImageCredit(userId: string, reservationKey: string): Promise<ReserveResult> {
   try {
-    const adminClient = createAdminClient()
-    const { data, error } = await adminClient.rpc("refund_credits", {
+    const { data, error } = await createAdminClient().rpc("reserve_credits_v2", {
       p_user_id: userId,
-      p_amount: 1,
+      p_reservation_key: reservationKey,
+      p_credits: IMAGE_CREDIT_COST,
+    })
+    if (error?.message === "insufficient_credits") return { ok: false, status: 402 }
+    if (error) {
+      console.error("reserve_credits_v2 failed:", error.message)
+    } else {
+      const result = rpcResult(data)
+      if (result?.status === "reserved" && isBalance(result.balance)) return { ok: true, balance: result.balance }
+      console.error("reserve_credits_v2 unexpected result:", result?.status ?? typeof data)
+    }
+  } catch (error) {
+    console.error("reserve_credits_v2 exception:", error instanceof Error ? error.message : "unknown")
+  }
+  // A lost connection can hide a charge that did go through: release this key.
+  await refundImageCredit(userId, reservationKey, "release")
+  return { ok: false, status: 503 }
+}
+
+/**
+ * Returns the balance after refunding exactly this reservation, or null if it failed.
+ * "release" is the emergency path after an unconfirmed reservation: an absent
+ * reservation is expected there, any other failure is logged with key and user.
+ */
+async function refundImageCredit(
+  userId: string,
+  reservationKey: string,
+  mode: "refund" | "release" = "refund",
+): Promise<number | null> {
+  const fail = (reason: string) => {
+    if (mode === "release") {
+      console.error("Emergency credit release failed:", reason, "key:", reservationKey, "user:", userId)
+    } else {
+      console.error("refund_credits_v2 failed:", reason)
+    }
+    return null
+  }
+  try {
+    const { data, error } = await createAdminClient().rpc("refund_credits_v2", {
+      p_user_id: userId,
+      p_reservation_key: reservationKey,
     })
     if (error) {
-      console.error("refund_credits RPC error:", error.message)
-      return false
+      if (mode === "release" && error.message === "reservation_not_found") return null
+      return fail(error.message)
     }
-    if (typeof data !== "number") {
-      console.error("refund_credits returned unexpected type:", typeof data)
-      return false
+    const result = rpcResult(data)
+    if ((result?.status === "refunded" || result?.status === "already_refunded") && isBalance(result.balance)) {
+      return result.balance
     }
-    return true
-  } catch (e) {
-    console.error("refund_credits exception:", e)
-    return false
+    return fail(`unexpected result: ${result?.status ?? typeof data}`)
+  } catch (error) {
+    return fail(`exception: ${error instanceof Error ? error.message : "unknown"}`)
   }
 }
 
@@ -303,36 +357,42 @@ export async function POST(req: NextRequest) {
   }
 
   // ---- Reserve credit (AFTER validation) ----
-  let newCredits = 0
-  let creditReserved = false
+  // Server-made key for this execution; the same key is used for its refund.
+  const reservationKey = `image:${randomUUID()}`
+  const reservation = await reserveImageCredit(user.id, reservationKey)
+  if (!reservation.ok) {
+    return reservation.status === 402
+      ? NextResponse.json({ error: "Créditos insuficientes" }, { status: 402, headers: headersNoStore })
+      : NextResponse.json(
+          { error: "No pudimos verificar tus créditos. Inténtalo nuevamente en unos minutos." },
+          { status: 503, headers: headersNoStore }
+        )
+  }
+  const newCredits = reservation.balance
 
-  try {
-    const adminClient = createAdminClient()
-    const { data: reserveData, error: reserveError } = await adminClient.rpc("reserve_credits", {
-      p_user_id: user.id,
-      p_amount: 1,
-    })
-
-    if (reserveError || typeof reserveData !== "number") {
-      return NextResponse.json({ error: "Créditos insuficientes" }, { status: 402, headers: headersNoStore })
+  // n8n did not produce an image: refund this exact reservation before answering,
+  // so the balance sent back already includes the refund.
+  const failAndRefund = async (error: string) => {
+    const refundedBalance = await refundImageCredit(user.id, reservationKey)
+    if (refundedBalance === null) {
+      console.error("Failed to refund image credit:", reservationKey, "user:", user.id)
     }
-
-    newCredits = reserveData
-    creditReserved = true
-  } catch {
-    return NextResponse.json({ error: "Créditos insuficientes" }, { status: 402, headers: headersNoStore })
+    return NextResponse.json(
+      { error, credits: refundedBalance ?? newCredits },
+      { status: 502, headers: headersNoStore }
+    )
   }
 
   // ---- Call n8n with timeout ----
-  let n8nFailed = false
-  let refunded = false
+  let n8nResponse: Response
+  let n8nData: unknown
   let timeout: ReturnType<typeof setTimeout> | undefined
 
   try {
     const controller = new AbortController()
     timeout = setTimeout(() => controller.abort(), N8N_TIMEOUT_MS)
 
-    const n8nResponse = await fetch(n8nUrl, {
+    n8nResponse = await fetch(n8nUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -345,71 +405,59 @@ export async function POST(req: NextRequest) {
     clearTimeout(timeout)
 
     const contentType = n8nResponse.headers.get("content-type")
-
     if (!contentType?.includes("application/json")) {
-      n8nFailed = true
-      return NextResponse.json({ error: "Respuesta inesperada del servicio de generación", credits: newCredits }, { status: 502, headers: headersNoStore })
+      return await failAndRefund("Respuesta inesperada del servicio de generación")
     }
 
-    const n8nData = await n8nResponse.json()
-    const isSuccess =
-      n8nResponse.ok &&
-      typeof n8nData === "object" &&
-      n8nData !== null &&
-      (n8nData as Record<string, unknown>).success === true
-
-    if (isSuccess) {
-      const resultData = n8nData as Record<string, unknown>
-      const imageUrl = typeof resultData.imageUrl === "string" ? resultData.imageUrl : ""
-      const storagePath = imageUrl ? getGeneratedImageStoragePath(imageUrl, user.id) : null
-      if (!storagePath) {
-        return NextResponse.json(
-          { error: "El servicio no devolvió una imagen válida de tu cuenta", credits: newCredits },
-          { status: 502, headers: headersNoStore }
-        )
-      }
-
-      let assetId: string
-      try {
-        assetId = await registerGeneratedImage(user.id, imageUrl, storagePath, cleanPayload)
-      } catch (error) {
-        console.error("Image catalog registration failed:", error instanceof Error ? error.message : "unknown")
-        // n8n already generated and uploaded the image; never refund or rerun it here.
-        return NextResponse.json(
-          { error: "La imagen se generó, pero no se pudo registrar en Mis creativos", credits: newCredits },
-          { status: 502, headers: headersNoStore }
-        )
-      }
-      return NextResponse.json(
-        {
-          success: true,
-          imageUrl,
-          copy: typeof resultData.copy === "string" ? resultData.copy : null,
-          credits: newCredits,
-          assetId,
-        },
-        { status: 200, headers: headersNoStore }
-      )
-    }
-
-    n8nFailed = true
-    return NextResponse.json({ error: "El servicio de generación no pudo procesar la solicitud", credits: newCredits }, { status: 502, headers: headersNoStore })
-
+    n8nData = await n8nResponse.json()
   } catch (err: unknown) {
     if (timeout) clearTimeout(timeout)
-    n8nFailed = true
     const isAbort = err instanceof DOMException && err.name === "AbortError"
+    return await failAndRefund(
+      isAbort ? "El servicio de generación tardó demasiado" : "Error al conectar con el servicio de generación"
+    )
+  }
+
+  const isSuccess =
+    n8nResponse.ok &&
+    typeof n8nData === "object" &&
+    n8nData !== null &&
+    (n8nData as Record<string, unknown>).success === true
+
+  if (!isSuccess) {
+    return await failAndRefund("El servicio de generación no pudo procesar la solicitud")
+  }
+
+  // ---- n8n reported a generated image: from here on, never refund or rerun ----
+  const resultData = n8nData as Record<string, unknown>
+  const imageUrl = typeof resultData.imageUrl === "string" ? resultData.imageUrl : ""
+  const storagePath = imageUrl ? getGeneratedImageStoragePath(imageUrl, user.id) : null
+  if (!storagePath) {
     return NextResponse.json(
-      { error: isAbort ? "El servicio de generación tardó demasiado" : "Error al conectar con el servicio de generación", credits: newCredits },
+      { error: "El servicio no devolvió una imagen válida de tu cuenta", credits: newCredits },
       { status: 502, headers: headersNoStore }
     )
-  } finally {
-    // Only refund if n8n failed AND we haven't already refunded
-    if (n8nFailed && creditReserved) {
-      refunded = await refundCredit(user.id)
-      if (!refunded) {
-        console.error("Failed to refund credit for user:", user.id)
-      }
-    }
   }
+
+  let assetId: string
+  try {
+    assetId = await registerGeneratedImage(user.id, imageUrl, storagePath, cleanPayload)
+  } catch (error) {
+    console.error("Image catalog registration failed:", error instanceof Error ? error.message : "unknown")
+    return NextResponse.json(
+      { error: "La imagen se generó, pero no se pudo registrar en Mis creativos", credits: newCredits },
+      { status: 502, headers: headersNoStore }
+    )
+  }
+
+  return NextResponse.json(
+    {
+      success: true,
+      imageUrl,
+      copy: typeof resultData.copy === "string" ? resultData.copy : null,
+      credits: newCredits,
+      assetId,
+    },
+    { status: 200, headers: headersNoStore }
+  )
 }
