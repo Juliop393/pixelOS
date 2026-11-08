@@ -104,7 +104,8 @@ export async function POST(req: NextRequest) {
         line_items: [{ price: priceId, quantity: 1 }],
         metadata,
         subscription_data: { metadata },
-        success_url: `${siteUrl}/dashboard?checkout=success`,
+        // Stripe fills {CHECKOUT_SESSION_ID}; the page verifies it server-side.
+        success_url: `${siteUrl}/dashboard/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${siteUrl}/pricing?checkout=canceled`,
       },
       { idempotencyKey: `pixelfm-checkout-${user.id}-${priceId}-${attempt}` }
