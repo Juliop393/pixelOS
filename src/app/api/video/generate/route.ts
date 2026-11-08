@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createHash } from "node:crypto"
+import { createHash, randomUUID } from "node:crypto"
 import { createClient } from "@supabase/supabase-js"
 import { createAdminClient } from "@/lib/supabase-admin"
 import { getVideoGenerationContext } from "@/lib/video-generation-payload"
@@ -111,18 +111,71 @@ function buildVideoPrompt(angle: string, hook: string, style: string): string {
   return parts.join(". ")
 }
 
-async function refundVideoCredits(userId: string): Promise<void> {
+type ReserveResult = { ok: true; balance: number } | { ok: false; status: 402 | 503 }
+
+const isBalance = (value: unknown): value is number =>
+  typeof value === "number" && Number.isInteger(value) && value >= 0
+
+const rpcResult = (data: unknown): Record<string, unknown> | null =>
+  typeof data === "object" && data !== null && !Array.isArray(data) ? (data as Record<string, unknown>) : null
+
+/*
+ * Charges one video START to the credit engine v2 under this execution's key.
+ * The key is made by the server per execution, so it does not deduplicate HTTP
+ * retries by itself; repeated STARTs are stopped earlier by video_start_requests.
+ */
+async function reserveVideoCredits(userId: string, reservationKey: string): Promise<ReserveResult> {
   try {
-    const adminClient = createAdminClient()
-    const { data, error } = await adminClient.rpc("refund_credits", {
+    const { data, error } = await createAdminClient().rpc("reserve_credits_v2", {
       p_user_id: userId,
-      p_amount: VIDEO_CREDIT_COST,
+      p_reservation_key: reservationKey,
+      p_credits: VIDEO_CREDIT_COST,
     })
-    if (error || typeof data !== "number") {
-      console.error("Video START refund_credits failed for user:", userId, error?.code ?? "unexpected result")
+    if (error?.message === "insufficient_credits") return { ok: false, status: 402 }
+    if (error) {
+      console.error("Video START reserve_credits_v2 failed:", error.message)
+    } else {
+      const result = rpcResult(data)
+      if (result?.status === "reserved" && isBalance(result.balance)) return { ok: true, balance: result.balance }
+      console.error("Video START reserve_credits_v2 unexpected result:", result?.status ?? typeof data)
     }
-  } catch {
-    console.error("Video START refund_credits exception for user:", userId)
+  } catch (error) {
+    console.error("Video START reserve_credits_v2 exception:", error instanceof Error ? error.message : "unknown")
+  }
+  // A lost connection can hide a charge that did go through: release this key.
+  await refundVideoCredits(userId, reservationKey, "release")
+  return { ok: false, status: 503 }
+}
+
+/**
+ * Refunds exactly this reservation; returns false if it failed.
+ * "release" is the emergency path after an unconfirmed reservation: an absent
+ * reservation is expected there, any other failure is logged with key and user.
+ */
+async function refundVideoCredits(
+  userId: string,
+  reservationKey: string,
+  mode: "refund" | "release" = "refund",
+): Promise<boolean> {
+  const fail = (reason: string) => {
+    const label = mode === "release" ? "Video START emergency credit release failed:" : "Video START refund_credits_v2 failed:"
+    console.error(label, reason, "key:", reservationKey, "user:", userId)
+    return false
+  }
+  try {
+    const { data, error } = await createAdminClient().rpc("refund_credits_v2", {
+      p_user_id: userId,
+      p_reservation_key: reservationKey,
+    })
+    if (error) {
+      if (mode === "release" && error.message === "reservation_not_found") return false
+      return fail(error.message)
+    }
+    const result = rpcResult(data)
+    if ((result?.status === "refunded" || result?.status === "already_refunded") && isBalance(result.balance)) return true
+    return fail(`unexpected result: ${result?.status ?? typeof data}`)
+  } catch (error) {
+    return fail(`exception: ${error instanceof Error ? error.message : "unknown"}`)
   }
 }
 
@@ -307,38 +360,39 @@ export async function POST(req: NextRequest) {
   }
 
   // Reservar antes del único START/Submit cobrable. El RPC valida el saldo de forma atómica.
-  let remainingCredits: number
-  try {
-    const adminClient = createAdminClient()
-    const { data: reservedBalance, error: reserveError } = await adminClient.rpc("reserve_credits", {
-      p_user_id: user.id,
-      p_amount: VIDEO_CREDIT_COST,
-    })
-
-    if (reserveError || typeof reservedBalance !== "number") {
-      await markVideoStartFailed(user.id, idempotencyKey)
-      return NextResponse.json(
-        { success: false, error: "Créditos insuficientes", requiredCredits: VIDEO_CREDIT_COST },
-        { status: 402, headers: headersNoStore }
-      )
-    }
-    remainingCredits = reservedBalance
-  } catch {
+  // Server-made key for this execution; the same key is used for its refund.
+  const reservationKey = `video:${randomUUID()}`
+  const reservation = await reserveVideoCredits(user.id, reservationKey)
+  if (!reservation.ok) {
     await markVideoStartFailed(user.id, idempotencyKey)
-    return NextResponse.json(
-      { success: false, error: "Créditos insuficientes", requiredCredits: VIDEO_CREDIT_COST },
-      { status: 402, headers: headersNoStore }
-    )
+    return reservation.status === 402
+      ? NextResponse.json(
+          { success: false, error: "Créditos insuficientes", requiredCredits: VIDEO_CREDIT_COST },
+          { status: 402, headers: headersNoStore }
+        )
+      : NextResponse.json(
+          { success: false, error: "No pudimos verificar tus créditos. Inténtalo nuevamente en unos minutos." },
+          { status: 503, headers: headersNoStore }
+        )
+  }
+  const remainingCredits = reservation.balance
+
+  // START did not create a job: refund this exact reservation once, then answer.
+  const failAndRefund = async (error: string) => {
+    await refundVideoCredits(user.id, reservationKey)
+    await markVideoStartFailed(user.id, idempotencyKey)
+    return NextResponse.json({ success: false, error }, { status: 502, headers: headersNoStore })
   }
 
   let timeout: ReturnType<typeof setTimeout> | undefined
-  let startFailed = false
+  let n8nResponse: Response
+  let n8nData: unknown
 
   try {
     const controller = new AbortController()
     timeout = setTimeout(() => controller.abort(), N8N_VIDEO_TIMEOUT_MS)
 
-    const n8nResponse = await fetch(n8nVideoUrl, {
+    n8nResponse = await fetch(n8nVideoUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -354,63 +408,53 @@ export async function POST(req: NextRequest) {
     const contentType = n8nResponse.headers.get("content-type")
 
     if (!contentType?.includes("application/json")) {
-      startFailed = true
+      // Same body as before: this response never carried success: false.
+      await refundVideoCredits(user.id, reservationKey)
+      await markVideoStartFailed(user.id, idempotencyKey)
       return NextResponse.json({ error: "Respuesta inesperada del servicio de video" }, { status: 502, headers: headersNoStore })
     }
 
-    const n8nData = await n8nResponse.json()
+    n8nData = await n8nResponse.json()
+  } catch (err: unknown) {
+    if (timeout) clearTimeout(timeout)
+    const isAbort = err instanceof DOMException && err.name === "AbortError"
+    return await failAndRefund(isAbort ? "El servicio de video tardó demasiado" : "Error al conectar con el servicio de video")
+  }
 
-    const isProcessing =
-      n8nResponse.ok &&
-      typeof n8nData === "object" &&
-      n8nData !== null &&
-      (n8nData as Record<string, unknown>).success === true &&
-      (n8nData as Record<string, unknown>).status === "processing" &&
-      typeof (n8nData as Record<string, unknown>).requestId === "string" &&
-      typeof (n8nData as Record<string, unknown>).statusUrl === "string" &&
-      typeof (n8nData as Record<string, unknown>).responseUrl === "string"
+  const isProcessing =
+    n8nResponse.ok &&
+    typeof n8nData === "object" &&
+    n8nData !== null &&
+    (n8nData as Record<string, unknown>).success === true &&
+    (n8nData as Record<string, unknown>).status === "processing" &&
+    typeof (n8nData as Record<string, unknown>).requestId === "string" &&
+    typeof (n8nData as Record<string, unknown>).statusUrl === "string" &&
+    typeof (n8nData as Record<string, unknown>).responseUrl === "string"
 
-    if (isProcessing) {
-      const d = n8nData as Record<string, unknown>
-      await markVideoStartStarted(user.id, idempotencyKey, {
-        requestId: d.requestId as string,
-        statusUrl: d.statusUrl as string,
-        responseUrl: d.responseUrl as string,
-      }, remainingCredits)
-      return NextResponse.json(
-        {
-          success: true,
-          status: "processing",
-          requestId: d.requestId as string,
-          statusUrl: d.statusUrl as string,
-          responseUrl: d.responseUrl as string,
-          remainingCredits,
-        },
-        { status: 200, headers: headersNoStore }
-      )
-    }
-
-    startFailed = true
+  if (!isProcessing) {
     const errorMsg =
       typeof (n8nData as Record<string, unknown>)?.error === "string"
         ? (n8nData as Record<string, unknown>).error as string
         : "El servicio de video no pudo procesar la solicitud"
-
-    return NextResponse.json({ success: false, error: errorMsg }, { status: 502, headers: headersNoStore })
-
-  } catch (err: unknown) {
-    if (timeout) clearTimeout(timeout)
-    startFailed = true
-    const isAbort = err instanceof DOMException && err.name === "AbortError"
-    return NextResponse.json(
-      { success: false, error: isAbort ? "El servicio de video tardó demasiado" : "Error al conectar con el servicio de video" },
-      { status: 502, headers: headersNoStore }
-    )
-  } finally {
-    // Se ejecuta una sola vez y únicamente tras una reserva exitosa y un START fallido.
-    if (startFailed) {
-      await refundVideoCredits(user.id)
-      await markVideoStartFailed(user.id, idempotencyKey)
-    }
+    return await failAndRefund(errorMsg)
   }
+
+  // ---- START created the job: from here on, never refund or submit again ----
+  const d = n8nData as Record<string, unknown>
+  await markVideoStartStarted(user.id, idempotencyKey, {
+    requestId: d.requestId as string,
+    statusUrl: d.statusUrl as string,
+    responseUrl: d.responseUrl as string,
+  }, remainingCredits)
+  return NextResponse.json(
+    {
+      success: true,
+      status: "processing",
+      requestId: d.requestId as string,
+      statusUrl: d.statusUrl as string,
+      responseUrl: d.responseUrl as string,
+      remainingCredits,
+    },
+    { status: 200, headers: headersNoStore }
+  )
 }
