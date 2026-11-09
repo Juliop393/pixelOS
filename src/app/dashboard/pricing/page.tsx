@@ -1,4 +1,5 @@
 import CreditPacks from "@/components/CreditPacks"
+import PackPurchaseCard from "@/components/PackPurchaseCard"
 import PricingPlans from "@/components/PricingPlans"
 import styles from "@/components/PricingPlans.module.css"
 import StripeCheckoutTest from "@/components/dashboard/StripeCheckoutTest"
@@ -20,6 +21,7 @@ export default function DashboardPricingPage() {
           <h2 id="packs-title">Añade créditos a tu saldo</h2>
           <p>Sin cambiar de plan. Sirven igual para imágenes y videos.</p>
         </header>
+        <PackPurchaseCard />
         <CreditPacks />
       </section>
     </section>

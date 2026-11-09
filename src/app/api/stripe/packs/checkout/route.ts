@@ -75,8 +75,8 @@ export async function POST(req: NextRequest) {
         line_items: [{ price: priceId, quantity: 1 }],
         metadata,
         payment_intent_data: { metadata },
-        // The return page only says the payment is being processed; the webhook decides.
-        success_url: `${siteUrl}/dashboard/pricing?stripe_test=1&pack_checkout=processing#recargar`,
+        // The return card verifies this session server-side; the webhook alone records the pack.
+        success_url: `${siteUrl}/dashboard/pricing?stripe_test=1&pack_checkout=processing&session_id={CHECKOUT_SESSION_ID}#recargar`,
         cancel_url: `${siteUrl}/dashboard/pricing?stripe_test=1&pack_checkout=canceled#recargar`,
       },
       // Collapses double clicks inside one window; a later purchase gets a new session.

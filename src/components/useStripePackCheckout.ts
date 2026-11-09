@@ -42,7 +42,9 @@ export function useStripePackCheckout() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     setEnabled(params.get("stripe_test") === "1")
-    setNotice(NOTICES[params.get("pack_checkout") ?? ""] ?? "")
+    // A return with session_id is confirmed by PackPurchaseCard instead of this generic notice.
+    const checkout = params.get("pack_checkout") ?? ""
+    setNotice(checkout === "processing" && params.has("session_id") ? "" : NOTICES[checkout] ?? "")
   }, [])
 
   const purchase = useCallback(async (pack: CreditPack) => {
