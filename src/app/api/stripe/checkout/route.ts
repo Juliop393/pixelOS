@@ -3,6 +3,7 @@ import { getStripe } from "@/lib/stripe"
 import { getRequestUser, getSiteUrl, isStripeTestCheckoutAllowed, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
 import { isBillingInterval, isPlanCheckoutReady } from "@/lib/pricing-plans"
 import { getStripePriceId, isAnnualDeliveryConfigured, isStripePlan } from "@/lib/stripe-plans"
+import { activeLivemode, getModeCustomer, getModeSubscriptions } from "@/lib/stripe-modes"
 import { createAdminClient } from "@/lib/supabase-admin"
 
 export const runtime = "nodejs"
@@ -10,16 +11,11 @@ export const runtime = "nodejs"
 const LIVE_STATUSES = ["trialing", "active", "past_due", "unpaid", "paused"]
 const DOUBLE_SUBMIT_WINDOW_MS = 60_000
 
+/** The user's customer in the active Stripe mode, created on first Checkout of that mode. */
 async function getOrCreateCustomer(userId: string, email: string | undefined): Promise<string> {
   const admin = createAdminClient()
-  const { data, error } = await admin
-    .from("stripe_customers")
-    .select("stripe_customer_id")
-    .eq("user_id", userId)
-    .maybeSingle()
-
-  if (error) throw new Error("customer_read_failed")
-  if (data) return data.stripe_customer_id
+  const existing = await getModeCustomer(admin, userId)
+  if (existing) return existing
 
   // The key makes concurrent first checkouts resolve to one Stripe customer.
   const customer = await getStripe().customers.create(
@@ -29,7 +25,7 @@ async function getOrCreateCustomer(userId: string, email: string | undefined): P
 
   const { error: insertError } = await admin
     .from("stripe_customers")
-    .insert({ user_id: userId, stripe_customer_id: customer.id })
+    .insert({ user_id: userId, stripe_customer_id: customer.id, livemode: customer.livemode ?? activeLivemode() })
 
   if (insertError && insertError.code !== "23505") throw new Error("customer_write_failed")
   return customer.id
@@ -81,17 +77,10 @@ export async function POST(req: NextRequest) {
      * subscriptions left (or that they were migrated), and restore a
      * duplicate-billing check, or users could be charged by both processors.
      */
-    const { data: stripeSubscription, error: stripeError } = await createAdminClient()
-      .from("stripe_subscriptions")
-      .select("stripe_subscription_id")
-      .eq("user_id", user.id)
-      .in("status", LIVE_STATUSES)
-      .limit(1)
-      .maybeSingle()
+    // Duplicate subscriptions are checked within the active Stripe mode only.
+    const subscriptions = await getModeSubscriptions(createAdminClient(), user.id)
 
-    if (stripeError) throw new Error("subscription_read_failed")
-
-    if (stripeSubscription) {
+    if (subscriptions.some((row) => LIVE_STATUSES.includes(row.status))) {
       return stripeJson({ error: "Ya tienes una suscripción activa", code: "subscription_exists" }, 409)
     }
 

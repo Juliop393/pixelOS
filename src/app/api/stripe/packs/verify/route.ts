@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { getStripe } from "@/lib/stripe"
 import { getRequestUser, stripeJson } from "@/lib/stripe-api"
 import { getPackAmountCents, getPackDetails, getStripePackByPrice, PACK_CURRENCY } from "@/lib/stripe-packs"
+import { isModeCustomer } from "@/lib/stripe-modes"
 import { createAdminClient } from "@/lib/supabase-admin"
 
 export const runtime = "nodejs"
@@ -82,14 +83,7 @@ export async function POST(req: NextRequest) {
     }
 
     const admin = createAdminClient()
-    const { data: customer, error: customerError } = await admin
-      .from("stripe_customers")
-      .select("stripe_customer_id")
-      .eq("user_id", user.id)
-      .maybeSingle()
-
-    if (customerError) throw new Error("customer_read_failed")
-    if (!customer || customer.stripe_customer_id !== idOf(session.customer)) {
+    if (!(await isModeCustomer(admin, user.id, idOf(session.customer)))) {
       return stripeJson(NOT_FOUND, 404)
     }
 

@@ -22,11 +22,21 @@ export const idOf = (value: string | { id: string } | null | undefined) =>
 async function resolveUserId(admin: Admin, subscription: Stripe.Subscription, customerId: string, hint?: string | null) {
   const { data, error } = await admin
     .from("stripe_customers")
-    .select("user_id")
+    .select("user_id, livemode")
     .eq("stripe_customer_id", customerId)
     .maybeSingle()
 
   if (error) throw new Error("customer_read_failed")
+  if (data && data.livemode !== null && data.livemode !== subscription.livemode) throw new Error("customer_mode_mismatch")
+  if (data && data.livemode === null) {
+    // Stripe keeps a customer and its subscriptions in the same mode: classify it.
+    const { error: modeError } = await admin
+      .from("stripe_customers")
+      .update({ livemode: subscription.livemode })
+      .eq("stripe_customer_id", customerId)
+      .is("livemode", null)
+    if (modeError) throw new Error("mode_write_failed")
+  }
 
   const userId = data?.user_id ?? hint ?? subscription.metadata.supabase_user_id
   if (!userId) throw new Error("subscription_without_user")
@@ -46,6 +56,7 @@ export async function syncSubscription(admin: Admin, subscriptionId: string, use
       stripe_subscription_id: subscription.id,
       user_id: await resolveUserId(admin, subscription, customerId, userHint),
       stripe_customer_id: customerId,
+      livemode: subscription.livemode,
       status: subscription.status,
       stripe_price_id: priceId,
       plan: getStripePlanByPrice(priceId),

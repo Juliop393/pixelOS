@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { getStripe } from "@/lib/stripe"
 import { getRequestUser, getSiteUrl, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
+import { getModeCustomer } from "@/lib/stripe-modes"
 import { createAdminClient } from "@/lib/supabase-admin"
 
 export const runtime = "nodejs"
@@ -14,17 +15,12 @@ export async function POST(req: NextRequest) {
       return stripeJson({ error: "Demasiados intentos. Espera un momento." }, 429)
     }
 
-    const { data, error } = await createAdminClient()
-      .from("stripe_customers")
-      .select("stripe_customer_id")
-      .eq("user_id", user.id)
-      .maybeSingle()
-
-    if (error) throw new Error("customer_read_failed")
-    if (!data) return stripeJson({ error: "No se encontró una cuenta de facturación" }, 404)
+    // Only the customer of the active Stripe mode can open the Portal.
+    const customer = await getModeCustomer(createAdminClient(), user.id)
+    if (!customer) return stripeJson({ error: "No se encontró una cuenta de facturación" }, 404)
 
     const session = await getStripe().billingPortal.sessions.create({
-      customer: data.stripe_customer_id,
+      customer,
       return_url: `${getSiteUrl()}/dashboard/configuracion`,
     })
 

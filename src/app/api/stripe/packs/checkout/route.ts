@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { getStripe } from "@/lib/stripe"
 import { getRequestUser, getSiteUrl, isStripeTestCheckoutAllowed, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
 import { getStripePackPriceId, isStripePack } from "@/lib/stripe-packs"
+import { getModeCustomer, getModeSubscriptions } from "@/lib/stripe-modes"
 import { createAdminClient } from "@/lib/supabase-admin"
 
 export const runtime = "nodejs"
@@ -43,22 +44,12 @@ export async function POST(req: NextRequest) {
     }
 
     const admin = createAdminClient()
-    const [{ data: customer, error: customerError }, { data: subscriptions, error: subscriptionError }] = await Promise.all([
-      admin.from("stripe_customers").select("stripe_customer_id").eq("user_id", user.id).maybeSingle(),
-      admin
-        .from("stripe_subscriptions")
-        .select("stripe_customer_id")
-        .eq("user_id", user.id)
-        .in("status", ACTIVE_STATUSES)
-        .limit(5),
-    ])
+    const customerId = await getModeCustomer(admin, user.id)
+    const subscriptions = customerId ? await getModeSubscriptions(admin, user.id) : []
 
-    if (customerError) throw new Error("customer_read_failed")
-    if (subscriptionError) throw new Error("subscription_read_failed")
-
-    // The pack is charged to the same Stripe customer that holds the active subscription.
-    const customerId = customer?.stripe_customer_id as string | undefined
-    const subscribed = Boolean(customerId) && (subscriptions ?? []).some((row) => row.stripe_customer_id === customerId)
+    // The pack is charged to the same Stripe customer, in the active mode, that holds the active subscription.
+    const subscribed = Boolean(customerId) &&
+      subscriptions.some((row) => row.stripe_customer_id === customerId && ACTIVE_STATUSES.includes(row.status))
     if (!subscribed || !customerId) {
       return stripeJson({ error: "Los packs de créditos son para suscriptores activos", code: "subscription_required" }, 403)
     }

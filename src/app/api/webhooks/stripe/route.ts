@@ -155,12 +155,13 @@ async function grantInvoiceCredits(admin: Admin, invoiceId: string, livemode: bo
 
   const { data: customer, error: customerError } = await admin
     .from("stripe_customers")
-    .select("user_id")
+    .select("user_id, livemode")
     .eq("stripe_customer_id", customerId)
     .maybeSingle()
 
   if (customerError) throw new Error("customer_read_failed")
   if (!customer) throw new Error("invoice_without_user")
+  if (customer.livemode !== null && customer.livemode !== livemode) throw new Error("customer_mode_mismatch")
 
   const { data: result, error } = price.interval === "annual"
     ? await admin.rpc("deliver_annual_subscription_credits", { p_subscription_id: subscriptionId, p_livemode: livemode })
@@ -250,12 +251,13 @@ async function recordPackPurchase(admin: Admin, sessionId: string, livemode: boo
   if (!customerId) return fail("no_customer")
   const { data: customer, error: customerError } = await admin
     .from("stripe_customers")
-    .select("user_id")
+    .select("user_id, livemode")
     .eq("stripe_customer_id", customerId)
     .maybeSingle()
 
   if (customerError) throw new Error("customer_read_failed")
   if (!customer) throw new Error("pack_without_user")
+  if (customer.livemode !== null && customer.livemode !== livemode) return fail("customer_mode_mismatch")
   const metadataUser = session.metadata?.supabase_user_id
   if (session.client_reference_id !== customer.user_id || (metadataUser && metadataUser !== customer.user_id)) {
     return fail("owner_mismatch")

@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from "crypto"
 import { NextRequest, NextResponse } from "next/server"
 import { getStripePriceInfo, isAnnualDeliveryConfigured } from "@/lib/stripe-plans"
+import { markOtherMode } from "@/lib/stripe-modes"
 import { syncSubscription } from "@/lib/stripe-subscriptions"
 import { createAdminClient } from "@/lib/supabase-admin"
 
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
 
   const { data: rows, error } = await admin
     .from("stripe_subscriptions")
-    .select("stripe_subscription_id, stripe_price_id")
+    .select("stripe_subscription_id, stripe_price_id, livemode")
     .in("status", RUNNING)
     .gt("current_period_end", new Date().toISOString())
     .order("current_period_end", { ascending: true })
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
   }
 
   const candidates = (rows ?? [])
-    .filter((row) => getStripePriceInfo(row.stripe_price_id)?.interval === "annual")
+    .filter((row) => (row.livemode === null || row.livemode === liveKey) && getStripePriceInfo(row.stripe_price_id)?.interval === "annual")
     .slice(0, MAX_PER_RUN)
 
   const counts: Record<string, number> = { applied: 0, upgraded: 0, duplicate: 0, stale: 0, simulated: 0, inactive: 0, skipped: 0, failed: 0 }
@@ -83,6 +84,7 @@ export async function POST(req: NextRequest) {
     } catch (failure) {
       // A subscription of the other Stripe mode (or deleted) does not exist for this key.
       if ((failure as { statusCode?: number } | null)?.statusCode === 404) {
+        await markOtherMode(admin, id).catch(() => undefined)
         counts.skipped += 1
         continue
       }
