@@ -1,6 +1,7 @@
 import Topbar from "@/components/dashboard/Topbar"
 import DashboardBackdrop from "@/components/dashboard/DashboardBackdrop"
 import { AuthGuard } from "@/components/dashboard/AuthGuard"
+import PackPurchaseCard from "@/components/PackPurchaseCard"
 import { CreditsProvider } from "@/lib/credits-context"
 import styles from "@/components/dashboard/DashboardShell.module.css"
 
@@ -21,6 +22,7 @@ export default function DashboardLayout({
             <div className={styles.shellBody}>
               <Topbar />
               <main className={styles.content}>{children}</main>
+              <PackPurchaseCard />
             </div>
           </div>
         </AuthGuard>

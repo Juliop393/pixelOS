@@ -8,8 +8,9 @@ import { CREDIT_PACKS, CREDIT_PACK_RULES, type CreditPack } from "@/lib/pricing-
 import styles from "./PackPurchaseCard.module.css"
 
 /*
- * One confirmation card for credit pack purchases, TEST and LIVE alike. It
- * shows up only when the Checkout return carries a session_id, and trusts
+ * One confirmation card for credit pack purchases, TEST and LIVE alike. Checkout
+ * returns to /dashboard, where it opens as a modal over the dashboard only when
+ * the return carries a session_id. It trusts
  * nothing in the URL: the pack, its credits and the status come from
  * /api/stripe/packs/verify, which re-reads Stripe and the lot the webhook wrote.
  * "Credits added" is shown only for a lot confirmed as applied.
@@ -130,6 +131,7 @@ export default function PackPurchaseCard() {
   const [state, setState] = useState<State>({ kind: "hidden" })
   const tries = useRef(0)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const dialog = useRef<HTMLDialogElement>(null)
 
   const run = useCallback(async (id: string, manual: boolean) => {
     if (timer.current) clearTimeout(timer.current)
@@ -157,28 +159,45 @@ export default function PackPurchaseCard() {
     return () => { if (timer.current) clearTimeout(timer.current) }
   }, [run])
 
-  const close = () => {
+  const close = useCallback(() => {
     if (timer.current) clearTimeout(timer.current)
     setState({ kind: "hidden" })
-    // Drop the return parameters so a reload does not show the card again; keep test mode and #recargar.
+    // Drop the return parameters so a reload does not show the card again; keep test mode.
     const url = new URL(window.location.href)
     url.searchParams.delete("session_id")
     url.searchParams.delete("pack_checkout")
     window.history.replaceState(window.history.state, "", url)
-  }
+  }, [])
 
   const copy = copyFor(state)
+  const visible = Boolean(copy && sessionId)
+
+  // Native modal dialog: top layer above the dashboard, Escape and focus handling included.
+  useEffect(() => {
+    const element = dialog.current
+    if (!element) return
+    if (visible && !element.open) element.showModal()
+    if (!visible && element.open) element.close()
+  }, [visible])
+
   if (!copy || !sessionId) return null
   const verified = state.kind === "verified"
 
   return (
+    <dialog
+      ref={dialog}
+      className={styles.dialog}
+      aria-labelledby="pack-purchase-title"
+      onClose={close}
+      onClick={(event) => { if (event.target === event.currentTarget) close() }}
+    >
     <section
       className={`${styles.card} ${verified ? "" : styles.neutral} ${copy.amount ? styles.withAmount : ""}`}
-      aria-labelledby="pack-purchase-title"
       aria-busy={state.kind === "checking"}
       aria-live="polite"
     >
       <span className={styles.glow} aria-hidden="true" />
+      <span className={styles.sheen} aria-hidden="true" />
       <button type="button" className={styles.close} onClick={close} aria-label="Cerrar">
         <X aria-hidden="true" />
       </button>
@@ -209,7 +228,7 @@ export default function PackPurchaseCard() {
 
         <div className={styles.actions}>
           {copy.action === "create" && (
-            <Link href="/dashboard/imagenes" className={styles.primary}>
+            <Link href="/dashboard/imagenes" className={styles.primary} onClick={close}>
               Empezar a crear
               <ArrowRight aria-hidden="true" />
             </Link>
@@ -230,5 +249,6 @@ export default function PackPurchaseCard() {
         </div>
       )}
     </section>
+    </dialog>
   )
 }
