@@ -1,7 +1,6 @@
 import CreditPacks from "@/components/CreditPacks"
 import PricingPlans from "@/components/PricingPlans"
 import styles from "@/components/PricingPlans.module.css"
-import StripeCheckoutTest from "@/components/dashboard/StripeCheckoutTest"
 
 export default function DashboardPricingPage() {
   return (
@@ -11,7 +10,6 @@ export default function DashboardPricingPage() {
         <h1>Planes y créditos</h1>
         <p>Elige el plan que acompañe el ritmo de tus campañas.</p>
       </div>
-      <StripeCheckoutTest />
       <PricingPlans />
 
       <section id="recargar" className={styles.packsSection} aria-labelledby="packs-title">

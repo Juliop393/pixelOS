@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server"
 import { getStripe } from "@/lib/stripe"
 import { getRequestUser, getSiteUrl, isStripeTestCheckoutAllowed, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
-import { getStripePriceId, isStripePlan } from "@/lib/stripe-plans"
+import { isBillingInterval, isPlanCheckoutReady } from "@/lib/pricing-plans"
+import { getStripePriceId, isAnnualDeliveryConfigured, isStripePlan } from "@/lib/stripe-plans"
 import { createAdminClient } from "@/lib/supabase-admin"
 
 export const runtime = "nodejs"
@@ -43,15 +44,28 @@ export async function POST(req: NextRequest) {
   }
 
   let plan: unknown
+  let interval: unknown
   try {
-    plan = (await req.json())?.plan
+    const body = await req.json()
+    plan = body?.plan
+    interval = body?.interval ?? "monthly"
   } catch {
     return stripeJson({ error: "Cuerpo de solicitud inválido" }, 400)
   }
 
-  if (!isStripePlan(plan)) return stripeJson({ error: "Plan inválido" }, 400)
+  if (!isStripePlan(plan) || !isBillingInterval(interval)) return stripeJson({ error: "Plan inválido" }, 400)
 
-  const priceId = getStripePriceId(plan)
+  // Never charge a plan whose credits the webhook cannot grant yet, even if Stripe has a Price for it.
+  if (!isPlanCheckoutReady(plan, interval)) {
+    return stripeJson({ error: "Este plan todavía no está disponible", code: "plan_unavailable" }, 409)
+  }
+
+  // Annual credits arrive month by month: never sell a year while those deliveries cannot run.
+  if (interval === "annual" && !isAnnualDeliveryConfigured()) {
+    return stripeJson({ error: "Este plan todavía no está disponible", code: "plan_unavailable" }, 409)
+  }
+
+  const priceId = getStripePriceId(plan, interval)
   if (!priceId) return stripeJson({ error: "Plan no disponible" }, 503)
 
   try {
@@ -83,7 +97,7 @@ export async function POST(req: NextRequest) {
 
     const customer = await getOrCreateCustomer(user.id, user.email)
     const siteUrl = getSiteUrl()
-    const metadata = { supabase_user_id: user.id, plan }
+    const metadata = { supabase_user_id: user.id, plan, interval }
     const attempt = Math.floor(Date.now() / DOUBLE_SUBMIT_WINDOW_MS)
 
     const session = await getStripe().checkout.sessions.create(

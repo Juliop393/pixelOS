@@ -77,8 +77,8 @@ export async function POST(req: NextRequest) {
         payment_intent_data: { metadata },
         // Back to the dashboard, where the confirmation card verifies this session server-side;
         // the webhook alone records the pack.
-        success_url: `${siteUrl}/dashboard?stripe_test=1&pack_checkout=processing&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${siteUrl}/dashboard/pricing?stripe_test=1&pack_checkout=canceled#recargar`,
+        success_url: `${siteUrl}/dashboard?pack_checkout=processing&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${siteUrl}/dashboard/pricing?pack_checkout=canceled#recargar`,
       },
       // Collapses double clicks inside one window; a later purchase gets a new session.
       { idempotencyKey: `pixelfm-pack-${user.id}-${priceId}-${attempt}` }

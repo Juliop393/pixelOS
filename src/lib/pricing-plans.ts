@@ -131,6 +131,25 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   },
 ]
 
+export type BillingInterval = "monthly" | "annual"
+
+export const isBillingInterval = (value: unknown): value is BillingInterval => value === "monthly" || value === "annual"
+
+/*
+ * What can be bought. A plan and interval are ready only when the Stripe
+ * webhook grants its credits (migration 014: all three plans, monthly and
+ * annual). The Checkout endpoint enforces this same table, so the buttons and
+ * the server never disagree; the server also needs the Price ID, and for
+ * annual plans the monthly delivery job (see stripe-plans.ts).
+ */
+const CHECKOUT_READY: Record<PlanId, Record<BillingInterval, boolean>> = {
+  starter: { monthly: true, annual: true },
+  growth: { monthly: true, annual: true },
+  pro: { monthly: true, annual: true },
+}
+
+export const isPlanCheckoutReady = (plan: PlanId, interval: BillingInterval) => CHECKOUT_READY[plan][interval]
+
 export const planOutcome = (plan: SubscriptionPlan) =>
   `Hasta ${videosFor(plan.monthlyCredits)} videos o ${plan.monthlyCredits} imágenes al mes.`
 

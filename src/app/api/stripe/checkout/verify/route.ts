@@ -95,10 +95,25 @@ export async function POST(req: NextRequest) {
 
     let activation: Activation = "preview"
     if (session.livemode) {
-      // LIVE benefits are confirmed only once the webhook applied this invoice.
+      // LIVE benefits are confirmed only once the webhook applied credits for this
+      // subscription (migration 014; an annual plan has no invoice per month) or,
+      // for grants made before it, for this invoice (migration 012).
       const invoiceId = idOf(session.invoice)
+      const subscriptionId = idOf(session.subscription)
       activation = "pending"
-      if (invoiceId) {
+      if (subscriptionId) {
+        const { data: periods, error: periodError } = await admin
+          .from("credit_period_grants")
+          .select("status")
+          .eq("stripe_subscription_id", subscriptionId)
+          .eq("user_id", user.id)
+          .eq("status", "applied")
+          .limit(1)
+
+        if (periodError) throw new Error("grant_read_failed")
+        if (periods && periods.length > 0) activation = "active"
+      }
+      if (activation === "pending" && invoiceId) {
         const { data: grant, error: grantError } = await admin
           .from("stripe_credit_grants")
           .select("status")

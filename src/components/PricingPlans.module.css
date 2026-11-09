@@ -149,6 +149,63 @@
 
 .heroFacts svg { width: 13px; height: 13px; color: #df7651; }
 
+/* ── Billing interval toggle (glass pill above the cards) ──────────── */
+
+.billingToggle {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 30px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 999px;
+  display: flex;
+  gap: 4px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .015) 55%),
+    rgba(30, 24, 21, .5);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: inset 0 1px rgba(255, 240, 230, .12), 0 14px 32px -16px rgba(0, 0, 0, .7);
+}
+
+.billingToggle button {
+  min-height: 38px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #b3a99e;
+  background: transparent;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+.billingToggle button:hover:not([aria-pressed="true"]) { color: #f3eae0; background: rgba(255, 255, 255, .05); }
+
+.billingToggle button[aria-pressed="true"] {
+  color: #fff7f1;
+  background: linear-gradient(145deg, #e3825e, #c45a37);
+  box-shadow: 0 8px 20px -8px rgba(196, 90, 55, .65), inset 0 1px rgba(255, 255, 255, .25);
+}
+
+.billingToggle button span {
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: #f3b597;
+  background: rgba(223, 118, 81, .14);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.billingToggle button[aria-pressed="true"] span { color: #fff7f1; background: rgba(255, 255, 255, .18); }
+.billingToggle button:disabled { cursor: default; }
+.billingToggle button:focus-visible { outline: 2px solid #ef9472; outline-offset: 2px; }
+
 /* ── Plans grid ───────────────────────────────────────────────────── */
 
 .grid {

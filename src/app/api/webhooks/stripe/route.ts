@@ -2,24 +2,26 @@ import { NextRequest, NextResponse } from "next/server"
 import type Stripe from "stripe"
 import { getStripe, getStripeWebhookSecret } from "@/lib/stripe"
 import { getPackAmountCents, getStripePackByPrice, PACK_CURRENCY } from "@/lib/stripe-packs"
-import { getStripePlanByPrice } from "@/lib/stripe-plans"
+import { getStripePriceInfo } from "@/lib/stripe-plans"
+import { idOf, syncSubscription } from "@/lib/stripe-subscriptions"
 import { createAdminClient } from "@/lib/supabase-admin"
 
 export const runtime = "nodejs"
 
 /*
  * Mirrors Stripe state into the stripe_* tables. The only path that may change
- * a balance is invoice.paid, through grant_stripe_invoice_credits_v2 (migration
- * 012): once per invoice and per billing period, Starter only, monthly credits
- * only (legacy and pack credits are kept), and TEST invoices are only simulated.
+ * a subscription balance is invoice.paid, through migration 014: once per
+ * invoice and billing period, for Starter, Growth and Pro, monthly and annual
+ * (annual credits month by month), keeping legacy and pack credits. TEST
+ * invoices are only simulated. checkout.session.completed never grants.
  *
  * Credit pack payments (one-time Checkout) are recorded through
  * record_credit_pack_purchase (migration 010): one lot per PaymentIntent, TEST
  * lots only 'simulated' and never spendable, LIVE lots still refused.
  */
 
-// Only invoices that open or renew a period earn monthly credits.
-const GRANT_BILLING_REASONS = new Set(["subscription_create", "subscription_cycle"])
+// Invoices that open or renew a period, or invoice a plan change right away.
+const GRANT_BILLING_REASONS = new Set(["subscription_create", "subscription_cycle", "subscription_update"])
 
 const STALE_CLAIM_MS = 5 * 60 * 1000
 
@@ -29,8 +31,6 @@ type Claim = "claimed" | "done" | "in_progress"
 const toDate = (seconds: number | null | undefined) =>
   typeof seconds === "number" ? new Date(seconds * 1000).toISOString() : null
 
-const idOf = (value: string | { id: string } | null | undefined) =>
-  typeof value === "string" ? value : value?.id ?? null
 
 async function claimEvent(admin: Admin, event: Stripe.Event): Promise<Claim> {
   const { error } = await admin.from("stripe_webhook_events").insert({
@@ -81,52 +81,28 @@ async function finishEvent(admin: Admin, eventId: string, status: "processed" | 
   if (error) throw new Error("event_finish_failed")
 }
 
-async function resolveUserId(admin: Admin, subscription: Stripe.Subscription, customerId: string, hint?: string | null) {
-  const { data, error } = await admin
-    .from("stripe_customers")
-    .select("user_id")
-    .eq("stripe_customer_id", customerId)
-    .maybeSingle()
+/** Price of an invoice line, from its pricing details. */
+const linePrice = (line: Stripe.InvoiceLineItem) => idOf(line.pricing?.price_details?.price)
 
-  if (error) throw new Error("customer_read_failed")
-
-  const userId = data?.user_id ?? hint ?? subscription.metadata.supabase_user_id
-  if (!userId) throw new Error("subscription_without_user")
-  return userId as string
-}
-
-/** Always reads the live subscription, so events arriving out of order are harmless. */
-async function syncSubscription(admin: Admin, subscriptionId: string, userHint?: string | null) {
-  const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
-  const customerId = idOf(subscription.customer)
-  if (!customerId) throw new Error("subscription_without_customer")
-
-  const item = subscription.items.data[0]
-  const priceId = item?.price.id ?? null
-
-  const { error } = await admin.from("stripe_subscriptions").upsert(
-    {
-      stripe_subscription_id: subscription.id,
-      user_id: await resolveUserId(admin, subscription, customerId, userHint),
-      stripe_customer_id: customerId,
-      status: subscription.status,
-      stripe_price_id: priceId,
-      plan: getStripePlanByPrice(priceId),
-      current_period_start: toDate(item?.current_period_start),
-      current_period_end: toDate(item?.current_period_end),
-      cancel_at_period_end: subscription.cancel_at_period_end,
-      cancel_at: toDate(subscription.cancel_at),
-      canceled_at: toDate(subscription.canceled_at),
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "stripe_subscription_id" }
-  )
-
-  if (error) throw new Error("subscription_write_failed")
-}
-
-/** Skips (returns) invoices that do not qualify; throws when a grant should be retried. */
-async function grantInvoiceCredits(admin: Admin, invoiceId: string, livemode: boolean) {
+/*
+ * Grants the credits of a paid subscription invoice through migration 014.
+ * Plan and interval always come from the Stripe Price that was paid; amounts
+ * never come from Stripe or the browser, the database function decides them.
+ *
+ *   subscription_create / subscription_cycle: the single non-proration line is
+ *     what was bought; its period is the period paid. Proration lines next to
+ *     it (from an earlier plan change) are allowed and ignored.
+ *   subscription_update (plan change invoiced right away): the subscription as
+ *     it stands now is what was paid, for its current period, so the database
+ *     tops up the same period (upgraded) instead of opening a new one.
+ *
+ * Monthly Prices go to grant_subscription_credits_v3 (one month per invoice).
+ * Annual Prices never do: the year is delivered month by month through
+ * deliver_annual_subscription_credits, which grants only the current month.
+ *
+ * Skips (returns) invoices that do not qualify; throws when a grant should be retried.
+ */
+async function grantInvoiceCredits(admin: Admin, invoiceId: string, livemode: boolean, subscription: Stripe.Subscription) {
   // The key decides which Stripe account answers; a mismatch must never grant.
   const liveKey = (process.env.STRIPE_SECRET_KEY?.trim() ?? "").startsWith("sk_live_")
   if (liveKey !== livemode) throw new Error("livemode_mismatch")
@@ -136,27 +112,44 @@ async function grantInvoiceCredits(admin: Admin, invoiceId: string, livemode: bo
 
   if (invoice.livemode !== livemode) throw new Error("livemode_mismatch")
   if (invoice.status !== "paid") return skip("not_paid")
-  if (!GRANT_BILLING_REASONS.has(invoice.billing_reason ?? "")) return skip("billing_reason")
+  const reason = invoice.billing_reason ?? ""
+  if (!GRANT_BILLING_REASONS.has(reason)) return skip("billing_reason")
 
   const subscriptionId = idOf(invoice.parent?.subscription_details?.subscription)
   const customerId = idOf(invoice.customer)
   if (!subscriptionId || !customerId) return skip("no_subscription")
+  if (subscriptionId !== subscription.id) throw new Error("subscription_mismatch")
   if (invoice.lines.has_more) return skip("too_many_lines")
 
   const lines = invoice.lines.data.filter((line) => line.parent?.type === "subscription_item_details")
-  const line = lines[0]
-  if (lines.length !== 1 || line.parent?.subscription_item_details?.proration || line.quantity !== 1) {
-    return skip("unexpected_lines")
+  if (lines.length === 0 || lines.some((line) => line.quantity !== 1)) return skip("unexpected_lines")
+
+  let priceId: string | null
+  let periodStart: number | null | undefined
+  let periodEnd: number | null | undefined
+  if (reason === "subscription_update") {
+    const items = subscription.items.data
+    if (items.length !== 1 || items[0].quantity !== 1) return skip("unexpected_items")
+    priceId = items[0].price.id
+    // Only an invoice that charges the subscription's current Price pays for it.
+    if (!lines.some((line) => linePrice(line) === priceId)) return skip("update_for_other_price")
+    periodStart = items[0].current_period_start
+    periodEnd = items[0].current_period_end
+  } else {
+    const paid = lines.filter((line) => !line.parent?.subscription_item_details?.proration)
+    if (paid.length !== 1) return skip("unexpected_lines")
+    priceId = linePrice(paid[0])
+    periodStart = paid[0].period?.start
+    periodEnd = paid[0].period?.end
   }
 
-  const plan = getStripePlanByPrice(idOf(line.pricing?.price_details?.price))
-  if (plan !== "starter") return skip("plan_not_supported")
+  // A paid subscription Price that maps to no plan is a configuration error: keep it visible and retryable.
+  const price = getStripePriceInfo(priceId)
+  if (!price) throw new Error("subscription_price_unknown")
 
-  // The billed period comes from the validated subscription line. An eligible
-  // invoice without one fails, so Stripe retries instead of the event closing.
-  const periodStart = line.period?.start
-  const periodEnd = line.period?.end
-  if (!Number.isSafeInteger(periodStart) || !Number.isSafeInteger(periodEnd) || periodEnd <= periodStart || periodStart <= 0) {
+  // The billed period comes from Stripe. An eligible invoice without one fails, so Stripe retries.
+  if (!Number.isSafeInteger(periodStart) || !Number.isSafeInteger(periodEnd) ||
+      (periodEnd as number) <= (periodStart as number) || (periodStart as number) <= 0) {
     throw new Error("invoice_period_invalid")
   }
 
@@ -169,19 +162,23 @@ async function grantInvoiceCredits(admin: Admin, invoiceId: string, livemode: bo
   if (customerError) throw new Error("customer_read_failed")
   if (!customer) throw new Error("invoice_without_user")
 
-  const { data: result, error } = await admin.rpc("grant_stripe_invoice_credits_v2", {
-    p_invoice_id: invoice.id,
-    p_user_id: customer.user_id,
-    p_subscription_id: subscriptionId,
-    p_plan: plan,
-    p_livemode: livemode,
-    p_period_start: new Date(periodStart * 1000).toISOString(),
-    p_period_end: new Date(periodEnd * 1000).toISOString(),
-  })
+  const { data: result, error } = price.interval === "annual"
+    ? await admin.rpc("deliver_annual_subscription_credits", { p_subscription_id: subscriptionId, p_livemode: livemode })
+    : await admin.rpc("grant_subscription_credits_v3", {
+        p_invoice_id: invoice.id,
+        p_user_id: customer.user_id,
+        p_subscription_id: subscriptionId,
+        p_plan: price.plan,
+        p_livemode: livemode,
+        p_period_start: new Date((periodStart as number) * 1000).toISOString(),
+        p_period_end: new Date((periodEnd as number) * 1000).toISOString(),
+      })
 
   if (error) throw new Error(`credit_grant_failed: ${error.message.slice(0, 120)}`)
+  // A paid annual invoice for a subscription without a running term must be looked at, not dropped.
+  if (result === "inactive") throw new Error("annual_subscription_inactive")
   // stale: the period already ended or a newer one was granted; nothing to add.
-  if (!["applied", "simulated", "duplicate", "stale"].includes(result as string)) {
+  if (!["applied", "upgraded", "simulated", "duplicate", "stale"].includes(result as string)) {
     throw new Error(`credit_grant_unexpected: ${String(result).slice(0, 40)}`)
   }
 }
@@ -312,9 +309,9 @@ async function handleEvent(admin: Admin, event: Stripe.Event): Promise<boolean> 
     case "invoice.payment_failed": {
       const subscriptionId = idOf(event.data.object.parent?.subscription_details?.subscription)
       if (!subscriptionId) return false
-      await syncSubscription(admin, subscriptionId)
+      const subscription = await syncSubscription(admin, subscriptionId)
       if (event.type === "invoice.paid" && event.data.object.id) {
-        await grantInvoiceCredits(admin, event.data.object.id, event.livemode)
+        await grantInvoiceCredits(admin, event.data.object.id, event.livemode, subscription)
       }
       return true
     }
