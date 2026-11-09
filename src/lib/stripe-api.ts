@@ -33,6 +33,16 @@ export async function isWithinBillingLimit(userId: string, endpoint: string): Pr
   return data === "allowed"
 }
 
+/*
+ * TEMPORARY: while Stripe is validated in test mode, only one account may open
+ * Checkout (plans or packs), and only with a test key. Remove when going public.
+ */
+export function isStripeTestCheckoutAllowed(userId: string): boolean {
+  const allowedUserId = process.env.STRIPE_TEST_ALLOWED_USER_ID?.trim()
+  const secretKey = process.env.STRIPE_SECRET_KEY?.trim() ?? ""
+  return Boolean(allowedUserId) && userId === allowedUserId && secretKey.startsWith("sk_test_")
+}
+
 export function getSiteUrl(): string {
   const url = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/+$/, "")
   if (!url) throw new Error("Falta NEXT_PUBLIC_SITE_URL en el entorno")

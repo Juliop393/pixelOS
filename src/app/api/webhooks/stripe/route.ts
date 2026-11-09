@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import type Stripe from "stripe"
 import { getStripe, getStripeWebhookSecret } from "@/lib/stripe"
+import { getPackAmountCents, getStripePackByPrice, PACK_CURRENCY } from "@/lib/stripe-packs"
 import { getStripePlanByPrice } from "@/lib/stripe-plans"
 import { createAdminClient } from "@/lib/supabase-admin"
 
@@ -11,6 +12,10 @@ export const runtime = "nodejs"
  * a balance is invoice.paid, through grant_stripe_invoice_credits_v2 (migration
  * 012): once per invoice and per billing period, Starter only, monthly credits
  * only (legacy and pack credits are kept), and TEST invoices are only simulated.
+ *
+ * Credit pack payments (one-time Checkout) are recorded through
+ * record_credit_pack_purchase (migration 010): one lot per PaymentIntent, TEST
+ * lots only 'simulated' and never spendable, LIVE lots still refused.
  */
 
 // Only invoices that open or renew a period earn monthly credits.
@@ -181,10 +186,116 @@ async function grantInvoiceCredits(admin: Admin, invoiceId: string, livemode: bo
   }
 }
 
+/*
+ * Records a paid credit pack. Always re-reads the Checkout Session, its line
+ * items and its PaymentIntent from Stripe, so the event body is never trusted
+ * and completed / async_payment_succeeded can arrive in any order: whichever
+ * sees the payment confirmed records it, and the PaymentIntent ID keeps it to
+ * one lot.
+ *
+ * Payments that are not PixelFM packs are skipped. A recognized pack that is
+ * really paid but fails a check (price, amount, currency, lines, owner) is
+ * never recorded and never closed as processed: it throws a
+ * "pack_verification_failed: <reason>" error, so the event stays failed and
+ * can be retried or replayed once the cause is fixed.
+ */
+async function recordPackPurchase(admin: Admin, sessionId: string, livemode: boolean) {
+  const liveKey = (process.env.STRIPE_SECRET_KEY?.trim() ?? "").startsWith("sk_live_")
+  if (liveKey !== livemode) throw new Error("livemode_mismatch")
+
+  const session = await getStripe().checkout.sessions.retrieve(sessionId, {
+    expand: ["line_items", "payment_intent.latest_charge"],
+  })
+  const skip = (reason: string) => console.warn("Stripe pack payment not recorded:", reason)
+  const fail = (reason: string): never => { throw new Error(`pack_verification_failed: ${reason}`) }
+
+  if (session.livemode !== livemode) throw new Error("livemode_mismatch")
+  if (session.mode !== "payment") return skip("not_payment_mode")
+
+  // A PixelFM pack is recognized by a pack Price or by the metadata our Checkout sets.
+  const items = session.line_items
+  const item = items && !items.has_more && items.data.length === 1 ? items.data[0] : null
+  const pricePack = getStripePackByPrice(item?.price?.id)
+  const metadataPack = session.metadata?.kind === "credit_pack" ? session.metadata.pack ?? "" : null
+  if (!pricePack && metadataPack === null) return skip("not_a_pack")
+
+  // Not paid yet (e.g. bank debits): checkout.session.async_payment_succeeded records it later.
+  if (session.status !== "complete" || session.payment_status !== "paid") return skip("payment_pending")
+
+  // From here the pack is paid: any mismatch must stay visible, never be dropped.
+  if (!item) return fail("unexpected_lines")
+  if (!pricePack) return fail("unknown_price")
+  const pack = pricePack
+  if (metadataPack !== null && metadataPack !== pack) return fail("pack_mismatch")
+  if (item.quantity !== 1) return fail("unexpected_quantity")
+
+  const expected = getPackAmountCents(pack)
+  if (
+    session.currency !== PACK_CURRENCY || session.amount_total !== expected ||
+    item.currency !== PACK_CURRENCY || item.amount_total !== expected
+  ) {
+    return fail("unexpected_amount")
+  }
+
+  const paymentIntent = session.payment_intent
+  if (!paymentIntent || typeof paymentIntent === "string") throw new Error("payment_intent_missing")
+  // The session says paid; a PaymentIntent that disagrees is retried, never dropped.
+  if (paymentIntent.status !== "succeeded") throw new Error("payment_intent_not_succeeded")
+  if (
+    paymentIntent.livemode !== livemode || paymentIntent.currency !== PACK_CURRENCY ||
+    paymentIntent.amount_received !== expected
+  ) {
+    return fail("unexpected_payment_intent")
+  }
+
+  // The owner is the user behind the paying Stripe customer, and must match the session.
+  const customerId = idOf(session.customer)
+  if (!customerId) return fail("no_customer")
+  const { data: customer, error: customerError } = await admin
+    .from("stripe_customers")
+    .select("user_id")
+    .eq("stripe_customer_id", customerId)
+    .maybeSingle()
+
+  if (customerError) throw new Error("customer_read_failed")
+  if (!customer) throw new Error("pack_without_user")
+  const metadataUser = session.metadata?.supabase_user_id
+  if (session.client_reference_id !== customer.user_id || (metadataUser && metadataUser !== customer.user_id)) {
+    return fail("owner_mismatch")
+  }
+
+  // LIVE pack credits stay disabled: fail visibly (and retryably) instead of dropping a real payment.
+  if (livemode) throw new Error("live_packs_not_enabled")
+
+  const charge = paymentIntent.latest_charge
+  const paidAt = charge && typeof charge !== "string" ? charge.created : paymentIntent.created
+
+  const { data: result, error } = await admin.rpc("record_credit_pack_purchase", {
+    p_payment_intent_id: paymentIntent.id,
+    p_user_id: customer.user_id,
+    p_pack: pack,
+    p_livemode: livemode,
+    p_purchased_at: new Date(paidAt * 1000).toISOString(),
+  })
+
+  if (error) throw new Error(`pack_record_failed: ${error.message.slice(0, 120)}`)
+  if (!["simulated", "duplicate"].includes(result as string)) {
+    throw new Error(`pack_record_unexpected: ${String(result).slice(0, 40)}`)
+  }
+}
+
 /** Returns false when the event carries nothing this layer tracks. */
 async function handleEvent(admin: Admin, event: Stripe.Event): Promise<boolean> {
   switch (event.type) {
+    case "checkout.session.async_payment_succeeded":
+      if (event.data.object.mode !== "payment") return false
+      await recordPackPurchase(admin, event.data.object.id, event.livemode)
+      return true
     case "checkout.session.completed": {
+      if (event.data.object.mode === "payment") {
+        await recordPackPurchase(admin, event.data.object.id, event.livemode)
+        return true
+      }
       const subscriptionId = idOf(event.data.object.subscription)
       if (!subscriptionId) return false
       await syncSubscription(admin, subscriptionId, event.data.object.client_reference_id)

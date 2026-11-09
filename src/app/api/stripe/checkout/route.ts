@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
 import { getStripe } from "@/lib/stripe"
-import { getRequestUser, getSiteUrl, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
+import { getRequestUser, getSiteUrl, isStripeTestCheckoutAllowed, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
 import { getStripePriceId, isStripePlan } from "@/lib/stripe-plans"
 import { createAdminClient } from "@/lib/supabase-admin"
 
@@ -8,16 +8,6 @@ export const runtime = "nodejs"
 
 const LIVE_STATUSES = ["trialing", "active", "past_due", "unpaid", "paused"]
 const DOUBLE_SUBMIT_WINDOW_MS = 60_000
-
-/*
- * TEMPORARY: while Stripe is validated in test mode, only one account may open
- * Checkout, and only with a test key. Remove this guard when plans go public.
- */
-function isStripeTestCheckoutAllowed(userId: string): boolean {
-  const allowedUserId = process.env.STRIPE_TEST_ALLOWED_USER_ID?.trim()
-  const secretKey = process.env.STRIPE_SECRET_KEY?.trim() ?? ""
-  return Boolean(allowedUserId) && userId === allowedUserId && secretKey.startsWith("sk_test_")
-}
 
 async function getOrCreateCustomer(userId: string, email: string | undefined): Promise<string> {
   const admin = createAdminClient()
