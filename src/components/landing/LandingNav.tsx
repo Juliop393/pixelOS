@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import type { MouseEvent } from "react"
+import { useToastAnchor } from "@/hooks/useToastAnchor"
 import { useHasSession } from "./useHasSession"
 
 const LINKS = [
@@ -24,10 +25,11 @@ const closeMenu = (event: MouseEvent<HTMLElement>) => event.currentTarget.closes
 
 export default function LandingNav() {
   const signedIn = useHasSession()
+  const navRef = useToastAnchor<HTMLElement>()
 
   return (
     <header className="navShell">
-      <nav className="nav glass" aria-label="Navegación principal">
+      <nav ref={navRef} className="nav glass" aria-label="Navegación principal">
         <Logo />
         <div className="navLinks">
           {LINKS.map(({ href, label }) => <a href={href} key={href}>{label}</a>)}

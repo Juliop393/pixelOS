@@ -8,6 +8,7 @@ import { LogOut } from "lucide-react"
 import CreditPacksDialog from "@/components/CreditPacksDialog"
 import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
+import { useToastAnchor } from "@/hooks/useToastAnchor"
 import styles from "./DashboardShell.module.css"
 
 const sectionDetails = [
@@ -28,6 +29,7 @@ export default function Topbar() {
   const [userEmail, setUserEmail] = useState("")
   const [fullName, setFullName] = useState("")
   const [packsOpen, setPacksOpen] = useState(false)
+  const headerRef = useToastAnchor<HTMLElement>()
 
   useEffect(() => {
     const loadUser = async () => {
@@ -76,7 +78,7 @@ export default function Topbar() {
   ) ?? sectionDetails[sectionDetails.length - 1]
 
   return (
-    <header className={styles.topbar}>
+    <header ref={headerRef} className={styles.topbar}>
       <div className={styles.sectionContext}>
         <Link href="/dashboard" className={styles.homeBrand} aria-label="PixelFM — Inicio">
           <img src="/logo_PixelOS.png" width={44} height={44} alt="" />

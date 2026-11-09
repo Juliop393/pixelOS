@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { createBrowserClient } from "@supabase/ssr"
+import { Check, Image as ImageIcon, Palette, Trash2, Type, Upload, UserRound } from "lucide-react"
+import styles from "@/components/dashboard/BrandIdentity.module.css"
 
 export default function IdentidadMarcaPage() {
   const [userId, setUserId] = useState<string | null>(null)
@@ -127,206 +129,204 @@ export default function IdentidadMarcaPage() {
     }
   }
 
+  const fileInput = (type: "logo" | "face", uploading: boolean) => (
+    <input
+      type="file"
+      accept="image/*"
+      className={styles.srOnly}
+      onChange={(e) => {
+        const file = e.target.files?.[0]
+        if (file) handleFileUpload(file, type)
+        e.target.value = ""
+      }}
+      disabled={uploading}
+    />
+  )
+
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 rounded-full border-2 border-[#D97757]/30 border-t-[#D97757] animate-spin" />
+      <div className={styles.loading}>
+        <div className={styles.spinner} />
       </div>
     )
   }
 
   return (
-    <div className="max-w-3xl mx-auto h-full overflow-y-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Identidad de Marca</h1>
-        <p className="text-[#9A9893]">Personaliza tus creativos con los colores y activos de tu marca</p>
-      </div>
+    <div id="dashboard-brand" className={styles.page}>
+      <div className={styles.inner}>
+        <header className={styles.header}>
+          <span className={styles.eyebrow}>
+            <i aria-hidden="true" />
+            Tu marca
+          </span>
+          <h1>Identidad de Marca</h1>
+          <p>Personaliza tus creativos con los colores y activos de tu marca</p>
+        </header>
 
-      <div className="space-y-6">
-        {/* Nombre de la marca */}
-        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-6">
-          <label className="block text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-2">
-            Nombre de la marca
-          </label>
-          <input
-            type="text"
-            value={brandName}
-            onChange={(e) => setBrandName(e.target.value)}
-            placeholder="Ej: PixelFM"
-            className="w-full bg-[#1E1C1A] border border-[#3A3833] px-4 py-3 rounded-xl text-sm text-[#E8E6E1] placeholder:text-[#9A9893]/50 focus:outline-none focus:border-[#D97757]/50 transition-colors"
-          />
-        </div>
+        <div className={styles.grid}>
+          {/* Nombre de la marca */}
+          <section className={`${styles.card} ${styles.wide}`}>
+            <div className={styles.cardHead}>
+              <span className={styles.cardIcon} aria-hidden="true"><Type /></span>
+              <div>
+                <label htmlFor="brand-name" className={styles.cardTitle}>Nombre de la marca</label>
+                <span className={styles.cardHint}>Así se llama tu marca.</span>
+              </div>
+            </div>
+            <input
+              id="brand-name"
+              type="text"
+              value={brandName}
+              onChange={(e) => setBrandName(e.target.value)}
+              placeholder="Ej: PixelFM"
+              className={styles.input}
+            />
+          </section>
 
-        {/* Logo */}
-        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-6">
-          <label className="block text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-3">
-            Logo de la marca
-          </label>
-          <div className="flex items-start gap-4">
-            <div className="w-24 h-24 rounded-xl bg-[#1E1C1A] border border-[#3A3833] flex items-center justify-center overflow-hidden flex-shrink-0">
-              {logoUrl ? (
-                <img src={logoUrl} alt="Logo preview" className="w-full h-full object-contain p-2" />
-              ) : (
-                <svg className="w-8 h-8 text-[#9A9893]/30" width={32} height={32} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              )}
+          {/* Logo */}
+          <section className={styles.card}>
+            <div className={styles.cardHead}>
+              <span className={styles.cardIcon} aria-hidden="true"><ImageIcon /></span>
+              <div>
+                <h2 className={styles.cardTitle}>Logo de la marca</h2>
+                <span className={styles.cardHint}>El logo de tu propia marca.</span>
+              </div>
             </div>
-            <div className="flex-1">
-              <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E1C1A] border border-[#3A3833] text-sm text-[#9A9893] hover:text-[#E8E6E1] hover:border-[#D97757]/50 transition-all cursor-pointer">
-                {uploadingLogo ? (
-                  <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full border-2 border-[#D97757]/30 border-t-[#D97757] animate-spin" />
-                    Subiendo...
-                  </span>
-                ) : (
-                  "Seleccionar archivo"
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) handleFileUpload(file, "logo")
-                    e.target.value = ""
-                  }}
-                  disabled={uploadingLogo}
-                />
-              </label>
-              {logoUrl && (
-                <button
-                  onClick={() => setLogoUrl(null)}
-                  className="ml-2 text-xs text-[#9A9893] hover:text-red-400 transition-colors"
-                >
-                  Quitar
-                </button>
-              )}
+            <div className={styles.upload}>
+              <div className={`${styles.preview} ${styles.previewLogo} ${logoUrl ? "" : styles.previewEmpty}`}>
+                {logoUrl ? <img src={logoUrl} alt="Logo preview" /> : <ImageIcon aria-hidden="true" />}
+                {uploadingLogo && <span className={styles.previewBusy}><span className={styles.spinner} /></span>}
+              </div>
+              <div className={styles.uploadActions}>
+                <span className={styles.uploadState} aria-live="polite">
+                  {uploadingLogo ? "Subiendo..." : logoUrl ? "Logo cargado" : "Aún no hay logo"}
+                </span>
+                <div className={styles.uploadButtons}>
+                  <label className={`${styles.fileButton} ${uploadingLogo ? styles.fileButtonBusy : ""}`}>
+                    <Upload aria-hidden="true" />
+                    {uploadingLogo ? "Subiendo..." : "Seleccionar archivo"}
+                    {fileInput("logo", uploadingLogo)}
+                  </label>
+                  {logoUrl && (
+                    <button type="button" onClick={() => setLogoUrl(null)} className={styles.removeButton}>
+                      <Trash2 aria-hidden="true" />
+                      Quitar
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        {/* Rostro / Foto */}
-        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-6">
-          <label className="block text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-3">
-            Rostro / Foto del representante
-          </label>
-          <div className="flex items-start gap-4">
-            <div className="w-24 h-24 rounded-xl bg-[#1E1C1A] border border-[#3A3833] flex items-center justify-center overflow-hidden flex-shrink-0">
-              {faceUrl ? (
-                <img src={faceUrl} alt="Face preview" className="w-full h-full object-cover" />
-              ) : (
-                <svg className="w-8 h-8 text-[#9A9893]/30" width={32} height={32} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              )}
+          {/* Rostro / Foto */}
+          <section className={styles.card}>
+            <div className={styles.cardHead}>
+              <span className={styles.cardIcon} aria-hidden="true"><UserRound /></span>
+              <div>
+                <h2 className={styles.cardTitle}>Rostro / Foto del representante</h2>
+                <span className={styles.cardHint}>La persona que representa tu marca.</span>
+              </div>
             </div>
-            <div className="flex-1">
-              <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E1C1A] border border-[#3A3833] text-sm text-[#9A9893] hover:text-[#E8E6E1] hover:border-[#D97757]/50 transition-all cursor-pointer">
-                {uploadingFace ? (
-                  <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full border-2 border-[#D97757]/30 border-t-[#D97757] animate-spin" />
-                    Subiendo...
-                  </span>
-                ) : (
-                  "Seleccionar archivo"
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) handleFileUpload(file, "face")
-                    e.target.value = ""
-                  }}
-                  disabled={uploadingFace}
-                />
-              </label>
-              {faceUrl && (
-                <button
-                  onClick={() => setFaceUrl(null)}
-                  className="ml-2 text-xs text-[#9A9893] hover:text-red-400 transition-colors"
-                >
-                  Quitar
-                </button>
-              )}
+            <div className={styles.upload}>
+              <div className={`${styles.preview} ${styles.previewFace} ${faceUrl ? "" : styles.previewEmpty}`}>
+                {faceUrl ? <img src={faceUrl} alt="Face preview" /> : <UserRound aria-hidden="true" />}
+                {uploadingFace && <span className={styles.previewBusy}><span className={styles.spinner} /></span>}
+              </div>
+              <div className={styles.uploadActions}>
+                <span className={styles.uploadState} aria-live="polite">
+                  {uploadingFace ? "Subiendo..." : faceUrl ? "Foto cargada" : "Aún no hay foto"}
+                </span>
+                <div className={styles.uploadButtons}>
+                  <label className={`${styles.fileButton} ${uploadingFace ? styles.fileButtonBusy : ""}`}>
+                    <Upload aria-hidden="true" />
+                    {uploadingFace ? "Subiendo..." : "Seleccionar archivo"}
+                    {fileInput("face", uploadingFace)}
+                  </label>
+                  {faceUrl && (
+                    <button type="button" onClick={() => setFaceUrl(null)} className={styles.removeButton}>
+                      <Trash2 aria-hidden="true" />
+                      Quitar
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        {/* Colores */}
-        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-6">
-          <label className="block text-xs font-semibold text-[#9A9893] uppercase tracking-wider mb-4">
-            Paleta de colores
-          </label>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs text-[#9A9893] mb-2">Color principal</label>
-              <div className="flex items-center gap-3">
-                <div className="relative">
+          {/* Colores */}
+          <section className={`${styles.card} ${styles.wide}`}>
+            <div className={styles.cardHead}>
+              <span className={styles.cardIcon} aria-hidden="true"><Palette /></span>
+              <div>
+                <h2 className={styles.cardTitle}>Paleta de colores</h2>
+                <span className={styles.cardHint}>Los colores que identifican a tu marca.</span>
+              </div>
+            </div>
+            <div className={styles.palette}>
+              <div className={styles.colorField}>
+                <span className={styles.swatch} style={{ backgroundColor: primaryColor }}>
                   <input
                     type="color"
                     value={primaryColor}
                     onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="absolute inset-0 opacity-0 w-10 h-10 cursor-pointer"
+                    aria-label="Elegir color principal"
                   />
-                  <div
-                    className="w-10 h-10 rounded-xl border border-[#3A3833]"
-                    style={{ backgroundColor: primaryColor }}
+                </span>
+                <div className={styles.colorText}>
+                  <label htmlFor="primary-color" className={styles.colorLabel}>Color principal</label>
+                  <input
+                    id="primary-color"
+                    type="text"
+                    value={primaryColor}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
+                    placeholder="#E8724A"
+                    className={`${styles.input} ${styles.mono}`}
                   />
                 </div>
-                <input
-                  type="text"
-                  value={primaryColor}
-                  onChange={(e) => setPrimaryColor(e.target.value)}
-                  placeholder="#E8724A"
-                  className="flex-1 bg-[#1E1C1A] border border-[#3A3833] px-3 py-2 rounded-lg text-sm text-[#E8E6E1] font-mono focus:outline-none focus:border-[#D97757]/50 transition-colors"
-                />
               </div>
-            </div>
-            <div>
-              <label className="block text-xs text-[#9A9893] mb-2">Color secundario</label>
-              <div className="flex items-center gap-3">
-                <div className="relative">
+              <div className={styles.colorField}>
+                <span className={styles.swatch} style={{ backgroundColor: secondaryColor }}>
                   <input
                     type="color"
                     value={secondaryColor}
                     onChange={(e) => setSecondaryColor(e.target.value)}
-                    className="absolute inset-0 opacity-0 w-10 h-10 cursor-pointer"
+                    aria-label="Elegir color secundario"
                   />
-                  <div
-                    className="w-10 h-10 rounded-xl border border-[#3A3833]"
-                    style={{ backgroundColor: secondaryColor }}
+                </span>
+                <div className={styles.colorText}>
+                  <label htmlFor="secondary-color" className={styles.colorLabel}>Color secundario</label>
+                  <input
+                    id="secondary-color"
+                    type="text"
+                    value={secondaryColor}
+                    onChange={(e) => setSecondaryColor(e.target.value)}
+                    placeholder="#F5F0E8"
+                    className={`${styles.input} ${styles.mono}`}
                   />
                 </div>
-                <input
-                  type="text"
-                  value={secondaryColor}
-                  onChange={(e) => setSecondaryColor(e.target.value)}
-                  placeholder="#F5F0E8"
-                  className="flex-1 bg-[#1E1C1A] border border-[#3A3833] px-3 py-2 rounded-lg text-sm text-[#E8E6E1] font-mono focus:outline-none focus:border-[#D97757]/50 transition-colors"
-                />
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
         {/* Botón guardar */}
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold bg-[#D97757] text-white hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? (
-            <>
-              <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-              Guardando...
-            </>
-          ) : (
-            "Guardar cambios"
-          )}
-        </button>
+        <div className={styles.saveBar}>
+          <p>Los cambios se aplican al guardar.</p>
+          <button onClick={handleSave} disabled={saving} className={styles.saveButton}>
+            {saving ? (
+              <>
+                <span className={styles.spinner} />
+                Guardando...
+              </>
+            ) : (
+              <>
+                <Check aria-hidden="true" />
+                Guardar cambios
+              </>
+            )}
+          </button>
+        </div>
+        <div className={styles.bottomSpace} />
       </div>
     </div>
   )

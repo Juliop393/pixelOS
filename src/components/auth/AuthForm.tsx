@@ -8,6 +8,7 @@ import Link from "next/link"
 import { toast } from "sonner"
 import { FREE_SIGNUP_CREDITS } from "@/lib/pricing-plans"
 import { supabase } from "@/lib/supabase"
+import { useToastAnchor } from "@/hooks/useToastAnchor"
 import s from "./Auth.module.css"
 
 const display = Fraunces({ subsets: ["latin"], weight: "variable", axes: ["SOFT", "WONK", "opsz"], display: "swap" })
@@ -40,6 +41,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [loading, setLoading] = useState(false)
   const [oauthLoading, setOauthLoading] = useState(false)
   const [checkingSession, setCheckingSession] = useState(!isRegister)
+  const logoRef = useToastAnchor<HTMLAnchorElement>()
   const passwordStrength = getPasswordStrength(password)
 
   useEffect(() => {
@@ -166,7 +168,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   return (
     <main className={s.page}>
       <aside className={s.brand}>
-        <Link href="/" className={s.logo} aria-label="PixelFM, inicio">
+        <Link ref={logoRef} href="/" className={s.logo} aria-label="PixelFM, inicio">
           <img src="/pixelfm-logo.png" alt="" aria-hidden="true" />
           <span>Pixel<span>FM</span></span>
         </Link>

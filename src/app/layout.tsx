@@ -30,11 +30,18 @@ export default function RootLayout({
           position="top-center"
           expand={false}
           theme="dark"
+          gap={10}
+          // Below the page header when one is anchored (useToastAnchor); otherwise Sonner's defaults.
+          offset={{ top: "var(--pf-toast-top, 24px)" }}
+          mobileOffset={{ top: "var(--pf-toast-top, 16px)" }}
+          style={{ "--width": "340px" } as React.CSSProperties}
           toastOptions={{
-            style: {
-              background: "#2A2826",
-              border: "1px solid #3A3833",
-              color: "#E8E6E1",
+            // Liquid glass look lives in globals.css (.pf-toast).
+            classNames: {
+              toast: "pf-toast",
+              title: "pf-toast-title",
+              description: "pf-toast-description",
+              icon: "pf-toast-icon",
             },
           }}
         />
