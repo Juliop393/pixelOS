@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
 import { getStripe } from "@/lib/stripe"
-import { getRequestUser, getSiteUrl, isStripeTestCheckoutAllowed, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
+import { getRequestUser, getSiteUrl, isStripeCheckoutAllowed, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
 import { isBillingInterval, isPlanCheckoutReady } from "@/lib/pricing-plans"
 import { getStripePriceId, isAnnualDeliveryConfigured, isStripePlan } from "@/lib/stripe-plans"
 import { activeLivemode, getModeCustomer, getModeSubscriptions } from "@/lib/stripe-modes"
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   const user = await getRequestUser(req)
   if (!user) return stripeJson({ error: "No autorizado" }, 401)
 
-  if (!isStripeTestCheckoutAllowed(user.id)) {
+  if (!isStripeCheckoutAllowed(user.id)) {
     return stripeJson({ error: "El pago todavía no está disponible para esta cuenta" }, 403)
   }
 

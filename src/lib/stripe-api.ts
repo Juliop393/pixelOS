@@ -34,13 +34,22 @@ export async function isWithinBillingLimit(userId: string, endpoint: string): Pr
 }
 
 /*
- * TEMPORARY: while Stripe is validated in test mode, only one account may open
- * Checkout (plans or packs), and only with a test key. Remove when going public.
+ * Who may open a Checkout (plans or packs). The server key decides the mode:
+ *   sk_test_  only the account in STRIPE_TEST_ALLOWED_USER_ID (test charges only)
+ *   sk_live_  closed unless STRIPE_LIVE_CHECKOUT_ENABLED is exactly "true";
+ *             then any signed-in user, still subject to each route's checks
+ *   other     closed
  */
-export function isStripeTestCheckoutAllowed(userId: string): boolean {
-  const allowedUserId = process.env.STRIPE_TEST_ALLOWED_USER_ID?.trim()
+export function isStripeCheckoutAllowed(userId: string): boolean {
   const secretKey = process.env.STRIPE_SECRET_KEY?.trim() ?? ""
-  return Boolean(allowedUserId) && userId === allowedUserId && secretKey.startsWith("sk_test_")
+  if (secretKey.startsWith("sk_test_")) {
+    const allowedUserId = process.env.STRIPE_TEST_ALLOWED_USER_ID?.trim()
+    return Boolean(allowedUserId) && userId === allowedUserId
+  }
+  if (secretKey.startsWith("sk_live_")) {
+    return process.env.STRIPE_LIVE_CHECKOUT_ENABLED?.trim() === "true"
+  }
+  return false
 }
 
 export function getSiteUrl(): string {

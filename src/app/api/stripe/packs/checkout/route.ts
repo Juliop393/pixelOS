@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
 import { getStripe } from "@/lib/stripe"
-import { getRequestUser, getSiteUrl, isStripeTestCheckoutAllowed, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
+import { getRequestUser, getSiteUrl, isStripeCheckoutAllowed, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
 import { getStripePackPriceId, isStripePack } from "@/lib/stripe-packs"
 import { getModeCustomer, getModeSubscriptions } from "@/lib/stripe-modes"
 import { createAdminClient } from "@/lib/supabase-admin"
@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
   const user = await getRequestUser(req)
   if (!user) return stripeJson({ error: "No autorizado" }, 401)
 
-  // TEMPORARY: test accounts and test keys only, exactly like plan Checkout.
-  if (!isStripeTestCheckoutAllowed(user.id)) {
+  // Same access rule as plan Checkout (see isStripeCheckoutAllowed).
+  if (!isStripeCheckoutAllowed(user.id)) {
     return stripeJson({ error: "La compra de créditos todavía no está disponible para esta cuenta" }, 403)
   }
 
