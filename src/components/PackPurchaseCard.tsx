@@ -152,7 +152,12 @@ export default function PackPurchaseCard() {
   }, [])
 
   useEffect(() => {
-    const id = new URLSearchParams(window.location.search).get("session_id")
+    // Only the pack Checkout return (/dashboard?pack_checkout=processing&session_id=...).
+    // This card lives in the dashboard layout; other returns, such as the
+    // subscription success page, carry a session_id that is not a pack.
+    const params = new URLSearchParams(window.location.search)
+    const id = params.get("session_id")
+    if (window.location.pathname !== "/dashboard" || params.get("pack_checkout") !== "processing") return
     if (!id || !SESSION_ID.test(id)) return
     setSessionId(id)
     void run(id, true)
