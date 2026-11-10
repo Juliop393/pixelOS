@@ -101,8 +101,9 @@ export async function POST(req: NextRequest) {
     const expected = getPackAmountCents(pack)
     if (
       (metadataPack !== undefined && metadataPack !== pack) || item.quantity !== 1 ||
+      // Integration-currency fields only (see the webhook): valid under Adaptive Pricing too.
       session.currency !== PACK_CURRENCY || session.amount_total !== expected ||
-      item.currency !== PACK_CURRENCY || item.amount_total !== expected
+      item.price?.currency !== PACK_CURRENCY || item.price?.unit_amount !== expected
     ) {
       return stripeJson(UNVERIFIED, 409)
     }
@@ -113,7 +114,7 @@ export async function POST(req: NextRequest) {
     }
     if (
       paymentIntent.livemode !== liveKey || paymentIntent.currency !== PACK_CURRENCY ||
-      paymentIntent.amount_received !== expected
+      paymentIntent.amount !== expected
     ) {
       return stripeJson(UNVERIFIED, 409)
     }

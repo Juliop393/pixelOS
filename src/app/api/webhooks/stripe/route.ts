@@ -227,10 +227,13 @@ async function recordPackPurchase(admin: Admin, sessionId: string, livemode: boo
   if (metadataPack !== null && metadataPack !== pack) return fail("pack_mismatch")
   if (item.quantity !== 1) return fail("unexpected_quantity")
 
+  // Only fields Stripe documents in the integration currency (USD) are compared,
+  // so a customer paying in local currency (Adaptive Pricing) is still verified:
+  // session totals and the line's own Price, never the line's presented amounts.
   const expected = getPackAmountCents(pack)
   if (
     session.currency !== PACK_CURRENCY || session.amount_total !== expected ||
-    item.currency !== PACK_CURRENCY || item.amount_total !== expected
+    item.price?.currency !== PACK_CURRENCY || item.price?.unit_amount !== expected
   ) {
     return fail("unexpected_amount")
   }
@@ -239,9 +242,10 @@ async function recordPackPurchase(admin: Admin, sessionId: string, livemode: boo
   if (!paymentIntent || typeof paymentIntent === "string") throw new Error("payment_intent_missing")
   // The session says paid; a PaymentIntent that disagrees is retried, never dropped.
   if (paymentIntent.status !== "succeeded") throw new Error("payment_intent_not_succeeded")
+  // amount (integration currency) of a succeeded PaymentIntent; amount_received may be in local currency.
   if (
     paymentIntent.livemode !== livemode || paymentIntent.currency !== PACK_CURRENCY ||
-    paymentIntent.amount_received !== expected
+    paymentIntent.amount !== expected
   ) {
     return fail("unexpected_payment_intent")
   }
