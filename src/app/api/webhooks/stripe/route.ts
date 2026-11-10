@@ -16,8 +16,9 @@ export const runtime = "nodejs"
  * invoices are only simulated. checkout.session.completed never grants.
  *
  * Credit pack payments (one-time Checkout) are recorded through
- * record_credit_pack_purchase (migration 010): one lot per PaymentIntent, TEST
- * lots only 'simulated' and never spendable, LIVE lots still refused.
+ * record_credit_pack_purchase_v2 (migration 013): one lot per PaymentIntent,
+ * TEST lots only 'simulated' and never spendable, LIVE lots 'applied', added to
+ * the balance through the credit engine and valid for 12 months.
  */
 
 // Invoices that open or renew a period, or invoice a plan change right away.
@@ -267,13 +268,11 @@ async function recordPackPurchase(admin: Admin, sessionId: string, livemode: boo
     return fail("owner_mismatch")
   }
 
-  // LIVE pack credits stay disabled: fail visibly (and retryably) instead of dropping a real payment.
-  if (livemode) throw new Error("live_packs_not_enabled")
-
   const charge = paymentIntent.latest_charge
   const paidAt = charge && typeof charge !== "string" ? charge.created : paymentIntent.created
 
-  const { data: result, error } = await admin.rpc("record_credit_pack_purchase", {
+  // Migration 013: TEST records a 'simulated' lot; LIVE an 'applied' lot added to the balance.
+  const { data: result, error } = await admin.rpc("record_credit_pack_purchase_v2", {
     p_payment_intent_id: paymentIntent.id,
     p_user_id: customer.user_id,
     p_pack: pack,
@@ -282,7 +281,8 @@ async function recordPackPurchase(admin: Admin, sessionId: string, livemode: boo
   })
 
   if (error) throw new Error(`pack_record_failed: ${error.message.slice(0, 120)}`)
-  if (!["simulated", "duplicate"].includes(result as string)) {
+  // A LIVE payment must never end up simulated, nor a TEST one applied.
+  if (result !== "duplicate" && result !== (livemode ? "applied" : "simulated")) {
     throw new Error(`pack_record_unexpected: ${String(result).slice(0, 40)}`)
   }
 }
