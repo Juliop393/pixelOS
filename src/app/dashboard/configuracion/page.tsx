@@ -1,9 +1,20 @@
 "use client"
 
 import Link from "next/link"
-import { FormEvent, useEffect, useState } from "react"
+import { FormEvent, useEffect, useRef, useState } from "react"
 import { CreditCard, KeyRound, Mail, Palette, TriangleAlert, User } from "lucide-react"
+import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
+
+const isPortalUrl = (value: unknown): value is string => {
+  if (typeof value !== "string") return false
+  try {
+    const url = new URL(value)
+    return url.protocol === "https:" && url.hostname === "billing.stripe.com"
+  } catch {
+    return false
+  }
+}
 
 type StatusMessage = {
   type: "success" | "error"
@@ -19,6 +30,45 @@ export default function ConfiguracionPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<StatusMessage | null>(null)
+  const [openingPortal, setOpeningPortal] = useState(false)
+  const portalBusy = useRef(false)
+
+  // Opens the Stripe Customer Portal of the active Stripe mode (the server decides which customer).
+  const openPortal = async () => {
+    // A ref, not state: a fast double click must not create two Portal sessions.
+    if (portalBusy.current) return
+    portalBusy.current = true
+    setOpeningPortal(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        toast.error("Tu sesión expiró. Vuelve a iniciar sesión.", { id: "stripe-portal" })
+      } else {
+        const response = await fetch("/api/stripe/portal", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        const body: unknown = await response.json().catch(() => null)
+        const url = body && typeof body === "object" && "url" in body ? body.url : null
+        if (response.ok && isPortalUrl(url)) {
+          window.location.assign(url)
+          return // Keep the button busy while the browser leaves.
+        }
+        toast.error(
+          response.status === 404
+            ? "Todavía no tienes una suscripción para gestionar."
+            : response.status === 429
+              ? "Demasiados intentos. Espera un momento."
+              : "No se pudo abrir el portal de facturación. Inténtalo nuevamente.",
+          { id: "stripe-portal" }
+        )
+      }
+    } catch {
+      toast.error("No se pudo conectar con el servidor. Inténtalo nuevamente.", { id: "stripe-portal" })
+    }
+    portalBusy.current = false
+    setOpeningPortal(false)
+  }
 
   useEffect(() => {
     const loadAccount = async () => {
@@ -213,15 +263,14 @@ export default function ConfiguracionPage() {
             >
               Ver planes
             </Link>
-            {/* Billing management returns with Stripe LIVE. */}
             <button
               type="button"
-              disabled
-              aria-disabled="true"
-              title="Disponible muy pronto"
-              className="flex flex-1 cursor-not-allowed items-center justify-center rounded-xl bg-[var(--pf-action)] px-4 py-3 text-sm font-semibold text-[var(--pf-action-ink)] opacity-50"
+              onClick={() => void openPortal()}
+              disabled={openingPortal}
+              aria-busy={openingPortal}
+              className="flex flex-1 items-center justify-center rounded-xl bg-[var(--pf-action)] px-4 py-3 text-sm font-semibold text-[var(--pf-action-ink)] transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
             >
-              Gestionar suscripción · Muy pronto
+              {openingPortal ? "Abriendo portal..." : "Gestionar suscripción"}
             </button>
           </div>
         </section>
