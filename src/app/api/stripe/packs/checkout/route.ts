@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { getStripe } from "@/lib/stripe"
 import { getRequestUser, getSiteUrl, isStripeCheckoutAllowed, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
 import { getStripePackPriceId, isStripePack } from "@/lib/stripe-packs"
+import { checkSlot, packSlot } from "@/lib/stripe-catalog"
 import { getModeCustomer, getModeSubscriptions } from "@/lib/stripe-modes"
 import { createAdminClient } from "@/lib/supabase-admin"
 
@@ -52,6 +53,13 @@ export async function POST(req: NextRequest) {
       subscriptions.some((row) => row.stripe_customer_id === customerId && ACTIVE_STATUSES.includes(row.status))
     if (!subscribed || !customerId) {
       return stripeJson({ error: "Los packs de créditos son para suscriptores activos", code: "subscription_required" }, 403)
+    }
+
+    // The configured Price must be exactly what the catalog sells, or nothing is charged.
+    const priceProblems = await checkSlot(packSlot(pack), priceId)
+    if (priceProblems.length > 0) {
+      console.error("Stripe pack price rejected:", pack, priceProblems.join(","))
+      return stripeJson({ error: "Pack no disponible" }, 503)
     }
 
     const siteUrl = getSiteUrl()

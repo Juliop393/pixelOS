@@ -3,6 +3,7 @@ import { getStripe } from "@/lib/stripe"
 import { getRequestUser, getSiteUrl, isStripeCheckoutAllowed, isWithinBillingLimit, stripeJson } from "@/lib/stripe-api"
 import { isBillingInterval, isPlanCheckoutReady } from "@/lib/pricing-plans"
 import { getStripePriceId, isAnnualDeliveryConfigured, isStripePlan } from "@/lib/stripe-plans"
+import { checkSlot, planSlot } from "@/lib/stripe-catalog"
 import { activeLivemode, getModeCustomer, getModeSubscriptions } from "@/lib/stripe-modes"
 import { createAdminClient } from "@/lib/supabase-admin"
 
@@ -67,6 +68,13 @@ export async function POST(req: NextRequest) {
   try {
     if (!(await isWithinBillingLimit(user.id, "stripe-checkout"))) {
       return stripeJson({ error: "Demasiados intentos. Espera un momento." }, 429)
+    }
+
+    // The configured Price must be exactly what the catalog sells, or nothing is charged.
+    const priceProblems = await checkSlot(planSlot(plan, interval), priceId)
+    if (priceProblems.length > 0) {
+      console.error("Stripe plan price rejected:", plan, interval, priceProblems.join(","))
+      return stripeJson({ error: "Este plan todavía no está disponible", code: "plan_unavailable" }, 503)
     }
 
     // Stripe is the only billing processor: one subscription per user in the active mode.
