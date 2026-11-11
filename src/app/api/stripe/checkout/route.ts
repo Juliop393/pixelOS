@@ -69,15 +69,7 @@ export async function POST(req: NextRequest) {
       return stripeJson({ error: "Demasiados intentos. Espera un momento." }, 429)
     }
 
-    /*
-     * TEMPORARY (test mode only): the legacy Paddle check on user_credits is
-     * intentionally skipped here, because the guard above limits Checkout to
-     * one account using an sk_test_ key, so no real charge can happen.
-     * BEFORE ENABLING STRIPE LIVE: confirm there are no real Paddle
-     * subscriptions left (or that they were migrated), and restore a
-     * duplicate-billing check, or users could be charged by both processors.
-     */
-    // Duplicate subscriptions are checked within the active Stripe mode only.
+    // Stripe is the only billing processor: one subscription per user in the active mode.
     const subscriptions = await getModeSubscriptions(createAdminClient(), user.id)
 
     if (subscriptions.some((row) => LIVE_STATUSES.includes(row.status))) {
