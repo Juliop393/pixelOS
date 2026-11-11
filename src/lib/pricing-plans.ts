@@ -4,7 +4,38 @@
  * secrets and Price IDs: the Stripe mapping lives server-side in stripe-plans.ts.
  */
 
-export const CREDIT_COST = { image: 1, video: 12 } as const
+/*
+ * Video tiers. The browser only names a tier; the server charges these credits
+ * and picks the model from this table (see src/lib/video-models.ts).
+ */
+export type VideoModelId = "rapid" | "premium"
+
+export interface VideoModel {
+  id: VideoModelId
+  label: string
+  detail: string
+  credits: number
+  durationSeconds: number
+}
+
+export const VIDEO_MODELS: VideoModel[] = [
+  { id: "rapid", label: "Video Rápido", detail: "Listo antes, ideal para probar ideas", credits: 10, durationSeconds: 10 },
+  { id: "premium", label: "Video Premium", detail: "Máximo detalle y movimiento", credits: 20, durationSeconds: 10 },
+]
+
+export const DEFAULT_VIDEO_MODEL: VideoModelId = "rapid"
+
+export const isVideoModelId = (value: unknown): value is VideoModelId => VIDEO_MODELS.some((model) => model.id === value)
+
+export const getVideoModel = (id: VideoModelId): VideoModel => VIDEO_MODELS.find((model) => model.id === id)!
+
+const RAPID_VIDEO = getVideoModel("rapid")
+const PREMIUM_VIDEO = getVideoModel("premium")
+
+/** video: the cheapest tier, used for "up to N videos" outcomes. */
+export const CREDIT_COST = { image: 1, video: RAPID_VIDEO.credits, premiumVideo: PREMIUM_VIDEO.credits } as const
+
+export const VIDEO_DURATION_SECONDS = RAPID_VIDEO.durationSeconds
 
 export const FREE_SIGNUP_CREDITS = 24
 
@@ -12,7 +43,8 @@ export const FREE_CREDITS_COPY = `${FREE_SIGNUP_CREDITS} créditos gratis · Sin
 
 export const CREDIT_RATES = [
   `1 imagen = ${CREDIT_COST.image} crédito`,
-  `1 video de 6 s = ${CREDIT_COST.video} créditos`,
+  `1 video rápido de ${RAPID_VIDEO.durationSeconds} s = ${RAPID_VIDEO.credits} créditos`,
+  `1 video premium de ${PREMIUM_VIDEO.durationSeconds} s = ${PREMIUM_VIDEO.credits} créditos`,
 ]
 
 export const videosFor = (credits: number) => Math.floor(credits / CREDIT_COST.video)

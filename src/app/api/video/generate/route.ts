@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createHash, randomUUID } from "node:crypto"
+import { createHash } from "node:crypto"
 import { createClient } from "@supabase/supabase-js"
 import { createAdminClient } from "@/lib/supabase-admin"
 import { getVideoGenerationContext } from "@/lib/video-generation-payload"
+import { DEFAULT_VIDEO_MODEL, isVideoModelId } from "@/lib/pricing-plans"
+import { getVideoModelConfig } from "@/lib/video-models"
+import { videoReservationKey } from "@/lib/video-credits"
 
 const ALLOWED_ANGLES = [
   "comparison", "problem-solution", "primary-benefit", "social-proof",
@@ -15,7 +18,6 @@ const ALLOWED_STYLES = [
 ]
 
 const MAX_HOOK_CHARS = 2000
-const VIDEO_CREDIT_COST = 12
 const VIDEO_RATE_LIMIT_MAX = 3
 const VIDEO_RATE_LIMIT_WINDOW_MS = 60_000
 // El RPC compartido exige un límite diario; este valor evita añadir una regla diaria nueva.
@@ -120,16 +122,17 @@ const rpcResult = (data: unknown): Record<string, unknown> | null =>
   typeof data === "object" && data !== null && !Array.isArray(data) ? (data as Record<string, unknown>) : null
 
 /*
- * Charges one video START to the credit engine v2 under this execution's key.
- * The key is made by the server per execution, so it does not deduplicate HTTP
- * retries by itself; repeated STARTs are stopped earlier by video_start_requests.
+ * Charges one video START to the credit engine v2. The key comes from the
+ * request's idempotency key (video:<uuid>), which video_start_requests lets
+ * through once per user, so STATUS can later refund exactly this reservation
+ * when fal reports a definitive failure.
  */
-async function reserveVideoCredits(userId: string, reservationKey: string): Promise<ReserveResult> {
+async function reserveVideoCredits(userId: string, reservationKey: string, credits: number): Promise<ReserveResult> {
   try {
     const { data, error } = await createAdminClient().rpc("reserve_credits_v2", {
       p_user_id: userId,
       p_reservation_key: reservationKey,
-      p_credits: VIDEO_CREDIT_COST,
+      p_credits: credits,
     })
     if (error?.message === "insufficient_credits") return { ok: false, status: 402 }
     if (error) {
@@ -274,8 +277,17 @@ export async function POST(req: NextRequest) {
 
   const hook = typeof body.hook === "string" ? body.hook.trim().slice(0, MAX_HOOK_CHARS) : ""
 
+  // The tier decides model, duration and price on the server; older clients that send none get Video Rápido.
+  const tier = body.model === undefined ? DEFAULT_VIDEO_MODEL : body.model
+  if (!isVideoModelId(tier)) {
+    return NextResponse.json({ error: "Modelo de video no válido" }, { status: 400, headers: headersNoStore })
+  }
+  const videoModel = getVideoModelConfig(tier)
+
   const prompt = buildVideoPrompt(angle, hook, style)
-  const context = getVideoGenerationContext(body)
+  // The client's duration is never forwarded: every tier generates its fixed length.
+  const { duration: _clientDuration, ...context } = getVideoGenerationContext(body)
+  void _clientDuration
 
   const n8nVideoUrl = process.env.N8N_VIDEO_WEBHOOK_URL
   const internalSecret = (process.env.N8N_INTERNAL_SECRET ?? "").trim()
@@ -283,8 +295,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Servicio de video no configurado" }, { status: 500, headers: headersNoStore })
   }
 
-  const startPayload = { imageUrl, prompt, angle, hook, style, ...context }
-  const payloadHash = createHash("sha256").update(JSON.stringify({ imageUrl, angle, hook, style, ...context })).digest("hex")
+  const modelPayload = { model: tier, falModel: videoModel.falModel, duration: videoModel.duration, resolution: videoModel.resolution }
+  const startPayload = { imageUrl, prompt, angle, hook, style, ...context, ...modelPayload }
+  const payloadHash = createHash("sha256").update(JSON.stringify({ imageUrl, angle, hook, style, ...context, model: tier })).digest("hex")
   const adminClient = createAdminClient()
   const { error: claimError } = await adminClient.from("video_start_requests").insert({
     user_id: user.id,
@@ -360,14 +373,14 @@ export async function POST(req: NextRequest) {
   }
 
   // Reservar antes del único START/Submit cobrable. El RPC valida el saldo de forma atómica.
-  // Server-made key for this execution; the same key is used for its refund.
-  const reservationKey = `video:${randomUUID()}`
-  const reservation = await reserveVideoCredits(user.id, reservationKey)
+  // One key per claimed request; START and STATUS refund this same reservation.
+  const reservationKey = videoReservationKey(idempotencyKey)
+  const reservation = await reserveVideoCredits(user.id, reservationKey, videoModel.credits)
   if (!reservation.ok) {
     await markVideoStartFailed(user.id, idempotencyKey)
     return reservation.status === 402
       ? NextResponse.json(
-          { success: false, error: "Créditos insuficientes", requiredCredits: VIDEO_CREDIT_COST },
+          { success: false, error: "Créditos insuficientes", requiredCredits: videoModel.credits },
           { status: 402, headers: headersNoStore }
         )
       : NextResponse.json(
@@ -398,7 +411,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
         "X-PixelFM-Secret": internalSecret,
       },
-      // Keep the existing prompt/model behavior; Pro fields are metadata for the current START flow.
+      // model/falModel/duration/resolution are set by the server; Pro fields are scene metadata.
       body: JSON.stringify(startPayload),
       signal: controller.signal,
     })

@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
 import { getVideoGenerationContext, type VideoGenerationContext } from "@/lib/video-generation-payload"
+import { DEFAULT_VIDEO_MODEL, getVideoModel, type VideoModelId } from "@/lib/pricing-plans"
 
 export type VideoPhase = "idle" | "generating" | "generated" | "error"
 export type VideoGenerationOutcome =
@@ -14,6 +15,8 @@ export type VideoGenerationOutcome =
 
 const VIDEO_POLL_INTERVAL_MS = 5_000
 const VIDEO_POLL_MAX_ATTEMPTS = 72
+// Consecutive temporary STATUS failures tolerated before giving up (about one minute).
+const VIDEO_POLL_MAX_TRANSIENT = 12
 
 const wait = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
@@ -38,6 +41,7 @@ export function useVideoGenerator() {
     hook: string,
     style: string,
     context: VideoGenerationContext = {},
+    model: VideoModelId = DEFAULT_VIDEO_MODEL,
   ): Promise<VideoGenerationOutcome> => {
     if (!imageUrl) {
       toast.error("Genera un creativo primero")
@@ -56,7 +60,8 @@ export function useVideoGenerator() {
     setVideoUrl(null)
     setVideoAssetId(null)
 
-    const startPayload = { imageUrl, angle, hook, style, ...getVideoGenerationContext(context) }
+    // The tier is part of the request: switching it never reuses another tier's key.
+    const startPayload = { imageUrl, angle, hook, style, ...getVideoGenerationContext(context), model }
     const payloadSignature = JSON.stringify(startPayload)
     const previousAttempt = pendingStartRef.current
     const attempt = previousAttempt?.payload === payloadSignature
@@ -110,20 +115,46 @@ export function useVideoGenerator() {
         responseUrl: startData.responseUrl as string,
       }
 
+      let transientFailures = 0
+      let lastTransientError = ""
       for (let attempt = 0; attempt < VIDEO_POLL_MAX_ATTEMPTS; attempt += 1) {
         await wait(VIDEO_POLL_INTERVAL_MS)
         if (runIdRef.current !== runId) return { status: "busy" }
 
-        const statusResponse = await fetch("/api/video/status", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(trackingData),
-        })
+        // Network drops, n8n 500s and non-definitive errors say nothing final about
+        // the job: poll the same job again (STATUS never submits a new one).
+        const transient = (message: string) => {
+          transientFailures += 1
+          lastTransientError = message
+          if (transientFailures > VIDEO_POLL_MAX_TRANSIENT) throw new Error(lastTransientError)
+        }
 
-        const statusData = await statusResponse.json()
+        let statusResponse: Response
+        try {
+          statusResponse = await fetch("/api/video/status", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(trackingData),
+          })
+        } catch {
+          transient("No se pudo consultar el estado del video")
+          continue
+        }
+
+        const statusData = await statusResponse.json().catch(() => null)
+        if (!statusData || typeof statusData !== "object") {
+          transient("No se pudo consultar el estado del video")
+          continue
+        }
+        // Includes a refund the server could not confirm yet: polling retries it.
+        if (statusData.retry === true) {
+          transient(statusData.error || "No se pudo consultar el estado del video")
+          continue
+        }
+        transientFailures = 0
         if (!statusResponse.ok) {
           throw new Error(statusData.error || "No se pudo consultar el estado del video")
         }
@@ -141,6 +172,12 @@ export function useVideoGenerator() {
         }
 
         if (statusData.status === "error") {
+          if (statusData.refunded === true) {
+            if (typeof statusData.remainingCredits === "number" && Number.isFinite(statusData.remainingCredits) && statusData.remainingCredits >= 0) {
+              setCredits(statusData.remainingCredits)
+            }
+            throw new Error(`${statusData.error || "No se pudo generar el video"}. Te devolvimos ${getVideoModel(model).credits} créditos.`)
+          }
           throw new Error(statusData.error || "No se pudo generar el video")
         }
 

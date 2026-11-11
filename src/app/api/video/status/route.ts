@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createHash } from "node:crypto"
 import { createClient } from "@supabase/supabase-js"
 import { createAdminClient } from "@/lib/supabase-admin"
+import { refundVideoReservation } from "@/lib/video-credits"
 
 const N8N_STATUS_TIMEOUT_MS = 30_000
 const VIDEO_DOWNLOAD_TIMEOUT_MS = 120_000
@@ -49,9 +50,11 @@ async function signStoredScene(admin: ReturnType<typeof createAdminClient>, asse
   return { assetId, videoUrl: data.signedUrl }
 }
 
+const scenePath = (userId: string, requestId: string) =>
+  `${userId}/scenes/${createHash("sha256").update(requestId).digest("hex")}.mp4`
+
 async function persistScene(admin: ReturnType<typeof createAdminClient>, userId: string, requestId: string, sourceUrl: string) {
-  const fileId = createHash("sha256").update(requestId).digest("hex")
-  const storagePath = `${userId}/scenes/${fileId}.mp4`
+  const storagePath = scenePath(userId, requestId)
   const existing = await getStoredScene(admin, userId, storagePath)
   if (existing) return signStoredScene(admin, existing.id, storagePath)
   if (!isFalVideoUrl(sourceUrl)) throw new Error("invalid_source_url")
@@ -114,6 +117,51 @@ async function persistScene(admin: ReturnType<typeof createAdminClient>, userId:
   return signStoredScene(admin, asset.id, storagePath)
 }
 
+/*
+ * fal finished this job without a video: return its credits once and close the
+ * request, so later polls cannot reach fal or refund again. A scene already
+ * stored for the request is never refunded. When the refund cannot be confirmed
+ * the request stays open and the client keeps polling, which retries it.
+ */
+async function refundDefinitiveFailure(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+  requestId: string,
+  idempotencyKey: string,
+  error: string,
+) {
+  try {
+    if (await getStoredScene(admin, userId, scenePath(userId, requestId))) {
+      console.error("Video STATUS definitive failure for a stored scene; not refunded:", requestId)
+      return NextResponse.json({ success: false, status: "error", error, refunded: false }, { status: 200, headers: headersNoStore })
+    }
+  } catch {
+    return NextResponse.json({ error: "No pudimos confirmar la devolución de tus créditos. Seguimos intentándolo.", retry: true }, { status: 503, headers: headersNoStore })
+  }
+
+  const refund = await refundVideoReservation(userId, idempotencyKey)
+  if (refund.status === "failed") {
+    return NextResponse.json({ error: "No pudimos confirmar la devolución de tus créditos. Seguimos intentándolo.", retry: true }, { status: 503, headers: headersNoStore })
+  }
+  if (refund.status === "not_found") {
+    console.error("Video STATUS definitive failure without a refundable reservation:", requestId, "user:", userId)
+    return NextResponse.json({ success: false, status: "error", error, refunded: false }, { status: 200, headers: headersNoStore })
+  }
+
+  const { error: closeError } = await admin.from("video_start_requests")
+    .update({ status: "failed", updated_at: new Date().toISOString() })
+    .eq("user_id", userId)
+    .eq("request_id", requestId)
+    .eq("status", "started")
+  // The credits are back either way; a later poll would only find them already refunded.
+  if (closeError) console.error("Video STATUS failed-request update failed:", closeError.code)
+
+  return NextResponse.json(
+    { success: false, status: "error", error, refunded: true, remainingCredits: refund.balance },
+    { status: 200, headers: headersNoStore },
+  )
+}
+
 export async function POST(req: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -151,10 +199,11 @@ export async function POST(req: NextRequest) {
   }
 
   let admin: ReturnType<typeof createAdminClient>
+  let idempotencyKey: string
   try {
     admin = createAdminClient()
     const { data: start, error: ownershipError } = await admin.from("video_start_requests")
-      .select("status_url,response_url")
+      .select("status_url,response_url,idempotency_key")
       .eq("user_id", user.id)
       .eq("request_id", requestId)
       .eq("status", "started")
@@ -164,6 +213,7 @@ export async function POST(req: NextRequest) {
     if (!start || start.status_url !== statusUrl || start.response_url !== responseUrl) {
       return NextResponse.json({ error: "Solicitud de video no autorizada" }, { status: 403, headers: headersNoStore })
     }
+    idempotencyKey = start.idempotency_key
   } catch {
     return NextResponse.json({ error: "No se pudo verificar la solicitud de video" }, { status: 503, headers: headersNoStore })
   }
@@ -192,14 +242,19 @@ export async function POST(req: NextRequest) {
 
     clearTimeout(timeout)
 
+    /*
+     * retry: true marks answers that say nothing final about the job (n8n down,
+     * HTTP 500, non-JSON, a non-definitive error): the client keeps polling the
+     * same job. STATUS only reads; it never submits to fal again.
+     */
     const contentType = n8nResponse.headers.get("content-type")
     if (!contentType?.includes("application/json")) {
-      return NextResponse.json({ error: "Respuesta inesperada del servicio de estado" }, { status: 502, headers: headersNoStore })
+      return NextResponse.json({ error: "Respuesta inesperada del servicio de estado", retry: true }, { status: 502, headers: headersNoStore })
     }
 
     const n8nData = await n8nResponse.json()
     if (!n8nResponse.ok || typeof n8nData !== "object" || n8nData === null) {
-      return NextResponse.json({ error: "El servicio de estado no pudo procesar la solicitud" }, { status: 502, headers: headersNoStore })
+      return NextResponse.json({ error: "El servicio de estado no pudo procesar la solicitud", retry: true }, { status: 502, headers: headersNoStore })
     }
 
     const data = n8nData as Record<string, unknown>
@@ -215,7 +270,7 @@ export async function POST(req: NextRequest) {
         const reason = error instanceof Error && /^[a-z_]+$/.test(error.message) ? error.message : "unexpected"
         console.error("Video STATUS clip persistence failed:", reason)
         return NextResponse.json(
-          { success: false, status: "error", error: "El video se generó, pero no se pudo guardar. Intenta consultar el estado de nuevo." },
+          { success: false, status: "error", error: "El video se generó, pero no se pudo guardar. Intenta consultar el estado de nuevo.", retry: true },
           { status: 502, headers: headersNoStore }
         )
       }
@@ -223,15 +278,19 @@ export async function POST(req: NextRequest) {
 
     if (data.status === "error") {
       const error = typeof data.error === "string" ? data.error.slice(0, 500) : "No se pudo generar el video"
-      return NextResponse.json({ success: false, status: "error", error }, { status: 200, headers: headersNoStore })
+      // Only a failure n8n marks as definitive (fal finished the job without a video) is refunded.
+      if (data.definitive !== true) {
+        return NextResponse.json({ success: false, status: "error", error, retry: true }, { status: 200, headers: headersNoStore })
+      }
+      return await refundDefinitiveFailure(admin, user.id, requestId, idempotencyKey, error)
     }
 
-    return NextResponse.json({ error: "Estado de video inesperado" }, { status: 502, headers: headersNoStore })
+    return NextResponse.json({ error: "Estado de video inesperado", retry: true }, { status: 502, headers: headersNoStore })
   } catch (error: unknown) {
     if (timeout) clearTimeout(timeout)
     const isAbort = error instanceof DOMException && error.name === "AbortError"
     return NextResponse.json(
-      { error: isAbort ? "La consulta de estado tardó demasiado" : "Error al consultar el estado del video" },
+      { error: isAbort ? "La consulta de estado tardó demasiado" : "Error al consultar el estado del video", retry: true },
       { status: 502, headers: headersNoStore }
     )
   }
