@@ -19,8 +19,8 @@ export interface VideoModel {
 }
 
 export const VIDEO_MODELS: VideoModel[] = [
-  { id: "rapid", label: "Video Rápido", detail: "Listo antes, ideal para probar ideas", credits: 10, durationSeconds: 10 },
-  { id: "premium", label: "Video Premium", detail: "Máximo detalle y movimiento", credits: 20, durationSeconds: 10 },
+  { id: "rapid", label: "Video Rápido", detail: "Buena calidad visual para explorar ideas y crear más variaciones", credits: 10, durationSeconds: 10 },
+  { id: "premium", label: "Video Premium", detail: "Mayor detalle y fluidez para un acabado superior", credits: 20, durationSeconds: 10 },
 ]
 
 export const DEFAULT_VIDEO_MODEL: VideoModelId = "rapid"
@@ -42,9 +42,9 @@ export const FREE_SIGNUP_CREDITS = 24
 export const FREE_CREDITS_COPY = `${FREE_SIGNUP_CREDITS} créditos gratis · Sin tarjeta`
 
 export const CREDIT_RATES = [
-  `1 imagen = ${CREDIT_COST.image} crédito`,
-  `1 video rápido de ${RAPID_VIDEO.durationSeconds} s = ${RAPID_VIDEO.credits} créditos`,
-  `1 video premium de ${PREMIUM_VIDEO.durationSeconds} s = ${PREMIUM_VIDEO.credits} créditos`,
+  `Imagen: ${CREDIT_COST.image} crédito`,
+  `Video Rápido (${RAPID_VIDEO.durationSeconds} s): ${RAPID_VIDEO.credits} créditos`,
+  `Video Premium (${PREMIUM_VIDEO.durationSeconds} s): ${PREMIUM_VIDEO.credits} créditos`,
 ]
 
 export const videosFor = (credits: number) => Math.floor(credits / CREDIT_COST.video)
@@ -183,7 +183,7 @@ const CHECKOUT_READY: Record<PlanId, Record<BillingInterval, boolean>> = {
 export const isPlanCheckoutReady = (plan: PlanId, interval: BillingInterval) => CHECKOUT_READY[plan][interval]
 
 export const planOutcome = (plan: SubscriptionPlan) =>
-  `Hasta ${videosFor(plan.monthlyCredits)} videos o ${plan.monthlyCredits} imágenes al mes.`
+  `Hasta ${videosFor(plan.monthlyCredits)} videos en Video Rápido o ${plan.monthlyCredits} imágenes al mes.`
 
 export type CreditPackId = "small" | "medium" | "large"
 

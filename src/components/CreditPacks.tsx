@@ -22,7 +22,7 @@ export default function CreditPacks({ onPurchase }: { onPurchase?: (pack: Credit
             </p>
             <strong className={styles.packPrice}>{formatPrice(pack.price)}</strong>
             <p className={styles.packTagline}>{pack.tagline}</p>
-            <p className={styles.packOutcome}>≈ {videosFor(pack.credits)} videos</p>
+            <p className={styles.packOutcome}>≈ {videosFor(pack.credits)} videos en Video Rápido</p>
             <button
               type="button"
               disabled={Boolean(pending)}

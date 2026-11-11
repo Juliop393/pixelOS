@@ -48,7 +48,7 @@ export function FormatsSection() {
         <article className={s.format} data-reveal style={delay(90)}>
           <header>
             <span className={s.formatIcon}><Clapperboard aria-hidden="true" /></span>
-            <div><h3>Video</h3><p>Tu imagen toma vida en un clip de 10 segundos.</p></div>
+            <div><h3>Video</h3><p>De una imagen a un video publicitario de 10 segundos. Elige Video Rápido para explorar más ideas o Video Premium para conseguir mayor detalle y fluidez.</p></div>
           </header>
           <div className={s.formatFlow}>
             <div className={s.formatSteps}>
@@ -59,12 +59,12 @@ export function FormatsSection() {
               <ArrowRight className={s.formatArrow} aria-hidden="true" />
               <ul className={s.formatDirection}>
                 <li><small>Enfoque</small>Producto en acción</li>
-                <li><small>Duración</small>10 segundos</li>
+                <li><small>Calidad</small>Rápido o Premium</li>
               </ul>
             </div>
             <figure className={s.formatOutput}>
               <LandingVideo src={MEDIA.carro.video} poster={posterOf("carro")} label={`Video: ${MEDIA.carro.alt}`} />
-              <figcaption><i aria-hidden="true" />Video final</figcaption>
+              <figcaption><i aria-hidden="true" />Video de ejemplo</figcaption>
             </figure>
           </div>
         </article>
@@ -223,7 +223,7 @@ export function PricingSection() {
       <header className={s.intro} data-reveal>
         <span className={s.kicker}>PRECIOS SIMPLES</span>
         <h2 id="pricing-title">Empieza pequeño. <em>Crece cuando quieras.</em></h2>
-        <p>Todos los planes incluyen Modo Simple, Modo Pro, PixelIA, imagen y video. Cambia cuánto produces, no lo que puedes hacer.</p>
+        <p>Todos los planes incluyen Modo Simple, Modo Pro, PixelIA, imagen, Video Rápido y Video Premium. Cambia cuánto produces, no lo que puedes hacer.</p>
       </header>
 
       <div className={s.plans}>

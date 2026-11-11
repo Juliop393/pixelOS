@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { CREDIT_RATES, SUBSCRIPTION_PLANS, formatPrice, isPlanCheckoutReady, planOutcome, type BillingInterval } from "@/lib/pricing-plans"
+import { CREDIT_COST, CREDIT_RATES, SUBSCRIPTION_PLANS, formatPrice, isPlanCheckoutReady, planOutcome, type BillingInterval } from "@/lib/pricing-plans"
 import { useCheckoutCanceledNotice, useStripeCheckout } from "@/components/useStripeCheckout"
 import styles from "@/components/PricingPlans.module.css"
 
@@ -69,7 +69,7 @@ export default function PricingPlans({ initialInterval = "monthly" }: { initialI
 
             <p className={styles.outcome}>
               {planOutcome(plan)}
-              {plan.adKits && <span> Unos {plan.adKits} kits de anuncio (1 video + 4 imágenes).</span>}
+              {plan.adKits && <span> Unos {Math.floor(plan.monthlyCredits / (CREDIT_COST.video + 4 * CREDIT_COST.image))} kits de anuncio (1 Video Rápido + 4 imágenes).</span>}
             </p>
 
             <div className={styles.divider} />
@@ -110,8 +110,8 @@ export default function PricingPlans({ initialInterval = "monthly" }: { initialI
 
       <aside className={styles.explainer} aria-label="Cómo funcionan los créditos">
         <div>
-          <h3>Un solo saldo para imágenes y videos.</h3>
-          <p>Úsalos como quieras: imagen, video o una combinación de ambos.</p>
+          <h3>Dos niveles de video. Tú eliges cómo invertir tus créditos.</h3>
+          <p>Todos los planes incluyen Video Rápido y Video Premium. Usa menos créditos para crear más variaciones o elige Premium para un acabado más detallado.</p>
         </div>
         <ul>{CREDIT_RATES.map((rate) => <li key={rate}>{rate}</li>)}</ul>
       </aside>
