@@ -1,3 +1,5 @@
+import { VIDEO_DURATION_SECONDS } from "@/lib/pricing-plans"
+
 export type VideoOption = { id: string; label: string; description: string; icon: string; swatch?: string }
 export type VideoChunkStatus = "pending" | "configured" | "generating" | "generated" | "error"
 export type VideoReferenceSource = "library" | "upload"
@@ -25,7 +27,7 @@ export type VideoChunk = {
 export type VideoStrategy = { angle: string; hook: string; cta: string; style: string; format: string }
 
 // Current generation capabilities, not assumptions about the scene model.
-export const VIDEO_GENERATION_DURATION = 6
+export const VIDEO_GENERATION_DURATION = VIDEO_DURATION_SECONDS
 export const VIDEO_MAX_SCENES = 5
 export const VIDEO_FORMAT = "9:16"
 export const VIDEO_SCENE_ROLES = ["Hook / apertura", "Problema", "Producto / demostración", "Beneficio", "Prueba", "Resultado", "CTA", "Personalizada"]
@@ -33,7 +35,9 @@ export const VIDEO_SCENE_ROLES = ["Hook / apertura", "Problema", "Producto / dem
 /** Preserve previous scene direction without keeping a second editable action field. */
 export function migrateVideoChunk(chunk: VideoChunk & { sceneDirection?: string }): VideoChunk {
   const { sceneDirection, ...scene } = chunk
-  return { ...scene, videoSource: scene.videoSource ?? "generated", action: scene.action || sceneDirection || "" }
+  const videoSource = scene.videoSource ?? "generated"
+  // Generated scenes always have the current clip length; library clips keep their own.
+  return { ...scene, videoSource, duration: videoSource === "generated" ? VIDEO_GENERATION_DURATION : scene.duration, action: scene.action || sceneDirection || "" }
 }
 
 export function createVideoChunk(id: number, purpose = "Personalizada"): VideoChunk {

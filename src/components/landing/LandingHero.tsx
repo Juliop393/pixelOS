@@ -128,7 +128,7 @@ export default function LandingHero() {
           <span>
             <LandingVideo src={MEDIA.carro.video} poster={posterOf("carro")} label={MEDIA.carro.alt} deferred />
           </span>
-          <figcaption><i aria-hidden="true" />Video · 6 s</figcaption>
+          <figcaption><i aria-hidden="true" />Video · 10 s</figcaption>
         </figure>
       </div>
     </section>

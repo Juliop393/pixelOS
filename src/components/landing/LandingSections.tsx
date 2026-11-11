@@ -48,7 +48,7 @@ export function FormatsSection() {
         <article className={s.format} data-reveal style={delay(90)}>
           <header>
             <span className={s.formatIcon}><Clapperboard aria-hidden="true" /></span>
-            <div><h3>Video</h3><p>Tu imagen toma vida en un clip de 6 segundos.</p></div>
+            <div><h3>Video</h3><p>Tu imagen toma vida en un clip de 10 segundos.</p></div>
           </header>
           <div className={s.formatFlow}>
             <div className={s.formatSteps}>
@@ -59,7 +59,7 @@ export function FormatsSection() {
               <ArrowRight className={s.formatArrow} aria-hidden="true" />
               <ul className={s.formatDirection}>
                 <li><small>Enfoque</small>Producto en acción</li>
-                <li><small>Duración</small>6 segundos</li>
+                <li><small>Duración</small>10 segundos</li>
               </ul>
             </div>
             <figure className={s.formatOutput}>

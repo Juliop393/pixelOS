@@ -21,6 +21,8 @@ import VideoDropdown from "./VideoDropdown"
 import VideoSimple, { SIMPLE_APPROACHES, type SimpleApproach } from "./VideoSimple"
 import VideoPlan from "./VideoPlan"
 import VideoResult from "./VideoResult"
+import VideoModelPicker from "./VideoModelPicker"
+import { DEFAULT_VIDEO_MODEL, getVideoModel, type VideoModelId } from "@/lib/pricing-plans"
 import { proposeVideoPlan, SIMPLE_STYLE_LABELS, type SimpleDuration } from "./video-plan"
 import { createVideoChunk, getVideoDuration, getVideoSceneSignature, hasPendingVideoSceneChanges, isVideoChunkReady, migrateVideoChunk, moveVideoChunk, VIDEO_FORMAT, VIDEO_GENERATION_DURATION, VIDEO_MAX_SCENES, VIDEO_SCENE_ROLES, VIDEO_ANGLES, VIDEO_HOOKS, VIDEO_STYLES, type VideoChunk, type VideoStrategy } from "./video-data"
 import s from "./VideoWorkspace.module.css"
@@ -104,6 +106,11 @@ export default function VideoWorkspace() {
   const [workspaceMode, setWorkspaceMode] = useState<VideoWorkspaceMode>("storyboard")
   const [editorMode, setEditorMode] = useState<VideoEditorMode>("simple")
   const [simpleApproach, setSimpleApproach] = useState<SimpleApproach>("auto")
+  // One tier for Simple and Pro; the server charges it and fixes the clip length.
+  const [videoModel, setVideoModel] = useState<VideoModelId>(DEFAULT_VIDEO_MODEL)
+  const videoModelRef = useRef(videoModel)
+  videoModelRef.current = videoModel
+  const videoCreditLabel = `${getVideoModel(videoModel).credits} créditos por escena de ${getVideoModel(videoModel).durationSeconds} s`
   const [simpleGoal, setSimpleGoal] = useState("")
   const simpleDuration: SimpleDuration = "short"
   const [simpleReference, setSimpleReference] = useState<VideoChunk>(() => createVideoChunk(0, "Video simple"))
@@ -356,7 +363,7 @@ export default function VideoWorkspace() {
         dialogue: chunk.dialogue,
         sceneStyle: chunk.sceneStyle,
         duration: chunk.duration,
-      })
+      }, videoModelRef.current)
     } catch (error) {
       outcome = { status: "error", error: error instanceof Error ? error.message : "No se pudo generar la escena" }
     }
@@ -428,12 +435,12 @@ export default function VideoWorkspace() {
     generatingChunkId.current = simpleReference.id
     setSimpleError("")
     setSimpleReference((current) => ({ ...current, status: "generating" }))
-    // The current service generates one 6-second clip. The user's goal is passed as
-    // the hook text because this is part of the existing prompt, not optional metadata.
+    // One clip of the selected tier. The user's goal is passed as the hook text
+    // because this is part of the existing prompt, not optional metadata.
     void generateVideo(imageUrl, VIDEO_ANGLE_API_MAP.demo, goal, apiStyle, {
       format: VIDEO_FORMAT,
       duration: VIDEO_GENERATION_DURATION,
-    })
+    }, videoModel)
   }
 
   const mergeVideoChunks = async () => {
@@ -567,6 +574,8 @@ export default function VideoWorkspace() {
       generating={simpleReference.status === "generating"}
       videoUrl={simpleReference.videoUrl ?? null}
       generationError={simpleReference.status === "error" ? simpleError : ""}
+      videoModel={videoModel}
+      onVideoModelChange={setVideoModel}
     /> : editorMode === "plan" ? <VideoPlan
       chunks={chunks}
       goal={simpleGoal}
@@ -589,6 +598,8 @@ export default function VideoWorkspace() {
       chunks={chunks}
       pendingChanges={pendingChanges}
       strategyEditor={<VideoStrategyEditor strategy={strategy} onChange={updateStrategy} />}
+      modelPicker={<VideoModelPicker value={videoModel} onChange={setVideoModel} disabled={chunks.some((chunk) => chunk.status === "generating")} compact />}
+      creditLabel={videoCreditLabel}
       sourceReady={hasCurrentVideo(activeChunk) || hasValidReference(activeChunk)}
       canGenerate={canGenerate}
       canGenerateAnnouncement={canGenerateAnnouncement}
@@ -653,7 +664,7 @@ export default function VideoWorkspace() {
           </div>
         </div>
       </div>}
-      <footer className={s.generateDock}>{activeChunk.videoSource === "library" ? <small><strong>Clip listo para unir</strong><br />No consume créditos adicionales.</small> : <><button className={activeChunk.videoUrl ? s.regenerateScene : undefined} disabled={!canGenerate} onClick={() => { void generateVideoChunk(activeChunk) }}>{activeChunk.videoUrl ? <RotateCcw /> : <WandSparkles />}{activeChunk.videoUrl ? "Regenerar escena" : "Generar escena"}</button><small><strong>12 créditos por escena de 6 s</strong><br />{activeChunk.status === "generating" ? "Generando esta escena…" : generationInProgress ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (canGenerate ? activeChunk.videoUrl ? "Puedes regenerar únicamente esta escena" : "Escena seleccionada lista para generar" : "Selecciona una fuente visual para continuar")}</small></>}</footer>
+      <footer className={s.generateDock}>{activeChunk.videoSource === "library" ? <small><strong>Clip listo para unir</strong><br />No consume créditos adicionales.</small> : <><button className={activeChunk.videoUrl ? s.regenerateScene : undefined} disabled={!canGenerate} onClick={() => { void generateVideoChunk(activeChunk) }}>{activeChunk.videoUrl ? <RotateCcw /> : <WandSparkles />}{activeChunk.videoUrl ? "Regenerar escena" : "Generar escena"}</button><small><strong>{videoCreditLabel}</strong><br />{activeChunk.status === "generating" ? "Generando esta escena…" : generationInProgress ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (canGenerate ? activeChunk.videoUrl ? "Puedes regenerar únicamente esta escena" : "Escena seleccionada lista para generar" : "Selecciona una fuente visual para continuar")}</small></>}</footer>
     </aside>
     <main className={s.stagePanel}>
       <VideoPreview previewUrl={activePreviewUrl} activeChunk={activeChunk} activeIndex={activeIndex} totalDuration={getVideoDuration(chunks)} chunks={chunks} pendingChanges={pendingChanges} finalVideoUrl={currentFinalVideoUrl} finalDownloadUrl={currentFinalDownloadUrl} finalVideoSceneSignature={chunks.length === 1 ? currentFinalSceneSignature : finalVideoSceneSignature} completePreviewRequest={completePreviewRequest} canMerge={canMerge} isMerging={isMerging} mergeError={mergeError} onMerge={() => { void mergeVideoChunks() }} hookLabel={hookLabel} angleLabel={angleLabel} styleLabel={styleLabel} strategyFeedback={strategyFeedback} onRecommend={recommendStrategy} hasPendingChanges={pendingChanges.has(activeChunk.id)} canRegenerate={canGenerate} onRegenerate={() => { void generateVideoChunk(activeChunk) }} />

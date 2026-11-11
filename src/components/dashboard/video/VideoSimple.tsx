@@ -1,7 +1,8 @@
 import { useRef, useState, type DragEvent } from "react"
 import { BadgePercent, Clapperboard, Download, ImagePlus, PlaySquare, Sparkles, Trash2, Upload, UsersRound, WandSparkles } from "lucide-react"
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
-import { VIDEO_GENERATION_DURATION } from "./video-data"
+import { getVideoModel, type VideoModelId } from "@/lib/pricing-plans"
+import VideoModelPicker from "./VideoModelPicker"
 import s from "./VideoSimple.module.css"
 
 export const SIMPLE_APPROACHES = [
@@ -18,7 +19,7 @@ export default function VideoSimple({
   referenceImageUrl, referenceFileName, referenceSource, fileError, uploading,
   goal, onGoalChange, approach, styleLabel, onApproachChange,
   onUpload, onChooseLibrary, onClear, onIdea, onCreate,
-  generating, videoUrl, generationError,
+  generating, videoUrl, generationError, videoModel, onVideoModelChange,
 }: {
   referenceImageUrl: string | null
   referenceFileName: string
@@ -38,6 +39,8 @@ export default function VideoSimple({
   generating: boolean
   videoUrl: string | null
   generationError: string
+  videoModel: VideoModelId
+  onVideoModelChange: (model: VideoModelId) => void
 }) {
   const dragDepth = useRef(0)
   const [isDragOver, setIsDragOver] = useState(false)
@@ -124,12 +127,15 @@ export default function VideoSimple({
             {approach === "custom" && <p className={s.advancedStyle}>Estilo actual de Modo Pro: {styleLabel}</p>}
           </section>
 
-          <div className={s.durationFixed}><span>Duración</span><strong>{VIDEO_GENERATION_DURATION} segundos</strong></div>
+          <section className={s.styleSection} aria-labelledby="simple-model-title">
+            <div className={s.sectionHeading}><span>04</span><div><h2 id="simple-model-title">Calidad del video</h2><p>Ambos generan un clip de {getVideoModel(videoModel).durationSeconds} segundos.</p></div></div>
+            <VideoModelPicker value={videoModel} onChange={onVideoModelChange} disabled={generating} />
+          </section>
 
           <div className={s.createArea}>
             <p className={s.planExplainer}>Genera un solo clip a partir de tu imagen, objetivo y enfoque.</p>
             <button type="button" className={s.createButton} onClick={onCreate} disabled={!canContinue}><WandSparkles aria-hidden="true" />{generating ? "Generando tu video…" : "Crear video"}</button>
-            <p className={s.creditCost}>12 créditos por video de 6 s</p>
+            <p className={s.creditCost}>{getVideoModel(videoModel).credits} créditos por video de {getVideoModel(videoModel).durationSeconds} s</p>
             <p>{generating ? "Puedes revisar tu configuración mientras se genera." : showVideo ? "Puedes crear otra versión sin perder tu configuración." : canContinue ? "El resultado aparecerá en la tarjeta izquierda." : "Añade una imagen y describe tu idea para continuar."}</p>
           </div>
         </div>

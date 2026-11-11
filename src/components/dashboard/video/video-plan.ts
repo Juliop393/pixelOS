@@ -9,9 +9,9 @@ export const SIMPLE_DURATION_LABELS: Record<SimpleDuration, string> = {
 }
 
 export const SIMPLE_DURATION_RANGES: Record<SimpleDuration, string> = {
-  short: "~6–10 s",
-  medium: "~12–18 s",
-  long: "~20–30 s",
+  short: "~10 s",
+  medium: "~20 s",
+  long: "~40 s",
 }
 
 export const SIMPLE_STYLE_LABELS: Record<string, string> = {

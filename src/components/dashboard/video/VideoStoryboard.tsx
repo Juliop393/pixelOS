@@ -17,6 +17,8 @@ type VideoStoryboardProps = {
   chunks: VideoChunk[]
   pendingChanges: ReadonlySet<number>
   strategyEditor: ReactNode
+  modelPicker: ReactNode
+  creditLabel: string
   sourceReady: boolean
   canGenerate: boolean
   canGenerateAnnouncement: boolean
@@ -44,6 +46,8 @@ export default function VideoStoryboard({
   chunks,
   pendingChanges,
   strategyEditor,
+  modelPicker,
+  creditLabel,
   sourceReady,
   canGenerate,
   canGenerateAnnouncement,
@@ -88,11 +92,12 @@ export default function VideoStoryboard({
           <div className={s.storyboardDuration}><Clock3 /><span>Duración estimada</span><b>{totalDuration}s</b></div>
           {selectedChunk && <><button type="button" className={`${s.storyboardGenerate} ${selectedChunk.videoUrl ? s.storyboardRegenerate : ""}`} disabled={!canGenerate} onClick={onGenerate}>{selectedChunk.videoSource === "library" ? <Clapperboard /> : selectedChunk.videoUrl ? <RotateCcw /> : <WandSparkles />}{selectedChunk.videoSource === "library" ? "Clip de biblioteca" : selectedChunk.videoUrl ? "Regenerar escena" : "Generar escena"}</button>
           <button type="button" className={s.storyboardAdjust} onClick={onAdjust}><SlidersHorizontal />Ajustar escenas</button>
-          <small><strong>{selectedChunk.videoSource === "library" ? "Video existente · sin nuevo cobro" : "12 créditos por escena de 6 s"}</strong><br />{selectedChunk.videoSource === "library" ? "Este clip fijo ya está listo para unir." : selectedChunk.status === "generating" ? "Generando esta escena…" : anotherSceneGenerating ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (sourceReady ? selectedChunk.videoUrl ? "Solo se regenerará la escena seleccionada" : "Se generará la escena seleccionada" : "Añade una fuente visual a la escena seleccionada")}</small></>}
+          <small><strong>{selectedChunk.videoSource === "library" ? "Video existente · sin nuevo cobro" : creditLabel}</strong><br />{selectedChunk.videoSource === "library" ? "Este clip fijo ya está listo para unir." : selectedChunk.status === "generating" ? "Generando esta escena…" : anotherSceneGenerating ? "Otra escena se está generando; puedes seguir editando." : generateFeedback || (sourceReady ? selectedChunk.videoUrl ? "Solo se regenerará la escena seleccionada" : "Se generará la escena seleccionada" : "Añade una fuente visual a la escena seleccionada")}</small></>}
         </div>
       </header>
 
       {strategyEditor}
+      {modelPicker}
 
       <section className={s.storyboardSection}>
         <header>

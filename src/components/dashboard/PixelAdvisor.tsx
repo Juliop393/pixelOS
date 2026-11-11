@@ -72,7 +72,7 @@ const VIDEO_INITIAL_MESSAGE: Message = {
 const VIDEO_STARTERS = [
   { label: "Recomiéndame un ángulo", prompt: "Recomiéndame un ángulo para un anuncio de video y dime qué dato necesitas para afinarlo.", Icon: Target },
   { label: "Propón un hook", prompt: "Propón tres ideas de hook para abrir un video publicitario. Si necesitas contexto, dime cuál.", Icon: Zap },
-  { label: "Arma un storyboard rápido", prompt: "Arma un storyboard breve para un anuncio de video. Dame un ejemplo adaptable por escenas de seis segundos.", Icon: ListVideo },
+  { label: "Arma un storyboard rápido", prompt: "Arma un storyboard breve para un anuncio de video. Dame un ejemplo adaptable por escenas de diez segundos.", Icon: ListVideo },
   { label: "Estructura mi video", prompt: "Ayúdame a estructurar un anuncio de video: apertura, demostración, beneficio y cierre.", Icon: Clapperboard },
   { label: "Algo simple y directo", prompt: "Quiero un anuncio de video simple y directo. Dame un enfoque fácil de ejecutar.", Icon: Lightbulb },
 ]
