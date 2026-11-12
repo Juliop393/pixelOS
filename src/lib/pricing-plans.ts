@@ -68,10 +68,7 @@ export interface SubscriptionPlan {
   creditRule?: string
   /** Kit = 1 video + 4 images. */
   adKits?: number
-  concurrentGenerations: number
-  seats: number
   rollover: boolean
-  priorityQueue: boolean
   /** Full list for the pricing pages. */
   features: string[]
   /** Compact list for the landing, shown after credits and outcome. */
@@ -82,6 +79,7 @@ export interface SubscriptionPlan {
 const EXTRA_CREDITS = "Compra créditos extra cuando quieras"
 const ROLLOVER = "Los créditos no usados pasan al siguiente mes"
 const ROLLOVER_CAP = "Acumulación máxima: una asignación mensual adicional"
+const FORMATS = "Imágenes en 1:1, 4:5 y 9:16; videos en 9:16"
 
 export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
@@ -93,22 +91,16 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     audience: "Para emprendedores y pequeñas tiendas que producen anuncios algunas veces al mes.",
     recommended: false,
     creditRule: "Los créditos mensuales vencen al renovar.",
-    concurrentGenerations: 2,
-    seats: 1,
     rollover: false,
-    priorityQueue: false,
     features: [
-      "Modo Simple y Modo Pro",
-      "PixelIA",
-      "Imagen + Video",
-      "Formatos 1:1, 4:5 y 9:16",
+      "Imágenes y videos con IA",
+      "Modo Simple, Modo Pro y PixelIA",
+      FORMATS,
       "Uso comercial",
       "Sin marca de agua",
-      "Hasta 2 generaciones simultáneas",
-      "1 usuario",
       EXTRA_CREDITS,
     ],
-    highlights: ["Modo Simple, Modo Pro y PixelIA", "Uso comercial, sin marca de agua", "Hasta 2 generaciones simultáneas"],
+    highlights: ["Imágenes y videos con IA", "Modo Simple, Modo Pro y PixelIA", "Créditos mensuales sin acumulación"],
     landingCta: "Empezar con Starter",
   },
   {
@@ -121,19 +113,14 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     recommended: true,
     note: "2.5× más créditos que Starter por ~2× el precio.",
     adKits: 18,
-    concurrentGenerations: 4,
-    seats: 2,
     rollover: true,
-    priorityQueue: false,
     features: [
       "Todo lo incluido en Starter",
-      "Hasta 4 generaciones simultáneas",
-      "Hasta 2 usuarios",
       ROLLOVER,
       ROLLOVER_CAP,
       EXTRA_CREDITS,
     ],
-    highlights: ["Todo lo incluido en Starter", "Hasta 4 generaciones y 2 usuarios", ROLLOVER],
+    highlights: ["Todo lo incluido en Starter", ROLLOVER, ROLLOVER_CAP],
     landingCta: "Elegir Growth",
   },
   {
@@ -145,20 +132,14 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     audience: "Para media buyers, agencias pequeñas y equipos de mayor volumen.",
     recommended: false,
     adKits: 45,
-    concurrentGenerations: 8,
-    seats: 5,
     rollover: true,
-    priorityQueue: true,
     features: [
       "Todo lo incluido en Growth",
-      "Hasta 8 generaciones simultáneas",
-      "Hasta 5 usuarios",
       ROLLOVER,
       ROLLOVER_CAP,
-      "Cola prioritaria",
       EXTRA_CREDITS,
     ],
-    highlights: ["Todo lo incluido en Growth", "Hasta 8 generaciones y 5 usuarios", "Cola prioritaria"],
+    highlights: ["Todo lo incluido en Growth", ROLLOVER, ROLLOVER_CAP],
     landingCta: "Elegir Pro",
   },
 ]
