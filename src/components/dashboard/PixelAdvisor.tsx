@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Clapperboard, FileText, Lightbulb, ListVideo, Megaphone, Target, Users, Zap } from "lucide-react"
+import { Clapperboard, Coins, Lightbulb, ListVideo, Megaphone, Target, Users, Zap } from "lucide-react"
 import PixelAiIcon from "./PixelAiIcon"
 import styles from "./GeneratorWorkspace.module.css"
 import ui from "./PixelAdvisor.module.css"
@@ -17,12 +17,20 @@ export type Recommendation = {
   productDescription?: string
 }
 
-type ConvState = "collecting" | "confirming" | "recommending" | "completed"
+/* "confirming" only follows an explicit request for structured recommendations; plain answers stay in "collecting". */
+type ConvState = "collecting" | "confirming" | "recommending"
 
 type Message = {
   role: "user" | "assistant"
   content: string
+  /** Recommendation cards shown in place of this assistant message. */
+  recommendations?: { summary: string; items: Recommendation[] }
 }
+
+/* The server accepts at most 10 messages of up to 2000 characters per request; older turns are
+   dropped and earlier messages are cut here, so a long session never turns into HTTP 400. */
+const MAX_HISTORY_MESSAGES = 10
+const MAX_HISTORY_MESSAGE_CHARS = 2000
 
 export type PixelAiInitialRequest = {
   id: number
@@ -47,6 +55,12 @@ function detectRecommendationCount(message: string): 1 | 2 | 3 | null {
   return 3
 }
 
+/* 429 and request errors carry a message written for the user; server failures stay generic. */
+function errorFor(status: number, data: unknown, fallback: string) {
+  const message = typeof data === "object" && data !== null ? (data as { error?: unknown }).error : null
+  return (status === 429 || status === 400) && typeof message === "string" && message ? message : fallback
+}
+
 interface PixelAdvisorProps {
   onApplyRecommendation?: (rec: Recommendation) => void
   accessToken?: string
@@ -61,7 +75,7 @@ interface PixelAdvisorProps {
 
 const INITIAL_MESSAGE: Message = {
   role: "assistant",
-  content: "Cuéntame qué vendes, a quién se lo vendes y qué quieres conseguir con el anuncio.",
+  content: "Soy PixelIA. Puedo ayudarte a crear mejores anuncios, explorar ideas y resolver dudas sobre PixelFM. ¿Qué tienes en mente?",
 }
 
 const VIDEO_INITIAL_MESSAGE: Message = {
@@ -70,7 +84,7 @@ const VIDEO_INITIAL_MESSAGE: Message = {
 }
 
 const VIDEO_STARTERS = [
-  { label: "Recomiéndame un ángulo", prompt: "Recomiéndame un ángulo para un anuncio de video y dime qué dato necesitas para afinarlo.", Icon: Target },
+  { label: "Recomiéndame un ángulo", prompt: "Recomiéndame un ángulo para un anuncio de video.", Icon: Target },
   { label: "Propón un hook", prompt: "Propón tres ideas de hook para abrir un video publicitario. Si necesitas contexto, dime cuál.", Icon: Zap },
   { label: "Arma un storyboard rápido", prompt: "Arma un storyboard breve para un anuncio de video. Dame un ejemplo adaptable por escenas de diez segundos.", Icon: ListVideo },
   { label: "Estructura mi video", prompt: "Ayúdame a estructurar un anuncio de video: apertura, demostración, beneficio y cierre.", Icon: Clapperboard },
@@ -78,10 +92,10 @@ const VIDEO_STARTERS = [
 ]
 
 const GENERAL_STARTERS = [
-  { label: "Quiero crear un anuncio para Meta Ads", prompt: "Quiero crear un anuncio para Meta Ads. ¿Qué necesitas saber de mi producto para empezar?", Icon: Megaphone },
-  { label: "Ayúdame a elegir un ángulo de venta", prompt: "Ayúdame a elegir un ángulo de venta para mi producto. Pregúntame lo que necesites.", Icon: Target },
-  { label: "Dame una idea UGC", prompt: "Dame una idea de anuncio UGC que se sienta auténtica para mi producto.", Icon: Users },
-  { label: "Convierte mi producto en un brief creativo", prompt: "Quiero convertir mi producto en un brief creativo. Guíame con las preguntas necesarias.", Icon: FileText },
+  { label: "Dame una idea de anuncio", prompt: "Dame una idea de anuncio para Meta Ads.", Icon: Megaphone },
+  { label: "¿Me conviene un enfoque UGC?", prompt: "¿Me conviene un enfoque UGC para mis anuncios?", Icon: Users },
+  { label: "¿Rápido o Premium?", prompt: "¿Qué diferencia hay entre Video Rápido y Video Premium?", Icon: Zap },
+  { label: "¿Cómo funcionan los créditos?", prompt: "¿Cómo funcionan los créditos en PixelFM?", Icon: Coins },
 ]
 
 export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideBubble, inline = false, open, onOpenChange, initialRequest, focusMode = false, videoContext = false }: PixelAdvisorProps) {
@@ -97,11 +111,8 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [collectedContext, setCollectedContext] = useState<Record<string, unknown>>({})
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
-  const [summary, setSummary] = useState("")
-  const [confirmationMessage, setConfirmationMessage] = useState("")
   const [requestedRecommendationCount, setRequestedRecommendationCount] = useState<1 | 2 | 3>(3)
-  const [appliedIndex, setAppliedIndex] = useState<number | null>(null)
+  const [appliedKey, setAppliedKey] = useState<string | null>(null)
   const [appliedDetails, setAppliedDetails] = useState<Recommendation | null>(null)
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -111,7 +122,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [messages, isLoading, recommendations])
+  }, [messages, isLoading])
 
   const formatLabels: Record<string, string> = {
     square: "1:1 Cuadrado",
@@ -129,12 +140,9 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
     setMessages([videoContext ? VIDEO_INITIAL_MESSAGE : INITIAL_MESSAGE])
     setInput("")
     setCollectedContext({})
-    setRecommendations([])
-    setSummary("")
-    setConfirmationMessage("")
     setRequestedRecommendationCount(3)
     setError(null)
-    setAppliedIndex(null)
+    setAppliedKey(null)
     setAppliedDetails(null)
   }
 
@@ -147,10 +155,17 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
     setIsLoading(true)
     setError(null)
 
+    // The welcome text is interface copy, not conversation; cards travel as a short text summary.
+    // Only the request is trimmed: the panel keeps showing the whole conversation.
     const chatMessages = [
-      ...messages.map((m) => ({ role: m.role, content: m.content })),
+      ...messages.slice(1).map((m) => ({
+        role: m.role,
+        content: (m.recommendations
+          ? `Recomendé: ${m.recommendations.items.map((rec) => `${rec.angleName} (${rec.styleName}, ${rec.format})`).join("; ")}.`
+          : m.content).slice(0, MAX_HISTORY_MESSAGE_CHARS),
+      })),
       { role: "user", content: userMessage },
-    ]
+    ].slice(-MAX_HISTORY_MESSAGES)
 
     try {
       const res = await fetch("/api/pixel-ai", {
@@ -167,11 +182,10 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         }),
       })
 
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        const msg = "No pudimos consultar Pixel IA en este momento. Inténtalo nuevamente."
-        setError(msg)
+        setError(errorFor(res.status, data, "No pudimos consultar PixelIA en este momento. Inténtalo nuevamente."))
         return
       }
 
@@ -185,10 +199,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         setCollectedContext(data.collectedContext)
       }
 
-      if (data.type === "confirmation") {
-        setConfirmationMessage(assistantContent)
-        setConvState("confirming")
-      }
+      setConvState(data.type === "confirmation" ? "confirming" : "collecting")
     } catch {
       setError("Error al conectar con Pixel IA")
     } finally {
@@ -247,21 +258,20 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
         }),
       })
 
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        setError(data.error || "Error al generar recomendaciones")
+        setError(errorFor(res.status, data, "Error al generar recomendaciones"))
         setConvState("confirming")
         return
       }
 
-      setSummary(data.summary || "")
       const recs = (data.recommendations || []) as Recommendation[]
       if (data.productDescription) {
         for (const rec of recs) { rec.productDescription = data.productDescription as string }
       }
-      setRecommendations(recs)
-      setConvState("completed")
+      setMessages((prev) => [...prev, { role: "assistant", content: data.summary || "", recommendations: { summary: data.summary || "", items: recs } }])
+      setConvState("collecting")
     } catch {
       setError("Error al conectar con Pixel IA")
       setConvState("confirming")
@@ -276,12 +286,11 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
       { role: "assistant", content: "Claro, dime qué necesitas corregir o añadir." },
     ])
     setConvState("collecting")
-    setConfirmationMessage("")
   }
 
-  const handleApply = (rec: Recommendation, idx: number) => {
+  const handleApply = (rec: Recommendation, key: string) => {
     onApplyRecommendation?.(rec)
-    setAppliedIndex(idx)
+    setAppliedKey(key)
     setAppliedDetails(rec)
   }
 
@@ -297,7 +306,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
       }
     : {
         Icon: null,
-        kicker: "PIXELIA · ESTRATEGA CREATIVO",
+        kicker: "PIXELIA · COPILOTO CREATIVO",
         title: "Pensemos tu próximo anuncio.",
         text: INITIAL_MESSAGE.content,
         starters: GENERAL_STARTERS,
@@ -308,6 +317,60 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
     <span className={ui.avatar} aria-hidden="true">
       <PixelAiIcon strokeWidth={1.6} />
     </span>
+  )
+
+  const renderRecommendations = (block: NonNullable<Message["recommendations"]>, messageIndex: number) => (
+    <div key={messageIndex} className={ui.row}>
+      {assistantAvatar}
+      <div className={ui.recommendations}>
+        {block.summary && <p className={ui.summary}>{block.summary}</p>}
+
+        {block.items.map((rec, idx) => {
+          const key = `${messageIndex}-${idx}`
+          return (
+            <div key={key} className={ui.recCard}>
+              <span className={ui.recIndex}>0{idx + 1}</span>
+              <p className={ui.recTitle}>{rec.angleName}</p>
+              <p className={ui.recReason}>{rec.reason}</p>
+              <div className={ui.recTags}>
+                <span>{formatLabels[rec.format] ?? rec.format}</span>
+                <span>{rec.styleName}</span>
+                {rec.safeZoneMeta && <span className={ui.recTagAccent}>Zona segura</span>}
+              </div>
+              {onApplyRecommendation && <button
+                type="button"
+                onClick={() => handleApply(rec, key)}
+                className={`${ui.applyButton} ${appliedKey === key ? ui.applyButtonDone : ""}`}
+              >
+                {appliedKey === key ? "✓ Aplicado" : "Aplicar recomendación"}
+              </button>}
+            </div>
+          )
+        })}
+
+        {onApplyRecommendation && appliedDetails && appliedKey?.startsWith(`${messageIndex}-`) && (
+          <div className={ui.appliedCard}>
+            <p className={ui.appliedTitle}>✓ Recomendación aplicada al generador</p>
+            <dl>
+              {appliedDetails.productDescription && (
+                <div><dt>Producto</dt><dd>{appliedDetails.productDescription}</dd></div>
+              )}
+              <div><dt>Ángulo</dt><dd>{appliedDetails.angleName}</dd></div>
+              <div><dt>Estilo</dt><dd>{appliedDetails.styleName}</dd></div>
+              <div><dt>Formato</dt><dd>{formatLabels[appliedDetails.format] ?? appliedDetails.format}</dd></div>
+              <div><dt>Zona Segura Meta</dt><dd>{appliedDetails.safeZoneMeta ? "Activada" : "Desactivada"}</dd></div>
+            </dl>
+          </div>
+        )}
+
+        <button type="button" onClick={handleReset} className={ui.resetButton}>
+          <svg width={12} height={12} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Nueva consulta
+        </button>
+      </div>
+    </div>
   )
 
   return (
@@ -381,6 +444,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
 
           {messages.map((msg, idx) => {
             if (idx === 0 && (videoContext || showWelcome)) return null
+            if (msg.recommendations) return renderRecommendations(msg.recommendations, idx)
             const isUser = msg.role === "user"
             return (
               <div key={idx} className={`${ui.row} ${isUser ? ui.rowUser : ""}`}>
@@ -434,61 +498,10 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
             </div>
           )}
 
-          {/* Recomendaciones */}
-          {recommendations.length > 0 && (
-            <div className={ui.row}>
-              {assistantAvatar}
-              <div className={ui.recommendations}>
-                {summary && <p className={ui.summary}>{summary}</p>}
-
-                {recommendations.map((rec, idx) => (
-                  <div key={idx} className={ui.recCard}>
-                    <span className={ui.recIndex}>0{idx + 1}</span>
-                    <p className={ui.recTitle}>{rec.angleName}</p>
-                    <p className={ui.recReason}>{rec.reason}</p>
-                    <div className={ui.recTags}>
-                      <span>{formatLabels[rec.format] ?? rec.format}</span>
-                      <span>{rec.styleName}</span>
-                      {rec.safeZoneMeta && <span className={ui.recTagAccent}>Zona segura</span>}
-                    </div>
-                    {onApplyRecommendation && <button
-                      type="button"
-                      onClick={() => handleApply(rec, idx)}
-                      className={`${ui.applyButton} ${appliedIndex === idx ? ui.applyButtonDone : ""}`}
-                    >
-                      {appliedIndex === idx ? "✓ Aplicado" : "Aplicar recomendación"}
-                    </button>}
-                  </div>
-                ))}
-
-                {onApplyRecommendation && appliedDetails && (
-                  <div className={ui.appliedCard}>
-                    <p className={ui.appliedTitle}>✓ Recomendación aplicada al generador</p>
-                    <dl>
-                      {appliedDetails.productDescription && (
-                        <div><dt>Producto</dt><dd>{appliedDetails.productDescription}</dd></div>
-                      )}
-                      <div><dt>Ángulo</dt><dd>{appliedDetails.angleName}</dd></div>
-                      <div><dt>Estilo</dt><dd>{appliedDetails.styleName}</dd></div>
-                      <div><dt>Formato</dt><dd>{formatLabels[appliedDetails.format] ?? appliedDetails.format}</dd></div>
-                      <div><dt>Zona Segura Meta</dt><dd>{appliedDetails.safeZoneMeta ? "Activada" : "Desactivada"}</dd></div>
-                    </dl>
-                  </div>
-                )}
-
-                <button type="button" onClick={handleReset} className={ui.resetButton}>
-                  <svg width={12} height={12} aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Nueva consulta
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Zona de entrada (solo en collecting y confirming) */}
-        {(convState === "collecting" || convState === "confirming") && (
+        {/* Zona de entrada: siempre disponible, también después de ver recomendaciones */}
+        {(
           <div className={ui.composer}>
             <div className={ui.inputShell}>
               <textarea
@@ -496,7 +509,7 @@ export default function PixelAdvisor({ onApplyRecommendation, accessToken, hideB
                 onChange={(e) => setInput(e.target.value)}
                 rows={2}
                 aria-label="Mensaje para PixelIA"
-                placeholder={videoContext ? "Describe tu video o pide una idea para avanzar..." : "Cuéntale qué vendes, a quién y qué quieres lograr…"}
+                placeholder={videoContext ? "Describe tu video o pide una idea para avanzar..." : "Escribe tu pregunta o tu idea…"}
                 className={ui.textarea}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey && !isLoading) {

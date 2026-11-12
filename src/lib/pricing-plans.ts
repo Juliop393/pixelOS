@@ -79,7 +79,7 @@ export interface SubscriptionPlan {
 const EXTRA_CREDITS = "Compra créditos extra cuando quieras"
 const ROLLOVER = "Los créditos no usados pasan al siguiente mes"
 const ROLLOVER_CAP = "Acumulación máxima: una asignación mensual adicional"
-const FORMATS = "Imágenes en 1:1, 4:5 y 9:16; videos en 9:16"
+export const FORMATS = "Imágenes en 1:1, 4:5 y 9:16; videos en 9:16"
 
 export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
