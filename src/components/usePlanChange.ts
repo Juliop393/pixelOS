@@ -26,7 +26,7 @@ export interface UpgradeQuote {
   credits: number
   periodStart: string
   nextRenewal: string
-  unused: { monthly: number; carried: number; lost: number; rolloverLost: number } | null
+  kept: { credits: number; expiresAt: string } | null
 }
 
 export type UpgradeResult =

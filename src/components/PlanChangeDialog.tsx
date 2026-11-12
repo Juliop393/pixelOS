@@ -186,9 +186,9 @@ export default function PlanChangeDialog({
             ) : (
               <ul className={styles.dialogFacts}>
                 <li><strong>Hoy se cobra: {money(quote.amountDue, quote.currency)}</strong> (el precio completo de {name} para el nuevo período).</li>
-                <li>Recibes {quote.credits} créditos de {name} al confirmarse el pago.</li>
+                <li>Recibes {quote.credits} créditos nuevos de {name} al confirmarse el pago.</li>
+                <li>{keptText(quote, current)}</li>
                 <li>Próxima renovación: {formatPlanDate(quote.nextRenewal)}.</li>
-                <li>{unusedText(quote, current, name)}</li>
                 <li>Los créditos de packs no cambian.</li>
               </ul>
             )}
@@ -250,17 +250,10 @@ export default function PlanChangeDialog({
   )
 }
 
-/* What happens to this period's credits, in the engine's own terms (migration 014). */
-function unusedText(quote: UpgradeQuote, current: string, name: string): string {
-  const u = quote.unused
-  if (!u) {
-    return current === "Starter"
-      ? `Los créditos de ${current} que no hayas usado no se acumulan: se reemplazan por los de ${name}.`
-      : `Tus créditos de ${current} sin usar pasan a ${name} (hasta 300) y vencen al final del nuevo período. Los acumulados del mes anterior vencen hoy.`
-  }
-  const parts: string[] = []
-  if (u.carried > 0) parts.push(`${u.carried} créditos de ${current} sin usar pasan a ${name} y vencen al final del nuevo período`)
-  if (u.lost > 0) parts.push(`${u.lost} créditos de ${current} sin usar no se acumulan y se pierden`)
-  if (u.rolloverLost > 0) parts.push(`${u.rolloverLost} créditos acumulados del mes anterior vencen hoy`)
-  return parts.length ? `${parts.join("; ")}.` : `No te quedan créditos de ${current} sin usar en este período.`
+/* The credits migration 016 keeps, only as the server read them from the engine. */
+function keptText(quote: UpgradeQuote, current: string): string {
+  const kept = quote.kept
+  if (!kept) return "No pudimos confirmar tu saldo actual del período, así que aquí no mostramos créditos conservados."
+  if (kept.credits === 0) return `No te quedan créditos de ${current} sin usar en este período.`
+  return `Conservas tus ${kept.credits} créditos de ${current} sin usar. Vencen el ${formatPlanDate(kept.expiresAt)} y se usan primero.`
 }

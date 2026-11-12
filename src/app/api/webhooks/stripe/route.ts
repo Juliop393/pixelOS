@@ -97,7 +97,10 @@ const linePrice = (line: Stripe.InvoiceLineItem) => idOf(line.pricing?.price_det
  *     it stands now is what was paid, for its current period, so the database
  *     tops up the same period (upgraded) instead of opening a new one.
  *
- * Monthly Prices go to grant_subscription_credits_v3 (one month per invoice).
+ * Monthly Prices go to grant_subscription_credits_v3 (one month per invoice), or
+ * for subscription_update invoices to grant_subscription_upgrade_credits (016),
+ * which follows the same rules but keeps the unused credits of a replaced period
+ * when the plan is upgraded.
  * Annual Prices never do: the year is delivered month by month through
  * deliver_annual_subscription_credits, which grants only the current month.
  *
@@ -170,7 +173,8 @@ async function grantInvoiceCredits(admin: Admin, invoiceId: string, livemode: bo
 
   const { data: result, error } = price.interval === "annual"
     ? await admin.rpc("deliver_annual_subscription_credits", { p_subscription_id: subscriptionId, p_livemode: livemode })
-    : await admin.rpc("grant_subscription_credits_v3", {
+    // A plan change charged now (paid upgrade) keeps the unused credits it replaces (migration 016).
+    : await admin.rpc(reason === "subscription_update" ? "grant_subscription_upgrade_credits" : "grant_subscription_credits_v3", {
         p_invoice_id: invoice.id,
         p_user_id: customer.user_id,
         p_subscription_id: subscriptionId,

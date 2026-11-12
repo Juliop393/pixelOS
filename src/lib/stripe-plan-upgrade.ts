@@ -23,12 +23,11 @@ import {
  * Economic rule: an upgrade starts a NEW monthly period now. Stripe charges the
  * full price of the new plan for that period (billing_cycle_anchor=now,
  * proration_behavior=none) and the webhook grants the new plan's credits for it
- * through invoice.paid, exactly like a renewal in migration 014:
- *   - unused monthly credits of the old period carry only up to the lower of both
- *     rollover caps (Starter 0: nothing; Growth -> Pro: up to 300), as rollover
- *     credits that expire with the new period;
- *   - rollover carried from the period before is dropped;
- *   - pack and legacy credits are never touched.
+ * through invoice.paid (grant_subscription_upgrade_credits, migration 016):
+ *   - the credits still unused in the replaced period (its monthly credits and any
+ *     valid rollover) are kept, with their original expiry, and spent first;
+ *   - pack and legacy credits are never touched;
+ *   - ordinary renewals keep the 014 rollover caps (Starter carries nothing).
  * The engine's same-period top-up ("upgraded", the full difference for any
  * prorated amount) is never reached: the period always changes.
  *
@@ -44,8 +43,6 @@ const PRICE_CENTS: Record<StripePlan, number> = Object.fromEntries(
 const PLAN_CREDITS: Record<StripePlan, number> = Object.fromEntries(
   SUBSCRIPTION_PLANS.map((plan) => [plan.id, plan.monthlyCredits])
 ) as Record<StripePlan, number>
-// Same caps as migration 014 (credit_engine.grant_subscription_period).
-const ROLLOVER_CAP: Record<StripePlan, number> = { starter: 0, growth: 300, pro: 720 }
 
 const fail = (code: string, status: number, message: string): never => {
   throw new PlanChangeError(code, status, message)
@@ -59,7 +56,8 @@ export interface UpgradeQuote {
   periodStart: string
   nextRenewal: string
   /** Live balance details when the engine tracks this period; null otherwise (e.g. TEST). */
-  unused: { monthly: number; carried: number; lost: number; rolloverLost: number } | null
+  /** Credits of the current period kept after the upgrade, as the engine holds them now (LIVE). */
+  kept: { credits: number; expiresAt: string } | null
 }
 
 export type UpgradeResult =
@@ -93,19 +91,22 @@ async function validate(current: Current | null, target: StripePlan): Promise<{ 
   return { current: current as Current, targetPrice }
 }
 
-/** What the engine will do with this period's credits (LIVE balances only). */
-async function unusedCredits(userId: string, current: Current, target: StripePlan): Promise<UpgradeQuote["unused"]> {
+/*
+ * What migration 016 will keep: this period's unused monthly credits plus valid
+ * rollover, expiring when this period would. Null when the engine does not hold
+ * this period (TEST, or not granted yet): nothing is promised then.
+ */
+async function keptCredits(userId: string, current: Current): Promise<UpgradeQuote["kept"]> {
   const { data, error } = await createAdminClient()
     .from("credit_accounts")
-    .select("monthly_credits, rollover_credits, monthly_period_key, monthly_expires_at")
+    .select("monthly_credits, rollover_credits, rollover_expires_at, monthly_period_key, monthly_expires_at")
     .eq("user_id", userId)
     .maybeSingle()
   if (error) throw new Error("credit_read_failed")
   const key = `period:${current.subscription.id}:${current.item.current_period_start}`
   if (!data || data.monthly_period_key !== key || new Date(data.monthly_expires_at) <= new Date()) return null
-  const monthly = data.monthly_credits as number
-  const carried = Math.min(monthly, ROLLOVER_CAP[current.price.plan], ROLLOVER_CAP[target])
-  return { monthly, carried, lost: monthly - carried, rolloverLost: data.rollover_credits as number }
+  const rollover = data.rollover_expires_at && new Date(data.rollover_expires_at) > new Date() ? (data.rollover_credits as number) : 0
+  return { credits: (data.monthly_credits as number) + rollover, expiresAt: new Date(data.monthly_expires_at).toISOString() }
 }
 
 export async function previewUpgrade(userId: string, target: StripePlan): Promise<UpgradeQuote> {
@@ -136,7 +137,7 @@ export async function previewUpgrade(userId: string, target: StripePlan): Promis
     credits: PLAN_CREDITS[target],
     periodStart: iso(line!.period.start),
     nextRenewal: iso(line!.period.end),
-    unused: await unusedCredits(userId, ok, target),
+    kept: await keptCredits(userId, ok),
   }
 }
 
