@@ -133,7 +133,11 @@ async function grantInvoiceCredits(admin: Admin, invoiceId: string, livemode: bo
     if (items.length !== 1 || items[0].quantity !== 1) return skip("unexpected_items")
     priceId = items[0].price.id
     // Only an invoice that charges the subscription's current Price pays for it.
-    if (!lines.some((line) => linePrice(line) === priceId)) return skip("update_for_other_price")
+    if (!lines.some((line) => linePrice(line) === priceId)) {
+      // A paid upgrade whose pending update Stripe has not applied yet: retry, never drop its credits.
+      if (subscription.pending_update) throw new Error("pending_update_not_applied")
+      return skip("update_for_other_price")
+    }
     periodStart = items[0].current_period_start
     periodEnd = items[0].current_period_end
   } else {
