@@ -983,65 +983,6 @@
 
 .modeNote { margin-top: 12px; color: var(--faint); font-size: 12px; }
 
-/* ── Library ──────────────────────────────────────────────────────── */
-
-.library { width: min(1360px, calc(100% - var(--gutter) * 2)); }
-
-.libraryGrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: start; gap: clamp(10px, 1.4vw, 18px); }
-
-.libraryColumn { --py: 0px; min-width: 0; display: grid; gap: clamp(10px, 1.4vw, 18px); transform: translateY(var(--py)); }
-.libraryColumn:nth-child(2) { margin-top: 56px; }
-.libraryColumn:nth-child(3) { margin-top: 18px; }
-.libraryColumn:nth-child(4) { margin-top: 84px; }
-.libraryColumn:nth-child(5) { margin-top: 34px; }
-
-.tile {
-  margin: 0;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: #15110e;
-  box-shadow: 0 26px 50px -26px rgba(0, 0, 0, .85);
-  transition: border-color .3s ease, box-shadow .4s ease;
-}
-
-.tile img,
-.tile video { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .7s var(--ease); }
-
-.tile::after {
-  content: "";
-  position: absolute;
-  inset: 55% 0 0;
-  background: linear-gradient(180deg, transparent, rgba(10, 8, 7, .9));
-  opacity: .9;
-  pointer-events: none;
-}
-
-.tile figcaption {
-  position: absolute;
-  left: 13px;
-  right: 13px;
-  bottom: 12px;
-  z-index: 2;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  color: #fbeee5;
-  font-size: 13px;
-}
-
-.tile figcaption b { font-weight: 640; }
-.tile figcaption span { color: #d9cdc2; font-size: 11px; white-space: nowrap; }
-
-/* Keeps the poster headline (which has a typo) out of the frame. */
-.tile[data-crop-top] video,
-.tile[data-crop-top]:hover video { transform: scale(1.4); transform-origin: 50% 100%; }
-
-.tile:hover { border-color: rgba(240, 150, 115, .5); box-shadow: 0 34px 60px -26px rgba(0, 0, 0, .9), 0 0 50px -22px rgba(215, 107, 69, .55); }
-.tile:hover img, .tile:hover video { transform: scale(1.04); }
-
 /* ── Direction ────────────────────────────────────────────────────── */
 
 .direction { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); align-items: center; gap: clamp(28px, 5vw, 76px); }
@@ -1331,8 +1272,6 @@
   .aiBoard { max-width: 560px; }
   .frames { padding-bottom: 28px; }
   .plans { max-width: 480px; margin-inline: auto; grid-template-columns: minmax(0, 1fr); gap: 28px; }
-  .libraryGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .libraryColumn:nth-child(n + 4) { display: none; }
   .modeSimple h3 { margin-bottom: 24px; }
 }
 
@@ -1390,13 +1329,6 @@
   .proAdd { display: none; }
   .proTimeline figure { height: 92px; }
 
-  /* Library: a calm two-column wall, columns dissolve into one grid. */
-  .libraryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .libraryColumn, .libraryColumn:nth-child(n + 4) { display: contents; }
-  .tile[data-hide-phone] { display: none; }
-  .tile { border-radius: 14px; }
-  .tile figcaption { left: 10px; right: 10px; bottom: 9px; font-size: 12px; }
-  .tile figcaption span { display: none; }
 
   .frames { grid-template-columns: 1fr .9fr .78fr; }
   .frames figcaption { font-size: 11px; white-space: normal; }
@@ -1413,17 +1345,12 @@
   .footerMain { flex-direction: column; }
 }
 
-@media (hover: none) {
-  .tile:hover img, .tile:hover video { transform: none; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .heroCopy, .heroCard, .heroGlow, .heroSweep, .storyTag { animation: none; }
   .heroField { transition: none; }
   .heroSweep { display: none; }
-  .heroCard, .ctaPrimary, .ctaGhostSolid, .ctaGhost, .tile, .tile img, .tile video { transition: none; }
+  .heroCard, .ctaPrimary, .ctaGhostSolid, .ctaGhost { transition: none; }
   .ctaPrimary:hover, .ctaGhostSolid:hover { transform: none; }
-  .tile:hover img, .tile:hover video { transform: none; }
 
   /* The story becomes a plain, fully visible section. */
   .story { height: auto; margin-top: clamp(104px, 13vw, 176px); }

@@ -7,11 +7,11 @@ import {
   FinalSection,
   FormatsSection,
   LandingFooter,
-  LibrarySection,
   ModesSection,
   PixelIaSection,
   PricingSection,
 } from "@/components/landing/LandingSections"
+import LandingShowcase from "@/components/landing/LandingShowcase"
 import LandingStory from "@/components/landing/LandingStory"
 import s from "@/components/landing/Landing.module.css"
 
@@ -25,7 +25,7 @@ export default function Home() {
       <FormatsSection />
       <PixelIaSection />
       <ModesSection />
-      <LibrarySection />
+      <LandingShowcase />
       <DirectionSection />
       <PricingSection />
       <FaqSection />

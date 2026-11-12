@@ -6,7 +6,7 @@ import LandingVideo from "./LandingVideo"
 import SessionCta from "./SessionCta"
 import { Logo } from "./LandingNav"
 import { CREDIT_RATES, SUBSCRIPTION_PLANS, formatPrice, planOutcome } from "@/lib/pricing-plans"
-import { ANGLES, FAQS, MEDIA, posterOf, type MediaKey } from "./landing-data"
+import { ANGLES, FAQS, MEDIA, posterOf } from "./landing-data"
 import s from "./Landing.module.css"
 
 const delay = (ms: number) => ({ "--rd": `${ms}ms` }) as CSSProperties
@@ -53,7 +53,7 @@ export function FormatsSection() {
           <div className={s.formatFlow}>
             <div className={s.formatSteps}>
               <figure className={s.formatRef}>
-                <Image src={MEDIA.carro.image} alt="" fill sizes="170px" style={{ objectPosition: "50% 86%" }} />
+                <Image src={MEDIA.grafica.image} alt="" fill sizes="170px" style={{ objectPosition: "50% 64%" }} />
                 <figcaption>Referencia</figcaption>
               </figure>
               <ArrowRight className={s.formatArrow} aria-hidden="true" />
@@ -63,7 +63,7 @@ export function FormatsSection() {
               </ul>
             </div>
             <figure className={s.formatOutput}>
-              <LandingVideo src={MEDIA.carro.video} poster={posterOf("carro")} label={`Video: ${MEDIA.carro.alt}`} />
+              <LandingVideo src={MEDIA.grafica.video} poster={posterOf("grafica")} label={`Video: ${MEDIA.grafica.alt}`} />
               <figcaption><i aria-hidden="true" />Video de ejemplo</figcaption>
             </figure>
           </div>
@@ -149,43 +149,6 @@ export function ModesSection() {
   )
 }
 
-type Tile = { key: MediaKey; ratio: string; position?: string; video?: "inview" | "hover"; hideOnPhone?: boolean; cropTop?: boolean }
-
-const LIBRARY: { speed: string; tiles: Tile[] }[] = [
-  { speed: "-0.03", tiles: [{ key: "perro", ratio: "4 / 5", position: "50% 62%" }, { key: "carro", ratio: "9 / 16", video: "hover" }] },
-  { speed: "0.04", tiles: [{ key: "audifonos", ratio: "9 / 16", video: "inview" }, { key: "zapatillas", ratio: "1 / 1", position: "50% 55%", hideOnPhone: true }] },
-  { speed: "-0.06", tiles: [{ key: "scooter", ratio: "4 / 5", position: "50% 92%" }, { key: "perro", ratio: "9 / 16", video: "hover", hideOnPhone: true }] },
-  { speed: "0.03", tiles: [{ key: "zapatillas", ratio: "9 / 16", video: "hover" }, { key: "carro", ratio: "4 / 5", position: "50% 62%", hideOnPhone: true }] },
-  { speed: "-0.04", tiles: [{ key: "audifonos", ratio: "1 / 1", position: "50% 30%", hideOnPhone: true }, { key: "scooter", ratio: "9 / 16", video: "inview", cropTop: true }] },
-]
-
-export function LibrarySection() {
-  return (
-    <section id="ejemplos" className={`${s.section} ${s.library}`} aria-labelledby="library-title">
-      <header className={s.intro} data-reveal>
-        <span className={s.kicker}>BIBLIOTECA</span>
-        <h2 id="library-title">Autos, mascotas, audio. <em>Un solo estudio.</em></h2>
-        <p>Piezas reales creadas con PixelFM. Todo lo que generas queda en tu biblioteca, listo para volver a usar.</p>
-      </header>
-
-      <div className={s.libraryGrid}>
-        {LIBRARY.map(({ speed, tiles }, column) => (
-          <div className={s.libraryColumn} data-parallax={speed} key={speed}>
-            {tiles.map(({ key, ratio, position, video, hideOnPhone, cropTop }, row) => (
-              <figure key={`${key}-${ratio}`} className={s.tile} data-video-host data-hide-phone={hideOnPhone ? "" : undefined} data-crop-top={cropTop ? "" : undefined} data-reveal style={{ ...delay((column + row) * 60), aspectRatio: ratio }}>
-                {video
-                  ? <LandingVideo src={MEDIA[key].video} poster={posterOf(key)} label={`Video: ${MEDIA[key].alt}`} mode={video} />
-                  : <Image src={MEDIA[key].image} alt={MEDIA[key].alt} fill sizes="(max-width: 760px) 46vw, 240px" style={position ? { objectPosition: position } : undefined} />}
-                <figcaption><b>{MEDIA[key].category}</b><span>{video ? "Video" : "Imagen"} · {ratio.replace(/ /g, "")}</span></figcaption>
-              </figure>
-            ))}
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
 export function DirectionSection() {
   return (
     <section className={`${s.section} ${s.direction}`} aria-labelledby="direction-title">
@@ -200,15 +163,15 @@ export function DirectionSection() {
 
       <div className={s.frames} data-reveal style={delay(90)}>
         <figure style={{ aspectRatio: "1 / 1" }}>
-          <Image src={MEDIA.carro.image} alt="" fill sizes="190px" style={{ objectPosition: "50% 56%" }} />
+          <Image src={MEDIA.porsche.image} alt="" fill sizes="190px" style={{ objectPosition: "50% 68%" }} />
           <figcaption><b>1:1</b>Feed</figcaption>
         </figure>
         <figure style={{ aspectRatio: "4 / 5" }}>
-          <Image src={MEDIA.carro.image} alt="" fill sizes="210px" style={{ objectPosition: "50% 50%" }} />
+          <Image src={MEDIA.porsche.image} alt="" fill sizes="210px" style={{ objectPosition: "50% 62%" }} />
           <figcaption><b>4:5</b>Feed vertical</figcaption>
         </figure>
         <figure style={{ aspectRatio: "9 / 16" }}>
-          <Image src={MEDIA.carro.image} alt="" fill sizes="220px" />
+          <Image src={MEDIA.porsche.image} alt="" fill sizes="220px" />
           <i className={s.safeZone} aria-hidden="true"><span>Zona Segura</span></i>
           <figcaption><b>9:16</b>Stories y Reels</figcaption>
         </figure>
@@ -272,10 +235,10 @@ export function FinalSection() {
     <section className={s.final} aria-labelledby="final-title">
       <div className={s.finalBackdrop} aria-hidden="true"><i /><i /></div>
       <figure className={`${s.finalCard} ${s.finalCardLeft}`} data-parallax="-0.05" aria-hidden="true">
-        <Image src={MEDIA.scooter.image} alt="" fill sizes="220px" style={{ objectPosition: "50% 92%" }} />
+        <Image src={MEDIA.dron.image} alt="" fill sizes="220px" style={{ objectPosition: "50% 82%" }} />
       </figure>
       <figure className={`${s.finalCard} ${s.finalCardRight}`} data-parallax="-0.08" aria-hidden="true">
-        <Image src={MEDIA.audifonos.image} alt="" fill sizes="220px" style={{ objectPosition: "50% 45%" }} />
+        <Image src={MEDIA.laptop.image} alt="" fill sizes="220px" style={{ objectPosition: "50% 62%" }} />
       </figure>
       <div className={s.finalCopy} data-reveal>
         <h2 id="final-title">Tu próxima campaña puede empezar con <em>una sola idea.</em></h2>

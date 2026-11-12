@@ -33,7 +33,7 @@ function stop(video: HTMLVideoElement) {
   running.delete(video)
 }
 
-export default function LandingVideo({ src, poster, label, className, mode = "inview", active, deferred = false }: {
+export default function LandingVideo({ src, poster, label, className, mode = "inview", active, deferred = false, manual = false, onEnded }: {
   src: string
   poster: string
   label: string
@@ -44,20 +44,30 @@ export default function LandingVideo({ src, poster, label, className, mode = "in
   active?: boolean
   /** Waits for the page to finish loading before requesting the file (above the fold). */
   deferred?: boolean
+  /**
+   * The parent shows a play/pause control and passes the choice as `active`. An explicit
+   * play then overrides reduced motion and Data Saver (the parent starts those users
+   * paused), and nothing is downloaded while paused.
+   */
+  manual?: boolean
+  /** Plays once and reports the end instead of looping (lets a showcase advance). */
+  onEnded?: () => void
 }) {
   const ref = useRef<HTMLVideoElement>(null)
   const [loaded, setLoaded] = useState(false)
   const visible = useRef(false)
+  const isNear = useRef(false)
   const wanted = useRef(active ?? true)
 
   useEffect(() => {
     const video = ref.current
-    if (!video || !canPlay()) return
+    if (!video || !(manual || canPlay())) return
 
-    const load = () => setLoaded(true)
+    const load = () => { if (!manual || wanted.current) setLoaded(true) }
     const near = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return
       near.disconnect()
+      isNear.current = true
       if (deferred && document.readyState !== "complete") window.addEventListener("load", load, { once: true })
       else load()
     }, { rootMargin: "320px 0px" })
@@ -95,7 +105,7 @@ export default function LandingVideo({ src, poster, label, className, mode = "in
       host?.removeEventListener("mouseleave", leave)
       stop(video)
     }
-  }, [deferred, mode])
+  }, [deferred, mode, manual])
 
   // The source arrives after the visibility check: start as soon as it can.
   useEffect(() => {
@@ -107,10 +117,12 @@ export default function LandingVideo({ src, poster, label, className, mode = "in
     if (active === undefined) return
     wanted.current = active
     const video = ref.current
-    if (!video || !canPlay()) return
+    if (!video || !(manual || canPlay())) return
+    // A manual play loads the file only once it is near the viewport.
+    if (active && manual && isNear.current && !loaded) setLoaded(true)
     if (active && visible.current && loaded) start(video)
     else if (!active) stop(video)
-  }, [active, loaded])
+  }, [active, loaded, manual])
 
   return <video
     ref={ref}
@@ -118,7 +130,8 @@ export default function LandingVideo({ src, poster, label, className, mode = "in
     src={loaded ? src : undefined}
     poster={poster}
     muted
-    loop
+    loop={!onEnded}
+    onEnded={onEnded}
     playsInline
     preload="none"
     aria-label={label}

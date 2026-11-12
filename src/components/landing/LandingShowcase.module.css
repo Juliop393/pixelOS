@@ -1,0 +1,244 @@
+/* Campaign showcase: one campaign on stage (image beside its video) and a rail to explore all. */
+
+.showcase { width: min(1200px, calc(100% - var(--gutter) * 2)); }
+
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 80px);
+}
+
+/* Asymmetric pair: the video leads, the source image sits lower and behind it. */
+.media {
+  width: min(100%, 500px);
+  justify-self: end;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, .74fr) minmax(0, 1fr);
+  align-items: end;
+  position: relative;
+}
+
+.image,
+.video {
+  margin: 0;
+  aspect-ratio: 9 / 16;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(243, 234, 220, .12);
+  background: #15110e;
+}
+
+.image {
+  margin: 0 -26px 46px 0;
+  z-index: 1;
+  border-radius: 18px;
+  opacity: .92;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .9);
+}
+
+.image img { object-fit: cover; }
+
+.video {
+  z-index: 2;
+  border-color: rgba(232, 146, 111, .32);
+  border-radius: 24px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 226, 206, .08),
+    0 50px 110px -40px rgba(215, 107, 69, .42),
+    0 40px 80px -30px rgba(0, 0, 0, .95);
+}
+
+.videoEl { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+.image figcaption,
+.video figcaption {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(243, 234, 220, .14);
+  border-radius: 999px;
+  color: #f3eadc;
+  background: rgba(16, 12, 10, .58);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.video figcaption i { width: 6px; height: 6px; border-radius: 50%; background: #ef8d68; box-shadow: 0 0 8px #ef8d68; }
+
+.toggle {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(243, 234, 220, .18);
+  border-radius: 50%;
+  color: #fff4ec;
+  background: rgba(16, 12, 10, .58);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+
+.toggle:hover { border-color: rgba(232, 146, 111, .55); background: rgba(215, 107, 69, .3); }
+.toggle svg { width: 16px; height: 16px; }
+
+.info { min-width: 0; }
+
+.counter {
+  margin: 0;
+  color: var(--faint);
+  font: 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .12em;
+}
+
+.counter b { color: var(--terra-light); font-weight: 500; }
+
+.category {
+  margin-top: clamp(22px, 3vw, 34px);
+  display: block;
+  color: var(--soft);
+  font: 11px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.info h3 {
+  margin-top: 12px;
+  color: #fbf5ee;
+  font-size: clamp(30px, 3.6vw, 48px);
+  font-weight: 570;
+  line-height: 1.04;
+  letter-spacing: -.045em;
+  text-wrap: balance;
+}
+
+.pair { max-width: 380px; margin: 18px 0 0; color: var(--soft); font-size: 16px; line-height: 1.6; }
+
+.nav { margin-top: clamp(24px, 3vw, 34px); display: flex; gap: 10px; }
+
+.nav button {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(243, 234, 220, .16);
+  border-radius: 14px;
+  color: var(--cream);
+  background: rgba(255, 255, 255, .04);
+  cursor: pointer;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+
+.nav button:hover { border-color: rgba(232, 146, 111, .5); background: rgba(215, 107, 69, .12); }
+.nav svg { width: 18px; height: 18px; }
+
+/* Rail: every campaign stays one click away; posters only, no video downloads. */
+.rail {
+  margin: clamp(40px, 5vw, 60px) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 12px;
+  list-style: none;
+}
+
+.rail button {
+  width: 100%;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+  border: 0;
+  color: var(--soft);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.thumb {
+  aspect-ratio: 4 / 5;
+  position: relative;
+  overflow: hidden;
+  display: block;
+  border: 1px solid rgba(243, 234, 220, .1);
+  border-radius: 14px;
+  background: #15110e;
+  opacity: .62;
+  transition: opacity .25s ease, border-color .25s ease, box-shadow .25s ease, transform .25s var(--ease);
+}
+
+.thumb img { object-fit: cover; }
+
+.badge {
+  position: absolute;
+  left: 7px;
+  bottom: 7px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: #fff4ec;
+  background: rgba(201, 93, 58, .86);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .02em;
+}
+
+.rail small { padding-left: 2px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.rail button:hover .thumb { opacity: .9; }
+.rail button[aria-pressed="true"] { color: #f3eadc; }
+
+.rail button[aria-pressed="true"] .thumb {
+  opacity: 1;
+  border-color: rgba(240, 150, 115, .8);
+  box-shadow: 0 0 0 2px rgba(217, 119, 87, .2), 0 18px 34px -18px rgba(215, 107, 69, .6);
+  transform: translateY(-3px);
+}
+
+@media (max-width: 900px) {
+  .stage { grid-template-columns: 1fr; }
+  .media { width: min(100%, 520px); margin: 0 auto; justify-self: center; }
+}
+
+@media (max-width: 760px) {
+  .media { width: min(100%, 330px); grid-template-columns: minmax(0, .6fr) minmax(0, 1fr); }
+  .image { margin: 0 -18px 34px 0; border-radius: 14px; }
+  .video { border-radius: 18px; }
+  .image figcaption, .video figcaption { top: 9px; left: 9px; padding: 5px 8px; font-size: 11px; }
+  .category { margin-top: 18px; }
+  .pair { font-size: 15px; }
+  .nav { margin-top: 18px; }
+
+  /* The rail scrolls sideways inside its own box; the page never does. */
+  .rail {
+    margin-top: 30px;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 4px var(--gutter) 8px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .rail::-webkit-scrollbar { display: none; }
+  .rail li { flex: 0 0 92px; scroll-snap-align: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb, .toggle, .nav button { transition: none; }
+  .rail button[aria-pressed="true"] .thumb { transform: none; }
+}

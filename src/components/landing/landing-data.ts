@@ -1,18 +1,31 @@
 import { CREDIT_COST, VIDEO_DURATION_SECONDS } from "@/lib/pricing-plans"
 
-/** Real outputs generated with PixelFM, served from public/landing. */
+/**
+ * Real outputs generated with PixelFM, served from public/landing. Each entry is one
+ * campaign: its image and the video made from it always travel together.
+ * (dron and laptop images are JPEG data despite the .png names; browsers sniff it.)
+ */
 export const MEDIA = {
-  audifonos: { image: "/landing/audifonos-imagen.jpg", video: "/landing/audifonos-video.mp4", category: "Audio", alt: "Anuncio de audífonos premium" },
-  carro: { image: "/landing/carro-imagen.jpg", video: "/landing/carro-video.mp4", category: "Automotriz", alt: "Anuncio de un SUV en un estudio oscuro" },
-  perro: { image: "/landing/perro-imagen.jpg", video: "/landing/perro-video.mp4", category: "Mascotas", alt: "Anuncio de comida natural para perros" },
-  scooter: { image: "/landing/scooter-imagen.jpg", video: "/landing/scooterelectrico-video.mp4", category: "Movilidad", alt: "Anuncio de una scooter eléctrica en la ciudad" },
-  zapatillas: { image: "/landing/zapatillas-imagen.jpg", video: "/landing/zapatillas-video.mp4", category: "Deporte", alt: "Anuncio de zapatillas para correr" },
+  porsche: { image: "/landing/porsche_imagen.jpg", video: "/landing/porsche_video.mp4", category: "Automotriz", title: "Deportivo en ruta de montaña", alt: "Anuncio de un deportivo plateado en una carretera de montaña" },
+  grafica: { image: "/landing/grafica_imagen.jpg", video: "/landing/grafica_video.mp4", category: "Tecnología", title: "Tarjeta gráfica de alto rendimiento", alt: "Anuncio de una tarjeta gráfica sobre un escritorio de diseño" },
+  laptop: { image: "/landing/laptop_imagen.png", video: "/landing/laptop_video.mp4", category: "Tecnología", title: "Laptop para creadores", alt: "Anuncio de una laptop en un escritorio con luz natural" },
+  dron: { image: "/landing/dron_imagen.png", video: "/landing/dron_video.mp4", category: "Fotografía aérea", title: "Dron al atardecer", alt: "Anuncio de un dron sobre un mirador al atardecer" },
+  audifonos: { image: "/landing/audifonos-imagen.jpg", video: "/landing/audifonos-video.mp4", category: "Audio", title: "Audífonos premium", alt: "Anuncio de audífonos premium" },
+  carro: { image: "/landing/carro-imagen.jpg", video: "/landing/carro-video.mp4", category: "Automotriz", title: "SUV en estudio", alt: "Anuncio de un SUV en un estudio oscuro" },
+  perro: { image: "/landing/perro-imagen.jpg", video: "/landing/perro-video.mp4", category: "Mascotas", title: "Comida natural para perros", alt: "Anuncio de comida natural para perros" },
+  scooter: { image: "/landing/scooter-imagen.jpg", video: "/landing/scooterelectrico-video.mp4", category: "Movilidad", title: "Scooter eléctrica urbana", alt: "Anuncio de una scooter eléctrica en la ciudad" },
+  zapatillas: { image: "/landing/zapatillas-imagen.jpg", video: "/landing/zapatillas-video.mp4", category: "Deporte", title: "Zapatillas para correr", alt: "Anuncio de zapatillas para correr" },
 } as const
+
+/** Order of the campaign showcase: the featured ones open it. */
+export const CAMPAIGNS = ["porsche", "grafica", "laptop", "dron", "carro", "audifonos", "zapatillas", "scooter", "perro"] as const satisfies readonly (keyof typeof MEDIA)[]
+
+export const FEATURED_CAMPAIGNS: readonly (keyof typeof MEDIA)[] = ["porsche", "grafica"]
 
 export type MediaKey = keyof typeof MEDIA
 
 /** Poster through the Next image optimizer: a light WebP instead of the full JPG. */
-export const posterOf = (key: MediaKey) => `/_next/image?url=${encodeURIComponent(MEDIA[key].image)}&w=640&q=70`
+export const posterOf = (key: MediaKey, width = 640) => `/_next/image?url=${encodeURIComponent(MEDIA[key].image)}&w=${width}&q=70`
 
 export const ANGLES = ["Problema y solución", "Beneficio principal", "Comparación", "Prueba social", "Demostración", "Oferta y conveniencia", "Mecanismo único"]
 
