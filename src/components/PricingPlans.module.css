@@ -621,6 +621,93 @@
 
 .dialogLink:hover { color: #f6c4ac; }
 
+/* ── Plan change ──────────────────────────────────────────────────── */
+
+.dialogNarrow { width: min(540px, calc(100vw - 32px)); }
+.dialogNarrow .dialogHead { margin-bottom: 20px; }
+.dialogNarrow .dialogHead p { line-height: 1.55; }
+
+.dialogFacts { margin: 0; padding: 0; display: grid; gap: 8px; list-style: none; }
+
+.dialogFacts li,
+.dialogNote {
+  margin: 0;
+  padding: 11px 14px;
+  border: 1px solid rgba(243, 234, 220, .08);
+  border-radius: 12px;
+  color: #c2b8ad;
+  background: rgba(8, 7, 6, .28);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.dialogError {
+  margin: 14px 0 0;
+  padding: 11px 14px;
+  border: 1px solid rgba(239, 106, 86, .34);
+  border-radius: 12px;
+  color: #f4b4a6;
+  background: rgba(214, 72, 52, .1);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.dialogActions { margin-top: 22px; display: flex; flex-direction: column; align-items: stretch; }
+.dialogActions .cta { justify-content: center; }
+.dialogActions .dialogLink { border: 0; background: none; font-family: inherit; cursor: pointer; }
+.dialogActions .dialogLink:disabled { opacity: .5; cursor: default; }
+
+/* Subscriber state on the plan cards. */
+.currentBadge {
+  padding: 5px 10px;
+  border: 1px solid rgba(223, 118, 81, .34);
+  border-radius: 99px;
+  color: #f0c8b4;
+  background: rgba(217, 119, 87, .1);
+  font: 600 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .12em;
+  white-space: nowrap;
+}
+
+.loadError {
+  margin: 0 0 24px;
+  padding: 14px 18px;
+  border: 1px solid rgba(239, 106, 86, .34);
+  border-radius: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  color: #f4c3b6;
+  background: rgba(214, 72, 52, .1);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.loadError p { margin: 0; flex: 1 1 320px; }
+
+.loadError button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid rgba(243, 234, 220, .18);
+  border-radius: 12px;
+  color: #fff4ec;
+  background: rgba(255, 255, 255, .06);
+  font: 600 13px/1 inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.loadError button:hover { border-color: rgba(223, 118, 81, .5); background: rgba(217, 119, 87, .14); }
+.loadError button:focus-visible { outline: 2px solid #ef9472; outline-offset: 3px; }
+
+.ctaGroup .cta { text-decoration: none; }
+.ctaGroup { margin-top: auto; }
+.ctaGroup .cta { margin-top: 0; justify-content: center; }
+
+.ctaNote { margin: 8px 0 0; color: #a99f93; font-size: 12px; line-height: 1.45; text-align: center; }
+
 @media (max-width: 760px) {
   .audience { min-height: 0; }
   .explainer { padding: 20px; }

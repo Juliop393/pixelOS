@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useRef, useState } from "react"
 import { CreditCard, KeyRound, Mail, Palette, TriangleAlert, User } from "lucide-react"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
+import PlanChangePanel from "@/components/dashboard/PlanChangePanel"
 
 const isPortalUrl = (value: unknown): value is string => {
   if (typeof value !== "string") return false
@@ -26,6 +27,8 @@ export default function ConfiguracionPage() {
   const [agencyName, setAgencyName] = useState("")
   const [email, setEmail] = useState("")
   const [plan, setPlan] = useState("")
+  // Stripe's view of the billed plan wins over the stored label once the panel reads it.
+  const [billedPlan, setBilledPlan] = useState("")
   const [credits, setCredits] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -138,7 +141,8 @@ export default function ConfiguracionPage() {
     setSaving(false)
   }
 
-  const planLabel = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : "Cargando..."
+  const shownPlan = billedPlan || plan
+  const planLabel = shownPlan ? shownPlan.charAt(0).toUpperCase() + shownPlan.slice(1) : "Cargando..."
 
   return (
     <div
@@ -255,6 +259,8 @@ export default function ConfiguracionPage() {
               <p className="text-lg font-bold text-[var(--pf-headline)]">{loading ? "—" : credits ?? 0}</p>
             </div>
           </div>
+
+          <PlanChangePanel onPlan={setBilledPlan} />
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link
