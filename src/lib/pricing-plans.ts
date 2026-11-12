@@ -37,7 +37,7 @@ export const CREDIT_COST = { image: 1, video: RAPID_VIDEO.credits, premiumVideo:
 
 export const VIDEO_DURATION_SECONDS = RAPID_VIDEO.durationSeconds
 
-export const FREE_SIGNUP_CREDITS = 24
+export const FREE_SIGNUP_CREDITS = 15
 
 export const FREE_CREDITS_COPY = `${FREE_SIGNUP_CREDITS} créditos gratis · Sin tarjeta`
 
