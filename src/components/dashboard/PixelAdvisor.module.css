@@ -580,3 +580,130 @@
   .typing i { animation: none; opacity: .7; }
   .starters button:hover:not(:disabled), .sendButton:hover:not(:disabled), .primaryAction:hover:not(:disabled) { transform: none; }
 }
+
+/* ── Liquid glass ────────────────────────────────────────────────────
+   Dark, clear glass rather than a white sheet: the cocoa tint stays,
+   the blur and saturation do the work, and light only touches the edges.
+   PixelIA's lilac (from the topbar orb) replaces the old blue. */
+.panel.panel {
+  --pf-ai-blue: #e4d2fa;
+  --pf-ai-violet: #c49fec;
+  --pf-ai-cyan: #ec9a78;
+  border: 1px solid rgba(255, 244, 236, .09) !important;
+  border-top-color: rgba(255, 244, 236, .16) !important;
+  background:
+    radial-gradient(90% 34% at 100% 0%, rgba(199, 166, 239, .08), transparent 64%),
+    radial-gradient(80% 30% at 0% 100%, rgba(232, 146, 111, .06), transparent 62%),
+    linear-gradient(160deg, rgba(255, 255, 255, .03), transparent 45%),
+    rgba(22, 17, 16, .7) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(160%);
+  backdrop-filter: blur(32px) saturate(160%);
+  box-shadow:
+    0 44px 96px -30px rgba(0, 0, 0, .8),
+    0 14px 36px rgba(0, 0, 0, .22),
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    inset 0 -1px 0 rgba(255, 255, 255, .03) !important;
+}
+
+/* Thin specular top edge with a lilac core. */
+.panel::after {
+  left: 12%;
+  right: 12%;
+  background: linear-gradient(90deg, transparent, rgba(214, 186, 246, .4) 50%, transparent);
+}
+
+.panelSheen {
+  height: 200px;
+  background: linear-gradient(118deg, rgba(255, 255, 255, .035), transparent 40%);
+  -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent);
+  mask-image: linear-gradient(180deg, #000 30%, transparent);
+}
+
+.header { border-bottom-color: rgba(255, 244, 236, .06); }
+
+.mark,
+.welcomeMark,
+.avatar {
+  border: 1px solid rgba(214, 186, 246, .24);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 60%, rgba(170, 130, 220, .14), transparent 70%),
+    rgba(28, 22, 24, .7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+
+.mark::after { display: none; }
+.welcomeKicker { color: #c3a6e6; }
+
+.headerActions { border-color: rgba(255, 244, 236, .07); background: rgba(255, 255, 255, .025); }
+.iconButton:hover { background: rgba(255, 255, 255, .07); }
+
+/* Welcome: open layout instead of a boxed card. */
+.welcome {
+  padding: 6px 4px 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.welcomeMark { width: 36px; height: 36px; margin-bottom: 14px; }
+.welcomeMark svg { width: 17px; height: 17px; }
+.welcome h2 { font-size: 20px; }
+.welcome p { font-size: 12.5px; line-height: 1.55; }
+
+/* Starters: a slim list divided by hairlines, not a stack of cards. */
+.starters { margin-top: 16px; gap: 0; border-top: 1px solid rgba(255, 244, 236, .06); }
+
+.starters button {
+  min-height: 38px;
+  padding: 7px 6px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 244, 236, .06);
+  border-radius: 0;
+  gap: 10px;
+  color: var(--pf-secondary);
+  background: none;
+  box-shadow: none;
+  font-size: 12.5px;
+  font-weight: 520;
+}
+
+.starterIcon { width: 22px; height: 22px; flex-basis: 22px; border-radius: 7px; color: #d9a088; background: none; box-shadow: none; }
+.starterIcon svg { width: 14px; height: 14px; }
+
+.starters button:hover:not(:disabled) {
+  transform: none;
+  border-color: rgba(255, 244, 236, .06);
+  color: var(--pf-headline);
+  background: rgba(255, 255, 255, .03);
+  box-shadow: none;
+}
+
+.welcome > small { margin-top: 12px; font-size: 10.5px; }
+
+.bubbleAssistant {
+  border-color: rgba(255, 244, 236, .08);
+  background: rgba(255, 255, 255, .035);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+}
+
+.composer { border-top-color: rgba(255, 244, 236, .06); background: none; }
+
+.inputShell {
+  border-color: rgba(255, 244, 236, .1);
+  background: rgba(10, 8, 8, .35);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .2);
+}
+
+.inputShell:focus-within {
+  border-color: rgba(214, 186, 246, .38);
+  background: rgba(10, 8, 8, .42);
+  box-shadow: 0 0 0 3px rgba(199, 166, 239, .08), inset 0 1px 2px rgba(0, 0, 0, .2);
+}
+
+.panel button:focus-visible { outline-color: #d6baf6; }
+
+@media (max-width: 767px) {
+  .welcome h2 { font-size: 19px; }
+  .starters button { min-height: 42px; }
+}

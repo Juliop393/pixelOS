@@ -12,18 +12,6 @@
   color: var(--pf-primary);
 }
 
-.page::before {
-  content: "";
-  position: absolute;
-  inset: -20px -14px auto;
-  height: 360px;
-  z-index: -1;
-  background:
-    radial-gradient(ellipse 46% 60% at 86% 0%, rgba(215, 107, 69, .09), transparent 70%),
-    radial-gradient(ellipse 40% 50% at 6% 30%, rgba(190, 150, 120, .04), transparent 70%);
-  pointer-events: none;
-}
-
 /* ── Header ───────────────────────────────────────────────────────── */
 
 .header {

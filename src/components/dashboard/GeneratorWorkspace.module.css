@@ -542,7 +542,8 @@
   animation:pixelAiDrawerIn .3s cubic-bezier(.22,1,.36,1) both;
 }
 .drawerFocusPanel{
-  top:66px;
+  /* Starts under the sticky top row (10px offset + 72px bar) so the orb and bar never overlap it. */
+  top:100px;
   right:16px;
   bottom:16px;
   width:clamp(380px,30vw,430px);

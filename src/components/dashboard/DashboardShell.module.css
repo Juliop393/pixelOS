@@ -802,5 +802,7 @@
 @media (max-width: 767px) {
   .topRow { width: 100%; display: block; top: 0; }
   .editorNav, .topRow .orbDock { display: none; }
+  /* ".sectionContext > span" outranked the older hide rule, so the section name crowded the bar. */
+  .sectionContext .currentSection, .sectionContext .sectionDivider { display: none; }
   .topbar .orbInline { display: grid; margin-right: 6px; }
 }

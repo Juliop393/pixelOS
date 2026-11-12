@@ -94,15 +94,15 @@ export default function Topbar() {
 
   return (
     <div className={styles.topRow}>
-    {isEditor && <nav className={styles.editorNav} aria-label="Navegación del editor">
+    {!isHome && <nav className={styles.editorNav} aria-label="Volver al inicio">
       <Link href="/dashboard" className={styles.editorBack}>
         <ArrowLeft aria-hidden="true" />
         <span>Inicio</span>
       </Link>
-      <span className={styles.editorTool} aria-current="page">
+      {isEditor && <span className={styles.editorTool} aria-current="page">
         <ToolIcon aria-hidden="true" />
         <span>{isVideo ? "Video" : "Imágenes"}</span>
-      </span>
+      </span>}
     </nav>}
     <header ref={headerRef} className={styles.topbar}>
       <div className={styles.sectionContext}>
