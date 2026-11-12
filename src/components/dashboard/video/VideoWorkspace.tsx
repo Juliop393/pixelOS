@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react"
 import { ArrowLeft, ChevronDown, RotateCcw, WandSparkles } from "lucide-react"
-import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import { useVideoGenerator, type VideoGenerationOutcome } from "@/hooks/useVideoGenerator"
 import { supabase } from "@/lib/supabase"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
+import { usePixelAiHost } from "@/lib/pixel-ai-context"
 import EditorHeader from "@/components/dashboard/EditorHeader"
 import MobileProNotice from "@/components/dashboard/MobileProNotice"
 import { useMobileViewport } from "@/hooks/useMobileViewport"
@@ -133,6 +133,7 @@ export default function VideoWorkspace() {
   const [mergeError, setMergeError] = useState("")
   const [completePreviewRequest, setCompletePreviewRequest] = useState(0)
   const [pixelAiOpen, setPixelAiOpen] = useState(false)
+  usePixelAiHost(pixelAiOpen, setPixelAiOpen)
 
   useEffect(() => () => { batchRunId.current += 1; mergeRunId.current += 1 }, [])
 
@@ -547,13 +548,7 @@ export default function VideoWorkspace() {
     <EditorHeader tool="video" action={<div className={s.modeHeaderActions}><div className={s.modeSwitch} role="tablist" aria-label="Modo de edición de Video">
       <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? s.modeSelected : ""} disabled={announcementProgress?.phase === "running"} onClick={showSimpleMode}>Simple</button>
       <button type="button" role="tab" aria-selected={editorMode === "pro"} className={editorMode === "pro" ? s.modeSelected : ""} onClick={() => setEditorMode("pro")}>Modo Pro</button>
-    </div><button
-      type="button"
-      className={`${s.pixelAiHeaderButton} ${pixelAiOpen ? s.pixelAiHeaderButtonActive : ""}`}
-      onClick={() => setPixelAiOpen((open) => !open)}
-      aria-controls="pixel-ai-panel"
-      aria-expanded={pixelAiOpen}
-    ><PixelAiIcon /><span>PixelIA</span><i>{pixelAiOpen ? "Abierto" : "Asistente creativo"}</i></button></div>} />
+    </div></div>} />
     <section className={s.workspace}>
     {isMobile && editorMode !== "simple" ? <MobileProNotice onBack={showSimpleMode} /> : editorMode === "simple" ? <VideoSimple
       referenceImageUrl={simpleReference.referenceImageUrl ?? null}

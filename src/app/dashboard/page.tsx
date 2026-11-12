@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react"
 import { ArrowUpRight, FolderOpen, Image as ImageIcon, Video } from "lucide-react"
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
+import { usePixelAiHost } from "@/lib/pixel-ai-context"
 import type { PixelAiInitialRequest } from "@/components/dashboard/PixelAdvisor"
 import { ImageCreationVisual, VideoCreationVisual } from "@/components/dashboard/home/CreationVisuals"
 import IdeaPreview, { type IdeaPreviewKind } from "@/components/dashboard/home/IdeaPreview"
@@ -102,6 +103,7 @@ function formatCreativeDate(value: string) {
 export default function DashboardHomePage() {
   const requestId = useRef(0)
   const [pixelAiOpen, setPixelAiOpen] = useState(false)
+  usePixelAiHost(pixelAiOpen, setPixelAiOpen)
   const [pixelAiInput, setPixelAiInput] = useState("")
   const [initialRequest, setInitialRequest] = useState<PixelAiInitialRequest | null>(null)
   const [recentCreatives, setRecentCreatives] = useState<Creative[]>([])

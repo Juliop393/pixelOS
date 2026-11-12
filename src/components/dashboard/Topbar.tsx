@@ -4,8 +4,11 @@ import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { toast } from "sonner"
-import { LogOut } from "lucide-react"
+import { ArrowLeft, Image as ImageIcon, LogOut, Video } from "lucide-react"
 import CreditPacksDialog from "@/components/CreditPacksDialog"
+import PixelAiDrawer from "./PixelAiDrawer"
+import PixelAiOrb from "./PixelAiOrb"
+import { usePixelAi } from "@/lib/pixel-ai-context"
 import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
 import { useToastAnchor } from "@/hooks/useToastAnchor"
@@ -30,6 +33,16 @@ export default function Topbar() {
   const [fullName, setFullName] = useState("")
   const [packsOpen, setPacksOpen] = useState(false)
   const headerRef = useToastAnchor<HTMLElement>()
+  const { host } = usePixelAi()
+  // Pages without their own PixelIA panel (Mis creativos, Planes...) get a general one here.
+  const [fallbackOpen, setFallbackOpen] = useState(false)
+  const [fallbackMounted, setFallbackMounted] = useState(false)
+  const pixelAiOpen = host ? host.open : fallbackOpen
+  const togglePixelAi = () => {
+    if (host) { host.setOpen((open) => !open); return }
+    setFallbackMounted(true)
+    setFallbackOpen((open) => !open)
+  }
 
   useEffect(() => {
     const loadUser = async () => {
@@ -72,12 +85,25 @@ export default function Topbar() {
   const displayName = fullName || userEmail.split("@")[0] || "Usuario"
   const avatarLetter = (displayName[0] ?? "U").toUpperCase()
   const isHome = pathname === "/dashboard"
-  const isEditor = pathname.startsWith("/dashboard/imagenes") || pathname.startsWith("/dashboard/videos")
+  const isVideo = pathname.startsWith("/dashboard/videos")
+  const isEditor = pathname.startsWith("/dashboard/imagenes") || isVideo
+  const ToolIcon = isVideo ? Video : ImageIcon
   const activeSection = sectionDetails.find((section) =>
     section.path === "/dashboard" ? pathname === section.path : pathname.startsWith(section.path)
   ) ?? sectionDetails[sectionDetails.length - 1]
 
   return (
+    <div className={styles.topRow}>
+    {isEditor && <nav className={styles.editorNav} aria-label="Navegación del editor">
+      <Link href="/dashboard" className={styles.editorBack}>
+        <ArrowLeft aria-hidden="true" />
+        <span>Inicio</span>
+      </Link>
+      <span className={styles.editorTool} aria-current="page">
+        <ToolIcon aria-hidden="true" />
+        <span>{isVideo ? "Video" : "Imágenes"}</span>
+      </span>
+    </nav>}
     <header ref={headerRef} className={styles.topbar}>
       <div className={styles.sectionContext}>
         <Link href="/dashboard" className={styles.homeBrand} aria-label="PixelFM — Inicio">
@@ -95,6 +121,8 @@ export default function Topbar() {
           </span>
         </>}
       </div>
+
+      <PixelAiOrb className={styles.orbInline} open={pixelAiOpen} onToggle={togglePixelAi} compact />
 
       <div className={styles.accountArea}>
         <div className={styles.wallet}>
@@ -154,5 +182,8 @@ export default function Topbar() {
       </nav>
       <CreditPacksDialog open={packsOpen} onClose={() => setPacksOpen(false)} />
     </header>
+    <PixelAiOrb className={styles.orbDock} open={pixelAiOpen} onToggle={togglePixelAi} />
+    {!host && fallbackMounted && <PixelAiDrawer open={fallbackOpen} onOpenChange={setFallbackOpen} />}
+    </div>
   )
 }

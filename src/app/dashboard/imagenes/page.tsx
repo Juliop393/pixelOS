@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import { useCreativeGenerator } from "@/hooks/useCreativeGenerator"
 import { ANGLES } from "@/lib/angles-data"
 import AngleSelector from "@/components/dashboard/AngleSelector"
@@ -12,6 +11,7 @@ import ImageSimple, { SIMPLE_IMAGE_APPROACHES, type SimpleImageApproach } from "
 import ResultPanel from "@/components/dashboard/ResultPanel"
 import Accordion from "@/components/ui/Accordion"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
+import { usePixelAiHost } from "@/lib/pixel-ai-context"
 import EditorHeader from "@/components/dashboard/EditorHeader"
 import MobileProNotice from "@/components/dashboard/MobileProNotice"
 import { useMobileViewport } from "@/hooks/useMobileViewport"
@@ -49,6 +49,7 @@ export default function DashboardPage() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [formatOpen, setFormatOpen] = useState(false)
   const [advisorOpen, setAdvisorOpen] = useState(false)
+  usePixelAiHost(advisorOpen, setAdvisorOpen)
 
   useEffect(() => {
     if (highlightProduct) {
@@ -143,7 +144,6 @@ export default function DashboardPage() {
           <button type="button" role="tab" aria-selected={editorMode === "simple"} className={editorMode === "simple" ? simpleStyles.headerModeActive : ""} onClick={() => setEditorMode("simple")}>Simple</button>
           <button type="button" role="tab" aria-selected={editorMode === "pro"} className={editorMode === "pro" ? simpleStyles.headerModeActive : ""} onClick={openPro}>Modo Pro</button>
         </div>
-        <button type="button" className={simpleStyles.headerPixelAi} onClick={() => setAdvisorOpen(true)} aria-label="Abrir PixelIA" aria-expanded={advisorOpen} aria-controls="pixel-ai-panel"><PixelAiIcon aria-hidden="true" />PixelIA</button>
       </div>} />
 
       {editorMode === "simple" && <main className={simpleStyles.simpleWorkspace}>

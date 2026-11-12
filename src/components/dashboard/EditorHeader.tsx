@@ -1,25 +1,13 @@
-import Link from "next/link"
 import type { ReactNode } from "react"
-import { ArrowLeft, Image as ImageIcon, Video } from "lucide-react"
 import styles from "./EditorHeader.module.css"
 
+/* The back link and tool name now live in the sticky top row; this bar keeps the editor's mode switch. */
 export default function EditorHeader({ tool, action }: { tool: "images" | "video"; action?: ReactNode }) {
-  const isVideo = tool === "video"
-  const ToolIcon = isVideo ? Video : ImageIcon
-  const title = isVideo ? "Video" : "Imágenes"
-
+  const title = tool === "video" ? "video" : "imágenes"
+  if (!action) return null
   return (
-    <nav className={styles.editorHeader} aria-label={`Navegación del editor de ${title.toLowerCase()}`}>
-      <Link href="/dashboard" className={styles.backButton}>
-        <ArrowLeft aria-hidden="true" />
-        <span>Inicio</span>
-      </Link>
-      <span className={styles.divider} aria-hidden="true" />
-      <div className={styles.toolName} aria-current="page">
-        <ToolIcon aria-hidden="true" />
-        <span>{title}</span>
-      </div>
-      {action && <div className={styles.actionSlot}>{action}</div>}
-    </nav>
+    <div className={styles.editorHeader} aria-label={`Opciones del editor de ${title}`} role="group">
+      <div className={styles.actionSlot}>{action}</div>
+    </div>
   )
 }
