@@ -10,6 +10,7 @@ import { FREE_SIGNUP_CREDITS } from "@/lib/pricing-plans"
 import { supabase } from "@/lib/supabase"
 import { useToastAnchor } from "@/hooks/useToastAnchor"
 import s from "./Auth.module.css"
+import { CAPTCHA_MESSAGES, isCaptchaError, useTurnstile } from "./useTurnstile"
 
 const display = Fraunces({ subsets: ["latin"], weight: "variable", axes: ["SOFT", "WONK", "opsz"], display: "swap" })
 
@@ -43,6 +44,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [checkingSession, setCheckingSession] = useState(!isRegister)
   const logoRef = useToastAnchor<HTMLAnchorElement>()
   const passwordStrength = getPasswordStrength(password)
+  const captcha = useTurnstile(isRegister ? "signup" : "login")
 
   useEffect(() => {
     let active = true
@@ -113,11 +115,17 @@ export default function AuthForm({ mode }: AuthFormProps) {
       return
     }
 
+    const captchaProblem = captcha.blockingMessage()
+    if (captchaProblem) {
+      setError(captchaProblem)
+      return
+    }
+
     setLoading(true)
 
     try {
       if (isRegister) {
-        const { data, error } = await supabase.auth.signUp({ email, password })
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { captchaToken: captcha.token } })
         if (error) throw error
 
         // Con la protección contra enumeración, Supabase puede devolver éxito
@@ -139,7 +147,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         router.push(`/confirm-email?email=${encodeURIComponent(email)}`)
         router.refresh()
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        const { error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken: captcha.token } })
         if (error) throw error
         router.push("/dashboard")
         router.refresh()
@@ -149,11 +157,15 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
       if (isRegister && message.toLowerCase().includes("user already registered")) {
         setDuplicateEmail(true)
+      } else if (isCaptchaError(message)) {
+        setError(CAPTCHA_MESSAGES.rejected)
       } else {
         setError(message)
       }
     } finally {
       setLoading(false)
+      // Turnstile tokens are single-use: every attempt gets a fresh challenge.
+      captcha.reset()
     }
   }
 
@@ -298,6 +310,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
                   />
                 </div>
               )}
+
+              {captcha.widget}
 
               {error && (
                 <div className={s.alert}>

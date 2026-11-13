@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
+import { CAPTCHA_MESSAGES, isCaptchaError, useTurnstile } from "@/components/auth/useTurnstile"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [linkError, setLinkError] = useState(false)
+  const [captchaError, setCaptchaError] = useState("")
+  const captcha = useTurnstile("recovery")
 
   useEffect(() => {
     const error = new URLSearchParams(window.location.search).get("error")
@@ -17,18 +20,35 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
+    setCaptchaError("")
+
+    const captchaProblem = captcha.blockingMessage()
+    if (captchaProblem) {
+      setCaptchaError(captchaProblem)
+      return
+    }
+
     setLoading(true)
+    let rejectedByCaptcha = false
 
     try {
-      await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/recovery/callback`,
+        captchaToken: captcha.token,
       })
+      // A failed captcha says nothing about the account, so it is the only error shown.
+      rejectedByCaptcha = isCaptchaError(error?.message)
     } catch {
       // Se conserva la misma respuesta para no revelar si el correo existe.
     } finally {
-      // La respuesta es deliberadamente idéntica exista o no la cuenta.
-      setSubmitted(true)
       setLoading(false)
+      captcha.reset()
+      if (rejectedByCaptcha) {
+        setCaptchaError(CAPTCHA_MESSAGES.rejected)
+      } else {
+        // La respuesta es deliberadamente idéntica exista o no la cuenta.
+        setSubmitted(true)
+      }
     }
   }
 
@@ -99,6 +119,14 @@ export default function ForgotPasswordPage() {
                   placeholder="tu@email.com"
                 />
               </div>
+
+              {captcha.widget}
+
+              {captchaError && (
+                <div className="px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20" role="alert">
+                  <p className="text-amber-300 text-sm">{captchaError}</p>
+                </div>
+              )}
 
               <button
                 type="submit"
