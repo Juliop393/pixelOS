@@ -320,6 +320,58 @@
 .switch:hover { color: var(--cream); }
 .switch span { color: #e8926f; font-weight: 620; }
 
+/* ── Recovery, new password and email confirmation ───────────────── */
+
+.success { padding: 13px 15px; border: 1px solid rgba(52, 211, 153, .24); border-radius: 12px; background: rgba(52, 211, 153, .08); }
+.success p { margin: 0; color: #a7f3d0; font-size: 13.5px; line-height: 1.5; }
+
+.secondary {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid rgba(243, 234, 220, .14);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cream);
+  background: rgba(255, 255, 255, .03);
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+
+.secondary:hover { border-color: rgba(232, 146, 111, .4); background: rgba(217, 119, 87, .08); }
+
+.stack { display: grid; gap: 14px; }
+.card h1 + .stack, .card h1 + .form { margin-top: 22px; }
+
+.chip {
+  max-width: 100%;
+  margin: 0 0 18px;
+  padding: 9px 13px;
+  border: 1px solid rgba(232, 146, 111, .26);
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #f3c3ae;
+  background: rgba(217, 119, 87, .08);
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+}
+
+.chip svg { width: 16px; height: 16px; flex: 0 0 16px; color: #e8926f; }
+
+.hint { margin: 0; color: var(--faint); font-size: 12.5px; line-height: 1.55; }
+
+.checking { min-height: 140px; display: grid; place-items: center; }
+
+a.submit { text-decoration: none; }
+
 .page a:focus-visible,
 .page button:focus-visible { outline: 2px solid #ef9472; outline-offset: 3px; }
 
@@ -350,6 +402,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .piece, .spinner, .submit svg { animation: none; }
-  .back svg, .back, .google, .input, .submit, .switch, .forgot { transition: none; }
+  .back svg, .back, .google, .input, .submit, .switch, .forgot, .secondary { transition: none; }
   .google:hover:not(:disabled), .submit:hover:not(:disabled) { transform: none; }
 }

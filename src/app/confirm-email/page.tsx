@@ -3,73 +3,44 @@
 import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
+import AuthShell from "@/components/auth/AuthShell"
+import s from "@/components/auth/Auth.module.css"
+import { FREE_SIGNUP_CREDITS } from "@/lib/pricing-plans"
 
 // Reads ?email= on the client; Suspense lets the rest of the page prerender.
 function SentTo() {
   const email = useSearchParams().get("email")
   if (!email) return null
   return (
-    <p className="text-sm text-[#D97757] font-medium mb-4 bg-[#D97757]/5 py-2 px-4 rounded-lg inline-block">
-      Enviado a: {email}
+    <p className={s.chip}>
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+      <span>Enviado a: <b>{email}</b></span>
     </p>
   )
 }
 
 export default function ConfirmEmailPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 bg-[#1E1C1A]">
-      <div className="w-full max-w-md">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm text-[#9A9893] hover:text-[#E8E6E1] transition-colors mb-12 group"
-        >
-          <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" width={16} height={16} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver
-        </Link>
+    <AuthShell
+      pitch={<>Ya casi <span className={s.accent}>estás dentro</span></>}
+      pitchText={`Confirma tu correo y empieza con ${FREE_SIGNUP_CREDITS} créditos gratis para crear imágenes y videos publicitarios.`}
+      back={{ href: "/", label: "Volver" }}
+      title="Confirma tu correo"
+      lead="Te enviamos un enlace de confirmación para activar tu cuenta de PixelFM."
+    >
+      <Suspense fallback={null}>
+        <SentTo />
+      </Suspense>
 
-        <div className="bg-[#2A2826] rounded-2xl border border-[#3A3833] p-8 text-center">
-          <div className="w-16 h-16 rounded-full bg-[#D97757]/10 border border-[#D97757]/20 flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8 text-[#D97757]" width={32} height={32} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-
-          <h1 className="text-2xl font-bold text-[#E8E6E1] mb-3">
-            Confirma tu correo
-          </h1>
-
-          <p className="text-[#9A9893] mb-4 leading-relaxed">
-            Te enviamos un enlace de confirmación para activar tu cuenta de PixelFM.
-          </p>
-
-          <Suspense fallback={null}>
-            <SentTo />
-          </Suspense>
-
-          <p className="text-xs text-[#9A9893]/70 mb-8 leading-relaxed">
-            Revisa tu bandeja de entrada y también la carpeta de spam.
-            Después de confirmar tu correo, podrás iniciar sesión.
-          </p>
-
-          <div className="space-y-3">
-            <Link
-              href="/login"
-              className="block w-full bg-[#D97757] text-white font-semibold px-6 py-4 rounded-xl hover:bg-[#C26547] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#D97757]/20"
-            >
-              Ir a iniciar sesión
-            </Link>
-
-            <Link
-              href="/register"
-              className="block w-full text-sm text-[#9A9893] hover:text-[#E8E6E1] transition-colors py-2"
-            >
-              Usar otro correo
-            </Link>
-          </div>
-        </div>
+      <div className={s.stack}>
+        <p className={s.hint}>
+          Revisa tu bandeja de entrada y también la carpeta de spam. Después de confirmar tu correo, podrás iniciar sesión.
+        </p>
+        <Link href="/login" className={s.submit}>Ir a iniciar sesión</Link>
+        <Link href="/register" className={s.switch}>¿Te equivocaste de correo? <span>Usar otro correo</span></Link>
       </div>
-    </main>
+    </AuthShell>
   )
 }
