@@ -70,10 +70,31 @@ function createResetRedirect(request: NextRequest, hasError = false) {
   return response
 }
 
-export async function GET(request: NextRequest) {
-  const code = request.nextUrl.searchParams.get("code")
+// Opaque one-time values from Supabase: bounded charset and length, never logged or forwarded.
+const SAFE_TOKEN = /^[A-Za-z0-9._-]{8,512}$/
 
-  if (!code) {
+/*
+ * Two link shapes reach this route:
+ * - token_hash + type=recovery (Reset Password template using {{ .TokenHash }}): verified on the
+ *   server with verifyOtp, so the link works in any browser or device.
+ * - code (template using {{ .ConfirmationURL }}, PKCE): needs the code verifier cookie left by the
+ *   browser that requested the email; kept for links already sent.
+ * Either way the session is written as cookies on the redirect to /reset-password, and any failure
+ * goes to the same fixed internal error page. The query string is never copied to the redirect.
+ */
+export async function GET(request: NextRequest) {
+  const params = request.nextUrl.searchParams
+  const tokenHash = params.get("token_hash")
+  const type = params.get("type")
+  const code = params.get("code")
+
+  const useTokenHash = tokenHash !== null
+  if (useTokenHash) {
+    if (type !== "recovery" || !SAFE_TOKEN.test(tokenHash)) {
+      console.error("Password recovery callback rejected: invalid token_hash link")
+      return createResetRedirect(request, true)
+    }
+  } else if (!code || !SAFE_TOKEN.test(code)) {
     return createResetRedirect(request, true)
   }
 
@@ -95,12 +116,15 @@ export async function GET(request: NextRequest) {
     }
   )
 
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+  const { data, error } = useTokenHash
+    ? await supabase.auth.verifyOtp({ type: "recovery", token_hash: tokenHash })
+    : await supabase.auth.exchangeCodeForSession(code!)
 
   if (error || !data.session) {
+    // Only Supabase's error code/message: they never contain the token or the code.
     console.error(
-      "Password recovery callback failed:",
-      error?.message ?? "Session missing after code exchange"
+      `Password recovery callback failed (${useTokenHash ? "token_hash" : "code"}):`,
+      error?.code ?? error?.message ?? "Session missing after verification"
     )
     return createResetRedirect(request, true)
   }
