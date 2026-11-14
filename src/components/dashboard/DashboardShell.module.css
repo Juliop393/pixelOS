@@ -806,3 +806,7 @@
   .sectionContext .currentSection, .sectionContext .sectionDivider { display: none; }
   .topbar .orbInline { display: grid; margin-right: 6px; }
 }
+
+/* Larger brand mark beside the PixelFM name. */
+.homeBrand img { width: 47px; height: 47px; flex-basis: 47px; }
+@media (max-width: 767px) { .homeBrand img { width: 38px; height: 38px; flex-basis: 38px; } }

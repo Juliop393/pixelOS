@@ -505,3 +505,7 @@ body:before{animation:bgDrift 20s ease-in-out infinite}
   color: var(--pf-secondary);
   background: rgba(24, 19, 16, .92);
 }
+
+/* Larger brand mark in the landing and pricing nav. */
+.nav img.logoMark{width:46px;height:46px}
+@media(max-width:760px){.nav img.logoMark{width:40px;height:40px}}

@@ -405,3 +405,6 @@ a.submit { text-decoration: none; }
   .back svg, .back, .google, .input, .submit, .switch, .forgot, .secondary { transition: none; }
   .google:hover:not(:disabled), .submit:hover:not(:disabled) { transform: none; }
 }
+
+/* Larger brand mark on the sign-in pages. */
+.logo img { width: 44px; height: 44px; }
