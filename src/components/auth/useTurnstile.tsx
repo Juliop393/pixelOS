@@ -55,7 +55,7 @@ export const CAPTCHA_MESSAGES = {
   pending: "Estamos verificando tu conexión. Espera un momento y vuelve a intentarlo.",
   interactive: "Completa la verificación de seguridad que aparece arriba para continuar.",
   failed: "No pudimos completar la verificación de seguridad. Pulsa «Reintentar verificación» e inténtalo de nuevo.",
-  failedAgain: "La verificación de seguridad sigue sin completarse. Desactiva bloqueadores de anuncios o VPN, o prueba con otro navegador.",
+  failedAgain: "No pudimos completar la verificación. Prueba desactivando las extensiones del navegador o utilizando otro navegador.",
   rejected: "La verificación de seguridad caducó o no es válida. Inténtalo de nuevo.",
 }
 
