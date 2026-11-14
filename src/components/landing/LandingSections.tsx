@@ -6,6 +6,7 @@ import LandingVideo from "./LandingVideo"
 import SessionCta from "./SessionCta"
 import { Logo } from "./LandingNav"
 import { CREDIT_RATES, SUBSCRIPTION_PLANS, formatPrice, planOutcome } from "@/lib/pricing-plans"
+import { PRICING_NEXT_PATH, authPath } from "@/lib/auth-next"
 import { ANGLES, FAQS, MEDIA, posterOf } from "./landing-data"
 import s from "./Landing.module.css"
 
@@ -201,7 +202,8 @@ export function PricingSection() {
             </div>
             {plan.note && <small className={s.planEdge}>{plan.note}</small>}
             <ul>{[`${plan.monthlyCredits} créditos al mes`, planOutcome(plan), ...plan.highlights].map((feature) => <li key={feature}><i aria-hidden="true"><Check /></i>{feature}</li>)}</ul>
-            <Link href="/pricing" className={plan.recommended ? s.ctaPrimary : s.ctaGhostSolid}>{plan.landingCta} <ArrowRight aria-hidden="true" /></Link>
+            {/* Straight to sign-in; afterwards (or right away when already signed in) the plans in the dashboard. */}
+            <Link href={authPath("/login", PRICING_NEXT_PATH)} className={plan.recommended ? s.ctaPrimary : s.ctaGhostSolid}>{plan.landingCta} <ArrowRight aria-hidden="true" /></Link>
           </article>
         ))}
       </div>
