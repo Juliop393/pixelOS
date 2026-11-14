@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { Suspense } from "react"
 import { Toaster } from "sonner"
+import MetaPixel from "@/components/MetaPixel"
 import "./globals.css"
 
 const inter = Inter({
@@ -26,6 +28,8 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen antialiased">
         {children}
+        {/* Meta Pixel (PageView after consent); inert without NEXT_PUBLIC_META_PIXEL_ID. */}
+        <Suspense fallback={null}><MetaPixel /></Suspense>
         <Toaster
           position="top-center"
           expand={false}

@@ -4,6 +4,7 @@ import type { CSSProperties } from "react"
 import { ArrowRight, Check, Clapperboard, ImageIcon, Plus, SlidersHorizontal, Sparkles, Zap } from "lucide-react"
 import LandingVideo from "./LandingVideo"
 import SessionCta from "./SessionCta"
+import { CookiePreferencesLink } from "@/components/MetaPixel"
 import { Logo } from "./LandingNav"
 import { CREDIT_RATES, SUBSCRIPTION_PLANS, formatPrice, planOutcome } from "@/lib/pricing-plans"
 import { PRICING_NEXT_PATH, authPath } from "@/lib/auth-next"
@@ -257,7 +258,7 @@ export function LandingFooter() {
         <div><Logo /><p>Dirección creativa e IA para crear anuncios que se sienten pensados.</p></div>
         <nav aria-label="Pie de página">
           <div><b>Producto</b><a href="#producto">Características</a><a href="#como-funciona">Cómo funciona</a><a href="#ejemplos">Ejemplos</a><a href="#precios">Precios</a></div>
-          <div><b>Legal</b><Link href="/terms">Términos</Link><Link href="/privacy">Privacidad</Link><a href="mailto:team@pixelfm.com?subject=Soporte%20PixelFM&body=Hola%20equipo%20de%20PixelFM%2C%0A%0ANecesito%20ayuda%20con%3A%0A">Soporte</a></div>
+          <div><b>Legal</b><Link href="/terms">Términos</Link><Link href="/privacy">Privacidad</Link><CookiePreferencesLink /><a href="mailto:team@pixelfm.com?subject=Soporte%20PixelFM&body=Hola%20equipo%20de%20PixelFM%2C%0A%0ANecesito%20ayuda%20con%3A%0A">Soporte</a></div>
         </nav>
       </div>
       <small>© 2026 AFM Group LLC · PixelFM</small>

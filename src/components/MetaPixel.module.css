@@ -1,0 +1,40 @@
+/* Advertising-cookie notice: small, bottom corner, same warm glass as the rest of PixelFM. */
+.notice {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  width: min(380px, calc(100vw - 32px));
+  padding: 14px 16px;
+  border: 1px solid rgba(243, 234, 220, .12);
+  border-radius: 16px;
+  display: grid;
+  gap: 12px;
+  background: linear-gradient(165deg, rgba(40, 35, 31, .94), rgba(19, 16, 14, .96));
+  box-shadow: 0 18px 44px -14px rgba(0, 0, 0, .7), inset 0 1px rgba(255, 255, 255, .06);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  color: #e8dfd8;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.notice p { margin: 0; }
+.notice a { color: #ef9a78; text-decoration: underline; text-underline-offset: 2px; }
+.actions { display: flex; justify-content: flex-end; gap: 8px; }
+.actions button {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: filter .2s ease, background-color .2s ease, border-color .2s ease;
+}
+.decline { border: 1px solid rgba(243, 234, 220, .16); background: rgba(255, 255, 255, .05); color: #e8dfd8; }
+.decline:hover { border-color: rgba(243, 234, 220, .3); background: rgba(255, 255, 255, .09); }
+.accept { border: 1px solid rgba(255, 255, 255, .16); background: linear-gradient(180deg, #e27c57, #c95d3a); color: #fff6ef; }
+.accept:hover { filter: brightness(1.06); }
+.actions button:focus-visible { outline: 2px solid #ef9a78; outline-offset: 2px; }
+@media (max-width: 420px) { .notice { right: 12px; bottom: 12px; width: calc(100vw - 24px); } }
+@media (prefers-reduced-motion: reduce) { .actions button { transition: none; } }
