@@ -408,3 +408,11 @@ a.submit { text-decoration: none; }
 
 /* Larger brand mark on the sign-in pages. */
 .logo img { width: 44px; height: 44px; }
+
+/* Turnstile could not verify: a short note with a retry, in the notice palette. */
+.captchaRetry { margin-top: 4px; padding: 11px 14px; border: 1px solid rgba(245, 158, 11, .24); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: rgba(245, 158, 11, .08); }
+.captchaRetry p { margin: 0; color: #fcd34d; font-size: 13px; line-height: 1.4; }
+.captchaRetry button { flex: none; min-height: 34px; padding: 0 12px; border: 1px solid rgba(252, 211, 77, .35); border-radius: 10px; background: rgba(252, 211, 77, .1); color: #fde68a; font: inherit; font-size: 12.5px; font-weight: 640; cursor: pointer; transition: background-color .2s ease, border-color .2s ease; }
+.captchaRetry button:hover { border-color: rgba(252, 211, 77, .6); background: rgba(252, 211, 77, .18); }
+.captchaRetry button:focus-visible { outline: 2px solid #fcd34d; outline-offset: 2px; }
+@media (max-width: 380px) { .captchaRetry { flex-direction: column; align-items: stretch; } }
