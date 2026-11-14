@@ -239,17 +239,7 @@ export function useCreativeGenerator() {
         return newHistory.slice(0, 20)
       })
 
-      const savedCreativos = JSON.parse(localStorage.getItem("afm_creativos") || "[]")
-      const newCreativos = newImages.map((img, idx) => ({
-        id: Date.now() + idx,
-        imageUrl: img.imageUrl,
-        producto: generationProducto,
-        angulo: generationAngle,
-        formato: generationFormat,
-        fecha: new Date().toISOString(),
-      }))
-      savedCreativos.unshift(...newCreativos)
-      localStorage.setItem("afm_creativos", JSON.stringify(savedCreativos.slice(0, 50)))
+      // Generated images are recorded per user in creative_assets by /api/generate; nothing is kept in shared browser storage.
 
       if (failCount > 0) {
         toast.warning("Generación parcial", {

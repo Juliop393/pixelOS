@@ -7,6 +7,7 @@ import { ArrowUpRight, FolderOpen, Image as ImageIcon, Video } from "lucide-reac
 import PixelAiIcon from "@/components/dashboard/PixelAiIcon"
 import PixelAiDrawer from "@/components/dashboard/PixelAiDrawer"
 import { usePixelAiHost } from "@/lib/pixel-ai-context"
+import { supabase } from "@/lib/supabase"
 import type { PixelAiInitialRequest } from "@/components/dashboard/PixelAdvisor"
 import { ImageCreationVisual, VideoCreationVisual } from "@/components/dashboard/home/CreationVisuals"
 import IdeaPreview, { type IdeaPreviewKind } from "@/components/dashboard/home/IdeaPreview"
@@ -15,7 +16,7 @@ import styles from "@/components/dashboard/DashboardHome.module.css"
 const display = Fraunces({ subsets: ["latin"], weight: "variable", axes: ["SOFT", "WONK", "opsz"], display: "swap", variable: "--font-display" })
 
 interface Creative {
-  id: number
+  id: string
   imageUrl: string
   producto: string
   angulo: string
@@ -109,23 +110,55 @@ export default function DashboardHomePage() {
   const [recentCreatives, setRecentCreatives] = useState<Creative[]>([])
   const [creativesLoaded, setCreativesLoaded] = useState(false)
 
+  // Recent creatives come from the signed-in user's own library (RLS on creative_assets), like
+  // "Mis creativos". The old browser-wide "afm_creativos" list mixed accounts on a shared browser.
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("afm_creativos") || "[]")
-      const creatives = Array.isArray(saved)
-        ? saved
-            .filter((creative): creative is Creative =>
-              Boolean(creative && typeof creative.imageUrl === "string" && creative.imageUrl)
-            )
-            .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
-            .slice(0, 4)
-        : []
+    let active = true
+    // Account whose creatives are shown (or loading); a different account clears them first.
+    let shownFor: string | null = null
+    let request = 0
+    try { localStorage.removeItem("afm_creativos") } catch { /* storage unavailable */ }
 
-      setRecentCreatives(creatives)
-    } catch {
-      setRecentCreatives([])
-    } finally {
+    const load = async (userId: string) => {
+      const current = ++request
+      const { data, error } = await supabase.from("creative_assets")
+        .select("id,public_url,title,format,metadata,created_at")
+        .eq("user_id", userId)
+        .eq("media_type", "image")
+        .not("public_url", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(4)
+      // A response for an account that is no longer signed in is dropped.
+      if (!active || current !== request) return
+      setRecentCreatives(error || !data ? [] : data.flatMap((row): Creative[] => {
+        if (typeof row.public_url !== "string" || !row.public_url) return []
+        const metadata = row.metadata && typeof row.metadata === "object" ? row.metadata as Record<string, unknown> : {}
+        return [{
+          id: String(row.id),
+          imageUrl: row.public_url,
+          producto: typeof row.title === "string" ? row.title : "",
+          angulo: typeof metadata.angle === "string" ? metadata.angle : "",
+          formato: typeof row.format === "string" ? row.format : "",
+          fecha: typeof row.created_at === "string" ? row.created_at : "",
+        }]
+      }))
       setCreativesLoaded(true)
+    }
+
+    // Fires with the current session on subscribe and again on every sign-in, sign-out or account change.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const userId = session?.user.id ?? null
+      if (userId === shownFor) return
+      shownFor = userId
+      request += 1
+      setRecentCreatives([])
+      setCreativesLoaded(false)
+      // Deferred: Supabase calls must not run inside the auth callback itself.
+      if (userId) setTimeout(() => { void load(userId).catch(() => { if (active) { setRecentCreatives([]); setCreativesLoaded(true) } }) }, 0)
+    })
+    return () => {
+      active = false
+      subscription.unsubscribe()
     }
   }, [])
 
