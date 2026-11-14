@@ -192,7 +192,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
     <main className={s.page}>
       <aside className={s.brand}>
         <Link ref={logoRef} href="/" className={s.logo} aria-label="PixelFM, inicio">
-          <img src="/pixelfm-logo.png" alt="" aria-hidden="true" />
+          <img src="/pixelfm-logo-mark.webp" alt="" aria-hidden="true" />
           <span>Pixel<span>FM</span></span>
         </Link>
 

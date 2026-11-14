@@ -24,7 +24,7 @@ export function LegalPage({ title, updatedAt, children }: LegalPageProps) {
         }}
       >
         <Link href="/" className="flex items-center gap-3">
-          <Image src="/logo_PixelOS.png" width={44} height={44} alt="PixelFM" priority unoptimized />
+          <Image src="/pixelfm-logo-mark.webp" width={44} height={44} alt="PixelFM" priority unoptimized />
           <span className="font-semibold text-[#E8E6E1] tracking-tight text-xl">PixelFM</span>
         </Link>
         <Link

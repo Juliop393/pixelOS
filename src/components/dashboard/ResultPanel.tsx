@@ -83,7 +83,7 @@ export default function ResultPanel({
         {phase === "loading" && (
           <div className={styles.generatingState} role="status" aria-live="polite">
             <div className={styles.generatingMark}>
-              <img src="/pixelfm-logo.png" alt="" /><i />
+              <img src="/pixelfm-logo-mark.webp" alt="" /><i />
             </div>
             <span className={styles.previewKicker}>PIXELFM ESTÁ CREANDO</span>
             <h2>Construyendo una dirección<br />visual para tu producto.</h2>

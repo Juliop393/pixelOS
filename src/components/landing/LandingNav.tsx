@@ -15,7 +15,7 @@ const LINKS = [
 export function Logo() {
   return (
     <Link className="logo" href="/" aria-label="PixelFM, inicio">
-      <img className="logoMark" src="/pixelfm-logo.png" alt="" aria-hidden="true" />
+      <img className="logoMark" src="/pixelfm-logo-mark.webp" alt="" aria-hidden="true" />
       <span>Pixel<span>FM</span></span>
     </Link>
   )

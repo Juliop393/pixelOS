@@ -210,7 +210,7 @@ export default function PackPurchaseCard() {
       <div className={styles.logoWrap}>
         <span className={styles.logoRing} aria-hidden="true" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={styles.logo} src="/pixelfm-logo-huron.webp" width={64} height={64} alt="PixelFM" />
+        <img className={styles.logo} src="/pixelfm-logo-mark.webp" width={64} height={64} alt="PixelFM" />
       </div>
 
       <div className={styles.body}>

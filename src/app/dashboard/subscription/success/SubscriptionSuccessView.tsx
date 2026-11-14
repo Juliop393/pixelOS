@@ -157,7 +157,7 @@ export default function SubscriptionSuccessView({ sessionId }: { sessionId: stri
         <div className={styles.logoWrap}>
           <span className={styles.logoRing} aria-hidden="true" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={styles.logo} src="/pixelfm-logo-huron.webp" width={132} height={132} alt="PixelFM" />
+          <img className={styles.logo} src="/pixelfm-logo-mark.webp" width={132} height={132} alt="PixelFM" />
         </div>
 
         <span className={styles.eyebrow}>

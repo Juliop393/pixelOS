@@ -107,7 +107,7 @@ export default function Topbar() {
     <header ref={headerRef} className={styles.topbar}>
       <div className={styles.sectionContext}>
         <Link href="/dashboard" className={styles.homeBrand} aria-label="PixelFM — Inicio">
-          <img src="/logo_PixelOS.png" width={44} height={44} alt="" />
+          <img src="/pixelfm-logo-mark.webp" width={44} height={44} alt="" />
           <span>
             <b>Pixel<strong>FM</strong></b>
             <small>Tu espacio creativo</small>

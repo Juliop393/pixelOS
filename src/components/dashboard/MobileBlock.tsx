@@ -5,7 +5,7 @@ export default function MobileBlock() {
   return (
     <div className="md:hidden min-h-screen bg-[#1E1C1A] text-[#E8E6E1] flex flex-col items-center justify-center px-8 text-center">
       <Image
-        src="/logo_PixelOS.png"
+        src="/pixelfm-logo-mark.webp"
         width={64}
         height={64}
         alt="PixelFM"

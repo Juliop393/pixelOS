@@ -11,7 +11,7 @@ export default function PricingPage() {
       <header className="navShell">
         <nav className={`nav glass ${styles.nav}`} aria-label="Navegación">
           <Link className="logo" href="/">
-            <img className="logoMark" src="/pixelfm-logo.png" alt="" aria-hidden="true" />
+            <img className="logoMark" src="/pixelfm-logo-mark.webp" alt="" aria-hidden="true" />
             <span>Pixel<span>FM</span></span>
           </Link>
           <Link href="/dashboard" className={styles.backLink}>
