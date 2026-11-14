@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
+import { PRICING_NEXT_PATH, authPath } from "@/lib/auth-next"
 
 /*
  * One purchase flow for every buy button (plans and credit packs). The browser
@@ -52,7 +53,9 @@ export function useStripeCheckout(endpoint: CheckoutEndpoint) {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        toast.error("Inicia sesión para continuar con el pago.", { id: TOAST_ID })
+        // Signed out: sign in (or create an account) first, then come back to the plans.
+        window.location.assign(authPath("/login", PRICING_NEXT_PATH))
+        return // Keep the button busy while the browser leaves.
       } else {
         const response = await fetch(endpoint, {
           method: "POST",

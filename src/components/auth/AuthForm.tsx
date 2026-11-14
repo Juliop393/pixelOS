@@ -8,6 +8,7 @@ import Link from "next/link"
 import { toast } from "sonner"
 import { FREE_SIGNUP_CREDITS } from "@/lib/pricing-plans"
 import { supabase } from "@/lib/supabase"
+import { AUTH_NEXT_COOKIE, AUTH_NEXT_PARAM, authPath, safeNextPath } from "@/lib/auth-next"
 import { useToastAnchor } from "@/hooks/useToastAnchor"
 import s from "./Auth.module.css"
 import { CAPTCHA_MESSAGES, isCaptchaError, useTurnstile } from "./useTurnstile"
@@ -42,6 +43,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [loading, setLoading] = useState(false)
   const [oauthLoading, setOauthLoading] = useState(false)
   const [checkingSession, setCheckingSession] = useState(!isRegister)
+  // Validated destination after signing in (e.g. back to the plans); null means the dashboard.
+  const [nextPath, setNextPath] = useState<string | null>(null)
+  const destination = nextPath ?? "/dashboard"
   const logoRef = useToastAnchor<HTMLAnchorElement>()
   const passwordStrength = getPasswordStrength(password)
   const captcha = useTurnstile(isRegister ? "signup" : "login")
@@ -50,7 +54,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
     let active = true
 
     const checkExistingSession = async () => {
-      const oauthError = new URLSearchParams(window.location.search).get("oauth_error")
+      const params = new URLSearchParams(window.location.search)
+      const oauthError = params.get("oauth_error")
+      const next = safeNextPath(params.get(AUTH_NEXT_PARAM))
+      setNextPath(next)
 
       if (oauthError === "callback") {
         setError("No pudimos iniciar sesión con Google. Inténtalo nuevamente.")
@@ -65,7 +72,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
       if (!active) return
 
       if (user) {
-        router.replace("/dashboard")
+        router.replace(next ?? "/dashboard")
         router.refresh()
         return
       }
@@ -86,6 +93,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setOauthLoading(true)
 
     try {
+      // The OAuth callback reads this short-lived cookie (validated again on the server) to return here.
+      document.cookie = nextPath
+        ? `${AUTH_NEXT_COOKIE}=${encodeURIComponent(nextPath)}; Max-Age=600; Path=/; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`
+        : `${AUTH_NEXT_COOKIE}=; Max-Age=0; Path=/; SameSite=Lax`
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -136,7 +147,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         }
 
         if (data.session) {
-          router.push("/dashboard")
+          router.push(destination)
           router.refresh()
           return
         }
@@ -149,7 +160,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken: captcha.token } })
         if (error) throw error
-        router.push("/dashboard")
+        router.push(destination)
         router.refresh()
       }
     } catch (err: unknown) {
@@ -220,9 +231,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
               {isRegister ? "Crear cuenta" : "Bienvenido de vuelta"}
             </h1>
             <p className={s.lead}>
-              {isRegister
-                ? "Regístrate para comenzar a crear anuncios"
-                : "Ingresa tus credenciales para continuar"}
+              {nextPath
+                ? isRegister ? "Crea tu cuenta para elegir tu plan" : "Inicia sesión o crea una cuenta para elegir tu plan"
+                : isRegister
+                  ? "Regístrate para comenzar a crear anuncios"
+                  : "Ingresa tus credenciales para continuar"}
             </p>
 
             <button
@@ -323,7 +336,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 <div className={s.notice} role="alert">
                   <p>
                     Este email ya tiene una cuenta. ¿Quieres{" "}
-                    <Link href="/login">iniciar sesión?</Link>
+                    <Link href={authPath("/login", nextPath)}>iniciar sesión?</Link>
                   </p>
                 </div>
               )}
@@ -345,7 +358,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
               </button>
             </form>
 
-            <Link href={isRegister ? "/login" : "/register"} className={s.switch}>
+            <Link href={authPath(isRegister ? "/login" : "/register", nextPath)} className={s.switch}>
               {isRegister ? (
                 <>¿Ya tienes cuenta? <span>Inicia sesión</span></>
               ) : (

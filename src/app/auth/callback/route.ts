@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import { NextRequest, NextResponse } from "next/server"
+import { AUTH_NEXT_COOKIE, safeNextPath } from "@/lib/auth-next"
 
 export const dynamic = "force-dynamic"
 
@@ -85,7 +86,15 @@ export async function GET(request: NextRequest) {
     return redirectToLoginWithError(request)
   }
 
-  const response = createRedirect(request, "/dashboard")
+  // Back to where sign-in was asked for (only allowlisted internal paths), else the dashboard.
+  let next: string | null = null
+  try {
+    next = safeNextPath(decodeURIComponent(request.cookies.get(AUTH_NEXT_COOKIE)?.value ?? ""))
+  } catch {
+    next = null
+  }
+  const response = createRedirect(request, next ?? "/dashboard")
+  response.cookies.set({ name: AUTH_NEXT_COOKIE, value: "", maxAge: 0, path: "/" })
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
