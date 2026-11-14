@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createHash } from "node:crypto"
 import { createClient } from "@supabase/supabase-js"
 import { createAdminClient } from "@/lib/supabase-admin"
-import { refundVideoReservation } from "@/lib/video-credits"
+import { refundVideoReservation, videoReservationKey } from "@/lib/video-credits"
 
 const N8N_STATUS_TIMEOUT_MS = 30_000
 const VIDEO_DOWNLOAD_TIMEOUT_MS = 120_000
@@ -144,8 +144,17 @@ async function refundDefinitiveFailure(
     return NextResponse.json({ error: "No pudimos confirmar la devolución de tus créditos. Seguimos intentándolo.", retry: true }, { status: 503, headers: headersNoStore })
   }
   if (refund.status === "not_found") {
+    // No reservation under this request's key (e.g. charged before keys were derived from the request), so
+    // nothing can be refunded safely here. The request stays open as evidence ('started', no scene, failed in
+    // this log) for manual reconciliation; it is never closed as if the credits had been settled.
     console.error("Video STATUS definitive failure without a refundable reservation:", requestId, "user:", userId)
-    return NextResponse.json({ success: false, status: "error", error, refunded: false }, { status: 200, headers: headersNoStore })
+    return NextResponse.json({
+      success: false,
+      status: "error",
+      error: `${error}. No pudimos devolver tus créditos automáticamente: escríbenos a team@pixelfm.com y lo revisamos.`,
+      refunded: false,
+      refundPending: true,
+    }, { status: 200, headers: headersNoStore })
   }
 
   const { error: closeError } = await admin.from("video_start_requests")
@@ -160,6 +169,69 @@ async function refundDefinitiveFailure(
     { success: false, status: "error", error, refunded: true, remainingCredits: refund.balance },
     { status: 200, headers: headersNoStore },
   )
+}
+
+const OPEN_JOB_WINDOW_MS = 7 * 24 * 60 * 60 * 1000
+// START claims a request before it calls n8n (up to 6 minutes); a claim older than this never started a job.
+const OPEN_CLAIM_WINDOW_MS = 10 * 60 * 1000
+const OPEN_JOB_CANDIDATES = 25
+const OPEN_JOB_MAX = 5
+
+/*
+ * The signed-in user's own video jobs that may still need STATUS: started in the
+ * last 7 days with no stored scene (a definitive failure closes the request), or
+ * claimed by a START that may still be running. Read only; the browser then follows
+ * each one by its idempotency key, so nothing is started or charged again.
+ */
+async function listOpenJobs(admin: ReturnType<typeof createAdminClient>, userId: string) {
+  const now = Date.now()
+  const { data: rows, error } = await admin.from("video_start_requests")
+    .select("idempotency_key,request_id,status,created_at")
+    .eq("user_id", userId)
+    .in("status", ["started", "processing"])
+    .gte("created_at", new Date(now - OPEN_JOB_WINDOW_MS).toISOString())
+    .order("created_at", { ascending: false })
+    .limit(OPEN_JOB_CANDIDATES)
+  if (error) throw new Error("open_jobs_read_failed")
+
+  const candidates = (rows ?? []).filter((row) => row.status === "started"
+    ? typeof row.request_id === "string" && row.request_id.length > 0
+    : now - new Date(row.created_at).getTime() < OPEN_CLAIM_WINDOW_MS)
+  if (candidates.length === 0) return []
+
+  const started = candidates.filter((row) => row.status === "started")
+  const paths = started.map((row) => scenePath(userId, row.request_id))
+  const stored = new Set<string>()
+  if (paths.length > 0) {
+    const { data: assets, error: assetsError } = await admin.from("creative_assets")
+      .select("storage_path")
+      .eq("user_id", userId)
+      .eq("bucket", VIDEO_BUCKET)
+      .eq("kind", "scene")
+      .in("storage_path", paths)
+    if (assetsError) throw new Error("open_jobs_read_failed")
+    for (const asset of assets ?? []) stored.add(asset.storage_path)
+  }
+
+  const open = candidates
+    .filter((row) => row.status !== "started" || !stored.has(scenePath(userId, row.request_id)))
+    .slice(0, OPEN_JOB_MAX)
+  if (open.length === 0) return []
+
+  // The reserved amount tells the browser which tier it was (for its refund message only).
+  const { data: reservations, error: reservationsError } = await admin.from("credit_reservations")
+    .select("reservation_key,credits")
+    .eq("user_id", userId)
+    .in("reservation_key", open.map((row) => videoReservationKey(row.idempotency_key)))
+  if (reservationsError) throw new Error("open_jobs_read_failed")
+  const credits = new Map((reservations ?? []).map((row) => [row.reservation_key as string, row.credits as number]))
+
+  return open.map((row) => ({
+    idempotencyKey: row.idempotency_key as string,
+    requestId: typeof row.request_id === "string" ? row.request_id : null,
+    startedAt: row.created_at as string,
+    credits: credits.get(videoReservationKey(row.idempotency_key)) ?? null,
+  }))
 }
 
 export async function POST(req: NextRequest) {
@@ -190,11 +262,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Cuerpo de solicitud inválido" }, { status: 400, headers: headersNoStore })
   }
 
-  const requestId = typeof body.requestId === "string" ? body.requestId.trim() : ""
-  const statusUrl = typeof body.statusUrl === "string" ? body.statusUrl.trim() : ""
-  const responseUrl = typeof body.responseUrl === "string" ? body.responseUrl.trim() : ""
+  if (body.list === true) {
+    try {
+      const jobs = await listOpenJobs(createAdminClient(), user.id)
+      return NextResponse.json({ success: true, jobs }, { status: 200, headers: headersNoStore })
+    } catch {
+      return NextResponse.json({ error: "No se pudieron consultar tus videos pendientes", retry: true }, { status: 503, headers: headersNoStore })
+    }
+  }
 
-  if (!/^[A-Za-z0-9._:-]{1,256}$/.test(requestId) || !isSafeHttpsUrl(statusUrl) || !isSafeHttpsUrl(responseUrl)) {
+  /*
+   * Two ways to name a job, both limited to the signed-in user's own START requests:
+   *   - its tracking data (requestId, statusUrl, responseUrl), as START returned it;
+   *   - its idempotency key alone, which the browser keeps before sending START, so a
+   *     reload during START can still find the job. The tracking data then comes from
+   *     the server's own record, never from the browser.
+   */
+  const keyLookup = body.idempotencyKey !== undefined
+  const lookupKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim().toLowerCase() : ""
+  let requestId = typeof body.requestId === "string" ? body.requestId.trim() : ""
+  let statusUrl = typeof body.statusUrl === "string" ? body.statusUrl.trim() : ""
+  let responseUrl = typeof body.responseUrl === "string" ? body.responseUrl.trim() : ""
+
+  if (keyLookup
+    ? !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(lookupKey)
+    : !/^[A-Za-z0-9._:-]{1,256}$/.test(requestId) || !isSafeHttpsUrl(statusUrl) || !isSafeHttpsUrl(responseUrl)) {
     return NextResponse.json({ error: "Datos de seguimiento inválidos" }, { status: 400, headers: headersNoStore })
   }
 
@@ -202,18 +294,38 @@ export async function POST(req: NextRequest) {
   let idempotencyKey: string
   try {
     admin = createAdminClient()
-    const { data: start, error: ownershipError } = await admin.from("video_start_requests")
-      .select("status_url,response_url,idempotency_key")
-      .eq("user_id", user.id)
-      .eq("request_id", requestId)
-      .eq("status", "started")
-      .limit(1)
-      .maybeSingle()
-    if (ownershipError) throw new Error("ownership_check_failed")
-    if (!start || start.status_url !== statusUrl || start.response_url !== responseUrl) {
-      return NextResponse.json({ error: "Solicitud de video no autorizada" }, { status: 403, headers: headersNoStore })
+    if (keyLookup) {
+      const { data: start, error: lookupError } = await admin.from("video_start_requests")
+        .select("status,request_id,status_url,response_url,idempotency_key")
+        .eq("user_id", user.id)
+        .eq("idempotency_key", lookupKey)
+        .maybeSingle()
+      if (lookupError) throw new Error("lookup_failed")
+      // START has not reached the database yet (or never did): nothing is charged without this record.
+      if (!start) return NextResponse.json({ success: false, status: "not_started" }, { status: 200, headers: headersNoStore })
+      // START is still running: same answer as a job in progress.
+      if (start.status === "processing") return NextResponse.json({ success: true, status: "processing" }, { status: 200, headers: headersNoStore })
+      if (start.status !== "started" || !start.request_id || !start.status_url || !start.response_url) {
+        return NextResponse.json({ error: "Esta solicitud de video ya terminó", status: "closed" }, { status: 409, headers: headersNoStore })
+      }
+      requestId = start.request_id
+      statusUrl = start.status_url
+      responseUrl = start.response_url
+      idempotencyKey = start.idempotency_key
+    } else {
+      const { data: start, error: ownershipError } = await admin.from("video_start_requests")
+        .select("status_url,response_url,idempotency_key")
+        .eq("user_id", user.id)
+        .eq("request_id", requestId)
+        .eq("status", "started")
+        .limit(1)
+        .maybeSingle()
+      if (ownershipError) throw new Error("ownership_check_failed")
+      if (!start || start.status_url !== statusUrl || start.response_url !== responseUrl) {
+        return NextResponse.json({ error: "Solicitud de video no autorizada" }, { status: 403, headers: headersNoStore })
+      }
+      idempotencyKey = start.idempotency_key
     }
-    idempotencyKey = start.idempotency_key
   } catch {
     return NextResponse.json({ error: "No se pudo verificar la solicitud de video" }, { status: 503, headers: headersNoStore })
   }

@@ -21,27 +21,42 @@ const VIDEO_POLL_MAX_TRANSIENT = 12
 const wait = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
 /*
- * Paid video jobs survive a reload or a closed tab: once START has created the
- * job, its tracking data is kept in this browser, per user, until STATUS gives
- * a final answer. When the editor opens again it keeps polling the same job
- * through /api/video/status, which checks ownership, stores the clip or refunds
- * a definitive failure. Nothing is submitted or charged again. Only the job
- * identifiers are stored: no tokens and no signed URLs. Recovery needs the user
- * to come back to the editor in this browser; there is no server-side recovery.
+ * Paid video jobs survive a reload or a closed tab, even one that happens while
+ * START is still running. Before START is sent, the request's idempotency key is
+ * kept in this browser, per user, until STATUS gives a final answer. When the
+ * editor opens again it keeps asking /api/video/status about that key: the
+ * server finds the signed-in user's own START record (or answers that START has
+ * not reached it yet), stores the clip or refunds a definitive failure. START is
+ * never called again and nothing is reserved or charged again. Only the key, the
+ * tier and the start time are stored: no tokens and no URLs. Recovery needs the
+ * user to come back to the editor in this browser; there is no server-side recovery.
  */
 const PENDING_PREFIX = "pixelfm:video-pending:"
 const PENDING_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
+// How long a key may stay unknown to the server before it is forgotten. START records the
+// key as soon as it arrives, so a key still unknown after this never reached the server and charged nothing.
+const START_GRACE_MS = 5 * 60 * 1000
+// START answers that mean no job exists for this key (invalid, unauthorized, no credits, rejected, rate limited).
+const START_NO_JOB_STATUSES = [400, 401, 402, 409, 429]
 
 type Tracking = { requestId: string; statusUrl: string; responseUrl: string }
-type PendingJob = Tracking & { model: VideoModelId; startedAt: number }
+/** New entries carry only idempotencyKey; entries saved by the previous version carry START's tracking data. */
+type PendingJob = { model: VideoModelId; startedAt: number; credits?: number } & ({ idempotencyKey: string } | Tracking)
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+const jobId = (job: PendingJob) => ("idempotencyKey" in job ? job.idempotencyKey : job.requestId)
+const statusQuery = (job: PendingJob) => ("idempotencyKey" in job
+  ? { idempotencyKey: job.idempotencyKey }
+  : { requestId: job.requestId, statusUrl: job.statusUrl, responseUrl: job.responseUrl })
 
 const pendingKey = (userId: string) => `${PENDING_PREFIX}${userId}`
 
 const isPendingJob = (value: unknown): value is PendingJob => {
   if (typeof value !== "object" || value === null) return false
   const job = value as Record<string, unknown>
-  return typeof job.requestId === "string" && typeof job.statusUrl === "string" && typeof job.responseUrl === "string" &&
-    isVideoModelId(job.model) && typeof job.startedAt === "number" && Number.isFinite(job.startedAt)
+  if (!isVideoModelId(job.model) || typeof job.startedAt !== "number" || !Number.isFinite(job.startedAt)) return false
+  if (typeof job.idempotencyKey === "string") return UUID.test(job.idempotencyKey)
+  return typeof job.requestId === "string" && typeof job.statusUrl === "string" && typeof job.responseUrl === "string"
 }
 
 function readPendingJobs(userId: string): PendingJob[] {
@@ -63,17 +78,17 @@ function writePendingJobs(userId: string, jobs: PendingJob[]) {
 }
 
 function rememberPendingJob(userId: string, job: PendingJob) {
-  writePendingJobs(userId, [...readPendingJobs(userId).filter((item) => item.requestId !== job.requestId), job])
+  writePendingJobs(userId, [...readPendingJobs(userId).filter((item) => jobId(item) !== jobId(job)), job])
 }
 
-function forgetPendingJob(userId: string, requestId: string) {
-  writePendingJobs(userId, readPendingJobs(userId).filter((item) => item.requestId !== requestId))
+function forgetPendingJob(userId: string, id: string) {
+  writePendingJobs(userId, readPendingJobs(userId).filter((item) => jobId(item) !== id))
 }
 
 // Jobs this page is polling (and how each poll knows it was stopped), so a resume never duplicates a live poll.
 const activePolls = new Map<string, () => boolean>()
-const isPolling = (requestId: string) => {
-  const stopped = activePolls.get(requestId)
+const isPolling = (id: string) => {
+  const stopped = activePolls.get(id)
   return Boolean(stopped && !stopped())
 }
 
@@ -81,7 +96,7 @@ type PollResult =
   | { kind: "completed"; videoUrl: string; assetId: string }
   /** final: STATUS answered for good (keep no tracking); otherwise the job may still be followed later. */
   | { kind: "error"; error: string; final: boolean; remainingCredits?: number }
-  /** STATUS no longer follows this job (closed elsewhere, another user's, malformed): forget it. */
+  /** STATUS will never follow this job (closed, another user's, malformed, never started): forget it. */
   | { kind: "gone"; error: string }
   | { kind: "stopped" }
 
@@ -89,7 +104,7 @@ const validBalance = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value) && value >= 0
 
 /** Polls one job through STATUS only. It never starts, submits or charges anything. */
-async function pollVideoJob(tracking: Tracking, accessToken: string, model: VideoModelId, stopped: () => boolean): Promise<PollResult> {
+async function pollVideoJob(job: PendingJob, accessToken: string, stopped: () => boolean, startGraceMs: number): Promise<PollResult> {
   let transientFailures = 0
   let lastTransientError = ""
   for (let attempt = 0; attempt < VIDEO_POLL_MAX_ATTEMPTS; attempt += 1) {
@@ -108,7 +123,7 @@ async function pollVideoJob(tracking: Tracking, accessToken: string, model: Vide
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify(tracking),
+        body: JSON.stringify(statusQuery(job)),
       })
       const body: unknown = await statusResponse.json().catch(() => null)
       statusData = typeof body === "object" && body !== null ? body as Record<string, unknown> : null
@@ -130,8 +145,14 @@ async function pollVideoJob(tracking: Tracking, accessToken: string, model: Vide
 
     if (!statusResponse.ok) {
       const error = errorText || "No se pudo consultar el estado del video"
-      // 400/403: STATUS will never follow this job (closed, not this user's, or malformed).
-      return [400, 403].includes(statusResponse.status) ? { kind: "gone", error } : { kind: "error", error, final: false }
+      // 400/403/409: STATUS will never follow this job (closed, not this user's, or malformed).
+      return [400, 403, 409].includes(statusResponse.status) ? { kind: "gone", error } : { kind: "error", error, final: false }
+    }
+
+    // START has not recorded this key yet: keep waiting until it could no longer arrive.
+    if (statusData.status === "not_started") {
+      if (Date.now() - job.startedAt >= startGraceMs) return { kind: "gone", error: "La generación no llegó a iniciarse" }
+      continue
     }
 
     if (statusData.status === "processing") continue
@@ -144,7 +165,7 @@ async function pollVideoJob(tracking: Tracking, accessToken: string, model: Vide
       if (statusData.refunded === true) {
         return {
           kind: "error",
-          error: `${errorText || "No se pudo generar el video"}. Te devolvimos ${getVideoModel(model).credits} créditos.`,
+          error: `${errorText || "No se pudo generar el video"}. Te devolvimos ${job.credits ?? getVideoModel(job.model).credits} créditos.`,
           final: true,
           remainingCredits: validBalance(statusData.remainingCredits) ? statusData.remainingCredits : undefined,
         }
@@ -159,14 +180,52 @@ async function pollVideoJob(tracking: Tracking, accessToken: string, model: Vide
 }
 
 /** Follows one job and forgets its stored tracking once STATUS answered for good. */
-async function followVideoJob(userId: string, job: PendingJob, accessToken: string, stopped: () => boolean): Promise<PollResult> {
-  activePolls.set(job.requestId, stopped)
+async function followVideoJob(
+  userId: string,
+  job: PendingJob,
+  accessToken: string,
+  stopped: () => boolean,
+  startGraceMs = START_GRACE_MS,
+): Promise<PollResult> {
+  const id = jobId(job)
+  activePolls.set(id, stopped)
   try {
-    const result = await pollVideoJob(job, accessToken, job.model, stopped)
-    if (result.kind === "completed" || result.kind === "gone" || (result.kind === "error" && result.final)) forgetPendingJob(userId, job.requestId)
+    const result = await pollVideoJob(job, accessToken, stopped, startGraceMs)
+    if (result.kind === "completed" || result.kind === "gone" || (result.kind === "error" && result.final)) forgetPendingJob(userId, id)
     return result
   } finally {
-    if (activePolls.get(job.requestId) === stopped) activePolls.delete(job.requestId)
+    if (activePolls.get(id) === stopped) activePolls.delete(id)
+  }
+}
+
+/*
+ * The signed-in user's open jobs as the server records them, so a job is found even
+ * without this browser's storage (other device, storage cleared, reload before the
+ * key was kept). Read only; any failure just leaves recovery to the stored keys.
+ */
+type ServerJob = { job: PendingJob; requestId: string | null }
+
+async function discoverServerJobs(accessToken: string): Promise<ServerJob[]> {
+  try {
+    const response = await fetch("/api/video/status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ list: true }),
+    })
+    const body: unknown = await response.json().catch(() => null)
+    const jobs = response.ok && typeof body === "object" && body !== null ? (body as Record<string, unknown>).jobs : null
+    if (!Array.isArray(jobs)) return []
+    return jobs.flatMap((item): ServerJob[] => {
+      const job = typeof item === "object" && item !== null ? item as Record<string, unknown> : {}
+      const startedAt = typeof job.startedAt === "string" ? Date.parse(job.startedAt) : NaN
+      if (typeof job.idempotencyKey !== "string" || !UUID.test(job.idempotencyKey) || !Number.isFinite(startedAt)) return []
+      const credits = typeof job.credits === "number" && Number.isInteger(job.credits) && job.credits > 0 ? job.credits : undefined
+      const model: VideoModelId = credits === getVideoModel("premium").credits ? "premium" : DEFAULT_VIDEO_MODEL
+      const requestId = typeof job.requestId === "string" ? job.requestId : null
+      return [{ job: { idempotencyKey: job.idempotencyKey, model, startedAt, ...(credits ? { credits } : {}) }, requestId }]
+    })
+  } catch {
+    return []
   }
 }
 
@@ -200,9 +259,17 @@ export function useVideoGenerator() {
       const fresh = jobs.filter((job) => now - job.startedAt < PENDING_MAX_AGE_MS)
       if (fresh.length !== jobs.length) writePendingJobs(userId, fresh)
 
-      for (const job of fresh) {
-        if (cancelled) return
-        if (isPolling(job.requestId)) continue
+      // Jobs the server still has open for this user, also when this browser kept nothing.
+      const serverJobs = await discoverServerJobs(accessToken)
+      if (cancelled) return
+      const localIds = new Set(fresh.map(jobId))
+      const discovered = serverJobs
+        .filter(({ job, requestId }) => !localIds.has(jobId(job)) && !(requestId && localIds.has(requestId)))
+        .map(({ job }) => job)
+
+      // Every job at once: one slow job never delays another one's result.
+      await Promise.all([...fresh, ...discovered].map(async (job) => {
+        if (cancelled || isPolling(jobId(job))) return
         const result = await followVideoJob(userId, job, accessToken, stopped)
         if (cancelled || result.kind === "stopped") return
         if (result.kind === "completed") {
@@ -211,7 +278,7 @@ export function useVideoGenerator() {
           if (result.remainingCredits !== undefined) setCredits(result.remainingCredits)
           toast.error("Un video pendiente no se pudo generar", { description: result.error })
         }
-      }
+      }))
     })()
     return () => { cancelled = true }
   }, [setCredits])
@@ -261,51 +328,50 @@ export function useVideoGenerator() {
         throw new Error("Sesión expirada")
       }
 
-      const startResponse = await fetch("/api/video/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ ...startPayload, idempotencyKey: attempt.key }),
-      })
-
-      const startData = await startResponse.json()
-      const hasTrackingData =
-        startResponse.ok &&
-        startData.success === true &&
-        startData.status === "processing" &&
-        typeof startData.requestId === "string" &&
-        typeof startData.statusUrl === "string" &&
-        typeof startData.responseUrl === "string"
-
-      if (!hasTrackingData) {
-        // Solo una respuesta que confirma que no hubo START permite abandonar la key.
-        if ([400, 401, 402, 409, 429].includes(startResponse.status)) pendingStartRef.current = null
-        throw new Error(startData.error || "No se pudo iniciar la generación del video")
-      }
-
-      pendingStartRef.current = null
-
-      if (validBalance(startData.remainingCredits)) {
-        setCredits(startData.remainingCredits)
-      }
-
-      // The job is paid from here on: keep it so a reload or a closed tab can resume it.
-      const job: PendingJob = {
-        requestId: startData.requestId as string,
-        statusUrl: startData.statusUrl as string,
-        responseUrl: startData.responseUrl as string,
-        model,
-        startedAt: Date.now(),
-      }
+      // Kept before START is sent: a reload while START is still running can then find the job.
+      const job: PendingJob = { idempotencyKey: attempt.key, model, startedAt: Date.now() }
       rememberPendingJob(userId, job)
 
-      // Leaving the editor stops only this page's polling; the stored job is resumed on return.
-      const result = await followVideoJob(userId, job, accessToken, () => runIdRef.current !== runId)
+      let startResponse: Response | null = null
+      let startData: Record<string, unknown> | null = null
+      try {
+        startResponse = await fetch("/api/video/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ ...startPayload, idempotencyKey: attempt.key }),
+        })
+        const body: unknown = await startResponse.json().catch(() => null)
+        startData = typeof body === "object" && body !== null ? body as Record<string, unknown> : null
+      } catch {
+        // The answer was lost, but START may have run: the job is followed by its key below.
+      }
+      const startError = typeof startData?.error === "string" ? startData.error : "No se pudo iniciar la generación del video"
+
+      if (startResponse && START_NO_JOB_STATUSES.includes(startResponse.status)) {
+        // Solo una respuesta que confirma que no hubo START permite abandonar la key.
+        pendingStartRef.current = null
+        forgetPendingJob(userId, attempt.key)
+        throw new Error(startError)
+      }
+
+      const started = Boolean(startResponse?.ok && startData?.success === true && startData?.status === "processing" &&
+        typeof startData?.requestId === "string")
+      if (started) {
+        pendingStartRef.current = null
+        if (validBalance(startData?.remainingCredits)) setCredits(startData.remainingCredits)
+      }
+
+      // Started, still starting, or unknown: STATUS finds the job by its key and never starts another one.
+      // Leaving the editor stops only this page's polling; the stored key is resumed on return.
+      // When START already answered, a key the server does not know was never claimed: no wait needed.
+      const result = await followVideoJob(userId, job, accessToken, () => runIdRef.current !== runId, startResponse ? 0 : START_GRACE_MS)
       if (result.kind === "stopped") return { status: "busy" }
 
       if (result.kind === "completed") {
+        pendingStartRef.current = null
         setVideoUrl(result.videoUrl)
         setVideoAssetId(result.assetId)
         setVideoPhase("generated")
@@ -316,6 +382,12 @@ export function useVideoGenerator() {
       }
 
       if (result.kind === "error" && result.remainingCredits !== undefined) setCredits(result.remainingCredits)
+      // A job that never started (START failed and returned its credits) shows START's own message.
+      if (result.kind === "gone") {
+        pendingStartRef.current = null
+        throw new Error(started ? result.error : startError)
+      }
+      if (result.kind === "error" && result.final) pendingStartRef.current = null
       throw new Error(result.error)
     } catch (err) {
       if (runIdRef.current !== runId) return { status: "busy" }
