@@ -541,3 +541,11 @@
 @media (min-width: 901px) {
   .page[data-pixel-ai-open="true"] > :first-child { padding-right: calc(clamp(380px, 30vw, 430px) + 24px); }
 }
+
+/* Modo Pro shell: the same warm glass as Modo Simple instead of a near-black slab. */
+.page .storyboardOverview{position:relative;border:1px solid rgba(243,234,220,.1);border-top-color:rgba(255,246,236,.16);background:radial-gradient(70% 46% at 92% 0,rgba(217,119,87,.12),transparent 62%),radial-gradient(50% 40% at 0 100%,rgba(243,234,220,.04),transparent 64%),linear-gradient(165deg,rgba(46,40,35,.84),rgba(21,18,16,.9) 58%);box-shadow:0 34px 80px -28px rgba(0,0,0,.72),0 12px 32px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.07)}
+/* Inner Pro panels: warm glass over the shell instead of solid dark cards. */
+.page .storyboardHero,.page .storyboardSection,.page .globalStrategyEditor{border:1px solid rgba(243,234,220,.09);border-top-color:rgba(255,246,236,.15);background:radial-gradient(120% 70% at 100% 0,rgba(217,119,87,.07),transparent 55%),linear-gradient(165deg,rgba(255,246,236,.06),rgba(255,246,236,.018) 70%);box-shadow:0 22px 44px -30px rgba(0,0,0,.7),inset 0 1px rgba(255,255,255,.06)}
+.page .storyboardAddScene{border:1px dashed rgba(229,132,96,.3);background:radial-gradient(60% 45% at 50% 40%,rgba(217,119,87,.1),transparent 70%),linear-gradient(165deg,rgba(255,246,236,.045),rgba(255,246,236,.012));box-shadow:none;transition:border-color .2s ease,background-color .2s ease,transform .2s ease}
+.page .storyboardAddScene:hover:not(:disabled){border-color:rgba(240,156,123,.6);background:radial-gradient(60% 45% at 50% 40%,rgba(217,119,87,.16),transparent 70%),linear-gradient(165deg,rgba(255,246,236,.06),rgba(255,246,236,.02));transform:translateY(-2px)}
+@media(prefers-reduced-motion:reduce){.page .storyboardAddScene{transition:none}.page .storyboardAddScene:hover:not(:disabled){transform:none}}

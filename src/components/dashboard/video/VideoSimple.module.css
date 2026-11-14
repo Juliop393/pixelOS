@@ -164,3 +164,40 @@
 .createArea{padding:4px 2px 0}
 @media(max-width:1050px){.layout{grid-template-columns:minmax(0,1fr)}.simple .uploadZone,.simple .preview{min-height:300px;max-height:460px}.simple .preview img{max-height:460px}}
 @media(max-width:767px){.inner{padding:18px 14px 22px}.simple .reference,.simple .goalSection,.simple .styleSection{padding:16px}.simple .uploadZone,.simple .preview{min-height:255px;max-height:none}.simple .styleGrid button{min-height:80px;padding:10px;gap:8px}.simple .styleGrid button>svg{width:31px;height:31px;flex-basis:31px;padding:7px}}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Refinement — same warm glass as Imagen, a real toolbar for the reference,
+   a clear secondary library action and a primary download.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Cards */
+.simple .reference,.simple .goalSection,.simple .styleSection{position:relative;border-color:rgba(243,234,220,.09);border-top-color:rgba(255,246,236,.15);background:radial-gradient(120% 70% at 100% 0,rgba(217,119,87,.06),transparent 55%),linear-gradient(165deg,rgba(255,246,236,.055),rgba(255,246,236,.016) 70%);box-shadow:0 22px 44px -30px rgba(0,0,0,.7),inset 0 1px rgba(255,255,255,.06)}
+.simple .reference::before,.simple .goalSection::before,.simple .styleSection::before{content:"";position:absolute;top:-1px;left:14%;right:14%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,236,224,.22) 35%,rgba(232,140,105,.28) 55%,transparent);pointer-events:none}
+
+/* Reference toolbar: file name, change, remove */
+.simple .referenceActions{margin-top:14px;padding:6px 6px 6px 14px;border:1px solid rgba(243,234,220,.09);border-radius:14px;gap:8px;background:linear-gradient(165deg,rgba(255,246,236,.05),rgba(255,246,236,.015));box-shadow:inset 0 1px rgba(255,255,255,.04)}
+.simple .referenceActions>span{color:var(--pf-headline);font-size:12px;font-weight:600}
+.simple .referenceActions>span::before{content:"";display:inline-block;width:6px;height:6px;margin:0 9px 1px 0;border-radius:2px;background:#df7651;box-shadow:0 0 0 3px rgba(223,118,81,.16);vertical-align:middle}
+.simple .referenceActions label{height:34px;padding:0 13px;border:1px solid rgba(243,234,220,.12);border-radius:10px;background:rgba(255,255,255,.055);color:var(--pf-headline)}
+.simple .referenceActions label svg{color:#ec9675}
+.simple .referenceActions label:hover{border-color:rgba(223,118,81,.42);background:rgba(217,119,87,.12)}
+.simple .referenceActions button{width:34px;height:34px;border:1px solid transparent;border-radius:10px;background:rgba(232,120,105,.09);color:#eaa196}
+.simple .referenceActions button:hover{border-color:rgba(232,120,105,.38);background:rgba(232,120,105,.17);color:#ffc2b8}
+.simple .referenceThumb{border-radius:9px}
+.simple .referenceThumb+span::before{display:none}
+.simple .referenceActions:has(.referenceThumb){padding-left:6px}
+
+/* Library: secondary action with its icon in a chip */
+.simple .libraryChoice{min-height:48px;margin-top:10px;border:1px solid rgba(223,118,81,.24);border-radius:14px;gap:11px;background:linear-gradient(165deg,rgba(217,119,87,.11),rgba(217,119,87,.03));color:var(--pf-headline);font-size:13px;transition:border-color .2s ease,background-color .2s ease,transform .2s ease}
+.simple .libraryChoice svg{width:28px;height:28px;padding:6px;border-radius:9px;background:rgba(217,119,87,.16);color:#f0a081;box-shadow:inset 0 0 0 1px rgba(217,119,87,.22)}
+.simple .libraryChoice:hover:not(:disabled),.simple .libraryChoice:focus-visible{border-color:rgba(223,118,81,.5);background:linear-gradient(165deg,rgba(217,119,87,.17),rgba(217,119,87,.06));transform:translateY(-1px)}
+
+/* Download: the primary action once the clip exists */
+.simple .videoDownload{width:100%;min-height:50px;margin-top:14px;border:1px solid rgba(255,255,255,.16);border-radius:14px;background:linear-gradient(180deg,#e27c57,#c95d3a);color:#fff6ef;font-size:14px;font-weight:680;box-shadow:0 14px 30px -12px rgba(215,107,69,.5),inset 0 1px rgba(255,255,255,.22);transition:filter .2s ease,transform .2s ease}
+.simple .videoDownload svg{color:#fff6ef}
+.simple .videoDownload:hover{border-color:rgba(255,255,255,.2);background:linear-gradient(180deg,#e27c57,#c95d3a);color:#fff6ef;filter:brightness(1.06);transform:translateY(-1px)}
+
+/* Create: dimmed terracotta, not grey, while unavailable */
+.simple .createButton:disabled{border-color:rgba(226,124,87,.2);background:linear-gradient(180deg,rgba(226,124,87,.2),rgba(201,93,58,.12));color:rgba(255,236,224,.55)}
+
+@media(prefers-reduced-motion:reduce){.simple .libraryChoice,.simple .videoDownload{transition:none}.simple .libraryChoice:hover:not(:disabled),.simple .videoDownload:hover{transform:none}}

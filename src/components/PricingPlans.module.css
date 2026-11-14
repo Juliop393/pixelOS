@@ -797,3 +797,20 @@
 @media (prefers-reduced-motion: reduce) and (max-width: 900px) {
   .featured:hover { transform: none; }
 }
+
+/* Available secondary actions (other plans, packs) must read as clickable, not as the disabled state:
+   a soft terracotta fill with a visible edge, below the featured button in emphasis. */
+.cta:not(:disabled):not(.ctaFeatured) {
+  justify-content: center;
+  border-color: rgba(229, 132, 96, .48);
+  color: #fff3ea;
+  background: linear-gradient(180deg, rgba(226, 124, 87, .24), rgba(201, 93, 58, .14));
+  box-shadow: 0 10px 24px -12px rgba(215, 107, 69, .4), inset 0 1px rgba(255, 236, 222, .12);
+}
+.cta:not(:disabled):not(.ctaFeatured):hover {
+  border-color: rgba(240, 156, 123, .75);
+  color: #fff;
+  background: linear-gradient(180deg, rgba(226, 124, 87, .36), rgba(201, 93, 58, .22));
+  box-shadow: 0 16px 32px -12px rgba(215, 107, 69, .5), inset 0 1px rgba(255, 236, 222, .16);
+}
+.ctaFeatured:not(:disabled) { justify-content: center; }

@@ -672,3 +672,7 @@
   .generatorPage{height:auto;min-height:0;padding:8px 0 24px;overflow:visible;overscroll-behavior:auto}
   .drawerPanel,.drawerFocusPanel{inset:8px;width:auto;max-width:none;border-radius:18px}
 }
+
+/* The page is the scroll container: a background here stays the size of the viewport while the
+   content scrolls past it, drawing hard edges across the editor. The dashboard backdrop shows through. */
+.generatorPage{background:none}

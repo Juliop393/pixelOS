@@ -222,3 +222,37 @@
 
 @media(max-width:767px){.simple .card,.simple .referenceColumn>div>section,.simple .inlineResult{border-radius:16px}.hero h1{font-size:clamp(30px,8.4vw,38px)}.simple .createArea>button{min-height:52px}}
 @media(prefers-reduced-motion:reduce){.simple .card,.simple .referenceColumn [data-simple-reference-frame="upload"],.simple .card .prompt,.simple .pixelAiHelp,.simple .brandIdentityOption,.simple .brandIdentityOption input,.simple .brandIdentityOption input::after,.simple .createArea>button,.simple .createArea>button b,.simple .resultActions a,.simple .resultActions button{transition:none}.simple .createArea>button:hover:not(:disabled){transform:none}}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Refinement — warmer glass cards, quieter upload frame, a switch for the
+   brand identity option and a generate button that keeps its identity
+   while disabled.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Cards: warm glass with a soft specular edge on top */
+.simple .card,.simple .referenceColumn>div>section,.simple .inlineResult{position:relative;border-color:rgba(243,234,220,.09);border-top-color:rgba(255,246,236,.15);background:radial-gradient(120% 70% at 100% 0,rgba(217,119,87,.06),transparent 55%),linear-gradient(165deg,rgba(255,246,236,.055),rgba(255,246,236,.016) 70%);box-shadow:0 22px 44px -30px rgba(0,0,0,.7),inset 0 1px rgba(255,255,255,.06)}
+.simple .card::before,.simple .referenceColumn>div>section::before,.simple .inlineResult::before{content:"";position:absolute;top:-1px;left:14%;right:14%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,236,224,.22) 35%,rgba(232,140,105,.28) 55%,transparent);pointer-events:none}
+.simple .card:hover,.simple .referenceColumn>div>section:hover{border-color:rgba(243,234,220,.13)}
+
+/* Upload frame: quieter dashes, a warm glow that grows on hover */
+.simple .referenceColumn [data-simple-reference-frame="upload"]{border:1px dashed rgba(229,132,96,.26);border-radius:18px;background:radial-gradient(60% 45% at 50% 42%,rgba(217,119,87,.13),transparent 70%),linear-gradient(180deg,rgba(12,10,9,.55),rgba(8,7,6,.38));transition:border-color .25s ease,background-color .25s ease,box-shadow .25s ease}
+.simple .referenceColumn [role="button"][data-simple-reference-frame="upload"]:hover,.simple .referenceColumn [role="button"][data-simple-reference-frame="upload"]:focus-visible{border-color:rgba(240,156,123,.55);box-shadow:0 0 0 4px rgba(217,119,87,.06),inset 0 0 60px rgba(217,119,87,.06)}
+.simple .referenceColumn [role="button"]>div:first-child{transition:transform .25s ease}
+.simple .referenceColumn [role="button"]:hover>div:first-child{transform:translateY(-2px)}
+
+/* Brand identity: a simple switch on the right of the row */
+.simple .brandIdentityOption{justify-content:space-between;padding:14px 16px;border-color:rgba(243,234,220,.09);border-radius:16px;background:linear-gradient(165deg,rgba(255,246,236,.045),rgba(255,246,236,.014))}
+.simple .brandIdentityOption span{min-width:0}
+.simple .brandIdentityOption input{order:2;position:relative;width:38px;height:22px;flex:0 0 38px;border:1px solid rgba(243,234,220,.16);border-radius:99px;display:block;background:rgba(255,255,255,.08);box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
+.simple .brandIdentityOption input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border:0;border-radius:50%;background:#efe6dc;box-shadow:0 2px 5px rgba(0,0,0,.35);transform:none;transition:transform .2s ease,background-color .2s ease}
+.simple .brandIdentityOption input:checked{border-color:transparent;background:linear-gradient(180deg,#e17b56,#c95d3a)}
+.simple .brandIdentityOption input:checked::after{background:#fff8f2;transform:translateX(16px)}
+.simple .brandIdentityOption[data-active="true"]{border-color:rgba(223,118,81,.3);background:linear-gradient(165deg,rgba(217,119,87,.12),rgba(217,119,87,.04))}
+
+/* Generate: the primary action, with its arrow in a chip; dimmed, not grey, while unavailable */
+.simple .createArea>button{position:relative;justify-content:center;gap:10px;padding:0 54px}
+.simple .createArea>button b{position:absolute;top:50%;right:10px;margin:-16px 0 0;width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:rgba(255,255,255,.16);box-shadow:inset 0 1px rgba(255,255,255,.2);font-size:16px;line-height:1}
+.simple .createArea>button:disabled{border-color:rgba(226,124,87,.2);background:linear-gradient(180deg,rgba(226,124,87,.2),rgba(201,93,58,.12));color:rgba(255,236,224,.55);cursor:not-allowed}
+.simple .createArea>button:disabled b{background:rgba(255,255,255,.07);box-shadow:none}
+
+@media(prefers-reduced-motion:reduce){.simple .referenceColumn [role="button"]>div:first-child,.simple .brandIdentityOption input::after{transition:none}.simple .referenceColumn [role="button"]:hover>div:first-child{transform:none}}
