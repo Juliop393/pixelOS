@@ -17,6 +17,26 @@ const isPortalUrl = (value: unknown): value is string => {
   }
 }
 
+/*
+ * Account deletion is a request handled by support, not an automatic action: this only opens the
+ * user's own mail app with a prefilled message. Nothing is deleted or sent from PixelFM.
+ */
+const accountDeletionMailto = (accountEmail: string) => {
+  const subject = "Solicitud de eliminación de cuenta PixelFM"
+  const body = [
+    "Hola equipo de PixelFM,",
+    "",
+    "Solicito la eliminación de mi cuenta de PixelFM y de los datos asociados.",
+    "",
+    `Correo de la cuenta: ${accountEmail || "(escribe aquí el correo de tu cuenta)"}`,
+    "",
+    "Entiendo que el equipo revisará la solicitud, que puede pedirme verificar mi identidad y que las suscripciones activas, los archivos y los registros de facturación requieren un tratamiento específico.",
+    "",
+    "Gracias.",
+  ].join("\n")
+  return `mailto:team@pixelfm.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+}
+
 type StatusMessage = {
   type: "success" | "error"
   text: string
@@ -343,22 +363,29 @@ export default function ConfiguracionPage() {
               <TriangleAlert className="h-5 w-5" strokeWidth={1.5} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[var(--pf-headline)]">Zona de peligro</h2>
-              <p className="text-sm text-[var(--pf-secondary)]">Acciones permanentes sobre tu cuenta.</p>
+              <h2 className="text-lg font-bold text-[var(--pf-headline)]">Privacidad y datos</h2>
+              <p className="text-sm text-[var(--pf-secondary)]">Solicita la eliminación de tu cuenta y tus datos.</p>
             </div>
           </div>
           <div className="flex flex-col gap-4 border-t border-red-400/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
+            <div className="max-w-xl">
               <p className="text-sm font-semibold text-[var(--pf-primary)]">Eliminar cuenta</p>
-              <p className="mt-1 text-xs text-[var(--pf-tertiary)]">Esta opción estará disponible próximamente.</p>
+              <p className="mt-1 text-xs leading-relaxed text-[var(--pf-tertiary)]">
+                Envía una solicitud al equipo de soporte: tu cuenta no se elimina al pulsar el botón. Revisaremos la
+                solicitud y es posible que te pidamos verificar tu identidad antes de continuar.
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-[var(--pf-tertiary)]">
+                Las suscripciones activas, los archivos generados y los registros de facturación requieren un tratamiento
+                específico: te indicaremos qué ocurre con cada uno. Algunos registros de facturación pueden tener que
+                conservarse por obligaciones legales.
+              </p>
             </div>
-            <button
-              type="button"
-              disabled
-              className="cursor-not-allowed rounded-xl border border-red-400/20 px-4 py-2.5 text-sm font-semibold text-red-300 opacity-55"
+            <a
+              href={accountDeletionMailto(email)}
+              className="shrink-0 rounded-xl border border-red-400/30 px-4 py-2.5 text-center text-sm font-semibold text-red-300 transition-colors hover:border-red-400/50 hover:bg-red-400/10"
             >
-              Eliminar cuenta · Próximamente
-            </button>
+              Solicitar eliminación de cuenta
+            </a>
           </div>
         </section>
       </div>
