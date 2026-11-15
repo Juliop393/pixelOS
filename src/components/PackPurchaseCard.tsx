@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { ArrowRight, CalendarClock, RotateCw, X } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { META_PURCHASE_EVENT, queuePurchase } from "@/lib/meta-pixel"
 import { CREDIT_PACKS, CREDIT_PACK_RULES, type CreditPack } from "@/lib/pricing-plans"
 import styles from "./PackPurchaseCard.module.css"
 
@@ -45,6 +46,8 @@ async function verify(sessionId: string): Promise<State> {
     const status = data.status
     const modeOk = (data.mode === "live" && status !== "simulated") || (data.mode === "test" && status !== "applied")
     if (pack && pack.credits === data.credits && modeOk && (status === "simulated" || status === "applied" || status === "pending")) {
+      // Paid and verified by the server: a LIVE purchase counts once as the advertising conversion.
+      if (data.mode === "live") void queuePurchase(sessionId, data.purchase)
       return { kind: "verified", pack, status }
     }
     return { kind: "unverified", reason: "error" }
@@ -172,6 +175,8 @@ export default function PackPurchaseCard() {
     url.searchParams.delete("session_id")
     url.searchParams.delete("pack_checkout")
     window.history.replaceState(window.history.state, "", url)
+    // The URL no longer carries the session id: a purchase queued for Meta can be sent now.
+    window.dispatchEvent(new Event(META_PURCHASE_EVENT))
   }, [])
 
   const copy = copyFor(state)

@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { ArrowRight, Check, Image as ImageIcon, RotateCw, Sparkles, Video } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { queuePurchase } from "@/lib/meta-pixel"
 import { SUBSCRIPTION_PLANS, type SubscriptionPlan } from "@/lib/pricing-plans"
 import styles from "./success.module.css"
 
@@ -54,6 +55,8 @@ async function verify(sessionId: string): Promise<State> {
     const mode = data.mode === "live" ? "live" : data.mode === "test" ? "test" : null
     const activation = data.activation
     if (plan && mode && (activation === "preview" || activation === "pending" || activation === "active")) {
+      // Paid and verified by the server: a LIVE purchase counts once as the advertising conversion.
+      if (mode === "live") void queuePurchase(sessionId, data.purchase)
       return { kind: "verified", result: { mode, plan, activation } }
     }
     return { kind: "error" }

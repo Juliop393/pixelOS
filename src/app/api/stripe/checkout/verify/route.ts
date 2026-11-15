@@ -4,6 +4,7 @@ import { getRequestUser, stripeJson } from "@/lib/stripe-api"
 import { getStripePlanByPrice } from "@/lib/stripe-plans"
 import { isModeCustomer } from "@/lib/stripe-modes"
 import { createAdminClient } from "@/lib/supabase-admin"
+import { checkoutPurchase } from "@/lib/checkout-purchase"
 
 export const runtime = "nodejs"
 
@@ -120,7 +121,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return stripeJson({ verified: true, mode: session.livemode ? "live" : "test", plan, activation })
+    // What Stripe charged in this Session (for the advertising conversion; null when not reportable).
+    const purchase = checkoutPurchase(session)
+    return stripeJson({ verified: true, mode: session.livemode ? "live" : "test", plan, activation, purchase })
   } catch (error) {
     console.error("Stripe checkout verify failed:", error instanceof Error ? error.message : "unexpected")
     return stripeJson({ error: "No se pudo verificar el pago" }, 502)

@@ -3,7 +3,7 @@
 import { useEffect, useState, type MouseEvent } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
-import { META_PIXEL_ENABLED, clearMetaCookies, loadMetaPixel, readAdsConsent, saveAdsConsent, trackCompleteRegistration, trackPageView, type AdsConsent } from "@/lib/meta-pixel"
+import { META_PIXEL_ENABLED, META_PURCHASE_EVENT, clearMetaCookies, flushPurchases, loadMetaPixel, readAdsConsent, saveAdsConsent, trackCompleteRegistration, trackPageView, type AdsConsent } from "@/lib/meta-pixel"
 import { supabase } from "@/lib/supabase"
 import s from "./MetaPixel.module.css"
 
@@ -41,7 +41,17 @@ export default function MetaPixel() {
     void supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) void trackCompleteRegistration(session.user, pathname, search)
     })
+    // A verified purchase queued on a Checkout return page is sent here, on a URL without its id.
+    flushPurchases(pathname, search)
   }, [consent, pathname, searchParams])
+
+  // A purchase verified while the visitor is already on a trackable page is sent right away.
+  useEffect(() => {
+    if (consent !== "granted") return
+    const flush = () => flushPurchases(window.location.pathname, new URLSearchParams(window.location.search))
+    window.addEventListener(META_PURCHASE_EVENT, flush)
+    return () => window.removeEventListener(META_PURCHASE_EVENT, flush)
+  }, [consent])
 
   // The session can also start without a route change (confirmation link exchanged on the same page).
   useEffect(() => {

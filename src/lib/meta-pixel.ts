@@ -1,5 +1,5 @@
 /*
- * Meta Pixel, kept minimal: PageView and CompleteRegistration, after the visitor accepts advertising cookies.
+ * Meta Pixel, kept minimal: PageView, CompleteRegistration and Purchase, after the visitor accepts advertising cookies.
  * Off unless NEXT_PUBLIC_META_PIXEL_ID is set (digits only); then nothing loads and no
  * consent prompt is shown. No personal data is ever sent: Meta reports the page URL with
  * every event, so pages whose URL can carry personal or sensitive data are never tracked.
@@ -142,6 +142,73 @@ export async function trackCompleteRegistration(
     registrationPending.delete(user.id)
   }
 }
+
+/*
+ * Purchase: one per Checkout Session the server verified as paid in LIVE, with the amount Stripe
+ * charged (see the Stripe verify routes and checkout-purchase.ts). Checkout returns to URLs that carry
+ * the Stripe session id, and Meta reports the page URL with every event, so the purchase is only
+ * queued there and sent on the next trackable page (closing the pack card, moving on from the
+ * success page, or the next visit within a day). Locally only hashes of the session id are kept;
+ * Meta receives value and currency, nothing else.
+ */
+const PURCHASE_PENDING_KEY = "pf_meta_purchase_pending"
+const PURCHASE_SENT_KEY = "pf_meta_purchases"
+const PURCHASE_PENDING_MS = 24 * 60 * 60 * 1000
+const PURCHASE_EVENT = "pf:meta-purchase"
+type PendingPurchase = { m: string; v: number; c: "USD"; t: number }
+
+function readList<T>(key: string, valid: (item: unknown) => item is T): T[] {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "[]")
+    return Array.isArray(parsed) ? parsed.filter(valid) : []
+  } catch {
+    return []
+  }
+}
+
+const isMarker = (item: unknown): item is string => typeof item === "string"
+const isPending = (item: unknown): item is PendingPurchase => {
+  const p = item as PendingPurchase | null
+  return !!p && typeof p.m === "string" && typeof p.v === "number" && Number.isFinite(p.v) && p.v > 0 &&
+    p.c === "USD" && typeof p.t === "number"
+}
+
+/** Called by the Checkout return views after their server verification confirmed a LIVE payment. */
+export async function queuePurchase(sessionId: string, purchase: unknown) {
+  if (!META_PIXEL_ENABLED || readAdsConsent() !== "granted") return
+  const p = purchase as { value?: unknown; currency?: unknown } | null
+  if (!p || typeof p.value !== "number" || !Number.isFinite(p.value) || p.value <= 0 || p.currency !== "USD") return
+  const marker = await accountMarker(sessionId)
+  const sent = readList(PURCHASE_SENT_KEY, isMarker)
+  const pending = readList(PURCHASE_PENDING_KEY, isPending)
+  if (sent.includes(marker) || pending.some((item) => item.m === marker)) return
+  try {
+    localStorage.setItem(PURCHASE_PENDING_KEY, JSON.stringify([...pending, { m: marker, v: p.value, c: "USD", t: Date.now() }].slice(-10)))
+  } catch {
+    return
+  }
+  window.dispatchEvent(new Event(PURCHASE_EVENT))
+}
+
+/** Sends queued purchases, each once, when the current URL is safe to report. */
+export function flushPurchases(pathname: string, search: URLSearchParams) {
+  if (!META_PIXEL_ENABLED || !window.fbq || !isTrackableUrl(pathname, search)) return
+  const pending = readList(PURCHASE_PENDING_KEY, isPending)
+  if (pending.length === 0) return
+  const sent = readList(PURCHASE_SENT_KEY, isMarker)
+  const now = Date.now()
+  const due = pending.filter((item) => now - item.t <= PURCHASE_PENDING_MS && !sent.includes(item.m))
+  // Recorded and dequeued before sending: a reload or a second tab can never send one twice.
+  try {
+    localStorage.setItem(PURCHASE_SENT_KEY, JSON.stringify([...sent, ...due.map((item) => item.m)].slice(-50)))
+    localStorage.removeItem(PURCHASE_PENDING_KEY)
+  } catch {
+    return
+  }
+  for (const item of due) window.fbq("track", "Purchase", { value: item.v, currency: item.c })
+}
+
+export const META_PURCHASE_EVENT = PURCHASE_EVENT
 
 let lastTrackedUrl: string | null = null
 

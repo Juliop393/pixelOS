@@ -4,6 +4,7 @@ import { getRequestUser, stripeJson } from "@/lib/stripe-api"
 import { getPackAmountCents, getPackDetails, getStripePackByPrice, PACK_CURRENCY } from "@/lib/stripe-packs"
 import { isModeCustomer } from "@/lib/stripe-modes"
 import { createAdminClient } from "@/lib/supabase-admin"
+import { checkoutPurchase } from "@/lib/checkout-purchase"
 
 export const runtime = "nodejs"
 
@@ -130,15 +131,17 @@ export async function POST(req: NextRequest) {
 
     const credits = getPackDetails(pack).credits
     const mode = liveKey ? "live" : "test"
+    // What Stripe charged (already checked against the catalog above); null when not reportable.
+    const purchase = checkoutPurchase(session)
 
-    if (!lot) return stripeJson({ verified: true, mode, pack, credits, status: "pending" })
+    if (!lot) return stripeJson({ verified: true, mode, pack, credits, status: "pending", purchase })
 
     const expectedStatus = liveKey ? "applied" : "simulated"
     if (lot.user_id !== user.id || lot.pack !== pack || lot.livemode !== liveKey || lot.status !== expectedStatus) {
       return stripeJson(UNVERIFIED, 409)
     }
 
-    return stripeJson({ verified: true, mode, pack, credits, status: expectedStatus })
+    return stripeJson({ verified: true, mode, pack, credits, status: expectedStatus, purchase })
   } catch (error) {
     console.error("Stripe pack verify failed:", error instanceof Error ? error.message : "unexpected")
     return stripeJson({ error: "No se pudo verificar la compra" }, 502)
