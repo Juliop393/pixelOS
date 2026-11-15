@@ -1,5 +1,5 @@
 /*
- * Meta Pixel, kept minimal: PageView only, after the visitor accepts advertising cookies.
+ * Meta Pixel, kept minimal: PageView and CompleteRegistration, after the visitor accepts advertising cookies.
  * Off unless NEXT_PUBLIC_META_PIXEL_ID is set (digits only); then nothing loads and no
  * consent prompt is shown. No personal data is ever sent: Meta reports the page URL with
  * every event, so pages whose URL can carry personal or sensitive data are never tracked.
@@ -80,6 +80,66 @@ export function clearMetaCookies() {
     for (const domain of domains) {
       document.cookie = `${name}=; Max-Age=0; path=/${domain ? `; domain=${domain}` : ""}`
     }
+  }
+}
+
+/*
+ * CompleteRegistration: the first signed-in session of an account created and confirmed in the
+ * last 24 hours (Supabase sets email_confirmed_at when the confirmation link is opened; new
+ * Google accounts are confirmed on creation). Existing users never count, even if they confirm
+ * an email now. An approximation of a confirmed signup, not an exhaustive or cross-device count.
+ * Sent once per account in this browser; only a hash of the account id is kept locally, and
+ * nothing about the user is sent to Meta.
+ */
+const REGISTRATION_WINDOW_MS = 24 * 60 * 60 * 1000
+const REGISTRATION_KEY = "pf_meta_registration"
+const registrationPending = new Set<string>()
+
+async function accountMarker(userId: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(userId))
+  return Array.from(new Uint8Array(digest).slice(0, 12), (byte) => byte.toString(16).padStart(2, "0")).join("")
+}
+
+function readRegistrationMarkers(): string[] {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(REGISTRATION_KEY) ?? "[]")
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : []
+  } catch {
+    return []
+  }
+}
+
+/** True only for a valid timestamp within the last REGISTRATION_WINDOW_MS (missing or invalid → false). */
+function isRecent(timestamp: string | null | undefined): boolean {
+  if (!timestamp) return false
+  const time = Date.parse(timestamp)
+  if (!Number.isFinite(time)) return false
+  const age = Date.now() - time
+  return age >= 0 && age <= REGISTRATION_WINDOW_MS
+}
+
+export async function trackCompleteRegistration(
+  user: { id: string; created_at?: string | null; email_confirmed_at?: string | null },
+  pathname: string,
+  search: URLSearchParams,
+) {
+  if (!META_PIXEL_ENABLED || !window.fbq) return
+  // Both the account and its confirmation must be recent: an old account that confirms an email
+  // (or changes it) now is not a new registration.
+  if (!isRecent(user.created_at) || !isRecent(user.email_confirmed_at)) return
+  // Same rule as PageView: never on a URL that can carry personal data (e.g. the confirmation ?code=).
+  if (!isTrackableUrl(pathname, search)) return
+  if (registrationPending.has(user.id)) return
+  registrationPending.add(user.id)
+  try {
+    const marker = await accountMarker(user.id)
+    const markers = readRegistrationMarkers()
+    if (markers.includes(marker)) return
+    // Recorded before sending: a reload or a repeated callback can never send it twice.
+    try { localStorage.setItem(REGISTRATION_KEY, JSON.stringify([...markers, marker].slice(-20))) } catch { return }
+    window.fbq("track", "CompleteRegistration")
+  } finally {
+    registrationPending.delete(user.id)
   }
 }
 

@@ -3,7 +3,8 @@
 import { useEffect, useState, type MouseEvent } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
-import { META_PIXEL_ENABLED, clearMetaCookies, loadMetaPixel, readAdsConsent, saveAdsConsent, trackPageView, type AdsConsent } from "@/lib/meta-pixel"
+import { META_PIXEL_ENABLED, clearMetaCookies, loadMetaPixel, readAdsConsent, saveAdsConsent, trackCompleteRegistration, trackPageView, type AdsConsent } from "@/lib/meta-pixel"
+import { supabase } from "@/lib/supabase"
 import s from "./MetaPixel.module.css"
 
 const OPEN_PREFERENCES_EVENT = "pf:cookie-preferences"
@@ -34,8 +35,27 @@ export default function MetaPixel() {
     if (consent !== "granted") return
     // Both are idempotent: the script loads once and each URL is reported once.
     loadMetaPixel()
-    trackPageView(pathname, new URLSearchParams(searchParams.toString()))
+    const search = new URLSearchParams(searchParams.toString())
+    trackPageView(pathname, search)
+    // A just-confirmed account reaching any trackable page counts once (see trackCompleteRegistration).
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) void trackCompleteRegistration(session.user, pathname, search)
+    })
   }, [consent, pathname, searchParams])
+
+  // The session can also start without a route change (confirmation link exchanged on the same page).
+  useEffect(() => {
+    if (consent !== "granted") return
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event !== "SIGNED_IN" || !session) return
+      const user = session.user
+      // Deferred: Supabase must not be re-entered from inside its own auth callback.
+      setTimeout(() => {
+        void trackCompleteRegistration(user, window.location.pathname, new URLSearchParams(window.location.search))
+      }, 0)
+    })
+    return () => subscription.unsubscribe()
+  }, [consent])
 
   if (!META_PIXEL_ENABLED || consent === undefined || (consent !== null && !reopened)) return null
 
