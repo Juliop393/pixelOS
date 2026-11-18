@@ -17,6 +17,8 @@ const VIDEO_POLL_INTERVAL_MS = 5_000
 const VIDEO_POLL_MAX_ATTEMPTS = 72
 // Consecutive temporary STATUS failures tolerated before giving up (about one minute).
 const VIDEO_POLL_MAX_TRANSIENT = 12
+// fal no longer finds the job: polling it again during this visit cannot help.
+const PROVIDER_NOT_FOUND_MESSAGE = "No podemos consultar este video ahora. Tu generación sigue pendiente de revisión."
 
 const wait = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
@@ -94,8 +96,9 @@ const isPolling = (id: string) => {
 
 type PollResult =
   | { kind: "completed"; videoUrl: string; assetId: string }
-  /** final: STATUS answered for good (keep no tracking); otherwise the job may still be followed later. */
-  | { kind: "error"; error: string; final: boolean; remainingCredits?: number }
+  /** final: STATUS answered for good (keep no tracking); otherwise the job may still be followed later.
+   *  paused: polling stopped for this visit only (provider_not_found); the job stays pending and is checked again on a later visit. */
+  | { kind: "error"; error: string; final: boolean; remainingCredits?: number; paused?: boolean }
   /** STATUS will never follow this job (closed, another user's, malformed, never started): forget it. */
   | { kind: "gone"; error: string }
   | { kind: "stopped" }
@@ -132,6 +135,11 @@ async function pollVideoJob(job: PendingJob, accessToken: string, stopped: () =>
     }
     const errorText = typeof statusData?.error === "string" ? statusData.error : ""
     if (!transientMessage && !statusData) transientMessage = "No se pudo consultar el estado del video"
+    // fal no longer finds this job: stop polling it for this visit without closing it, refunding or
+    // forgetting its key (final: false), so a later visit asks once more instead of retrying in a burst.
+    if (!transientMessage && statusData?.status === "error" && statusData.reason === "provider_not_found") {
+      return { kind: "error", error: PROVIDER_NOT_FOUND_MESSAGE, final: false, paused: true }
+    }
     // Includes a refund the server could not confirm yet: polling retries it.
     if (!transientMessage && statusData?.retry === true) transientMessage = errorText || "No se pudo consultar el estado del video"
     if (transientMessage) {
@@ -277,6 +285,8 @@ export function useVideoGenerator() {
         } else if (result.kind === "error" && result.final) {
           if (result.remainingCredits !== undefined) setCredits(result.remainingCredits)
           toast.error("Un video pendiente no se pudo generar", { description: result.error })
+        } else if (result.kind === "error" && result.paused) {
+          toast.info("Un video pendiente está en revisión", { description: result.error })
         }
       }))
     })()

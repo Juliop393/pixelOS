@@ -392,7 +392,9 @@ export async function POST(req: NextRequest) {
       const error = typeof data.error === "string" ? data.error.slice(0, 500) : "No se pudo generar el video"
       // Only a failure n8n marks as definitive (fal finished the job without a video) is refunded.
       if (data.definitive !== true) {
-        return NextResponse.json({ success: false, status: "error", error, retry: true }, { status: 200, headers: headersNoStore })
+        // n8n's classification of a non-definitive provider answer (e.g. provider_not_found), passed on as is.
+        const reason = typeof data.reason === "string" && /^[a-z_]{1,40}$/.test(data.reason) ? data.reason : undefined
+        return NextResponse.json({ success: false, status: "error", error, retry: true, ...(reason ? { reason } : {}) }, { status: 200, headers: headersNoStore })
       }
       return await refundDefinitiveFailure(admin, user.id, requestId, idempotencyKey, error)
     }
