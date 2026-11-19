@@ -576,6 +576,10 @@
   box-shadow: 0 50px 120px -20px rgba(0, 0, 0, .8), inset 0 1px rgba(244, 200, 176, .07);
 }
 
+/* With the plans inside (users without an active plan), the dialog grows so the cards keep their width. */
+.dialog:has(.dialogPlans) { width: min(1180px, calc(100vw - 32px)); }
+.dialogPlans { display: flex; flex-direction: column; }
+
 .dialog::backdrop {
   background: rgba(10, 7, 6, .68);
   -webkit-backdrop-filter: blur(6px);

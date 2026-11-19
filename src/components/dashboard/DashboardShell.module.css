@@ -561,14 +561,34 @@
   .accountCluster .accountDivider { display: none; }
 }
 
+/* Small "Planes" link: only where Recargar is hidden. Outlined, so it does not compete with the content. */
+.wallet .plansLink { display: none; }
+
 @media (max-width: 920px) {
+  .wallet .plansLink {
+    height: 30px;
+    padding: 0 11px;
+    border: 1px solid rgba(236, 150, 112, .32);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    color: #f3b597;
+    background: rgba(217, 119, 87, .08);
+    font: 650 11.5px/1 inherit;
+    font-family: inherit;
+    letter-spacing: .01em;
+    cursor: pointer;
+    transition: background-color .2s ease, color .2s ease;
+  }
+  .wallet .plansLink:hover { color: #fff4ec; background: rgba(217, 119, 87, .18); }
+  .wallet .plansLink:focus-visible { outline: 2px solid #ef9472; outline-offset: 2px; }
   .wallet .recharge { display: none; }
   .wallet .credits { padding-right: 10px; }
   .logout span { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wallet .recharge, .homeBrand, .settingsLink { transition: none; }
+  .wallet .recharge, .wallet .plansLink, .homeBrand, .settingsLink { transition: none; }
   .creditToken i:nth-child(2) { animation: none; }
 }
 
@@ -727,6 +747,7 @@
   .wallet .credits { height: 32px; padding: 0 9px 0 8px; gap: 6px; }
   .creditToken { width: 12px; height: 12px; flex-basis: 12px; gap: 1.5px; }
   .wallet .credits b { font-size: 14px; }
+  .wallet .plansLink { height: 28px; padding: 0 10px; font-size: 11px; }
   .accountCluster .settingsLink { width: 32px; height: 32px; }
   .logout { width: 32px; height: 32px; padding: 0; justify-content: center; }
   .logout span { display: none; }

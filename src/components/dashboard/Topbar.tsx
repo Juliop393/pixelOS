@@ -12,6 +12,7 @@ import { usePixelAi } from "@/lib/pixel-ai-context"
 import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
 import { useToastAnchor } from "@/hooks/useToastAnchor"
+import { OPEN_RECHARGE_EVENT } from "@/lib/recharge"
 import styles from "./DashboardShell.module.css"
 
 const sectionDetails = [
@@ -61,6 +62,13 @@ export default function Topbar() {
     }
 
     loadUser()
+  }, [])
+
+  // Editors open this same dialog when the user runs out of credits.
+  useEffect(() => {
+    const open = () => setPacksOpen(true)
+    window.addEventListener(OPEN_RECHARGE_EVENT, open)
+    return () => window.removeEventListener(OPEN_RECHARGE_EVENT, open)
   }, [])
 
   const handleSignOut = async () => {
@@ -133,6 +141,8 @@ export default function Topbar() {
           </button>
 
           <button type="button" onClick={() => setPacksOpen(true)} className={styles.recharge}>Recargar</button>
+          {/* Phones hide Recargar: this small link keeps the plans one tap away. */}
+          <button type="button" onClick={() => setPacksOpen(true)} className={styles.plansLink}>Planes</button>
         </div>
 
         <div className={styles.accountCluster}>

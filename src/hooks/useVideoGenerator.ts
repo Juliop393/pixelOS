@@ -6,6 +6,10 @@ import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
 import { getVideoGenerationContext, type VideoGenerationContext } from "@/lib/video-generation-payload"
 import { DEFAULT_VIDEO_MODEL, getVideoModel, isVideoModelId, type VideoModelId } from "@/lib/pricing-plans"
+import { notifyNoCredits } from "@/lib/recharge"
+
+/** START answered 402: the user cannot pay for this video. Nothing was reserved. */
+class NoCreditsError extends Error {}
 
 export type VideoPhase = "idle" | "generating" | "generated" | "error"
 export type VideoGenerationOutcome =
@@ -364,6 +368,7 @@ export function useVideoGenerator() {
         // Solo una respuesta que confirma que no hubo START permite abandonar la key.
         pendingStartRef.current = null
         forgetPendingJob(userId, attempt.key)
+        if (startResponse.status === 402) throw new NoCreditsError(startError)
         throw new Error(startError)
       }
 
@@ -404,6 +409,10 @@ export function useVideoGenerator() {
       const message = err instanceof Error ? err.message : "Error de conexión"
       setVideoPhase("error")
       setVideoError(message)
+      if (err instanceof NoCreditsError) {
+        notifyNoCredits(`Este video necesita ${getVideoModel(model).credits} créditos.`)
+        return { status: "error", error: message }
+      }
       toast.error(message === "Sesión expirada" ? "Sesión expirada" : "Error al generar video", {
         description: message === "Sesión expirada" ? "Vuelve a iniciar sesión para continuar" : message,
       })

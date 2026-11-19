@@ -76,8 +76,9 @@ function RechargeContent({ onClose }: { onClose: () => void }) {
     )
   }
 
+  // dialogPlans widens the dialog (see PricingPlans.module.css) so the three plan cards fit side by side.
   return (
-    <>
+    <div className={styles.dialogPlans}>
       <header className={styles.dialogHead}>
         <span className={styles.kicker}><i aria-hidden="true" />PLANES</span>
         <h2 id="credit-packs-title">Elige un plan para tener créditos</h2>
@@ -94,6 +95,6 @@ function RechargeContent({ onClose }: { onClose: () => void }) {
         </header>
         <CreditPacks locked />
       </section>
-    </>
+    </div>
   )
 }

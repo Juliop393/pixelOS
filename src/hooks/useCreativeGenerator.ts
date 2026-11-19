@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 import { useCredits } from "@/lib/credits-context"
+import { notifyNoCredits } from "@/lib/recharge"
 
 export type Phase = "select" | "loading" | "result" | "error"
 export type GeneratedImage = { imageUrl: string; angle: string }
@@ -95,9 +96,7 @@ export function useCreativeGenerator() {
     }
 
     if (credits < generationQuantity) {
-      toast.error("Créditos insuficientes", {
-        description: `Necesitas ${generationQuantity} crédito${generationQuantity > 1 ? "s" : ""}, tienes ${credits}`,
-      })
+      notifyNoCredits(`Necesitas ${generationQuantity} crédito${generationQuantity > 1 ? "s" : ""} y tienes ${credits}.`)
       return
     }
 
